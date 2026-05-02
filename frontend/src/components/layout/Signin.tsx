@@ -4,9 +4,9 @@ import Input from "../common/Input";
 import Button from "../common/Button";
 import { FacebookIcon, GoogleIcon } from "../common/Icons";
 
-export default function Signin() {
+export default function Signin({ onClose }: { onClose?: () => void }) {
     return (
-        <Modal>
+        <Modal onClose={onClose}>
             <div className="bg-white p-6 rounded-sm w-98">
                 <div>
                     <h2 className="text-3xl font-semibold mb-4" >

@@ -1,13 +1,23 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/dist/client/link';
 import icon from '@/assets/images/icon.png'
 import { ChevronDown } from 'lucide-react';
 import law from '@/assets/images/law.png';
 import search from '@/assets/images/search.png';
+import Signin from "@/components/layout/Signin";
+import { useState } from 'react';
 
 export default function Header() {
+    const [isSigninOpen, setIsSigninOpen] = useState(false);
+
+    const openSignin = () => setIsSigninOpen(true);
+    const closeSignin = () => setIsSigninOpen(false);
+
     return (
-        <header className="bg-white shadow-sm py-4">
+        <>
+            <header className="bg-white shadow-sm py-4">
             <nav className='max-w-7xl mx-auto flex items-center justify-between' >
 
                 <div className='flex items-center space-x-8' >
@@ -62,21 +72,25 @@ export default function Header() {
 
                 <ul className='flex items-center space-x-4' >
                     <li>
-                        <Link
-                            href="/"
+                        <button
+                            onClick={openSignin}
+                            className='cursor-pointer hover:text-[#2563eb] transition-colors'
                         >
                             Entrar
-                        </Link>
+                        </button>
                     </li>
                     <li>
-                        <button className='bg-blue-500 text-white px-4 py-2 rounded-md' >            
+                        <button 
+                            onClick={openSignin}
+                            className='bg-[#2563eb] text-white px-4 py-2 rounded-md hover:bg-[#1d4ed8] transition-colors' 
+                        >            
                             Registrar
                         </button>
                     </li>
                     <li>
-                        <Link
-                            href="/"
-                            className='flex items-center'
+                        <button
+                            onClick={openSignin}
+                            className='flex items-center cursor-pointer hover:text-[#2563eb] transition-colors'
                         >
                             Favoritos
                             <Image
@@ -86,11 +100,13 @@ export default function Header() {
                                 alt="BidLive Logo"
                                 className="inline-block ml-1"
                             />
-                        </Link>
+                        </button>
                     </li>
                 </ul>
 
             </nav>
         </header>
+        {isSigninOpen && <Signin onClose={closeSignin} />}
+        </>
     );
 }
