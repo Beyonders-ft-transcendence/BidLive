@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/dist/client/link';
 import icon from '@/assets/images/icon.png'
-import { ChevronDown } from 'lucide-react';
 import law from '@/assets/images/law.png';
 import search from '@/assets/images/search.png';
 import Signin from "@/components/layout/Signin";
+import CategoriesDropdown from "@/components/common/CategoriesDropdown";
 import { useState } from 'react';
 
 export default function Header() {
@@ -38,12 +38,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <button
-                                className='flex items-center cursor-pointer'
-                            >
-                                Categorias
-                                <ChevronDown size={15} />
-                            </button>
+                            <CategoriesDropdown />
                         </li>
                         <li>
                             <Link
