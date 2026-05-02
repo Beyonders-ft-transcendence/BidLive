@@ -53,7 +53,7 @@ export default function CategoriesDropdown({ onCategorySelect }: CategoriesDropd
         <div ref={dropdownRef} className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 group"
             >
                 <span className="text-gray-700 font-medium group-hover:text-[#2563eb] transition-colors">
                     Categorias
@@ -67,7 +67,7 @@ export default function CategoriesDropdown({ onCategorySelect }: CategoriesDropd
 
             {/* Dropdown Panel */}
             {isOpen && (
-                <div className="absolute top-full left-0 mt-4 w-[520px] bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 mt-4 w-130 bg-white rounded-sm shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
 
                     {/* Grid */}
                     <div className="grid grid-cols-2 gap-x-8 gap-y-4 p-6">
