@@ -1,0 +1,96 @@
+import Image from 'next/image';
+import Link from 'next/dist/client/link';
+import icon from '@/assets/images/icon.png'
+import { ChevronDown } from 'lucide-react';
+import law from '@/assets/images/law.png';
+import search from '@/assets/images/search.png';
+
+export default function Header() {
+    return (
+        <header className="bg-white shadow-sm py-4">
+            <nav className='max-w-7xl mx-auto flex items-center justify-between' >
+
+                <div className='flex items-center space-x-8' >
+                    <Image
+                        src={icon}
+                        width={130}
+                        height={40}
+                        alt="BidLive Logo"
+                        className="inline-block "
+                    />
+
+                    <ul className='flex items-center space-x-4' >
+                        <li>
+                            <Link
+                                href="/"
+                            >
+                                Leilões
+                            </Link>
+                        </li>
+                        <li>
+                            <button
+                                className='flex items-center cursor-pointer'
+                            >
+                                Categorias
+                                <ChevronDown size={15} />
+                            </button>
+                        </li>
+                        <li>
+                            <Link
+                                href="/"
+                            >
+                                Vendedor
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+
+                <div className='bg-gray-200 p-2 flex items-center rounded-md w-96' >
+                    <input type="text" 
+                        placeholder="Buscar leilões, categorias, vendedores..." 
+                        className='flex-1 bg-transparent outline-none'
+                    />
+                    <button className='bg-transparent cursor-pointer' >
+                        <Image
+                            src={search}
+                            width={20}
+                            height={20}
+                            alt="Search Icon"
+                        />
+                    </button>
+                </div>
+
+                <ul className='flex items-center space-x-4' >
+                    <li>
+                        <Link
+                            href="/"
+                        >
+                            Entrar
+                        </Link>
+                    </li>
+                    <li>
+                        <button className='bg-blue-500 text-white px-4 py-2 rounded-md' >            
+                            Registrar
+                        </button>
+                    </li>
+                    <li>
+                        <Link
+                            href="/"
+                            className='flex items-center'
+                        >
+                            Favoritos
+                            <Image
+                                src={law}
+                                width={25}
+                                height={20}
+                                alt="BidLive Logo"
+                                className="inline-block ml-1"
+                            />
+                        </Link>
+                    </li>
+                </ul>
+
+            </nav>
+        </header>
+    );
+}
