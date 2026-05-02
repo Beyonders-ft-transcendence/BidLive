@@ -1,8 +1,8 @@
-import Modal from "../common/Modal";
 import Link from "next/link";
-import { FacebookIcon, GoogleIcon } from "../common/Icons";
-import Button from "../common/Button";
+import Modal from "../common/Modal";
 import Input from "../common/Input";
+import Button from "../common/Button";
+import { FacebookIcon, GoogleIcon } from "../common/Icons";
 
 export default function Signin() {
     return (
