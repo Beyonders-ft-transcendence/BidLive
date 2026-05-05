@@ -19,13 +19,16 @@ WORKDIR /app
 # copiar requirements primeiro (cache otimizado)
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3 -m venv .venv && \
+     source .venv/bin/activate && \
+     pip install --no-cache-dir --upgrade pip && \
+     pip install --no-cache-dir -r requirements.txt
 
 # copiar projeto
 COPY . .
 
 # entrypoint
-COPY tools/entrypoint.sh /entrypoint.sh
+COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000

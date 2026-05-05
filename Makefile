@@ -2,7 +2,7 @@
 
 COMPOSE_FILE = srcs/docker-compose.yml
 PROJECT_NAME = inception
-DATA_PATH = /home/nmatondo/data
+DATA_PATH = /mnt/d/NdDaniel/Code/42/BidLive/data # /home/nmatondo/data
 
 all: build up
 
@@ -10,12 +10,12 @@ bonus: bonus_build bonus_up
 
 build:
 	@echo "🔨 Building Docker images..."
-	@mkdir -p $(DATA_PATH) $(DATA_PATH)/mariadb $(DATA_PATH)/wordpress
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build mariadb wordpress nginx
+	@mkdir -p $(DATA_PATH)  $(DATA_PATH)/adminer  $(DATA_PATH)/backend  $(DATA_PATH)/frontend  $(DATA_PATH)/grafana  $(DATA_PATH)/nginx  $(DATA_PATH)/portainer  $(DATA_PATH)/postgresql  $(DATA_PATH)/prometheus  $(DATA_PATH)/redis
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build  adminer  backend  frontend  grafana  nginx  portainer  postgresql  prometheus  redis
 
 up:
 	@echo "🚀 Starting containers..."
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d mariadb wordpress nginx
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d adminer  backend  frontend  grafana  nginx  portainer  postgresql  prometheus  redis
 
 down:
 	@echo "🛑 Stopping containers..."
@@ -34,8 +34,12 @@ fclean: clean
 	@docker volume rm $$(docker volume ls -q) 2>/dev/null || true
 	@docker network rm $$(docker network ls -q) 2>/dev/null || true
 	@echo "🗑️  Removing persistent data directories..."
-	@sudo rm -rf $(DATA_PATH)/mariadb $(DATA_PATH)/wordpress $(DATA_PATH)/redis $(DATA_PATH)/elasticsearch $(DATA_PATH)/myprofile 2>/dev/null || true
+	@sudo rm -rf $(DATA_PATH)/adminer $(DATA_PATH)/backend $(DATA_PATH)/frontend $(DATA_PATH)/grafana $(DATA_PATH)/nginx $(DATA_PATH)/portainer $(DATA_PATH)/postgresql $(DATA_PATH)/prometheus $(DATA_PATH)/redis 2>/dev/null || true
 	@echo "✅ All data removed!"
+
+stop:
+	@echo "🛑 Stopping containers..."
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) stop
 
 logs:
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) logs -f
@@ -49,12 +53,12 @@ status:
 
 bonus_build:
 	@echo "🔨 Building Docker images..."
-	@mkdir -p $(DATA_PATH) $(DATA_PATH)/mariadb $(DATA_PATH)/wordpress $(DATA_PATH)/redis $(DATA_PATH)/elasticsearch $(DATA_PATH)/myprofile
+	@mkdir -p $(DATA_PATH)  $(DATA_PATH)/adminer  $(DATA_PATH)/backend  $(DATA_PATH)/frontend  $(DATA_PATH)/grafana  $(DATA_PATH)/nginx  $(DATA_PATH)/portainer  $(DATA_PATH)/postgresql  $(DATA_PATH)/prometheus  $(DATA_PATH)/redis
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
 
 bonus_up:
 	@echo "🚀 Starting containers..."
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d 
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d
 
 re: fclean all
 

@@ -6,14 +6,14 @@ RUN apk add --no-cache \
     postgresql16-client \
     postgresql16-contrib
 
-RUN adduser -D postgres
+RUN id -u postgres >/dev/null 2>&1 || adduser -D postgres
 
 RUN mkdir -p /var/lib/postgresql/data && \
     chown -R postgres:postgres /var/lib/postgresql
 
 ENV PGDATA=/var/lib/postgresql/data
 
-COPY entrypoint.sh /entrypoint.sh
+COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER postgres

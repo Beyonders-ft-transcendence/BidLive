@@ -5,8 +5,8 @@ RUN apk add --no-cache \
 
 WORKDIR /etc/prometheus
 
-COPY prometheus.yml /etc/prometheus/prometheus.yml
-COPY entrypoint.sh /entrypoint.sh
+COPY conf/prometheus.yml /etc/prometheus/prometheus.yml
+COPY ./tools/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
