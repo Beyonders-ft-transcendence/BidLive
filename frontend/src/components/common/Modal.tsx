@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 
 export default function Modal({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
     return (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+        <div className="fixed inset-0 z-10 bg-black/30 flex items-center justify-center">
             {/* Close button */}
            <button 
                 onClick={onClose}

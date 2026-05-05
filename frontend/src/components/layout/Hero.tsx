@@ -9,10 +9,10 @@ export default function HeroSection() {
                 <div className="lg:col-span-2">
                     <div className="relative h-100 rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-r from-slate-900 to-slate-800">
                         {/* Background Image */}
-                        <Image 
-                            src={herobcg} 
-                            alt="Hero Background" 
-                            layout="fill" 
+                        <Image
+                            src={herobcg}
+                            alt="Hero Background"
+                            layout="fill"
                             objectFit="cover"
                             className="opacity-40"
                         />
@@ -37,46 +37,50 @@ export default function HeroSection() {
 
                 {/* Right Side Small Cards Grid */}
                 <div className="grid grid-cols-2 gap-2">
-                    {/* Card 1 */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-br from-emerald-500 to-emerald-600 p-4 flex flex-col justify-between text-white">
-                        <div>
+                    {/* Card 1 - Ofertas Quentes */}
+                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/hot-offers.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
+                        <div className="relative z-10">
                             <h3 className="text-sm font-bold mb-1">Ofertas Quentes</h3>
                             <p className="text-xs opacity-90">Maior movimento</p>
                         </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2">
+                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
                             Ver
                         </button>
                     </div>
 
-                    {/* Card 2 */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-br from-orange-500 to-orange-600 p-4 flex flex-col justify-between text-white">
-                        <div>
+                    {/* Card 2 - Próximos Leilões */}
+                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/upcoming-auctions.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
+                        <div className="relative z-10">
                             <h3 className="text-sm font-bold mb-1">Próximos Leilões</h3>
                             <p className="text-xs opacity-90">Agendados hoje</p>
                         </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2">
+                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
                             Ver
                         </button>
                     </div>
 
-                    {/* Card 3 */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-br from-blue-500 to-blue-600 p-4 flex flex-col justify-between text-white">
-                        <div>
+                    {/* Card 3 - Minhas Apostas */}
+                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/my-bids.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
+                        <div className="relative z-10">
                             <h3 className="text-sm font-bold mb-1">Minhas Apostas</h3>
                             <p className="text-xs opacity-90">Acompanhe aqui</p>
                         </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2">
+                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
                             Ver
                         </button>
                     </div>
 
-                    {/* Card 4 */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-br from-purple-500 to-purple-600 p-4 flex flex-col justify-between text-white">
-                        <div>
+                    {/* Card 4 - Histórico */}
+                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/history.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
+                        <div className="relative z-10">
                             <h3 className="text-sm font-bold mb-1">Histórico</h3>
                             <p className="text-xs opacity-90">Seus leilões</p>
                         </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2">
+                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
                             Ver
                         </button>
                     </div>

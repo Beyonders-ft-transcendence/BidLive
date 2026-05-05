@@ -1,24 +1,32 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import type { StaticImageData } from 'next/image';
 import { ChevronDown } from 'lucide-react';
+import home from '@/assets/images/casa.png';
+import electronics from '@/assets/images/aparelhos.png';
+import fashion from '@/assets/images/moda.png';
+import sports from '@/assets/images/esportes-com-bolas.png';
+import books from '@/assets/images/megafone.png';
+import collectibles from '@/assets/images/velho.png';
+import automotive from '@/assets/images/carro-verificado.png';
+import Image from 'next/image';
 
 interface Category {
     id: number;
     name: string;
-    icon: string;
+    icon: StaticImageData;
     count?: number;
 }
 
 const categories: Category[] = [
-    { id: 1, name: "Eletrônicos", icon: "📱", count: 1240 },
-    { id: 2, name: "Moda e Acessórios", icon: "👔", count: 856 },
-    { id: 3, name: "Casa e Jardim", icon: "🏠", count: 542 },
-    { id: 4, name: "Esportes", icon: "⚽", count: 478 },
-    { id: 5, name: "Livros e Mídia", icon: "📚", count: 634 },
-    { id: 6, name: "Colecionáveis", icon: "🎨", count: 892 },
-    { id: 7, name: "Automotivo", icon: "🚗", count: 315 },
-    { id: 8, name: "Joias e Relógios", icon: "⌚", count: 421 },
+    { id: 1, name: "Eletrônicos", icon: electronics, count: 1240 },
+    { id: 2, name: "Moda e Acessórios", icon: fashion, count: 856 },
+    { id: 3, name: "Casa e Jardim", icon: home, count: 542 },
+    { id: 4, name: "Esportes", icon: sports, count: 478 },
+    { id: 5, name: "Livros e Mídia", icon: books, count: 634 },
+    { id: 6, name: "Colecionáveis", icon: collectibles, count: 892 },
+    { id: 7, name: "Automotivo", icon: automotive, count: 315 },
 ];
 
 interface CategoriesDropdownProps {
@@ -81,7 +89,7 @@ export default function CategoriesDropdown({ onCategorySelect }: CategoriesDropd
                             >
                                 {/* Icon */}
                                 <div className="text-2xl transition-transform duration-200 group-hover:scale-110">
-                                    {category.icon}
+                                    <Image src={category.icon} alt={category.name} width={32} height={32} />
                                 </div>
 
                                 {/* Text */}
@@ -97,8 +105,8 @@ export default function CategoriesDropdown({ onCategorySelect }: CategoriesDropd
                                 {/* Arrow */}
                                 <span
                                     className={`ml-auto text-blue-600 transition-all duration-200 ${hoveredId === category.id
-                                            ? "opacity-100 translate-x-0"
-                                            : "opacity-0 translate-x-2"
+                                        ? "opacity-100 translate-x-0"
+                                        : "opacity-0 translate-x-2"
                                         }`}
                                 >
                                     →

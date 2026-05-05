@@ -4,7 +4,7 @@ import HeroSection from "@/components/layout/Hero";
 
 export default function Home() {
   return (
-    <div className="">
+    <div className="bg-gray-50 flex-1">
       <Header />
 
       <main  className="max-w-7xl mx-auto">
