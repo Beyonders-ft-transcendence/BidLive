@@ -1,0 +1,210 @@
+services:
+
+  nginx:
+    image: nginx:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "443:443"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+
+  adminer:
+    image: adminer:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+
+  frontend:
+    image: frontend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+
+  backend:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - credentials
+      - redis_password
+
+  postgresql:
+    image: postgres:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/postgresql
+      dockerfile: Dockerfile
+    container_name: postgresql
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - credentials
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/bonus/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - redis_password
+    volumes:
+      - redis_data:/data
+
+  prometheus:
+    image: prometheus:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/prometheus
+      dockerfile: Dockerfile
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/grafana
+      dockerfile: Dockerfile
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - grafana_password
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD_FILE: /run/secrets/grafana_password
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:9000"
+    networks:
+      - bidlive_network
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+secrets:
+  credentials:
+    file: ../secrets/credentials.txt
+  grafana_password:
+    file: ../secrets/grafana.txt
+  redis_password:
+    file: ../secrets/redis.txt
+
+networks:
+  bidlive_network:
+    driver: bridge
+    name: bidlive_network
+
+volumes:
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nmatondo/data/redis
+
+  postgresql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nmatondo/data/postgresql
+
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nmatondo/data/prometheus
+
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/nmatondo/data/portainer
