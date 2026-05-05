@@ -89,7 +89,7 @@ services:
     env_file:
       - ./.env
     secrets:
-      - credentials
+      - db_password
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
@@ -168,12 +168,12 @@ services:
       - portainer_data:/data
 
 secrets:
-  credentials:
-    file: ../secrets/credentials.txt
+  db_password:
+    file: ../secrets/db_password.txt
   grafana_password:
-    file: ../secrets/grafana.txt
+    file: ../secrets/grafana_password.txt
   redis_password:
-    file: ../secrets/redis.txt
+    file: ../secrets/redis_password.txt
 
 networks:
   bidlive_network:
