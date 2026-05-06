@@ -1,8 +1,10 @@
 "use client";
 
 import ActionCard from "@/components/common/ActionCard";
+import StatCard from "@/components/common/StatCard";
+import PieStatCard from "@/components/common/PieStatCard";
+import StatItem from "@/components/common/StatItem";
 import Header from "@/components/layout/backoffice/Header";
-import { ArrowDown, ArrowUp } from "lucide-react";
 
 import {
     ResponsiveContainer,
@@ -71,25 +73,14 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                     {/* LEFT SIDE */}
                     <div>
-                        {/* TOP SMALL CARDS */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             {/* USERS */}
-                            <div className="bg-white rounded-sm shadow-sm overflow-hidden">
-                                <div className="p-4">
-                                    <p className="text-gray-600 font-medium">Users</p>
-                                    <div className="flex items-center space-x-4 mt-2">
-                                        <h4 className="text-3xl font-semibold">33,956</h4>
-                                        <span className="text-red-400 flex items-center text-sm font-medium">
-                                            <ArrowDown className="w-4 h-4" />
-                                            12,2%
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-500 text-sm">
-                                        Total users world wide
-                                    </p>
-                                </div>
-
-                                <div className="h-24">
+                            <StatCard
+                                label="Users"
+                                value="33,956"
+                                trend="down"
+                                trendValue="12,2%"
+                                chart={
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={userTrendData}>
                                             <Area
@@ -101,26 +92,16 @@ export default function Dashboard() {
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
-                                </div>
-                            </div>
+                                }
+                            />
 
                             {/* EMPRESAS */}
-                            <div className="bg-white rounded-sm shadow-sm overflow-hidden">
-                                <div className="p-4">
-                                    <p className="text-gray-600 font-medium">Empresas</p>
-                                    <div className="flex items-center space-x-4 mt-2">
-                                        <h4 className="text-3xl font-semibold">50.36%</h4>
-                                        <span className="text-green-400 flex items-center text-sm font-medium">
-                                            <ArrowUp className="w-4 h-4" />
-                                            9,12%
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-500 text-sm">
-                                        Total empresas world wide
-                                    </p>
-                                </div>
-
-                                <div className="h-24">
+                            <StatCard
+                                label="Empresas"
+                                value="50.36%"
+                                trend="up"
+                                trendValue="9,12%"
+                                chart={
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={companyTrendData}>
                                             <Area
@@ -132,8 +113,8 @@ export default function Dashboard() {
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
-                                </div>
-                            </div>
+                                }
+                            />
                         </div>
 
                         {/* STATUS USERS */}
@@ -146,8 +127,10 @@ export default function Dashboard() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* ONLINE */}
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-32 h-32">
+                                <PieStatCard
+                                    label="Online"
+                                    value="45,324"
+                                    chart={
                                         <ResponsiveContainer width="100%" height="100%">
                                             <PieChart>
                                                 <Pie
@@ -162,16 +145,14 @@ export default function Dashboard() {
                                                 </Pie>
                                             </PieChart>
                                         </ResponsiveContainer>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-medium">Online</h4>
-                                        <p className="text-2xl font-semibold">45,324</p>
-                                    </div>
-                                </div>
+                                    }
+                                />
 
                                 {/* OFFLINE */}
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-32 h-32">
+                                <PieStatCard
+                                    label="Offline"
+                                    value="12,236"
+                                    chart={
                                         <ResponsiveContainer width="100%" height="100%">
                                             <PieChart>
                                                 <Pie
@@ -186,12 +167,8 @@ export default function Dashboard() {
                                                 </Pie>
                                             </PieChart>
                                         </ResponsiveContainer>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-medium">Offline</h4>
-                                        <p className="text-2xl font-semibold">12,236</p>
-                                    </div>
-                                </div>
+                                    }
+                                />
                             </div>
                         </div>
                     </div>
@@ -206,25 +183,10 @@ export default function Dashboard() {
 
                         {/* STATS */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                            <div>
-                                <h4 className="text-sm text-gray-500">Active</h4>
-                                <p className="text-2xl font-semibold">13,956</p>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm text-gray-500">Scheduled</h4>
-                                <p className="text-2xl font-semibold">27,219</p>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm text-gray-500">Completed</h4>
-                                <p className="text-2xl font-semibold">03,386</p>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm text-gray-500">Canceled</h4>
-                                <p className="text-2xl font-semibold">04,739</p>
-                            </div>
+                            <StatItem label="Active" value="13,956" />
+                            <StatItem label="Scheduled" value="27,219" />
+                            <StatItem label="Completed" value="03,386" />
+                            <StatItem label="Canceled" value="04,739" />
                         </div>
 
                         {/* MAIN GRAPH */}
