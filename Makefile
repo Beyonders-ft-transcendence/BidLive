@@ -2,7 +2,7 @@
 
 COMPOSE_FILE = srcs/docker-compose.yml
 PROJECT_NAME = inception
-DATA_PATH = /mnt/d/NdDaniel/Code/42/BidLive/data # /home/nmatondo/data
+DATA_PATH = /home/nmatondo/data
 
 all: build up
 

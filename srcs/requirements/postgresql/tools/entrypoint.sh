@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
@@ -6,7 +6,7 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
 
     initdb -D "$PGDATA"
 
-    pg_ctl -D "$PGDATA" -o "-c listen_addresses='localhost'" -w start
+    pg_ctl -D "$PGDATA" -o "-c listen_addresses='*'" -w start
 
     psql -U postgres -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
 
@@ -18,4 +18,4 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
 fi
 
 echo "Starting PostgreSQL..."
-exec postgres -D "$PGDATA"
+exec postgres -D "$PGDATA" -c listen_addresses='*'
