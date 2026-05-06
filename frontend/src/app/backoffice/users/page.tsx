@@ -8,7 +8,6 @@ import {
   X,
   Eye,
   Ban,
-  PauseCircle,
   Trash2,
   BadgeCheck,
   ChevronLeft,
@@ -203,11 +202,10 @@ export default function Users() {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`px-3 py-2 border rounded-sm text-xs font-medium transition flex items-center gap-2 ${
-                  showFilters
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-2 border rounded-sm text-xs font-medium transition flex items-center gap-2 ${showFilters
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Filter className="w-4 h-4" />
                 Filtros
@@ -308,75 +306,67 @@ export default function Users() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
-                  >
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white font-semibold text-xs`}>
-                          {getInitials(user.name)}
+                    <tr
+                      key={user.id}
+                      className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
+                    >
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white font-semibold text-xs`}>
+                            {getInitials(user.name)}
+                          </div>
+                          <span className="font-medium">{user.name}</span>
                         </div>
-                        <span className="font-medium">{user.name}</span>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="text-xs">{user.email}</td>
+                      <td className="text-xs">{user.email}</td>
 
-                    <td className="text-xs">
-                      <span>{user.type}</span>
-                    </td>
+                      <td className="text-xs">
+                        <span>{user.type}</span>
+                      </td>
 
-                    <td className="text-xs">
-                      <span
-                        className={`px-2 py-0.5 rounded-sm text-xs font-medium ${statusColor(
-                          user.status
-                        )}`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-
-                    <td className="text-xs">
-                      {user.verified ? (
-                        <BadgeCheck className="text-green-500 w-4 h-4" />
-                      ) : (
-                        <X className="text-red-500 w-4 h-4" />
-                      )}
-                    </td>
-
-                    <td className="text-xs">{user.createdAt}</td>
-
-                    <td className="text-xs">{user.lastActivity}</td>
-
-                    <td className="text-xs">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setSelectedUser(user)}
-                          className="p-1.5 rounded-sm hover:bg-blue-100 text-blue-600"
+                      <td className="text-xs">
+                        <span
+                          className={`px-2 py-0.5 rounded-sm text-xs font-medium ${statusColor(
+                            user.status
+                          )}`}
                         >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
+                          {user.status}
+                        </span>
+                      </td>
 
-                        <button className="p-1.5 rounded-sm hover:bg-yellow-100 text-yellow-600">
-                          <PauseCircle className="w-3.5 h-3.5" />
-                        </button>
+                      <td className="text-xs">
+                        {user.verified ? (
+                          <BadgeCheck className="text-green-500 w-4 h-4" />
+                        ) : (
+                          <X className="text-red-500 w-4 h-4" />
+                        )}
+                      </td>
 
-                        <button className="p-1.5 rounded-sm hover:bg-red-100 text-red-600">
-                          <Ban className="w-3.5 h-3.5" />
-                        </button>
+                      <td className="text-xs">{user.createdAt}</td>
 
-                        <button className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-700">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <td className="text-xs">{user.lastActivity}</td>
 
-                        <button className="p-1.5 rounded-sm hover:bg-green-100 text-green-600">
-                          <BadgeCheck className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="text-xs">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setSelectedUser(user)}
+                            className="p-1.5 rounded-sm hover:bg-blue-100 text-blue-600"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button className="p-1.5 rounded-sm hover:bg-red-100 text-red-600">
+                            <Ban className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-700">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
@@ -403,7 +393,7 @@ export default function Users() {
         </div>
       </div>
 
-  
+
     </div>
   );
 }
