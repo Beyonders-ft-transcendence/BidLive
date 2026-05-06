@@ -3,6 +3,9 @@
 import Header from "@/components/layout/backoffice/Header";
 import ActionCard from "@/components/common/ActionCard";
 import {
+  Search,
+  Filter,
+  X,
   Eye,
   Ban,
   PauseCircle,
@@ -10,9 +13,8 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
-  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type UserType = "Pessoa Física" | "Pessoa Jurídica";
 type UserStatus = "Ativo" | "Suspenso" | "Bloqueado";
@@ -147,6 +149,30 @@ function getAvatarColor(name: string): string {
 
 export default function Users() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [verificationFilter, setVerificationFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredUsers = useMemo(() => {
+    return usersData.filter((user) => {
+      const matchSearch =
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase());
+
+      const matchType = typeFilter ? user.type === typeFilter : true;
+      const matchStatus = statusFilter ? user.status === statusFilter : true;
+      const matchVerification =
+        verificationFilter === ""
+          ? true
+          : verificationFilter === "Verificado"
+            ? user.verified
+            : !user.verified;
+
+      return matchSearch && matchType && matchStatus && matchVerification;
+    });
+  }, [search, typeFilter, statusFilter, verificationFilter]);
 
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
@@ -159,7 +185,105 @@ export default function Users() {
         />
 
         {/* TABLE */}
-        <div className="bg-white rounded-sm shadow-sm mt-4 overflow-hidden">
+        <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
+
+          {/* SEARCH & FILTERS */}
+          <div className="pb-4 border-b border-gray-200">
+            {/* SEARCH BAR WITH FILTER TOGGLE */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar por nome ou email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-3 py-2 border rounded-sm text-xs font-medium transition flex items-center gap-2 ${
+                  showFilters
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filtros
+              </button>
+            </div>
+
+            {/* FILTERS GRID - CONDITIONAL DISPLAY */}
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
+                {/* TYPE FILTER */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Tipo
+                  </label>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Pessoa Física">Pessoa Física</option>
+                    <option value="Pessoa Jurídica">Pessoa Jurídica</option>
+                  </select>
+                </div>
+
+                {/* STATUS FILTER */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Suspenso">Suspenso</option>
+                    <option value="Bloqueado">Bloqueado</option>
+                  </select>
+                </div>
+
+                {/* VERIFICATION FILTER */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Verificação
+                  </label>
+                  <select
+                    value={verificationFilter}
+                    onChange={(e) => setVerificationFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Verificado">Verificado</option>
+                    <option value="Não Verificado">Não Verificado</option>
+                  </select>
+                </div>
+
+                {/* CLEAR FILTERS BUTTON */}
+                <div className="flex items-end">
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setTypeFilter("");
+                      setStatusFilter("");
+                      setVerificationFilter("");
+                    }}
+                    className="w-full px-3 py-2 text-xs font-medium text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 transition"
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full min-w-300">
               <thead className="bg-gray-50 text-left">
@@ -176,7 +300,14 @@ export default function Users() {
               </thead>
 
               <tbody>
-                {usersData.map((user) => (
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-6 text-center text-xs text-gray-500">
+                      Nenhum usuário encontrado
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
                   <tr
                     key={user.id}
                     className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
@@ -245,15 +376,16 @@ export default function Users() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* PAGINATION */}
-          <div className="flex items-center justify-between p-3 border-t border-gray-200">
+          <div className="flex items-center justify-between p-3">
             <div className="text-xs text-gray-500">
-              Mostrando 1–10 de {usersData.length}
+              Mostrando 1–10 de {filteredUsers.length}
             </div>
 
             <div className="flex items-center gap-1.5">
