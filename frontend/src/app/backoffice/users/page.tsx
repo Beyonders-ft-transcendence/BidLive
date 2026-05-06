@@ -3,8 +3,6 @@
 import Header from "@/components/layout/backoffice/Header";
 import ActionCard from "@/components/common/ActionCard";
 import {
-  Search,
-  Filter,
   Eye,
   Ban,
   PauseCircle,
@@ -12,20 +10,9 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
-  Bell,
-  ShieldAlert,
-  LogOut,
-  KeyRound,
-  Building2,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Activity,
-  AlertTriangle,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type UserType = "Pessoa Física" | "Pessoa Jurídica";
 type UserStatus = "Ativo" | "Suspenso" | "Bloqueado";
@@ -159,31 +146,7 @@ function getAvatarColor(name: string): string {
 }
 
 export default function Users() {
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [verificationFilter, setVerificationFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-
-  const filteredUsers = useMemo(() => {
-    return usersData.filter((user) => {
-      const matchSearch =
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase()) ||
-        user.id.toLowerCase().includes(search.toLowerCase());
-
-      const matchType = typeFilter ? user.type === typeFilter : true;
-      const matchStatus = statusFilter ? user.status === statusFilter : true;
-      const matchVerification =
-        verificationFilter === ""
-          ? true
-          : verificationFilter === "Verificado"
-            ? user.verified
-            : !user.verified;
-
-      return matchSearch && matchType && matchStatus && matchVerification;
-    });
-  }, [search, typeFilter, statusFilter, verificationFilter]);
 
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
@@ -213,7 +176,7 @@ export default function Users() {
               </thead>
 
               <tbody>
-                {filteredUsers.map((user) => (
+                {usersData.map((user) => (
                   <tr
                     key={user.id}
                     className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
@@ -235,7 +198,7 @@ export default function Users() {
 
                     <td className="text-xs">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(
+                        className={`px-2 py-0.5 rounded-sm text-xs font-medium ${statusColor(
                           user.status
                         )}`}
                       >
@@ -290,7 +253,7 @@ export default function Users() {
           {/* PAGINATION */}
           <div className="flex items-center justify-between p-3 border-t border-gray-200">
             <div className="text-xs text-gray-500">
-              Mostrando 1–10 de {filteredUsers.length}
+              Mostrando 1–10 de {usersData.length}
             </div>
 
             <div className="flex items-center gap-1.5">
