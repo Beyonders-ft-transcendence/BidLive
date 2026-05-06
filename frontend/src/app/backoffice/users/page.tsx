@@ -2,16 +2,17 @@
 
 import Header from "@/components/layout/backoffice/Header";
 import ActionCard from "@/components/common/ActionCard";
+import TableFilters from "@/components/common/TableFilters";
+import Avatar from "@/components/common/Avatar";
+import { statusColor } from "@/utils/user";
 import {
-  Search,
-  Filter,
-  X,
   Eye,
   Ban,
   Trash2,
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -114,38 +115,6 @@ const usersData: UserData[] = [
   },
 ];
 
-function statusColor(status: UserStatus) {
-  switch (status) {
-    case "Ativo":
-      return "bg-green-100 text-green-600";
-    case "Suspenso":
-      return "bg-yellow-100 text-yellow-600";
-    case "Bloqueado":
-      return "bg-red-100 text-red-600";
-  }
-}
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function getAvatarColor(name: string): string {
-  const colors = [
-    "bg-blue-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-green-500",
-    "bg-teal-500",
-    "bg-indigo-500",
-  ];
-  const index = name.charCodeAt(0) % colors.length;
-  return colors[index];
-}
-
 export default function Users() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [search, setSearch] = useState("");
@@ -187,100 +156,49 @@ export default function Users() {
         <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
 
           {/* SEARCH & FILTERS */}
-          <div className="pb-4 border-b border-gray-200">
-            {/* SEARCH BAR WITH FILTER TOGGLE */}
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar por nome ou email..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600"
-                />
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`px-3 py-2 border rounded-sm text-xs font-medium transition flex items-center gap-2 ${showFilters
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "border-gray-200 text-gray-700 hover:bg-gray-50"
-                  }`}
-              >
-                <Filter className="w-4 h-4" />
-                Filtros
-              </button>
-            </div>
-
-            {/* FILTERS GRID - CONDITIONAL DISPLAY */}
-            {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
-                {/* TYPE FILTER */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                    Tipo
-                  </label>
-                  <select
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
-                  >
-                    <option value="">Todos</option>
-                    <option value="Pessoa Física">Pessoa Física</option>
-                    <option value="Pessoa Jurídica">Pessoa Jurídica</option>
-                  </select>
-                </div>
-
-                {/* STATUS FILTER */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                    Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
-                  >
-                    <option value="">Todos</option>
-                    <option value="Ativo">Ativo</option>
-                    <option value="Suspenso">Suspenso</option>
-                    <option value="Bloqueado">Bloqueado</option>
-                  </select>
-                </div>
-
-                {/* VERIFICATION FILTER */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                    Verificação
-                  </label>
-                  <select
-                    value={verificationFilter}
-                    onChange={(e) => setVerificationFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
-                  >
-                    <option value="">Todos</option>
-                    <option value="Verificado">Verificado</option>
-                    <option value="Não Verificado">Não Verificado</option>
-                  </select>
-                </div>
-
-                {/* CLEAR FILTERS BUTTON */}
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setSearch("");
-                      setTypeFilter("");
-                      setStatusFilter("");
-                      setVerificationFilter("");
-                    }}
-                    className="w-full px-3 py-2 text-xs font-medium text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 transition"
-                  >
-                    Limpar Filtros
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <TableFilters
+            search={search}
+            onSearchChange={setSearch}
+            showFilters={showFilters}
+            onShowFiltersChange={setShowFilters}
+            filters={{
+              type: typeFilter,
+              status: statusFilter,
+              verification: verificationFilter,
+            }}
+            onFilterChange={(filterName, value) => {
+              switch (filterName) {
+                case "type":
+                  setTypeFilter(value);
+                  break;
+                case "status":
+                  setStatusFilter(value);
+                  break;
+                case "verification":
+                  setVerificationFilter(value);
+                  break;
+              }
+            }}
+            onClearFilters={() => {
+              setSearch("");
+              setTypeFilter("");
+              setStatusFilter("");
+              setVerificationFilter("");
+            }}
+            filterOptions={{
+              typeOptions: [
+                { value: "", label: "Todos" },
+                { value: "Pessoa Física", label: "Pessoa Física" },
+                { value: "Pessoa Jurídica", label: "Pessoa Jurídica" },
+              ],
+              statusOptions: [
+                { value: "", label: "Todos" },
+                { value: "Ativo", label: "Ativo" },
+                { value: "Suspenso", label: "Suspenso" },
+                { value: "Bloqueado", label: "Bloqueado" },
+              ],
+            }}
+          />
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-300">
@@ -312,9 +230,7 @@ export default function Users() {
                     >
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white font-semibold text-xs`}>
-                            {getInitials(user.name)}
-                          </div>
+                          <Avatar name={user.name} size="md" />
                           <span className="font-medium">{user.name}</span>
                         </div>
                       </td>
