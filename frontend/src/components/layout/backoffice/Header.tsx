@@ -21,7 +21,7 @@ export default function Header() {
     ]
 
     return (
-        <header className="w-full shadow-sm">
+        <header className="w-full bg-white shadow-sm">
             <div className='bg-[#0B1F3B] text-white'>
                 <div className="flex items-center justify-between max-w-7xl mx-auto px-6 py-3">
 
