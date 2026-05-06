@@ -6,12 +6,12 @@
 
 :root {
   /* 🌊 cores principais */
+
   --background: #ffffff;
   --foreground: #0b1f3b; /* azul-marinho principal */
 
-  --primary: #0b1f3b;
+  --primary: #2563eb;
   --primary-light: #1a3b6f;
-  --accent: #2563eb;
 
   /* 🧠 UI */
   --muted: #6b7280;
@@ -42,7 +42,6 @@
 
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
-  --color-accent: var(--accent);
 
   --color-muted: var(--muted);
   --color-border: var(--border);

@@ -69,7 +69,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='cursor-pointer hover:text-[#2563eb] transition-colors'
+                                className='cursor-pointer hover:text-primary transition-colors'
                             >
                                 Entrar
                             </button>
@@ -77,7 +77,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='bg-[#2563eb] text-white px-4 py-2 rounded-md hover:bg-[#1d4ed8] transition-colors'
+                                className='bg-primary text-white px-4 py-2 rounded-md hover:bg-[#1d4ed8] transition-colors'
                             >
                                 Registrar
                             </button>
@@ -85,7 +85,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='flex items-center cursor-pointer hover:text-[#2563eb] transition-colors'
+                                className='flex items-center cursor-pointer hover:text-primary transition-colors'
                             >
                                 Favoritos
                                 <Image
