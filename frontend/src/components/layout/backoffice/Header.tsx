@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, Bell, Mail, ChevronDown, 
-        LayoutDashboard, Users, Settings, Factory, 
-        Gavel, TrendingUp, AlertCircle } 
-from 'lucide-react';
+import {
+    Search, Bell, Mail, ChevronDown,
+    LayoutDashboard, Users, Settings, Factory,
+    Gavel, TrendingUp, AlertCircle
+}
+    from 'lucide-react';
 import icon from '@/assets/images/icon2.png';
 
 export default function Header() {
@@ -67,18 +69,14 @@ export default function Header() {
                 <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
                     {
                         NAV.map((item) => {
-                            const isImage = typeof item.icon === 'object' && 'src' in item.icon
+                            const IconComponent = item.icon
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
                                     className="hover:text-gray-400 flex items-center gap-1"
                                 >
-                                    {isImage ? (
-                                        <Image src={item.icon} alt={item.name} width={25} height={16} />
-                                    ) : (
-                                        <item.icon size={16} />
-                                    )}
+                                    <IconComponent size={16} />
                                     {item.name}
                                 </Link>
                             )
