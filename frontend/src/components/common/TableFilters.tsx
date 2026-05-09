@@ -9,6 +9,7 @@ interface TableFiltersProps {
     type?: string;
     status?: string;
     verification?: string;
+    category?: string;
   };
   onFilterChange: (filterName: string, value: string) => void;
   onClearFilters: () => void;
@@ -16,6 +17,7 @@ interface TableFiltersProps {
     typeOptions?: { value: string; label: string }[];
     statusOptions?: { value: string; label: string }[];
     verificationOptions?: { value: string; label: string }[];
+    categoryOptions?: { value: string; label: string }[];
   };
 }
 
@@ -88,6 +90,26 @@ export default function TableFilters({
             </div>
           )}
 
+          {/* CATEGORY FILTER */}
+          {filterOptions.categoryOptions && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Categoria
+              </label>
+              <select
+                value={filters.category || ""}
+                onChange={(e) => onFilterChange("category", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
+              >
+                {filterOptions.categoryOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* STATUS FILTER */}
           {filterOptions.statusOptions && (
             <div>
@@ -108,23 +130,25 @@ export default function TableFilters({
             </div>
           )}
 
-          {/* VERIFICATION FILTER */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Verificação
-            </label>
-            <select
-              value={filters.verification || ""}
-              onChange={(e) => onFilterChange("verification", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
-            >
-              {verificationOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* VERIFICATION FILTER - Only show if not using category (simple heuristic for now) */}
+          {!filterOptions.categoryOptions && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Verificação
+              </label>
+              <select
+                value={filters.verification || ""}
+                onChange={(e) => onFilterChange("verification", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-blue-600 appearance-none bg-white cursor-pointer"
+              >
+                {verificationOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* CLEAR FILTERS BUTTON */}
           <div className="flex items-end">
@@ -140,3 +164,4 @@ export default function TableFilters({
     </div>
   );
 }
+

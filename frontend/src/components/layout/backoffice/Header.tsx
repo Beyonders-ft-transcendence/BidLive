@@ -1,5 +1,8 @@
+"use client";
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import {
     Search, Bell, Mail, ChevronDown,
     LayoutDashboard, Users, Settings,
@@ -8,6 +11,7 @@ import {
 import icon from '@/assets/images/icon2.png';
 
 export default function Header() {
+    const pathname = usePathname();
 
     const NAV = [
         { name: 'Dashboard', href: '/backoffice/dashboard', icon: LayoutDashboard },
@@ -68,11 +72,16 @@ export default function Header() {
                     {
                         NAV.map((item) => {
                             const IconComponent = item.icon
+                            const isActive = pathname === item.href
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="hover:text-gray-400 flex items-center gap-1"
+                                    className={`flex items-center gap-1.5 transition-colors ${
+                                        isActive 
+                                        ? "text-blue-600 border-b-2 border-blue-600 pb-1" 
+                                        : "text-gray-600 hover:text-blue-600"
+                                    }`}
                                 >
                                     <IconComponent size={16} />
                                     {item.name}
