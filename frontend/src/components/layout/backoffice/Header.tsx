@@ -2,10 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
     Search, Bell, Mail, ChevronDown,
-    LayoutDashboard, Users, Settings, Factory,
+    LayoutDashboard, Users, Settings,
     Gavel, TrendingUp, AlertCircle
-}
-    from 'lucide-react';
+} from 'lucide-react';
 import icon from '@/assets/images/icon2.png';
 
 export default function Header() {
@@ -13,7 +12,6 @@ export default function Header() {
     const NAV = [
         { name: 'Dashboard', href: '/backoffice/dashboard', icon: LayoutDashboard },
         { name: 'Usuários', href: '/backoffice/users', icon: Users },
-        { name: 'Empresas', href: '/backoffice/companies', icon: Factory },
         { name: 'Leilões', href: '/backoffice/auctions', icon: Gavel },
         { name: 'Lances', href: '/backoffice/bids', icon: TrendingUp },
         { name: 'Denúncias', href: '/backoffice/reports', icon: AlertCircle },
