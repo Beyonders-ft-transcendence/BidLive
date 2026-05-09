@@ -4,7 +4,6 @@ import ActionCard from "@/components/common/ActionCard";
 import StatCard from "@/components/common/StatCard";
 import PieStatCard from "@/components/common/PieStatCard";
 import StatItem from "@/components/common/StatItem";
-import Header from "@/components/layout/backoffice/Header";
 
 import {
     ResponsiveContainer,
@@ -62,7 +61,6 @@ const offlineData = [
 export default function Dashboard() {
     return (
         <div className="flex flex-col gap-4 bg-gray-100 flex-1 min-h-screen">
-            <Header />
 
             <div className="max-w-7xl mx-auto w-full px-4 pb-8">
                 <ActionCard

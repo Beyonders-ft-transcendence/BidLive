@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "@/components/layout/backoffice/Header";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import { auctionStatusColor, formatCurrency, AuctionStatus } from "@/utils/auction";
@@ -121,203 +120,199 @@ export default function Auctions() {
   }, [search, statusFilter, categoryFilter]);
 
   return (
-    <div className="flex flex-col bg-gray-100 min-h-screen">
-      <Header />
+    <>
+      <ActionCard
+        title="Gestão de Leilões"
+        buttonLabel="Novo Leilão"
+      />
 
-      <div className="max-w-7xl mx-auto w-full px-4 py-6">
-        <ActionCard
-          title="Gestão de Leilões"
-          buttonLabel="Novo Leilão"
+      {/* TABLE */}
+      <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
+        {/* SEARCH & FILTERS */}
+        <TableFilters
+          search={search}
+          onSearchChange={setSearch}
+          showFilters={showFilters}
+          onShowFiltersChange={setShowFilters}
+          filters={{
+            status: statusFilter,
+            category: categoryFilter,
+          }}
+          onFilterChange={(filterName, value) => {
+            switch (filterName) {
+              case "status":
+                setStatusFilter(value);
+                break;
+              case "category":
+                setCategoryFilter(value);
+                break;
+            }
+          }}
+          onClearFilters={() => {
+            setSearch("");
+            setStatusFilter("");
+            setCategoryFilter("");
+          }}
+          filterOptions={{
+            statusOptions: [
+              { value: "", label: "Todos os Status" },
+              { value: "Ativo", label: "Ativo" },
+              { value: "Finalizado", label: "Finalizado" },
+              { value: "Cancelado", label: "Cancelado" },
+              { value: "Pausado", label: "Pausado" },
+              { value: "Aguardando Aprovação", label: "Pendente" },
+            ],
+            categoryOptions: [
+              { value: "", label: "Todas as Categorias" },
+              { value: "Veículos", label: "Veículos" },
+              { value: "Imóveis", label: "Imóveis" },
+              { value: "Eletrônicos", label: "Eletrônicos" },
+              { value: "Equipamentos", label: "Equipamentos" },
+            ],
+          }}
         />
 
-        {/* TABLE */}
-        <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
-          {/* SEARCH & FILTERS */}
-          <TableFilters
-            search={search}
-            onSearchChange={setSearch}
-            showFilters={showFilters}
-            onShowFiltersChange={setShowFilters}
-            filters={{
-              status: statusFilter,
-              category: categoryFilter,
-            }}
-            onFilterChange={(filterName, value) => {
-              switch (filterName) {
-                case "status":
-                  setStatusFilter(value);
-                  break;
-                case "category":
-                  setCategoryFilter(value);
-                  break;
-              }
-            }}
-            onClearFilters={() => {
-              setSearch("");
-              setStatusFilter("");
-              setCategoryFilter("");
-            }}
-            filterOptions={{
-              statusOptions: [
-                { value: "", label: "Todos os Status" },
-                { value: "Ativo", label: "Ativo" },
-                { value: "Finalizado", label: "Finalizado" },
-                { value: "Cancelado", label: "Cancelado" },
-                { value: "Pausado", label: "Pausado" },
-                { value: "Aguardando Aprovação", label: "Pendente" },
-              ],
-              categoryOptions: [
-                { value: "", label: "Todas as Categorias" },
-                { value: "Veículos", label: "Veículos" },
-                { value: "Imóveis", label: "Imóveis" },
-                { value: "Eletrônicos", label: "Eletrônicos" },
-                { value: "Equipamentos", label: "Equipamentos" },
-              ],
-            }}
-          />
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-300">
+            <thead className="bg-gray-50 text-left">
+              <tr className="text-xs text-gray-600 border-b border-gray-200">
+                <th className="p-3">Leilão</th>
+                <th className="text-xs">Criador</th>
+                <th className="text-xs">Preço Inicial</th>
+                <th className="text-xs">Lance Atual</th>
+                <th className="text-xs">Status</th>
+                <th className="text-xs">Término</th>
+                <th className="text-xs text-center">Lances</th>
+                <th className="text-xs">Ações</th>
+              </tr>
+            </thead>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-300">
-              <thead className="bg-gray-50 text-left">
-                <tr className="text-xs text-gray-600 border-b border-gray-200">
-                  <th className="p-3">Leilão</th>
-                  <th className="text-xs">Criador</th>
-                  <th className="text-xs">Preço Inicial</th>
-                  <th className="text-xs">Lance Atual</th>
-                  <th className="text-xs">Status</th>
-                  <th className="text-xs">Término</th>
-                  <th className="text-xs">Lances</th>
-                  <th className="text-xs">Ações</th>
+            <tbody>
+              {filteredAuctions.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-6 text-center text-xs text-gray-500">
+                    Nenhum leilão encontrado
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                filteredAuctions.map((auction) => (
+                  <tr
+                    key={auction.id}
+                    className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
+                  >
+                    <td className="p-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">{auction.title}</span>
+                        <span className="text-[10px] text-gray-500">{auction.category}</span>
+                      </div>
+                    </td>
 
-              <tbody>
-                {filteredAuctions.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-6 text-center text-xs text-gray-500">
-                      Nenhum leilão encontrado
+                    <td className="text-xs text-gray-600">{auction.creator}</td>
+
+                    <td className="text-xs font-medium">{formatCurrency(auction.startingPrice)}</td>
+
+                    <td className="text-xs font-bold text-blue-600">
+                      {auction.currentBid > 0 ? formatCurrency(auction.currentBid) : "—"}
+                    </td>
+
+                    <td className="text-xs">
+                      <span
+                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${auctionStatusColor(
+                          auction.status
+                        )}`}
+                      >
+                        {auction.status}
+                      </span>
+                    </td>
+
+                    <td className="text-xs text-gray-600">{auction.endDate}</td>
+
+                    <td className="text-xs text-center">{auction.bidsCount}</td>
+
+                    <td className="text-xs">
+                      <div className="flex items-center gap-1">
+                        <button
+                          title="Ver Detalhes"
+                          onClick={() => setSelectedAuction(auction)}
+                          className="p-1.5 rounded-sm hover:bg-blue-100 text-blue-600"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+
+                        {auction.status === "Aguardando Aprovação" && (
+                          <button
+                            title="Aprovar Leilão"
+                            className="p-1.5 rounded-sm hover:bg-green-100 text-green-600"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        {auction.status === "Ativo" && (
+                          <button
+                            title="Pausar Leilão"
+                            className="p-1.5 rounded-sm hover:bg-yellow-100 text-yellow-600"
+                          >
+                            <Pause className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        {auction.status === "Pausado" && (
+                          <button
+                            title="Retomar Leilão"
+                            className="p-1.5 rounded-sm hover:bg-green-100 text-green-600"
+                          >
+                            <Play className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <button
+                          title="Editar Leilão"
+                          className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-700"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          title="Cancelar Leilão"
+                          className="p-1.5 rounded-sm hover:bg-red-100 text-red-600"
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
+
+                        {auction.isFraudulent && (
+                          <button
+                            title="Remover Fraudulento"
+                            className="p-1.5 rounded-sm bg-red-600 text-white hover:bg-red-700 shadow-sm"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
-                ) : (
-                  filteredAuctions.map((auction) => (
-                    <tr
-                      key={auction.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
-                    >
-                      <td className="p-3">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{auction.title}</span>
-                          <span className="text-[10px] text-gray-500">{auction.category}</span>
-                        </div>
-                      </td>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-                      <td className="text-xs text-gray-600">{auction.creator}</td>
-
-                      <td className="text-xs font-medium">{formatCurrency(auction.startingPrice)}</td>
-
-                      <td className="text-xs font-bold text-blue-600">
-                        {auction.currentBid > 0 ? formatCurrency(auction.currentBid) : "—"}
-                      </td>
-
-                      <td className="text-xs">
-                        <span
-                          className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${auctionStatusColor(
-                            auction.status
-                          )}`}
-                        >
-                          {auction.status}
-                        </span>
-                      </td>
-
-                      <td className="text-xs text-gray-600">{auction.endDate}</td>
-
-                      <td className="text-xs text-center">{auction.bidsCount}</td>
-
-                      <td className="text-xs">
-                        <div className="flex items-center gap-1">
-                          <button
-                            title="Ver Detalhes"
-                            onClick={() => setSelectedAuction(auction)}
-                            className="p-1.5 rounded-sm hover:bg-blue-100 text-blue-600"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-
-                          {auction.status === "Aguardando Aprovação" && (
-                            <button
-                              title="Aprovar Leilão"
-                              className="p-1.5 rounded-sm hover:bg-green-100 text-green-600"
-                            >
-                              <CheckCircle className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          {auction.status === "Ativo" && (
-                            <button
-                              title="Pausar Leilão"
-                              className="p-1.5 rounded-sm hover:bg-yellow-100 text-yellow-600"
-                            >
-                              <Pause className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          {auction.status === "Pausado" && (
-                            <button
-                              title="Retomar Leilão"
-                              className="p-1.5 rounded-sm hover:bg-green-100 text-green-600"
-                            >
-                              <Play className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          <button
-                            title="Editar Leilão"
-                            className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-700"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            title="Cancelar Leilão"
-                            className="p-1.5 rounded-sm hover:bg-red-100 text-red-600"
-                          >
-                            <Ban className="w-3.5 h-3.5" />
-                          </button>
-
-                          {auction.isFraudulent && (
-                            <button
-                              title="Remover Fraudulento"
-                              className="p-1.5 rounded-sm bg-red-600 text-white hover:bg-red-700 shadow-sm"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {/* PAGINATION */}
+        <div className="flex items-center justify-between p-3">
+          <div className="text-xs text-gray-500">
+            Mostrando 1–10 de {filteredAuctions.length}
           </div>
 
-          {/* PAGINATION */}
-          <div className="flex items-center justify-between p-3">
-            <div className="text-xs text-gray-500">
-              Mostrando 1–10 de {filteredAuctions.length}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
-                <ChevronLeft className="w-3 h-3" />
-              </button>
-              <button className="px-2.5 py-1 bg-blue-600 text-white rounded-sm text-xs font-medium">
-                1
-              </button>
-              <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
+              <ChevronLeft className="w-3 h-3" />
+            </button>
+            <button className="px-2.5 py-1 bg-blue-600 text-white rounded-sm text-xs font-medium">
+              1
+            </button>
+            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
+              <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
@@ -402,6 +397,6 @@ export default function Auctions() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

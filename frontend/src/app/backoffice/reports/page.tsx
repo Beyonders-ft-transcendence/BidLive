@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "@/components/layout/backoffice/Header";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import { reportStatusColor, reportSeverityColor, ReportType, ReportStatus, ReportSeverity } from "@/utils/report";
@@ -116,147 +115,143 @@ export default function Reports() {
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 min-h-screen">
-      <Header />
+    <>
+      <ActionCard
+        title="Sistema de Denúncias"
+        buttonLabel="Ver Regras da Plataforma"
+        buttonVariant="outline"
+      />
 
-      <div className="max-w-7xl mx-auto w-full px-4 py-6">
-        <ActionCard
-          title="Sistema de Denúncias"
-          buttonLabel="Ver Regras da Plataforma"
-          buttonVariant="outline"
+      {/* TABLE */}
+      <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
+        {/* SEARCH & FILTERS */}
+        <TableFilters
+          search={search}
+          onSearchChange={setSearch}
+          showFilters={showFilters}
+          onShowFiltersChange={setShowFilters}
+          filters={{
+            type: typeFilter,
+            status: statusFilter,
+          }}
+          onFilterChange={(filterName, value) => {
+            if (filterName === "type") setTypeFilter(value);
+            if (filterName === "status") setStatusFilter(value);
+          }}
+          onClearFilters={() => {
+            setSearch("");
+            setTypeFilter("");
+            setStatusFilter("");
+          }}
+          filterOptions={{
+            typeOptions: [
+              { value: "", label: "Todos os Tipos" },
+              { value: "Leilão", label: "Leilões" },
+              { value: "Usuário", label: "Usuários" },
+              { value: "Mensagem", label: "Mensagens" },
+            ],
+            statusOptions: [
+              { value: "", label: "Todos os Status" },
+              { value: "Pendente", label: "Pendentes" },
+              { value: "Em Análise", label: "Em Análise" },
+              { value: "Resolvido", label: "Resolvidos" },
+              { value: "Arquivado", label: "Arquivados" },
+            ],
+          }}
         />
 
-        {/* TABLE */}
-        <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
-          {/* SEARCH & FILTERS */}
-          <TableFilters
-            search={search}
-            onSearchChange={setSearch}
-            showFilters={showFilters}
-            onShowFiltersChange={setShowFilters}
-            filters={{
-              type: typeFilter,
-              status: statusFilter,
-            }}
-            onFilterChange={(filterName, value) => {
-              if (filterName === "type") setTypeFilter(value);
-              if (filterName === "status") setStatusFilter(value);
-            }}
-            onClearFilters={() => {
-              setSearch("");
-              setTypeFilter("");
-              setStatusFilter("");
-            }}
-            filterOptions={{
-              typeOptions: [
-                { value: "", label: "Todos os Tipos" },
-                { value: "Leilão", label: "Leilões" },
-                { value: "Usuário", label: "Usuários" },
-                { value: "Mensagem", label: "Mensagens" },
-              ],
-              statusOptions: [
-                { value: "", label: "Todos os Status" },
-                { value: "Pendente", label: "Pendentes" },
-                { value: "Em Análise", label: "Em Análise" },
-                { value: "Resolvido", label: "Resolvidos" },
-                { value: "Arquivado", label: "Arquivados" },
-              ],
-            }}
-          />
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-300">
+            <thead className="bg-gray-50 text-left">
+              <tr className="text-xs text-gray-600 border-b border-gray-200">
+                <th className="p-3">Tipo</th>
+                <th className="text-xs">Alvo da Denúncia</th>
+                <th className="text-xs">Denunciante</th>
+                <th className="text-xs">Motivo</th>
+                <th className="text-xs">Gravidade</th>
+                <th className="text-xs">Status</th>
+                <th className="text-xs">Data</th>
+                <th className="text-xs">Ações</th>
+              </tr>
+            </thead>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-300">
-              <thead className="bg-gray-50 text-left">
-                <tr className="text-xs text-gray-600 border-b border-gray-200">
-                  <th className="p-3">Tipo</th>
-                  <th className="text-xs">Alvo da Denúncia</th>
-                  <th className="text-xs">Denunciante</th>
-                  <th className="text-xs">Motivo</th>
-                  <th className="text-xs">Gravidade</th>
-                  <th className="text-xs">Status</th>
-                  <th className="text-xs">Data</th>
-                  <th className="text-xs">Ações</th>
+            <tbody>
+              {filteredReports.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-6 text-center text-xs text-gray-500">
+                    Nenhuma denúncia encontrada
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                filteredReports.map((rep) => (
+                  <tr
+                    key={rep.id}
+                    className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
+                  >
+                    <td className="p-3">
+                      <div className="flex items-center gap-2 text-gray-500">
+                        {getTypeIcon(rep.type)}
+                        <span>{rep.type}</span>
+                      </div>
+                    </td>
 
-              <tbody>
-                {filteredReports.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-6 text-center text-xs text-gray-500">
-                      Nenhuma denúncia encontrada
+                    <td className="text-xs font-medium text-gray-900">{rep.targetName}</td>
+
+                    <td className="text-xs text-gray-600">{rep.reporterName}</td>
+
+                    <td className="text-xs text-red-600 font-medium">{rep.reason}</td>
+
+                    <td className="text-xs">
+                      <div className="flex items-center gap-1">
+                        <AlertTriangle className={`w-3 h-3 ${reportSeverityColor(rep.severity)}`} />
+                        <span className={reportSeverityColor(rep.severity)}>{rep.severity}</span>
+                      </div>
+                    </td>
+
+                    <td className="text-xs">
+                      <span
+                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${reportStatusColor(
+                          rep.status
+                        )}`}
+                      >
+                        {rep.status}
+                      </span>
+                    </td>
+
+                    <td className="text-xs text-gray-500">{rep.createdAt}</td>
+
+                    <td className="text-xs">
+                      <button
+                        onClick={() => setSelectedReport(rep)}
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-sm hover:bg-blue-100 transition font-medium"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Analisar
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  filteredReports.map((rep) => (
-                    <tr
-                      key={rep.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
-                    >
-                      <td className="p-3">
-                        <div className="flex items-center gap-2 text-gray-500">
-                          {getTypeIcon(rep.type)}
-                          <span>{rep.type}</span>
-                        </div>
-                      </td>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-                      <td className="text-xs font-medium text-gray-900">{rep.targetName}</td>
-
-                      <td className="text-xs text-gray-600">{rep.reporterName}</td>
-
-                      <td className="text-xs text-red-600 font-medium">{rep.reason}</td>
-
-                      <td className="text-xs">
-                        <div className="flex items-center gap-1">
-                          <AlertTriangle className={`w-3 h-3 ${reportSeverityColor(rep.severity)}`} />
-                          <span className={reportSeverityColor(rep.severity)}>{rep.severity}</span>
-                        </div>
-                      </td>
-
-                      <td className="text-xs">
-                        <span
-                          className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${reportStatusColor(
-                            rep.status
-                          )}`}
-                        >
-                          {rep.status}
-                        </span>
-                      </td>
-
-                      <td className="text-xs text-gray-500">{rep.createdAt}</td>
-
-                      <td className="text-xs">
-                        <button
-                          onClick={() => setSelectedReport(rep)}
-                          className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-sm hover:bg-blue-100 transition font-medium"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Analisar
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {/* PAGINATION */}
+        <div className="flex items-center justify-between p-3 border-t border-gray-100">
+          <div className="text-xs text-gray-500">
+            Mostrando 1–4 de {filteredReports.length}
           </div>
 
-          {/* PAGINATION */}
-          <div className="flex items-center justify-between p-3 border-t border-gray-100">
-            <div className="text-xs text-gray-500">
-              Mostrando 1–4 de {filteredReports.length}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50">
-                <ChevronLeft className="w-3 h-3" />
-              </button>
-              <button className="px-2.5 py-1 bg-blue-600 text-white rounded-sm text-xs font-medium shadow-sm">
-                1
-              </button>
-              <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50">
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50">
+              <ChevronLeft className="w-3 h-3" />
+            </button>
+            <button className="px-2.5 py-1 bg-blue-600 text-white rounded-sm text-xs font-medium shadow-sm">
+              1
+            </button>
+            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50">
+              <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
@@ -363,6 +358,7 @@ export default function Reports() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
+
