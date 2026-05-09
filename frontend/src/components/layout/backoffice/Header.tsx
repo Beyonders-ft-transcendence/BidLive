@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
     Search, Bell, Mail, ChevronDown,
     LayoutDashboard, Users, Settings,
-    Gavel, TrendingUp, AlertCircle
+    Gavel, TrendingUp, AlertCircle, Tag
 } from 'lucide-react';
 import icon from '@/assets/images/icon2.png';
 
@@ -17,10 +17,12 @@ export default function Header() {
         { name: 'Dashboard', href: '/backoffice/dashboard', icon: LayoutDashboard },
         { name: 'Usuários', href: '/backoffice/users', icon: Users },
         { name: 'Leilões', href: '/backoffice/auctions', icon: Gavel },
+        { name: 'Categorias', href: '/backoffice/categories', icon: Tag },
         { name: 'Lances', href: '/backoffice/bids', icon: TrendingUp },
         { name: 'Denúncias', href: '/backoffice/reports', icon: AlertCircle },
         { name: 'Configurações', href: '/backoffice/settings', icon: Settings },
     ]
+
 
     return (
         <header className="w-full bg-white shadow-sm">
