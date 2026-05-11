@@ -7,7 +7,7 @@ export default function Home() {
     <div className="bg-gray-50 flex-1">
       <Header />
 
-      <main  className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto">
         <HeroSection />
         <div className="grid grid-cols-3 " >
           <div>
