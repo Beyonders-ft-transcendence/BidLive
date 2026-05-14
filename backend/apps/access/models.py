@@ -39,9 +39,12 @@ class ApiKey(TimeStampedModel):
 class Session(TimeStampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sessions")
     token = models.TextField()
+    refresh_jti = models.CharField(max_length=64, blank=True, db_index=True)
     ip_address = models.CharField(max_length=45, blank=True)
     user_agent = models.TextField(blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "sessions"
