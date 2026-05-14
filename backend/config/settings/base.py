@@ -36,6 +36,14 @@ INSTALLED_APPS = [
     "django_filters",
     "core.users",
     "apps.projects",
+    "apps.auctions",
+    "apps.chat",
+    "apps.notifications",
+    "apps.storage",
+    "apps.analytics",
+    "apps.access",
+    "apps.reports",
+    "apps.social",
 ]
 
 MIDDLEWARE = [
