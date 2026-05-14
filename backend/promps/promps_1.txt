@@ -1,0 +1,342 @@
+Crie uma base backend profissional, escalável e pronta para produção usando Django + Django REST Framework, com gerenciamento de dependências e ambiente utilizando uv.
+
+Objetivo:
+Gerar uma arquitetura moderna de backend semelhante a projetos reais utilizados em produção, seguindo boas práticas de engenharia de software, organização modular, segurança, observabilidade e preparação para crescimento futuro.
+
+Stack principal:
+- Python 3.12+
+- Django
+- Django REST Framework
+- PostgreSQL
+- Redis
+- Celery
+- Docker
+- uv
+
+━━━━━━━━━━━━━━━━━━━━━━━
+REQUISITOS GERAIS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+O projeto deve:
+
+- Ser totalmente configurado usando uv
+- Utilizar pyproject.toml
+- Ter arquitetura limpa e modular
+- Ser preparado para múltiplos ambientes
+- Seguir boas práticas modernas de Django REST Framework
+- Ser facilmente escalável
+- Estar preparado para produção
+- Evitar estrutura simplificada demais
+- Parecer uma base real de startup/SaaS/plataforma enterprise
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ARQUITETURA DO PROJETO
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Criar uma estrutura organizada contendo:
+
+- apps/
+- core/
+- config/
+- api/
+- common/
+- infrastructure/
+- scripts/
+- tools/
+- tests/
+
+Separação clara entre:
+- regras de negócio
+- configurações
+- infraestrutura
+- API
+- utilitários
+- serviços compartilhados
+
+Usar arquitetura preparada para:
+- crescimento do domínio
+- múltiplos apps
+- versionamento de API
+- background jobs
+- cache
+- integração futura com microservices
+
+━━━━━━━━━━━━━━━━━━━━━━━
+DEPENDÊNCIAS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Instalar e configurar:
+
+- Django
+- djangorestframework
+- django-environ
+- psycopg[binary]
+- redis
+- celery
+- django-cors-headers
+- drf-spectacular
+- djangorestframework-simplejwt
+- gunicorn
+- uvicorn
+- whitenoise
+- django-filter
+
+Ferramentas de qualidade:
+- ruff
+- black
+- isort
+- pre-commit
+- pytest
+- pytest-django
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CONFIGURAÇÃO COM UV
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Mostrar:
+
+- comandos uv utilizados
+- criação do ambiente
+- instalação de dependências
+- sincronização do lockfile
+- execução do projeto
+- comandos úteis do uv
+
+Incluir:
+- pyproject.toml completo
+- uv.lock
+- configuração de scripts úteis
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CONFIGURAÇÃO DJANGO
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Implementar:
+
+- settings modularizados
+- configuração separada por ambiente:
+  - base.py
+  - development.py
+  - production.py
+- suporte a variáveis .env
+- timezone
+- internacionalização
+- logging básico
+- configuração estática
+- media files
+- CORS
+- DRF
+- JWT
+- paginação
+- throttling/rate limit
+- drf-spectacular
+- cache Redis
+- Celery + Celery Beat
+- healthcheck endpoint
+
+━━━━━━━━━━━━━━━━━━━━━━━
+BANCO DE DADOS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Usar:
+- PostgreSQL
+
+Configurar:
+- conexão via .env
+- pooling preparado
+- migrations
+- exemplo de model realista
+
+━━━━━━━━━━━━━━━━━━━━━━━
+REDIS + CELERY
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Configurar:
+
+- Redis como cache
+- Redis como broker do Celery
+- worker do Celery
+- tasks de exemplo
+- retry automático
+- organização de tasks
+
+━━━━━━━━━━━━━━━━━━━━━━━
+API REST
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Criar exemplo completo de CRUD profissional contendo:
+
+- Model
+- Manager
+- Service layer
+- Serializer
+- ViewSet
+- Permissions
+- Filters
+- Pagination
+- URLs
+- Versionamento (/api/v1/)
+- Tratamento global de exceções
+- Response padronizada
+
+Usar exemplo de entidade realista.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+SEGURANÇA
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Implementar:
+
+- JWT Authentication
+- Refresh tokens
+- Rate limiting
+- Configurações seguras do Django
+- Security headers
+- Variáveis sensíveis via .env
+- Configuração pronta para HTTPS reverso
+- Usuário customizado
+- Permissões por role
+
+━━━━━━━━━━━━━━━━━━━━━━━
+QUALIDADE DE CÓDIGO
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Configurar:
+
+- Ruff
+- Black
+- isort
+- pre-commit
+- pytest
+- coverage
+
+Incluir:
+- hooks pre-commit
+- lint scripts
+- scripts de formatação
+- organização de imports
+- tipagem básica
+
+━━━━━━━━━━━━━━━━━━━━━━━
+DOCKER
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Criar:
+
+- Dockerfile otimizado usando Alpine
+- docker-compose.yml
+- volumes
+- healthchecks
+- entrypoint.sh
+- suporte a hot reload
+- ambiente de desenvolvimento
+
+Serviços:
+- backend
+- postgres
+- redis
+- celery_worker
+- celery_beat
+
+Usar uv dentro do container.
+
+Basear o Dockerfile aproximadamente nesta ideia, mas modernizando e adaptando para uv:
+
+```dockerfile
+FROM alpine:3.22
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    build-base \
+    netcat-openbsd \
+    postgresql-dev \
+    libffi-dev \
+    jpeg-dev \
+    zlib-dev
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+
+# instalar uv
+RUN pip install uv
+
+# instalar dependências
+RUN uv sync --frozen
+
+COPY . .
+
+COPY ./tools/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+EXPOSE 8000
+
+ENTRYPOINT ["/entrypoint.sh"]
+```
+
+O entrypoint.sh deve:
+- esperar PostgreSQL iniciar
+- executar migrations
+- executar collectstatic
+- iniciar aplicação
+- ser robusto e organizado
+
+━━━━━━━━━━━━━━━━━━━━━━━
+DEVOPS
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Adicionar:
+- Makefile
+- scripts utilitários
+- comandos de desenvolvimento
+- logs básicos
+- healthchecks
+- readiness checks
+
+━━━━━━━━━━━━━━━━━━━━━━━
+DOCUMENTAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Gerar:
+- README.md profissional
+- instruções completas
+- comandos principais
+- como iniciar o projeto
+- como criar apps
+- como rodar migrations
+- como executar Celery
+- como rodar testes
+- como acessar documentação Swagger/OpenAPI
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUTURA DA RESPOSTA
+━━━━━━━━━━━━━━━━━━━━━━━
+
+A resposta deve:
+1. Mostrar a árvore completa de diretórios
+2. Mostrar os principais arquivos com conteúdo completo
+3. Explicar cada parte importante
+4. Explicar decisões arquiteturais
+5. Explicar todos os comandos uv utilizados
+6. Explicar fluxo Docker
+7. Explicar como subir o projeto localmente
+8. Explicar como preparar para produção
+
+Evite:
+- código excessivamente simplificado
+- exemplos genéricos demais
+- estrutura monolítica desorganizada
+- configurações inseguras
+
+Use:
+- boas práticas modernas de backend
+- padrões profissionais
+- organização semelhante a projetos enterprise
+- nomenclaturas consistentes
+- código limpo e bem separado

@@ -1,0 +1,13 @@
+from celery import shared_task
+
+from apps.projects.models import Project
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
+def notify_project_created(self, project_id: int) -> None:
+    Project.objects.filter(id=project_id).update(status="active")
+
+
+@shared_task
+def sample_heartbeat() -> str:
+    return "ok"

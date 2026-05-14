@@ -1,26 +1,91 @@
 # BidLive Backend
 
-Base do backend em FastAPI usando `uv` e uma organização MVC simples.
+Production-ready Django REST foundation with modular architecture, Celery, Redis, and PostgreSQL.
 
-## Estrutura
+## Stack
 
-- `src/routes/`: camada HTTP
-- `src/controllers/`: orquestração e regras de negócio
-- `src/services/`: lógica de domínio e acesso a dados
-- `src/database/`: `SQLAlchemy` e modelos
-- `migration/`: migrações do Alembic
-- `test/`: testes automatizados
+- Python 3.12+
+- Django + Django REST Framework
+- PostgreSQL, Redis, Celery
+- JWT auth, OpenAPI, CORS
+- Docker + uv
 
-## Como rodar
+## Project Layout
+
+- config: settings, ASGI/WSGI, URLs, Celery
+- core: shared domain modules (users, auth)
+- apps: business domains (projects)
+- api: HTTP layer and versioned routes
+- common: shared utilities, responses, permissions
+- infrastructure: external integrations
+- tools: ops utilities (entrypoint, gunicorn config)
+- scripts: local automation
+- tests: pytest suites
+
+## Quickstart (local)
+
+1) Create env file
+
+```bash
+cp .env.example .env
+```
+
+2) Create environment and install deps
+
+```bash
+uv venv
+uv sync
+```
+
+3) Run migrations and start server
+
+```bash
+uv run python manage.py migrate
+uv run python manage.py runserver
+```
+
+Open http://localhost:8000/api/v1/health/
+
+## Docker (dev)
+
+```bash
+docker compose up --build
+```
+
+## Main commands (uv)
 
 ```bash
 uv sync
-uv run uvicorn src.app:app --reload
+uv run python manage.py makemigrations
+uv run python manage.py migrate
+uv run python manage.py runserver 0.0.0.0:8000
+uv run pytest -q
+uv run celery -A config worker -l info
+uv run celery -A config beat -l info
 ```
 
-## Migrações
+## API docs
+
+- OpenAPI schema: /api/schema/
+- Swagger UI: /api/docs/
+
+## Creating apps
 
 ```bash
-uv run alembic revision --autogenerate -m "initial"
-uv run alembic upgrade head
+uv run python manage.py startapp billing apps/billing
+```
+
+Add the app to INSTALLED_APPS and create URLs, serializers, and services.
+
+## Production notes
+
+- Set DJANGO_ENV=production and DJANGO_SETTINGS_MODULE=config.settings.production
+- Ensure SECRET_KEY and ALLOWED_HOSTS are set via environment
+- Use a reverse proxy for TLS termination
+- Run with gunicorn and uvicorn workers
+
+Example production command:
+
+```bash
+gunicorn config.wsgi:application -c tools/gunicorn.conf.py
 ```

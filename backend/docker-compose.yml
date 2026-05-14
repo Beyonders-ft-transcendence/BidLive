@@ -1,0 +1,88 @@
+services:
+  backend:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DJANGO_ENV: development
+      DJANGO_SETTINGS_MODULE: config.settings.development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - static_data:/app/staticfiles
+      - media_data:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: python manage.py runserver 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/v1/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  celery_worker:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DJANGO_ENV: development
+      DJANGO_SETTINGS_MODULE: config.settings.development
+    volumes:
+      - ./:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker -l info
+
+  celery_beat:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DJANGO_ENV: development
+      DJANGO_SETTINGS_MODULE: config.settings.development
+    volumes:
+      - ./:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config beat -l info
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: bidlive
+      POSTGRES_USER: bidlive
+      POSTGRES_PASSWORD: bidlive
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bidlive -d bidlive"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  static_data:
+  media_data:
