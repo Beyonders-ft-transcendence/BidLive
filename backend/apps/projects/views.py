@@ -16,7 +16,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at", "budget", "status"]
 
     def get_queryset(self):
-        return Project.objects.filter(owner=self.request.user).order_by("-created_at")
+        if getattr(self, "swagger_fake_view", False):
+            return Project.objects.none()
+        user = getattr(self.request, "user", None)
+        if not user or getattr(user, "is_anonymous", True):
+            return Project.objects.none()
+        return Project.objects.filter(owner=user).order_by("-created_at")
 
     def perform_create(self, serializer):
         project = create_project(owner=self.request.user, data=serializer.validated_data)
