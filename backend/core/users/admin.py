@@ -36,6 +36,9 @@ class UserAdmin(DjangoUserAdmin):
                     "is_verified",
                     "is_online",
                     "last_seen",
+                    "last_login_ip",
+                    "failed_login_attempts",
+                    "locked_until",
                 )
             },
         ),
