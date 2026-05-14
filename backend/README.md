@@ -1,6 +1,6 @@
 # BidLive Backend
 
-Production-ready Django REST foundation with modular architecture, Celery, Redis, and PostgreSQL.
+Base Django REST pronta para produção com arquitetura modular, Celery, Redis e PostgreSQL.
 
 ## Stack
 
@@ -12,32 +12,32 @@ Production-ready Django REST foundation with modular architecture, Celery, Redis
 
 ## Project Layout
 
-- config: settings, ASGI/WSGI, URLs, Celery
-- core: shared domain modules (users, auth)
-- apps: business domains (projects)
-- api: HTTP layer and versioned routes
-- common: shared utilities, responses, permissions
-- infrastructure: external integrations
-- tools: ops utilities (entrypoint, gunicorn config)
-- scripts: local automation
-- tests: pytest suites
+- config: configurações, ASGI/WSGI, URLs, Celery
+- core: módulos de domínio compartilhados (usuários, autenticação)
+- apps: domínios de negócios (projetos)
+- api: camada HTTP e rotas versionadas
+- common: utilitários compartilhados, respostas, permissões
+- infrastructure: integrações externas
+- tools: utilitários de operações (entrypoint, configuração do gunicorn)
+- scripts: automação local
+- tests: suítes de testes pytest
 
 ## Quickstart (local)
 
-1) Create env file
+1) Criar arquivo env
 
 ```bash
 cp .env.example .env
 ```
 
-2) Create environment and install deps
+2) Crie o ambiente virtual e instale as dependências.
 
 ```bash
 uv venv
 uv sync
 ```
 
-3) Run migrations and start server
+3) Execute as migrações e inicie o servidor.
 
 ```bash
 uv run python manage.py migrate
@@ -75,16 +75,16 @@ uv run celery -A config beat -l info
 uv run python manage.py startapp billing apps/billing
 ```
 
-Add the app to INSTALLED_APPS and create URLs, serializers, and services.
+Adicione o aplicativo à lista INSTALLED_APPS e crie URLs, serializadores e serviços.
 
 ## Production notes
 
-- Set DJANGO_ENV=production and DJANGO_SETTINGS_MODULE=config.settings.production
-- Ensure SECRET_KEY and ALLOWED_HOSTS are set via environment
-- Use a reverse proxy for TLS termination
-- Run with gunicorn and uvicorn workers
+- Defina DJANGO_ENV=production e DJANGO_SETTINGS_MODULE=config.settings.production
+- Certifique-se de que SECRET_KEY e ALLOWED_HOSTS estejam definidos por meio de variáveis ​​de ambiente
+- Use um proxy reverso para a terminação TLS
+- Execute com os workers gunicorn e uvicorn
 
-Example production command:
+Exemplo de comando de produção:
 
 ```bash
 gunicorn config.wsgi:application -c tools/gunicorn.conf.py
