@@ -16,4 +16,6 @@ class ApiKeyAdmin(admin.ModelAdmin):
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
-    list_display = ("user", "expires_at", "created_at")
+    list_display = ("user", "refresh_jti", "is_active", "expires_at", "revoked_at", "created_at")
+    list_filter = ("is_active",)
+    search_fields = ("user__email", "refresh_jti", "ip_address")
