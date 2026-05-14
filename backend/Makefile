@@ -1,11 +1,14 @@
 UV=uv
 
-.PHONY: uv-sync dev lint format test migrate makemigrations superuser worker beat
+.PHONY: uv-sync dev runserver lint format test migrate makemigrations superuser worker beat
 
 uv-sync:
 	$(UV) sync
 
 dev:
+	$(UV) run gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -c tools/gunicorn.conf.py
+
+runserver:
 	$(UV) run python manage.py runserver 0.0.0.0:8000
 
 lint:

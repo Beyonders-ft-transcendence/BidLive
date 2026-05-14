@@ -46,10 +46,32 @@ uv run python manage.py runserver
 
 Open http://localhost:8000/api/v1/health/
 
+Observações do ambiente local:
+
+- O backend usa `config.settings.development` quando roda via `runserver`/`uvicorn`, então o cache local não depende de Redis para abrir `/api/schema/` e `/api/docs/`.
+- PostgreSQL precisa estar disponível em `localhost:5432` ou no `DATABASE_URL` configurado no seu `.env`.
+- Redis só é necessário para tarefas assíncronas do Celery e integrações que dependem dele.
+
 ## Docker (dev)
 
 ```bash
 docker compose up --build
+```
+
+## Containers (sem Compose)
+
+```bash
+docker run -d --name redis \
+  -p 6379:6379 \
+  redis:7-alpine
+
+docker run -d --name postgres \
+  -p 5432:5432 \
+  -e POSTGRES_DB=bidlive \
+  -e POSTGRES_USER=bidlive \
+  -e POSTGRES_PASSWORD=bidlive \
+  -v postgres_data:/var/lib/postgresql/data \
+  postgres:16-alpine
 ```
 
 ## Main commands (uv)
@@ -66,8 +88,44 @@ uv run celery -A config beat -l info
 
 ## API docs
 
-- OpenAPI schema: /api/schema/
-- Swagger UI: /api/docs/
+- OpenAPI schema (raw JSON/YAML): /api/schema/
+- Redoc UI (not interactive docs): /api/redoc/
+- Swagger UI (interactive docs): /api/docs/
+
+Access (development local):
+
+- Execute o servidor de desenvolvimento:
+
+```bash
+# from backend/
+uv run python manage.py runserver
+```
+
+- Abra no seu navegador:
+
+  - OpenAPI schema: http://localhost:8000/api/schema/
+  - Redoc UI: http://localhost:8000/api/redoc/
+  - Swagger UI: http://localhost:8000/api/docs/
+
+Access (Docker / Compose):
+
+- Start containers:
+
+```bash
+docker compose up --build
+```
+
+Em seguida, abra `http://localhost:8000/api/docs/` (ou o host/porta mapeado pela sua configuração do Compose).
+
+Notes:
+
+- Se sua implantação usa um proxy reverso ou uma porta diferente, substitua `localhost:8000` pelo host e porta expostos externamente.
+- Se a interface do Swagger estiver protegida por autenticação em seu ambiente, faça login primeiro ou use um token de API, conforme necessário.
+- Para obter o esquema bruto programaticamente:
+
+```bash
+curl -s http://localhost:8000/api/schema/ | jq .
+```
 
 ## Creating apps
 
@@ -87,5 +145,5 @@ Adicione o aplicativo à lista INSTALLED_APPS e crie URLs, serializadores e serv
 Exemplo de comando de produção:
 
 ```bash
-gunicorn config.wsgi:application -c tools/gunicorn.conf.py
+gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -c tools/gunicorn.conf.py
 ```
