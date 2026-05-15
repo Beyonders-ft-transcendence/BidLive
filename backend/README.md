@@ -44,7 +44,7 @@ uv run python manage.py migrate
 uv run python manage.py runserver
 ```
 
-Open http://localhost:8000/api/v1/health/
+Open http://localhost:8000/api/health/
 
 Observações do ambiente local:
 

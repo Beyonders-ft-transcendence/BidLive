@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     "core.users",
-    "apps.projects",
+    "apps.domain",
     "apps.auctions",
     "apps.chat",
     "apps.notifications",
@@ -185,7 +185,7 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_BEAT_SCHEDULE = {
     "healthcheck-ping": {
-        "task": "apps.projects.tasks.sample_heartbeat",
+        "task": "apps.domain.tasks.sample_heartbeat",
         "schedule": 60.0,
     }
 }

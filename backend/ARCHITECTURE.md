@@ -31,9 +31,8 @@ backend/
 ### api/
 Camada de roteamento HTTP e versionamento da API.
 
-- `api/urls.py`: entrypoint principal `/api/`.
-- `api/v1/urls.py`: rotas versionadas (ex.: `/api/v1/`).
-- `api/v1/health.py`: endpoint de healthcheck.
+`api/urls.py`: entrypoint principal `/api/`.
+`api/health.py`: endpoint de healthcheck.
 
 ### apps/
 Cada app representa um dominio e segue uma estrutura padrao:
@@ -67,19 +66,18 @@ Codigo transversal e compartilhado:
 ### config/
 Configuracao do Django:
 
-- `settings/base.py`: configuracoes comuns (apps, middleware, DRF, cache, logging).
-- `settings/development.py`: overrides para dev local.
-- `settings/production.py`: overrides para prod.
+ `api/urls.py`: entrypoint principal `/api/`.
+ `api/health.py`: endpoint de healthcheck.
 - `asgi.py`: entrypoint ASGI.
 - `wsgi.py`: entrypoint WSGI.
 - `celery.py`: configuracao do Celery.
 - `urls.py`: inclui admin, api, schema e docs.
-
+ Endpoints: `api/` e `apps/<nome>/views.py`.
 ### core/
 Dominio central compartilhado (ex.: `core/users`). Normalmente concentra o modelo de usuario e autenticacao.
 
 ### infrastructure/
-Adaptadores e integracoes externas. Mantem dependencias externas desacopladas da regra de negocio.
+ Endpoints: `api/` e `apps/<nome>/views.py`.
 
 ### tests/
 Testes de unidade e integracao com pytest, fixtures em `tests/conftest.py`.
