@@ -9,7 +9,7 @@ def test_auth_register_and_login_flow():
     client = APIClient()
 
     register_response = client.post(
-        "/api/v1/auth/register/",
+        "/api/auth/register/",
         {
             "email": "new.user@example.com",
             "username": "new_user",
@@ -22,7 +22,7 @@ def test_auth_register_and_login_flow():
     assert register_response.data["success"] is True
 
     login_response = client.post(
-        "/api/v1/auth/login/",
+        "/api/auth/login/",
         {"email": "new.user@example.com", "password": "StrongPass123!"},
         format="json",
     )
@@ -46,14 +46,14 @@ def test_auth_me_includes_roles_permissions():
 
     client = APIClient()
     login_response = client.post(
-        "/api/v1/auth/login/",
+        "/api/auth/login/",
         {"email": "member@example.com", "password": "StrongPass123!"},
         format="json",
     )
     access_token = login_response.data["data"]["access_token"]
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
-    response = client.get("/api/v1/auth/me/")
+    response = client.get("/api/auth/me/")
     assert response.status_code == 200
     assert response.data["data"]["roles"]
 
@@ -68,7 +68,7 @@ def test_auth_logout_revokes_refresh_token():
     )
     client = APIClient()
     login_response = client.post(
-        "/api/v1/auth/login/",
+        "/api/auth/login/",
         {"email": "logout@example.com", "password": "StrongPass123!"},
         format="json",
     )
@@ -77,14 +77,14 @@ def test_auth_logout_revokes_refresh_token():
 
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     logout_response = client.post(
-        "/api/v1/auth/logout/",
+        "/api/auth/logout/",
         {"refresh_token": refresh_token},
         format="json",
     )
     assert logout_response.status_code == 200
 
     refresh_response = client.post(
-        "/api/v1/auth/refresh/",
+        "/api/auth/refresh/",
         {"refresh_token": refresh_token},
         format="json",
     )
