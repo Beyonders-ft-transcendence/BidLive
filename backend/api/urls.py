@@ -15,7 +15,7 @@ from core.users.views import (
 )
 
 router = DefaultRouter()
-router.register("projects", ProjectViewSet, basename="project")
+router.register("domain", ProjectViewSet, basename="domain")
 
 urlpatterns = [
     path("health/", health_check, name="health-check"),
