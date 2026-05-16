@@ -65,6 +65,22 @@ class AuthTokenDataSerializer(serializers.Serializer):
     user = AuthUserSerializer()
 
 
+class SwaggerOAuth2TokenRequestSerializer(serializers.Serializer):
+    grant_type = serializers.CharField(required=False, default="password")
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    scope = serializers.CharField(required=False, allow_blank=True)
+    client_id = serializers.CharField(required=False, allow_blank=True)
+    client_secret = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+
+class SwaggerOAuth2TokenResponseSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    token_type = serializers.CharField()
+    expires_in = serializers.IntegerField()
+    refresh_token = serializers.CharField()
+
+
 class RegisterResponseSerializer(serializers.Serializer):
     success = serializers.BooleanField(default=True)
     message = serializers.CharField()
