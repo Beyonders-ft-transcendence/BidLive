@@ -1,4 +1,7 @@
 import pytest
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from rest_framework.test import APIClient
 
 from core.users.models import Permission, Role, RolePermission, User, UserRole
@@ -89,3 +92,99 @@ def test_auth_logout_revokes_refresh_token():
         format="json",
     )
     assert refresh_response.status_code >= 400
+
+
+@pytest.mark.django_db
+def test_auth_refresh_rotates_refresh_token(user):
+    client = APIClient()
+    login_response = client.post(
+        "/api/auth/login/",
+        {"email": user.email, "password": "pass"},
+        format="json",
+    )
+
+    response = client.post(
+        "/api/auth/refresh/",
+        {"refresh_token": login_response.data["data"]["refresh_token"]},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.data["success"] is True
+    assert response.data["data"]["access_token"]
+    assert response.data["data"]["refresh_token"]
+    assert response.data["data"]["refresh_token"] != login_response.data["data"]["refresh_token"]
+
+
+@pytest.mark.django_db
+def test_auth_me_requires_authentication(api_client):
+    response = api_client.get("/api/auth/me/")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_auth_change_password_updates_credentials(user, auth_client):
+    response = auth_client.post(
+        "/api/auth/change-password/",
+        {"current_password": "pass", "new_password": "NewStrongPass123!"},
+        format="json",
+    )
+
+    user.refresh_from_db()
+    assert response.status_code == 200
+    assert user.check_password("NewStrongPass123!")
+
+
+@pytest.mark.django_db
+def test_auth_change_password_rejects_wrong_current_password(auth_client):
+    response = auth_client.post(
+        "/api/auth/change-password/",
+        {"current_password": "wrong-pass", "new_password": "NewStrongPass123!"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert response.data["success"] is False
+
+
+@pytest.mark.django_db
+def test_auth_forgot_password_always_returns_success(api_client, user):
+    response = api_client.post(
+        "/api/auth/forgot-password/",
+        {"email": user.email},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.data["success"] is True
+
+
+@pytest.mark.django_db
+def test_auth_reset_password_with_valid_token_updates_password(api_client, user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    response = api_client.post(
+        "/api/auth/reset-password/",
+        {"uid": uid, "token": token, "new_password": "ResetStrongPass123!"},
+        format="json",
+    )
+
+    user.refresh_from_db()
+    assert response.status_code == 200
+    assert user.check_password("ResetStrongPass123!")
+
+
+@pytest.mark.django_db
+def test_auth_reset_password_rejects_invalid_token(api_client, user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+    response = api_client.post(
+        "/api/auth/reset-password/",
+        {"uid": uid, "token": "invalid-token", "new_password": "ResetStrongPass123!"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert response.data["success"] is False
