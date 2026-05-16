@@ -48,6 +48,32 @@ def test_auth_routes_document_request_bodies_and_examples(api_client):
         assert operation["responses"]
 
 
+def test_schema_exposes_jwt_and_swagger_oauth2_security_schemes(api_client):
+    response = api_client.get("/api/schema/")
+    security_schemes = response.data["components"]["securitySchemes"]
+
+    assert security_schemes["jwtAuth"] == {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+    }
+    assert security_schemes["SwaggerOAuth2"] == {
+        "type": "oauth2",
+        "description": (
+            "Login JWT pelo Swagger UI. Use email ou username no campo Username. "
+            "O Swagger chama /api/auth/swagger-token/ e aplica o Bearer token automaticamente."
+        ),
+        "flows": {
+            "password": {
+                "tokenUrl": "/api/auth/swagger-token/",
+                "scopes": {},
+            }
+        },
+    }
+    assert {"jwtAuth": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
+    assert {"SwaggerOAuth2": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
+
+
 def test_swagger_ui_route_is_available(client):
     response = client.get("/api/docs/")
 

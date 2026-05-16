@@ -148,6 +148,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "BidLive public API",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+    },
 }
 
 JWT_ACCESS_MINUTES = env("JWT_ACCESS_MINUTES", default=15)

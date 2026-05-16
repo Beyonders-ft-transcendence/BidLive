@@ -1,8 +1,11 @@
+from django.contrib.auth import get_user_model
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import serializers as drf_serializers
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.responses import error_response, success_response
@@ -18,6 +21,8 @@ from core.users.serializers import (
     RegisterResponseSerializer,
     RegisterSerializer,
     ResetPasswordSerializer,
+    SwaggerOAuth2TokenRequestSerializer,
+    SwaggerOAuth2TokenResponseSerializer,
     UserMeResponseSerializer,
     UserSerializer,
 )
@@ -38,6 +43,20 @@ def _client_ip(request) -> str:
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR", "")
+
+
+def _email_from_username_or_email(identifier: str) -> str:
+    normalized_identifier = identifier.strip()
+    if "@" in normalized_identifier:
+        return get_user_model().objects.normalize_email(normalized_identifier)
+
+    user = (
+        get_user_model()
+        .objects.filter(username__iexact=normalized_identifier)
+        .only("email")
+        .first()
+    )
+    return user.email if user else normalized_identifier
 
 
 AUTH_ERROR_RESPONSE = inline_serializer(
@@ -265,6 +284,102 @@ class LoginView(APIView):
                 status_code=status.HTTP_403_FORBIDDEN,
             )
         return success_response(payload, message="Login realizado com sucesso.")
+
+
+class SwaggerOAuth2TokenView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthLoginThrottle]
+    renderer_classes = [JSONRenderer]
+    serializer_class = SwaggerOAuth2TokenRequestSerializer
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Login OAuth2 para Swagger",
+        description=(
+            "Endpoint usado pelo botao Authorize do Swagger UI. Recebe username/email "
+            "e password via form-urlencoded, valida pelo login real e retorna um token "
+            "Bearer em formato OAuth2."
+        ),
+        auth=[],
+        request=SwaggerOAuth2TokenRequestSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=SwaggerOAuth2TokenResponseSerializer,
+                description="Token OAuth2 gerado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Credenciais invalidas ou corpo da requisicao malformado.",
+            ),
+            403: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Conta desativada, suspensa, banida ou temporariamente bloqueada.",
+            ),
+            429: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Limite de tentativas de login excedido.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Requisicao OAuth2 password",
+                value={
+                    "grant_type": "password",
+                    "username": "user@email.com",
+                    "password": "StrongPassword123",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Resposta OAuth2",
+                value={
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "token_type": "Bearer",
+                    "expires_in": 900,
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = SwaggerOAuth2TokenRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            payload = authenticate_user(
+                email=_email_from_username_or_email(serializer.validated_data["username"]),
+                password=serializer.validated_data["password"],
+                ip_address=_client_ip(request),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            )
+        except ValidationError as exc:
+            return Response(
+                {
+                    "error": "invalid_grant",
+                    "error_description": exc.detail,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except PermissionDenied as exc:
+            return Response(
+                {
+                    "error": "access_denied",
+                    "error_description": exc.detail,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        return Response(
+            {
+                "access_token": payload["access_token"],
+                "token_type": payload["token_type"],
+                "expires_in": payload["expires_in"],
+                "refresh_token": payload["refresh_token"],
+            }
+        )
 
 
 class RefreshView(APIView):

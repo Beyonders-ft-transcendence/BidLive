@@ -35,6 +35,51 @@ def test_auth_register_and_login_flow():
 
 
 @pytest.mark.django_db
+def test_swagger_oauth2_token_endpoint_returns_flat_bearer_payload(user):
+    client = APIClient()
+
+    response = client.post(
+        "/api/auth/swagger-token/",
+        {"grant_type": "password", "username": user.email, "password": "pass"},
+        format="multipart",
+    )
+
+    assert response.status_code == 200
+    assert response.data["access_token"]
+    assert response.data["refresh_token"]
+    assert response.data["token_type"] == "Bearer"
+    assert "success" not in response.data
+
+
+@pytest.mark.django_db
+def test_swagger_oauth2_token_endpoint_accepts_username(user):
+    client = APIClient()
+
+    response = client.post(
+        "/api/auth/swagger-token/",
+        {"grant_type": "password", "username": user.username, "password": "pass"},
+        format="multipart",
+    )
+
+    assert response.status_code == 200
+    assert response.data["access_token"]
+
+
+@pytest.mark.django_db
+def test_swagger_oauth2_token_endpoint_rejects_invalid_credentials(user):
+    client = APIClient()
+
+    response = client.post(
+        "/api/auth/swagger-token/",
+        {"grant_type": "password", "username": user.email, "password": "wrong-pass"},
+        format="multipart",
+    )
+
+    assert response.status_code == 400
+    assert response.data["error"] == "invalid_grant"
+
+
+@pytest.mark.django_db
 def test_auth_me_includes_roles_permissions():
     user = User.objects.create_user(
         email="member@example.com",
@@ -63,7 +108,7 @@ def test_auth_me_includes_roles_permissions():
 
 @pytest.mark.django_db
 def test_auth_logout_revokes_refresh_token():
-    user = User.objects.create_user(
+    User.objects.create_user(
         email="logout@example.com",
         username="logout_user",
         full_name="Logout User",
