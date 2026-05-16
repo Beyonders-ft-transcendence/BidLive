@@ -12,6 +12,42 @@ def test_schema_route_returns_openapi_document(api_client):
     assert "/api/domain/" in response.data["paths"]
 
 
+def _request_schema_for(schema, path):
+    operation = schema["paths"][path]["post"]
+    content = operation["requestBody"]["content"]["application/json"]
+    request_schema = content["schema"]
+    if "$ref" in request_schema:
+        component_name = request_schema["$ref"].split("/")[-1]
+        request_schema = schema["components"]["schemas"][component_name]
+    return operation, content, request_schema
+
+
+def test_auth_routes_document_request_bodies_and_examples(api_client):
+    response = api_client.get("/api/schema/")
+    schema = response.data
+
+    expected_fields = {
+        "/api/auth/login/": {"email", "password"},
+        "/api/auth/register/": {"email", "username", "full_name", "password"},
+        "/api/auth/refresh/": {"refresh_token"},
+        "/api/auth/logout/": set(),
+        "/api/auth/change-password/": {"current_password", "new_password"},
+        "/api/auth/forgot-password/": {"email"},
+        "/api/auth/reset-password/": {"uid", "token", "new_password"},
+    }
+
+    for path, fields in expected_fields.items():
+        operation, content, request_schema = _request_schema_for(schema, path)
+
+        assert operation["tags"] == ["auth"]
+        assert "requestBody" in operation
+        assert "schema" in content
+        assert "examples" in content
+        assert fields.issubset(set(request_schema.get("properties", {})))
+        assert fields.issubset(set(request_schema.get("required", [])))
+        assert operation["responses"]
+
+
 def test_swagger_ui_route_is_available(client):
     response = client.get("/api/docs/")
 
