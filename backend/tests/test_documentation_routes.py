@@ -70,6 +70,7 @@ def test_schema_exposes_jwt_and_swagger_oauth2_security_schemes(api_client):
             }
         },
     }
+    assert "basicAuth" not in security_schemes
     assert {"jwtAuth": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
     assert {"SwaggerOAuth2": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
 
