@@ -53,6 +53,48 @@ class AuthUserSerializer(serializers.ModelSerializer):
         )
 
 
+class EmptyDataSerializer(serializers.Serializer):
+    pass
+
+
+class AuthTokenDataSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
+    token_type = serializers.CharField()
+    expires_in = serializers.IntegerField()
+    user = AuthUserSerializer()
+
+
+class RegisterResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    data = UserSerializer()
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    data = AuthTokenDataSerializer()
+
+
+class EmptySuccessResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    data = EmptyDataSerializer()
+
+
+class UserMeResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    data = UserSerializer()
+
+
+class ErrorResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=False)
+    message = serializers.CharField(required=False)
+    errors = serializers.ListField(child=serializers.DictField())
+
+
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     username = serializers.CharField(max_length=50)
