@@ -155,6 +155,27 @@ def authenticate_user(
         )
         raise ValidationError({"credentials": ["Email ou password invalidos."]})
 
+    return issue_auth_tokens_for_user(
+        user=user,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        event_type="auth.login_success",
+        reset_failed_attempts=True,
+    )
+
+
+@transaction.atomic
+def issue_auth_tokens_for_user(
+    *,
+    user: User,
+    ip_address: str = "",
+    user_agent: str = "",
+    event_type: str = "auth.login_success",
+    metadata: dict[str, Any] | None = None,
+    reset_failed_attempts: bool = False,
+) -> dict[str, Any]:
+    _ensure_user_can_authenticate(user=user)
+
     refresh = RefreshToken.for_user(user)
     payload = _build_auth_payload(user=user, refresh=refresh)
 
@@ -167,29 +188,28 @@ def authenticate_user(
         expires_at=timezone.now() + timedelta(seconds=_get_refresh_lifetime_seconds()),
     )
 
-    user.failed_login_attempts = 0
-    user.locked_until = None
+    update_fields = ["last_seen", "last_login_ip", "is_online", "updated_at"]
+    if reset_failed_attempts:
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        update_fields.extend(["failed_login_attempts", "locked_until"])
+
     user.last_seen = timezone.now()
     user.last_login_ip = ip_address
     user.is_online = True
-    user.save(
-        update_fields=[
-            "failed_login_attempts",
-            "locked_until",
-            "last_seen",
-            "last_login_ip",
-            "is_online",
-            "updated_at",
-        ]
-    )
+    user.save(update_fields=update_fields)
+
+    event_metadata = {"session_jti": str(refresh["jti"])}
+    if metadata:
+        event_metadata.update(metadata)
 
     AnalyticsEvent.objects.create(
         user=user,
-        event_type="auth.login_success",
-        metadata={"session_jti": str(refresh["jti"])},
+        event_type=event_type,
+        metadata=event_metadata,
         ip_address=ip_address,
     )
-    logger.info("User logged in", extra={"user_id": user.id, "ip_address": ip_address})
+    logger.info("User authenticated", extra={"user_id": user.id, "event_type": event_type})
     return payload
 
 
