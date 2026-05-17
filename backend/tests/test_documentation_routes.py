@@ -9,6 +9,8 @@ def test_schema_route_returns_openapi_document(api_client):
     assert response.status_code == 200
     assert response.data["openapi"]
     assert "/api/auth/login/" in response.data["paths"]
+    assert "/api/auth/google/" in response.data["paths"]
+    assert "/api/auth/google/callback/" in response.data["paths"]
     assert "/api/domain/" in response.data["paths"]
 
 

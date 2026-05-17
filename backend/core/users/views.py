@@ -20,6 +20,8 @@ from core.users.serializers import (
     RefreshSerializer,
     RegisterResponseSerializer,
     RegisterSerializer,
+    GoogleCallbackSerializer,
+    GoogleLoginSerializer,
     ResetPasswordSerializer,
     SwaggerOAuth2TokenRequestSerializer,
     SwaggerOAuth2TokenResponseSerializer,
@@ -34,6 +36,11 @@ from core.users.services import (
     refresh_user_tokens,
     request_password_reset,
     reset_user_password,
+)
+from core.users.oauth_service import (
+    authenticate_google_user,
+    authenticate_google_with_code,
+    authenticate_google_with_id_token,
 )
 from core.users.throttles import AuthLoginThrottle, AuthPasswordThrottle, AuthRegisterThrottle
 
@@ -677,6 +684,164 @@ class ResetPasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         reset_user_password(**serializer.validated_data)
         return success_response({}, message="Senha redefinida com sucesso.")
+
+
+class GoogleLoginView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthLoginThrottle]
+    serializer_class = GoogleLoginSerializer
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Login com Google (access_token ou id_token)",
+        description=(
+            "Recebe o access_token ou id_token obtido pelo frontend apos autenticacao no Google, "
+            "valida com a API Google, cria ou associa a conta e retorna JWT da plataforma."
+        ),
+        auth=[],
+        request=GoogleLoginSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=LoginResponseSerializer,
+                description="Login Google realizado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Token Google invalido ou perfil incompleto.",
+            ),
+            403: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Conta indisponivel ou ja vinculada a outro usuario.",
+            ),
+            429: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Limite de tentativas excedido.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Login com access_token",
+                value={"access_token": "ya29.a0AfH6SMBx..."},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Resposta de sucesso",
+                value={
+                    "success": True,
+                    "message": "Login realizado com sucesso.",
+                    "data": {
+                        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "token_type": "Bearer",
+                        "expires_in": 900,
+                        "user": {
+                            "id": 1,
+                            "email": "user@gmail.com",
+                            "username": "john_doe",
+                            "avatar_url": "https://lh3.googleusercontent.com/...",
+                            "is_verified": True,
+                            "roles": ["USER"],
+                            "permissions": ["auction.read", "auction.bid"],
+                        },
+                    },
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = GoogleLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            if serializer.validated_data.get("access_token"):
+                payload = authenticate_google_user(
+                    access_token=serializer.validated_data["access_token"],
+                    ip_address=_client_ip(request),
+                    user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                )
+            else:
+                payload = authenticate_google_with_id_token(
+                    id_token=serializer.validated_data["id_token"],
+                    ip_address=_client_ip(request),
+                    user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                )
+        except ValidationError as exc:
+            return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
+        except PermissionDenied as exc:
+            return error_response(
+                exc.detail,
+                message="Conta indisponivel para login.",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        return success_response(payload, message="Login realizado com sucesso.")
+
+
+class GoogleCallbackView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthLoginThrottle]
+    serializer_class = GoogleCallbackSerializer
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Callback Google OAuth2 (authorization code)",
+        description=(
+            "Troca o authorization code do Google por access_token e emite JWT da plataforma. "
+            "Use quando o frontend concluir o fluxo redirect do Google."
+        ),
+        auth=[],
+        request=GoogleCallbackSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=LoginResponseSerializer,
+                description="Login Google realizado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Codigo invalido ou OAuth nao configurado.",
+            ),
+            403: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Conta indisponivel.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Callback com code",
+                value={
+                    "code": "4/0AeanS...",
+                    "redirect_uri": "http://localhost:3000/auth/google/callback",
+                },
+                request_only=True,
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = GoogleCallbackSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        redirect_uri = serializer.validated_data.get("redirect_uri") or None
+        try:
+            payload = authenticate_google_with_code(
+                code=serializer.validated_data["code"],
+                redirect_uri=redirect_uri,
+                ip_address=_client_ip(request),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            )
+        except ValidationError as exc:
+            return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
+        except PermissionDenied as exc:
+            return error_response(
+                exc.detail,
+                message="Conta indisponivel para login.",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        return success_response(payload, message="Login realizado com sucesso.")
 
 
 class AdminProtectedView(APIView):

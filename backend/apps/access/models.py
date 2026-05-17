@@ -21,6 +21,16 @@ class OAuthAccount(TimeStampedModel):
         verbose_name = "OAuth Account"
         verbose_name_plural = "OAuth Accounts"
         ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "provider_user_id"],
+                name="uniq_oauth_provider_user",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "provider"],
+                name="uniq_oauth_user_provider",
+            ),
+        ]
 
 
 class ApiKey(TimeStampedModel):

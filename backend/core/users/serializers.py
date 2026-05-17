@@ -144,3 +144,20 @@ class ResetPasswordSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+    access_token = serializers.CharField(required=False)
+    id_token = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        if not attrs.get("access_token") and not attrs.get("id_token"):
+            raise serializers.ValidationError(
+                "Informe access_token ou id_token retornado pelo Google."
+            )
+        return attrs
+
+
+class GoogleCallbackSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    redirect_uri = serializers.CharField(required=False, allow_blank=True)
