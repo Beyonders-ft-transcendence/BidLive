@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from api.health import health_check
@@ -36,3 +36,6 @@ urlpatterns = [
 ]
 
 urlpatterns += router.urls
+urlpatterns += [
+    path("", include("core.users.api.urls")),
+]
