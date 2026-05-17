@@ -11,6 +11,9 @@ def test_schema_route_returns_openapi_document(api_client):
     assert "/api/auth/login/" in response.data["paths"]
     assert "/api/auth/google/" in response.data["paths"]
     assert "/api/auth/google/callback/" in response.data["paths"]
+    assert "/api/users/" in response.data["paths"]
+    assert "/api/roles/" in response.data["paths"]
+    assert "/api/permissions/" in response.data["paths"]
     assert "/api/domain/" in response.data["paths"]
 
 
