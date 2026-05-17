@@ -4,6 +4,9 @@ from django.contrib.auth.base_user import BaseUserManager
 
 
 class UserManager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
     def create_user(self, email: str, password: str | None = None, **extra_fields: Any):
         if not email:
             raise ValueError("Email is required")

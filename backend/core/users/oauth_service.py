@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 from apps.access.models import OAuthAccount, OAuthProvider
 from core.users.models import Role, User, UserRole
 from core.users.selectors import invalidate_user_permissions_cache
+from core.users.constants import DEFAULT_SIGNUP_ROLE
 from core.users.services import assign_role, issue_auth_tokens_for_user
 
 logger = logging.getLogger(__name__)
@@ -123,13 +124,13 @@ def _get_or_create_user_for_google(*, profile: dict[str, Any]) -> User:
             is_verified=True,
         )
         default_role, _ = Role.objects.get_or_create(
-            name="USER",
-            defaults={"description": "Default role"},
+            name=DEFAULT_SIGNUP_ROLE,
+            defaults={"description": "Default signup role"},
         )
         UserRole.objects.get_or_create(user=user, role=default_role)
         invalidate_user_permissions_cache(user=user)
     else:
-        assign_role(user=user, role_name="USER")
+        assign_role(user=user, role_name=DEFAULT_SIGNUP_ROLE)
 
     return user
 
