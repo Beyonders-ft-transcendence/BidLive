@@ -1,7 +1,7 @@
 from django.core.cache import cache
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 
-from core.users.models import User, UserStatus
+from core.users.models import Permission, Role, User, UserStatus
 
 PERMISSIONS_CACHE_TTL = 300
 
@@ -40,3 +40,32 @@ def get_user_permissions(*, user: User, use_cache: bool = True) -> list[str]:
 
 def invalidate_user_permissions_cache(*, user: User) -> None:
     cache.delete(f"user:{user.id}:permissions")
+
+
+def list_users(*, include_deleted: bool = False) -> QuerySet[User]:
+    queryset = User.objects.all()
+    if not include_deleted:
+        queryset = queryset.filter(is_deleted=False)
+    return queryset.select_related().prefetch_related(
+        Prefetch("roles", queryset=Role.objects.order_by("name"))
+    ).order_by("-created_at")
+
+
+def get_user_by_id(*, user_id: int) -> User:
+    return User.objects.prefetch_related("roles").get(pk=user_id)
+
+
+def list_roles() -> QuerySet[Role]:
+    return Role.objects.prefetch_related("rolepermission_set__permission").order_by("name")
+
+
+def get_role_by_id(*, role_id: int) -> Role:
+    return Role.objects.prefetch_related("rolepermission_set__permission").get(pk=role_id)
+
+
+def list_permissions() -> QuerySet[Permission]:
+    return Permission.objects.prefetch_related("rolepermission_set__role").order_by("name")
+
+
+def get_permission_by_id(*, permission_id: int) -> Permission:
+    return Permission.objects.prefetch_related("rolepermission_set__role").get(pk=permission_id)
