@@ -87,7 +87,7 @@ def test_auth_me_includes_roles_permissions():
         full_name="Member User",
         password="StrongPass123!",
     )
-    role, _ = Role.objects.get_or_create(name="USER")
+    role, _ = Role.objects.get_or_create(name="PERSONAL_USER")
     permission, _ = Permission.objects.get_or_create(name="auction.bid")
     RolePermission.objects.get_or_create(role=role, permission=permission)
     UserRole.objects.get_or_create(user=user, role=role)
