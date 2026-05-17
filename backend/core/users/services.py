@@ -19,6 +19,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.access.models import Session
 from apps.analytics.models import AnalyticsEvent
+from core.users.constants import DEFAULT_SIGNUP_ROLE
 from core.users.models import Role, User, UserRole, UserStatus
 from core.users.selectors import (
     get_user_permissions,
@@ -46,6 +47,7 @@ def _token_hash(raw_token: str) -> str:
 
 def _build_claims(*, user: User) -> dict[str, Any]:
     return {
+        "user_id": user.id,
         "email": user.email,
         "username": user.username,
         "roles": get_user_roles(user=user),
@@ -110,8 +112,8 @@ def create_user(
         **extra_fields,
     )
     default_role, _ = Role.objects.get_or_create(
-        name="USER",
-        defaults={"description": "Default role"},
+        name=DEFAULT_SIGNUP_ROLE,
+        defaults={"description": "Default signup role"},
     )
     UserRole.objects.get_or_create(user=user, role=default_role)
     invalidate_user_permissions_cache(user=user)
