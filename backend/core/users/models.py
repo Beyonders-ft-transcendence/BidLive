@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
-from common.models import TimeStampedModel
+from common.models import SoftDeleteModel, TimeStampedModel
 from core.users.managers import UserManager
 
 
@@ -11,7 +11,7 @@ class UserStatus(models.TextChoices):
     SUSPENDED = "SUSPENDED", "Suspended"
 
 
-class User(TimeStampedModel, AbstractBaseUser, PermissionsMixin):
+class User(TimeStampedModel, SoftDeleteModel, AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True)
     full_name = models.CharField(max_length=150)
@@ -108,3 +108,35 @@ class UserRole(TimeStampedModel):
         verbose_name = "User Role"
         verbose_name_plural = "User Roles"
         constraints = [models.UniqueConstraint(fields=["user", "role"], name="uniq_user_role")]
+
+
+class PermissionAuditLog(TimeStampedModel):
+    actor = models.ForeignKey(
+        "User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="permission_audit_actions",
+    )
+    target_user = models.ForeignKey(
+        "User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="permission_audit_targets",
+    )
+    action = models.CharField(max_length=100)
+    resource_type = models.CharField(max_length=50, blank=True)
+    resource_id = models.CharField(max_length=64, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    ip_address = models.CharField(max_length=45, blank=True)
+
+    class Meta:
+        db_table = "permission_audit_logs"
+        verbose_name = "Permission Audit Log"
+        verbose_name_plural = "Permission Audit Logs"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["action"], name="idx_perm_audit_action"),
+            models.Index(fields=["resource_type"], name="idx_perm_audit_resource"),
+        ]
