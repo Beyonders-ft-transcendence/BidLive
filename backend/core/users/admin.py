@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from core.users.models import Permission, Role, RolePermission, User, UserRole
+from core.users.models import Permission, PermissionAuditLog, Role, RolePermission, User, UserRole
 
 
 class UserRoleInline(admin.TabularInline):
@@ -68,3 +68,11 @@ class RoleAdmin(admin.ModelAdmin):
 class PermissionAdmin(admin.ModelAdmin):
     list_display = ("name", "created_at")
     search_fields = ("name",)
+
+
+@admin.register(PermissionAuditLog)
+class PermissionAuditLogAdmin(admin.ModelAdmin):
+    list_display = ("action", "actor", "target_user", "resource_type", "resource_id", "created_at")
+    list_filter = ("action", "resource_type")
+    search_fields = ("action", "resource_id", "actor__email", "target_user__email")
+    readonly_fields = ("created_at", "updated_at")
