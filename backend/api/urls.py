@@ -5,6 +5,8 @@ from api.health import health_check
 from apps.domain.views import ProjectViewSet
 from core.users.views import (
     ChangePasswordView,
+    FortyTwoAuthorizeView,
+    FortyTwoCallbackView,
     ForgotPasswordView,
     GoogleCallbackView,
     GoogleLoginView,
@@ -33,6 +35,8 @@ urlpatterns = [
     path("auth/reset-password/", ResetPasswordView.as_view(), name="auth-reset-password"),
     path("auth/google/", GoogleLoginView.as_view(), name="auth-google"),
     path("auth/google/callback/", GoogleCallbackView.as_view(), name="auth-google-callback"),
+    path("auth/42/", FortyTwoAuthorizeView.as_view(), name="auth-42"),
+    path("auth/42/callback/", FortyTwoCallbackView.as_view(), name="auth-42-callback"),
 ]
 
 urlpatterns += router.urls

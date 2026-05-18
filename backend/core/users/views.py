@@ -13,15 +13,17 @@ from core.users.permissions import HasRBACPermission
 from core.users.serializers import (
     ChangePasswordSerializer,
     EmptySuccessResponseSerializer,
+    FortyTwoAuthorizeResponseSerializer,
+    FortyTwoCallbackSerializer,
     ForgotPasswordSerializer,
+    GoogleCallbackSerializer,
+    GoogleLoginSerializer,
     LoginResponseSerializer,
     LoginSerializer,
     LogoutSerializer,
     RefreshSerializer,
     RegisterResponseSerializer,
     RegisterSerializer,
-    GoogleCallbackSerializer,
-    GoogleLoginSerializer,
     ResetPasswordSerializer,
     SwaggerOAuth2TokenRequestSerializer,
     SwaggerOAuth2TokenResponseSerializer,
@@ -38,9 +40,11 @@ from core.users.services import (
     reset_user_password,
 )
 from core.users.oauth_service import (
+    authenticate_42_with_code,
     authenticate_google_user,
     authenticate_google_with_code,
     authenticate_google_with_id_token,
+    build_42_authorization_url,
 )
 from core.users.throttles import AuthLoginThrottle, AuthPasswordThrottle, AuthRegisterThrottle
 
@@ -829,6 +833,121 @@ class GoogleCallbackView(APIView):
             payload = authenticate_google_with_code(
                 code=serializer.validated_data["code"],
                 redirect_uri=redirect_uri,
+                ip_address=_client_ip(request),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            )
+        except ValidationError as exc:
+            return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
+        except PermissionDenied as exc:
+            return error_response(
+                exc.detail,
+                message="Conta indisponivel para login.",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+
+        return success_response(payload, message="Login realizado com sucesso.")
+
+
+class FortyTwoAuthorizeView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthLoginThrottle]
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Iniciar OAuth42",
+        description=(
+            "Gera a URL de autorizacao da 42 com `state` seguro para o frontend iniciar o fluxo OAuth."
+        ),
+        auth=[],
+        responses={
+            200: OpenApiResponse(
+                response=FortyTwoAuthorizeResponseSerializer,
+                description="URL de autorizacao gerada com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="OAuth42 nao configurado no servidor.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Resposta com URL OAuth42",
+                value={
+                    "success": True,
+                    "message": "URL de autorizacao gerada com sucesso.",
+                    "data": {
+                        "authorization_url": "https://api.intra.42.fr/oauth/authorize?client_id=app-id&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&scope=public&state=abc123",
+                        "state": "abc123",
+                        "expires_in": 600,
+                    },
+                },
+                response_only=True,
+                status_codes=["200"],
+            )
+        ],
+    )
+    def get(self, request):
+        try:
+            payload = build_42_authorization_url()
+        except ValidationError as exc:
+            return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
+        return success_response(payload, message="URL de autorizacao gerada com sucesso.")
+
+
+class FortyTwoCallbackView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthLoginThrottle]
+    serializer_class = FortyTwoCallbackSerializer
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Callback OAuth42",
+        description=(
+            "Recebe `code` e `state` da 42, valida o estado iniciado anteriormente e retorna JWT da plataforma."
+        ),
+        auth=[],
+        request=FortyTwoCallbackSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=LoginResponseSerializer,
+                description="Login 42 realizado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="State invalido, codigo invalido ou OAuth42 nao configurado.",
+            ),
+            403: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Conta indisponivel ou conflito de vinculacao.",
+            ),
+            429: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Limite de tentativas excedido.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Callback 42",
+                value={
+                    "code": "authorization-code-42",
+                    "state": "secure-random-state",
+                    "redirect_uri": "http://localhost:3000/auth/42/callback",
+                },
+                request_only=True,
+            )
+        ],
+    )
+    def post(self, request):
+        serializer = FortyTwoCallbackSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            payload = authenticate_42_with_code(
+                code=serializer.validated_data["code"],
+                state=serializer.validated_data["state"],
+                redirect_uri=serializer.validated_data.get("redirect_uri") or None,
                 ip_address=_client_ip(request),
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
             )

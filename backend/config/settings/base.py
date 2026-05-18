@@ -147,6 +147,13 @@ GOOGLE_CALLBACK_URL = env(
     "GOOGLE_CALLBACK_URL",
     default="http://localhost:3000/auth/google/callback",
 )
+FORTY_TWO_CLIENT_ID = env("FORTY_TWO_CLIENT_ID", default="")
+FORTY_TWO_CLIENT_SECRET = env("FORTY_TWO_CLIENT_SECRET", default="")
+FORTY_TWO_REDIRECT_URI = env(
+    "FORTY_TWO_REDIRECT_URI",
+    default="http://localhost:3000/auth/42/callback",
+)
+FORTY_TWO_SCOPES = env("FORTY_TWO_SCOPES", default="public")
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 
 SOCIALACCOUNT_PROVIDERS = {
