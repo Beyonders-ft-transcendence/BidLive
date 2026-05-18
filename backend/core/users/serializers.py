@@ -161,3 +161,21 @@ class GoogleLoginSerializer(serializers.Serializer):
 class GoogleCallbackSerializer(serializers.Serializer):
     code = serializers.CharField()
     redirect_uri = serializers.CharField(required=False, allow_blank=True)
+
+
+class FortyTwoAuthorizeDataSerializer(serializers.Serializer):
+    authorization_url = serializers.URLField()
+    state = serializers.CharField()
+    expires_in = serializers.IntegerField()
+
+
+class FortyTwoAuthorizeResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    data = FortyTwoAuthorizeDataSerializer()
+
+
+class FortyTwoCallbackSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    state = serializers.CharField()
+    redirect_uri = serializers.CharField(required=False, allow_blank=True)
