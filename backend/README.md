@@ -44,7 +44,7 @@ uv run python manage.py migrate
 uv run python manage.py runserver
 ```
 
-Open http://localhost:8000/api/health/
+Open http://localhost:8000/api/redoc/
 
 Observações do ambiente local:
 
