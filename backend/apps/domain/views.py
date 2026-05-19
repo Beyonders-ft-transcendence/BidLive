@@ -1,17 +1,17 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from apps.domain.filters import ProjectFilter
-from apps.domain.models import Project
+from apps.domain.filters import DomainFilter
+from apps.domain.models import Domain
 from apps.domain.permissions import IsOwnerOrAdmin
-from apps.domain.serializers import ProjectSerializer
-from apps.domain.services import create_project, update_project
+from apps.domain.serializers import DomainSerializer
+from apps.domain.services import create_domain, update_domain
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = ProjectSerializer
+class DomainViewSet(viewsets.ModelViewSet):
+    serializer_class = DomainSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
-    filterset_class = ProjectFilter
+    filterset_class = DomainFilter
     search_fields = ["name", "description"]
     ordering_fields = ["created_at", "budget", "status"]
 
@@ -24,9 +24,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Project.objects.filter(owner=user).order_by("-created_at")
 
     def perform_create(self, serializer):
-        project = create_project(owner=self.request.user, data=serializer.validated_data)
+        project = create_domain(owner=self.request.user, data=serializer.validated_data)
         serializer.instance = project
 
     def perform_update(self, serializer):
-        project = update_project(project=serializer.instance, data=serializer.validated_data)
+        project = update_domain(project=serializer.instance, data=serializer.validated_data)
         serializer.instance = project

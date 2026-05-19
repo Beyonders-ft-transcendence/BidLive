@@ -1,6 +1,6 @@
 from rest_framework.test import APIClient
 
-from apps.domain.models import Project
+from apps.domain.models import Domain
 from apps.users.models import User
 
 
@@ -66,7 +66,7 @@ def test_project_list_supports_filters_search_and_ordering(db, auth_client, user
 
 
 def test_project_create_route_creates_owned_project(db, auth_client, user, monkeypatch):
-    monkeypatch.setattr("apps.domain.tasks.notify_project_created.delay", lambda project_id: None)
+    monkeypatch.setattr("apps.domain.tasks.notify_domain_created.delay", lambda project_id: None)
 
     response = auth_client.post(
         "/api/domain/",
