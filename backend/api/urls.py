@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.health import health_check
 from apps.domain.views import ProjectViewSet
-from core.users.views import (
+from apps.users.views import (
     ChangePasswordView,
     FortyTwoAuthorizeView,
     FortyTwoCallbackView,
@@ -41,5 +41,5 @@ urlpatterns = [
 
 urlpatterns += router.urls
 urlpatterns += [
-    path("", include("core.users.api.urls")),
+    path("", include("apps.users.api.urls")),
 ]

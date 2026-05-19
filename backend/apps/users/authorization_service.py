@@ -4,9 +4,9 @@ from django.core.cache import cache
 from rest_framework.request import Request
 
 from apps.analytics.models import AnalyticsEvent
-from core.users.constants import ROLE_SUPER_ADMIN
-from core.users.models import PermissionAuditLog, User
-from core.users.selectors import get_user_permissions, get_user_roles, invalidate_user_permissions_cache
+from apps.users.constants import ROLE_SUPER_ADMIN
+from apps.users.models import PermissionAuditLog, User
+from apps.users.selectors import get_user_permissions, get_user_roles, invalidate_user_permissions_cache
 
 ROLE_CACHE_TTL = 300
 

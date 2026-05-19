@@ -1,8 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
 
-from core.users.constants import ROLE_PERSONAL_USER, ROLE_SUPER_ADMIN
-from core.users.models import Permission, Role, RolePermission, User, UserRole
+from apps.users.constants import ROLE_PERSONAL_USER, ROLE_SUPER_ADMIN
+from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
 @pytest.fixture()

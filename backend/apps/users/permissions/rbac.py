@@ -1,11 +1,11 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated
 
-from core.users.authorization_service import (
+from apps.users.authorization_service import (
     log_access_denied,
     user_has_all_permissions,
     user_has_any_permission,
 )
-from core.users.selectors import get_user_permissions
+from apps.users.selectors import get_user_permissions
 
 
 class HasRBACPermission(BasePermission):

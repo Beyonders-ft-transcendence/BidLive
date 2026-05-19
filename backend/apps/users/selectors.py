@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.db.models import Prefetch, QuerySet
 
-from core.users.models import Permission, Role, User, UserStatus
+from apps.users.models import Permission, Role, User, UserStatus
 
 PERMISSIONS_CACHE_TTL = 300
 

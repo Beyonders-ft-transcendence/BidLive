@@ -12,10 +12,10 @@ from rest_framework.exceptions import ValidationError
 
 from apps.access.models import OAuthAccount, OAuthProvider
 from apps.analytics.models import AnalyticsEvent
-from core.users.constants import DEFAULT_SIGNUP_ROLE
-from core.users.models import Role, User, UserRole
-from core.users.selectors import invalidate_user_permissions_cache
-from core.users.services import assign_role, issue_auth_tokens_for_user
+from apps.users.constants import DEFAULT_SIGNUP_ROLE
+from apps.users.models import Role, User, UserRole
+from apps.users.selectors import invalidate_user_permissions_cache
+from apps.users.services import assign_role, issue_auth_tokens_for_user
 
 logger = logging.getLogger(__name__)
 

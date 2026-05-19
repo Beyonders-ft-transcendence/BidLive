@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 
-from core.users.api.views import PermissionViewSet, RoleViewSet, UserViewSet
+from apps.users.api.views import PermissionViewSet, RoleViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="users")

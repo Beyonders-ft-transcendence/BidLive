@@ -2,7 +2,7 @@ from functools import wraps
 
 from rest_framework.exceptions import PermissionDenied
 
-from core.users.authorization_service import user_has_permission
+from apps.users.authorization_service import user_has_permission
 
 
 def require_permission(permission_name: str):

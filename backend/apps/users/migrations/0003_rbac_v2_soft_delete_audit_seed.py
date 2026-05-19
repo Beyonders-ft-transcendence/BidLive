@@ -1,6 +1,6 @@
 from django.db import migrations, models
 
-from core.users.constants import ROLE_PERMISSIONS, SYSTEM_PERMISSIONS
+from apps.users.constants import ROLE_PERMISSIONS, SYSTEM_PERMISSIONS
 
 
 def seed_rbac_v2(apps, schema_editor):

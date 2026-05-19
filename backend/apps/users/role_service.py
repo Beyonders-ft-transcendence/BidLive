@@ -3,12 +3,12 @@ from typing import Any
 from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from core.users.authorization_service import (
+from apps.users.authorization_service import (
     invalidate_user_role_cache,
     log_permission_audit,
     user_has_permission,
 )
-from core.users.models import Permission, Role, RolePermission, User, UserRole
+from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
 @transaction.atomic

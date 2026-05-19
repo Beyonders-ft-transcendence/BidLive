@@ -8,7 +8,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
 from common.responses import error_response, success_response
-from core.users.api.serializers import (
+from apps.users.api.serializers import (
     PermissionSerializer,
     PermissionWriteSerializer,
     RoleSerializer,
@@ -19,19 +19,19 @@ from core.users.api.serializers import (
     UserListSerializer,
     UserUpdateSerializer,
 )
-from core.users.authorization_service import user_has_permission, user_is_super_admin
-from core.users.filters import UserFilter
-from core.users.models import Permission, Role, User
-from core.users.permission_service import (
+from apps.users.authorization_service import user_has_permission, user_is_super_admin
+from apps.users.filters import UserFilter
+from apps.users.models import Permission, Role, User
+from apps.users.permission_service import (
     create_permission,
     delete_permission,
     serialize_permission,
     update_permission,
 )
-from core.users.permissions.rbac import HasRBACPermission, RBACPermissionMixin
-from core.users.role_service import create_role, delete_role, serialize_role, update_role
-from core.users.selectors import get_permission_by_id, get_role_by_id, get_user_by_id, list_permissions, list_roles
-from core.users.user_service import (
+from apps.users.permissions.rbac import HasRBACPermission, RBACPermissionMixin
+from apps.users.role_service import create_role, delete_role, serialize_role, update_role
+from apps.users.selectors import get_permission_by_id, get_role_by_id, get_user_by_id, list_permissions, list_roles
+from apps.users.user_service import (
     ban_user,
     create_managed_user,
     serialize_user_detail,

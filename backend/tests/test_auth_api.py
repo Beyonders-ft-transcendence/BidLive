@@ -4,7 +4,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework.test import APIClient
 
-from core.users.models import Permission, Role, RolePermission, User, UserRole
+from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
 @pytest.mark.django_db

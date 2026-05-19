@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     "dj_rest_auth.registration",
-    "core.users",
+    "apps.users",
     "apps.domain",
     "apps.auctions",
     "apps.chat",
@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "common.middleware.RequestIDMiddleware",
-    "core.users.middleware.authorization.AuthorizationAuditMiddleware",
+    "apps.users.middleware.authorization.AuthorizationAuditMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -131,8 +131,8 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-ACCOUNT_ADAPTER = "core.users.adapters.CustomAccountAdapter"
-SOCIALACCOUNT_ADAPTER = "core.users.adapters.CustomSocialAccountAdapter"
+ACCOUNT_ADAPTER = "apps.users.adapters.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.users.adapters.CustomSocialAccountAdapter"
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"

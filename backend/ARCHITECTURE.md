@@ -1,168 +1,311 @@
 # Arquitetura e Organizacao do Backend
 
-Este documento descreve como o backend do projeto BidLive esta organizado e o por que das escolhas de estruturacao. O objetivo e detalhar o fluxo de dados, camadas, responsabilidades e convencoes usadas no codigo.
+Este documento descreve como o backend do projeto BidLive esta organizado hoje, quais responsabilidades cada camada possui e quais convencoes seguimos no codigo.
 
 ## Visao geral
 
-O backend e uma aplicacao Django modular organizada por dominios (apps). A separacao por apps facilita manutencao, testes, reuso e escalabilidade. Cada app contem codigo relacionado a um dominio de negocio (ex.: auctions, projects, chat) e segue uma convencao consistente.
+O backend e uma aplicacao Django + Django REST Framework organizada por dominio em `apps/`. A ideia principal e manter cada contexto de negocio isolado, com regras claras para:
 
-## Estrutura principal (pasta backend/)
+- configuracao do projeto
+- roteamento HTTP
+- logica de negocio
+- consultas reutilizaveis
+- codigo compartilhado
 
-```
+## Estrutura principal
+
+```text
 backend/
-├─ api/                # Entrypoints HTTP (routers/urls) e versoes da API
-├─ apps/               # Apps Django por dominio (models, serializers, views...)
-│  ├─ auctions/
-│  ├─ chat/
-│  ├─ projects/
-│  └─ ...
-├─ common/             # Utilitarios compartilhados: middleware, exceptions, renderers
-├─ config/             # Configuracao do projeto: settings, wsgi/asgi, celery
-├─ core/               # Codigo central como users e integracoes internas
-├─ infrastructure/     # Infra e integracoes externas (cache, fila, storage adapters)
-├─ scripts/            # Scripts utilitarios e helpers para deploy e manutencao
-├─ tests/              # Testes do backend (integracao e unidade)
-├─ tools/              # Arquivos e configs de operacao (entrypoint, gunicorn)
-└─ manage.py
+  api/                # Agregacao de rotas HTTP e endpoints globais
+  apps/               # Apps Django por dominio
+    access/
+    analytics/
+    auctions/
+    chat/
+    domain/
+    notifications/
+    reports/
+    social/
+    storage/
+    users/
+  common/             # Codigo transversal compartilhado
+  config/             # Settings, urls globais, celery, wsgi, asgi
+  core/               # Nucleo minimo do pacote, sem dominio de negocio
+  infrastructure/     # Integracoes e infraestrutura compartilhada
+  scripts/            # Scripts utilitarios
+  tests/              # Suite de testes do backend
+  tools/              # Arquivos operacionais e de deploy
+  manage.py
 ```
 
 ## Componentes e responsabilidades
 
-### api/
-Camada de roteamento HTTP e versionamento da API.
+### `config/`
 
-`api/urls.py`: entrypoint principal `/api/`.
-`api/health.py`: endpoint de healthcheck.
+Responsavel pelo bootstrap do Django:
 
-### apps/
-Cada app representa um dominio e segue uma estrutura padrao:
+- `config/settings/base.py`: configuracao base do projeto
+- `config/settings/development.py`: ajustes de desenvolvimento
+- `config/settings/production.py`: ajustes de producao
+- `config/urls.py`: urls globais do projeto
+- `config/asgi.py`: entrada ASGI
+- `config/wsgi.py`: entrada WSGI
+- `config/celery.py`: configuracao do Celery
 
-- `models.py`: entidades e regras de integridade (constraints, choices, indexes).
-- `serializers.py`: validacao e conversao para JSON (entrada e saida).
-- `views.py` / `viewsets.py`: endpoints, permissoes e orquestracao de fluxo.
-- `services.py`: regras de negocio e orquestracao (ex.: criar entidade, executar transacao).
-- `selectors.py` / `managers.py`: queries e filtros reutilizaveis.
-- `tasks.py`: tarefas async (Celery).
-- `permissions.py`: regras de acesso especificas do dominio.
+### `api/`
 
-Exemplo de fluxo tipico:
+Camada fina de roteamento global da API:
 
-1. `ViewSet` recebe request.
-2. `Serializer` valida dados.
-3. `Service` aplica regras de negocio e persiste.
-4. `Selector/Manager` encapsula consultas.
-5. `Serializer` monta resposta.
+- `api/urls.py`: agrega endpoints como `health/`, `auth/`, `domain/` e rotas de RBAC
+- `api/health.py`: healthcheck do servico
 
-### common/
-Codigo transversal e compartilhado:
+Essa pasta nao deve concentrar regra de negocio; ela apenas conecta as rotas publicas aos apps corretos.
 
-- `exceptions.py`: handler global de erros do DRF (formato padronizado).
-- `middleware.py`: middleware de request-id.
-- `renderers.py`: renderer de resposta padrao.
-- `pagination.py`: paginacao padronizada.
-- `responses.py`: utilitarios de resposta.
-- `permissions.py`: permissao base ou utilitaria.
+### `apps/`
 
-### config/
-Configuracao do Django:
+Cada pasta dentro de `apps/` representa um dominio do sistema. Exemplos atuais:
 
- `api/urls.py`: entrypoint principal `/api/`.
- `api/health.py`: endpoint de healthcheck.
-- `asgi.py`: entrypoint ASGI.
-- `wsgi.py`: entrypoint WSGI.
-- `celery.py`: configuracao do Celery.
-- `urls.py`: inclui admin, api, schema e docs.
- Endpoints: `api/` e `apps/<nome>/views.py`.
-### core/
-Dominio central compartilhado (ex.: `core/users`). Normalmente concentra o modelo de usuario e autenticacao.
+- `apps.users`: autenticacao, usuarios, roles, permissions e OAuth
+- `apps.domain`: projetos e seu fluxo principal
+- `apps.auctions`: leiloes, lances e livestreams
+- `apps.access`, `apps.social`, `apps.chat`, `apps.notifications`, `apps.storage`, `apps.analytics`, `apps.reports`: dominios auxiliares ou ainda em expansao
 
-### infrastructure/
- Endpoints: `api/` e `apps/<nome>/views.py`.
+Arquivos comuns em um app:
 
-### tests/
-Testes de unidade e integracao com pytest, fixtures em `tests/conftest.py`.
+- `models.py`: entidades e regras de persistencia
+- `serializers.py`: validacao e serializacao HTTP
+- `views.py`: endpoints e orquestracao da request
+- `services.py`: regras de negocio
+- `selectors.py`: queries e leituras reutilizaveis
+- `filters.py`: filtros do Django Filter / DRF
+- `permissions.py`: permissoes especificas do dominio
+- `tasks.py`: tarefas assicronas com Celery
+- `managers.py`: managers customizados de modelos
 
-## Fluxo de request (alto nivel)
+Nem todo app precisa ter todas essas camadas desde o inicio. Elas sao adicionadas conforme o dominio cresce.
 
-1. Request chega no ASGI/WSGI.
-2. Middleware aplica cross-cutting (ex.: request-id, CORS).
-3. DRF autentica usuario (`JWTAuthentication`).
-4. DRF aplica permissao (`IsAuthenticated`, `IsOwnerOrAdmin`).
-5. View executa valida e delega para services/selectors.
-6. Resposta padronizada por renderer/exception handler.
+### `common/`
+
+Codigo transversal compartilhado pelo projeto:
+
+- `common.exceptions`: handler global de excecoes do DRF
+- `common.renderers`: formato padrao das respostas JSON
+- `common.responses`: helpers para `success_response` e `error_response`
+- `common.pagination`: paginacao padronizada
+- `common.permissions`: permissoes base reutilizaveis
+- `common.middleware`: middleware compartilhado, como request id
+- `common.models`: modelos base compartilhados
+
+### `infrastructure/`
+
+Espaco reservado para integracoes e adaptadores de infraestrutura compartilhados entre dominios, como cache, storage, filas ou clientes externos quando fizer sentido centralizar.
+
+### `tests/`
+
+Suite principal de testes de integracao e API do backend.
+
+Hoje os testes ficam centralizados em:
+
+- `tests/conftest.py`
+- `tests/test_auth_api.py`
+- `tests/test_rbac_api.py`
+- `tests/test_domain_api.py`
+- `tests/test_google_auth_api.py`
+- `tests/test_42_auth_api.py`
+- `tests/test_health.py`
+- `tests/test_documentation_routes.py`
+
+## Estrutura do app `users`
+
+O dominio `users` foi consolidado em `apps/users` e concentra:
+
+- autenticacao JWT
+- cadastro e login
+- refresh e logout
+- alteracao e reset de senha
+- OAuth com Google e 42
+- RBAC com usuarios, roles e permissions
+- middleware de auditoria de autorizacao
+
+Isso substitui a organizacao antiga em `core/users`.
+
+## Estrutura do app `domain`
+
+`apps/domain` contem o fluxo principal de projetos:
+
+- `models.py`: entidades do dominio
+- `views.py`: `ProjectViewSet`
+- `serializers.py`: serializacao do recurso
+- `services.py`: criacao e atualizacao de projetos
+- `filters.py`: filtros do endpoint
+- `permissions.py`: regras de acesso
+- `tasks.py`: tarefas assicronas relacionadas ao dominio
+
+## Estrutura do app `auctions`
+
+`apps/auctions` concentra a logica de leiloes:
+
+- `models.py`: `Auction`, `AuctionItem`, `Bid`, `LiveStream`
+- `services.py`: regras como colocacao de lances
+- `selectors.py`: leituras reutilizaveis
+- `serializers.py`: representacao HTTP
+
+## Fluxo tipico de uma request
+
+1. A request entra por `ASGI` ou `WSGI`.
+2. `config/urls.py` encaminha `/api/` para `api/urls.py`.
+3. Middlewares globais executam preocupacoes transversais.
+4. O DRF autentica o usuario, normalmente com `JWTAuthentication`.
+5. A view valida a entrada com serializer.
+6. A view delega a regra de negocio para `services.py`.
+7. Se necessario, consultas reutilizaveis sao feitas via `selectors.py` ou `managers.py`.
+8. A resposta e padronizada por `common.renderers` e `common.responses`.
+
+## Roteamento atual
+
+Hoje o roteamento principal esta dividido assim:
+
+- `config/urls.py`: expoe `admin/`, `api/`, `api/schema/`, `api/docs/`, `api/redoc/`
+- `api/urls.py`: expoe `health/`, rotas de autenticacao e endpoints de usuarios/RBAC
+
+Exemplos de endpoints atuais:
+
+- `/api/health/`
+- `/api/auth/register/`
+- `/api/auth/login/`
+- `/api/auth/refresh/`
+- `/api/auth/google/`
+- `/api/auth/42/`
+- `/api/domain/`
+- `/api/users/`
+- `/api/roles/`
+- `/api/permissions/`
 
 ## Autenticacao e autorizacao
 
-- JWT via `rest_framework_simplejwt`.
-- Permissoes padrao: `IsAuthenticated`.
-- Regras por dominio em `apps/<app>/permissions.py`.
+O projeto usa:
+
+- JWT com `rest_framework_simplejwt`
+- `IsAuthenticated` como permissao padrao da API
+- RBAC no dominio `users`
+- middlewares e servicos de auditoria para eventos de autorizacao
+
+O modelo de usuario continua sendo:
+
+```python
+AUTH_USER_MODEL = "users.User"
+```
+
+Isso permanece valido porque o app `apps.users` usa o label `users`.
 
 ## Serializacao e validacao
 
-- `serializers.py` valida entrada e define saida.
-- Serializers sao a fronteira entre request e modelo.
+A validacao de entrada e serializacao de saida fica em `serializers.py`.
+
+Principios adotados:
+
+- serializer valida request data
+- view orquestra
+- service executa a regra
+- model persiste
+
+Evita-se colocar regra de negocio relevante dentro da view.
 
 ## Regras de negocio
 
-- Implementadas em `services.py`.
-- Evita codigo de negocio dentro de views e models.
+As regras de negocio devem ficar preferencialmente em `services.py`.
 
-## Queries
+Exemplos no projeto:
 
-- Queries complexas isoladas em `selectors.py` ou `managers.py`.
-- Facilita reuso e testes.
+- autenticacao e emissao de tokens em `apps/users/services.py`
+- fluxo OAuth em `apps/users/oauth_service.py`
+- atualizacao de roles e permissions em services do dominio `users`
+- criacao e atualizacao de projetos em `apps/domain/services.py`
+- colocacao de lances em `apps/auctions/services.py`
+
+## Queries e acesso a dados
+
+Consultas mais complexas devem ser isoladas em:
+
+- `selectors.py`
+- `managers.py`
+
+Isso melhora:
+
+- reuso
+- legibilidade
+- testabilidade
+
+## Middleware
+
+Middlewares importantes hoje:
+
+- `common.middleware.RequestIDMiddleware`
+- `apps.users.middleware.authorization.AuthorizationAuditMiddleware`
+
+Eles lidam com preocupacoes transversais, sem poluir a camada de views.
 
 ## Cache e throttling
 
-- Cache padrao configurado via `CACHES`.
-- Throttling padrao do DRF configurado em `REST_FRAMEWORK`.
-- Em `development.py`, cache local para evitar dependencia de Redis no host.
+- cache padrao configurado em `CACHES`
+- em desenvolvimento usamos cache local em memoria
+- throttling padrao do DRF e throttles especificos de auth sao usados para proteger login, cadastro e fluxo de senha
 
-## Assincrono (Celery)
+## Assincrono
 
-- `celery.py` configura broker e backend.
-- `tasks.py` em cada app define rotinas async.
-- Workers e beat configurados em Docker/CLI.
+O projeto usa Celery para tarefas assicronas:
 
-## Observabilidade
+- broker e backend configurados em `config/celery.py` e settings
+- tarefas por dominio podem viver em `tasks.py`
 
-- Logging configurado em `LOGGING`.
-- Middleware de request-id gera `X-Request-ID` para correlacao.
+Exemplo atual:
+
+- `apps.domain.tasks.sample_heartbeat`
 
 ## Documentacao da API
 
-- OpenAPI via drf-spectacular.
-- Endpoints:
-  - `/api/schema/` (schema)
-  - `/api/docs/` (Swagger UI)
+O projeto usa `drf-spectacular` para OpenAPI.
+
+Rotas disponiveis:
+
+- `/api/schema/`
+- `/api/docs/`
+- `/api/redoc/`
 
 ## Configuracao por ambiente
 
-- `base.py` contem padroes e defaults.
-- `development.py` ajusta debug e cache local.
-- `production.py` exige variaveis de ambiente e endurece configuracoes.
+- `base.py`: configuracao padrao
+- `development.py`: debug, cache local e email em console
+- `production.py`: configuracoes endurecidas para producao
 
-## Por que essa estrutura (racional)
+## Convencoes do projeto
 
-- Escalabilidade: apps isolados facilitam paralelizacao.
-- Manutencao: codigo por dominio reduz curva de aprendizado.
-- Testabilidade: services/selectors sao facilmente testaveis.
-- Reuso: common/infrastructure evitam duplicacao.
+- organizar codigo por dominio em `apps/`
+- manter `api/` como agregador fino de rotas
+- colocar regra de negocio em `services.py`
+- mover queries reutilizaveis para `selectors.py` ou `managers.py`
+- usar `common/` para responsabilidades compartilhadas
+- evitar duplicar logica entre views e serializers
 
-## Como navegar e contribuir
+## Como navegar no codigo
 
-- Logica de negocio: `apps/<nome>/services.py`.
-- Queries: `apps/<nome>/selectors.py`.
-- Endpoints: `api/v1/` e `apps/<nome>/views.py`.
-- Config: `config/settings/`.
+Se quiseres encontrar algo rapidamente:
 
-## Boas praticas
+- autenticacao e usuarios: `apps/users/`
+- projetos: `apps/domain/`
+- leiloes: `apps/auctions/`
+- respostas e excecoes padronizadas: `common/`
+- settings e bootstrap: `config/`
+- testes de API: `tests/`
 
-- Coloque regra de negocio em services, nao em views.
-- Evite queries complexas em views; use selectors/managers.
-- Padronize respostas via renderer e exceptions.
-- Adicione testes para novos services e endpoints.
+## Proximos passos de organizacao
+
+A base atual ja esta alinhada com a organizacao por dominio, mas ainda pode evoluir para:
+
+- mover a camada HTTP de alguns apps para subpastas `api/`
+- simplificar mais `api/urls.py` para ficar apenas como agregador
+- padronizar melhor a separacao interna de auth e RBAC dentro de `apps/users`
 
 ---
 
-Se quiser, posso gerar um diagrama Mermaid com o fluxo request->view->service->model ou detalhar um app especifico (ex.: auctions) com exemplos de fluxo de dados.
+Se quiser, posso atualizar o proximo passo tambem e reorganizar `apps/users` em `api/auth_views.py`, `api/rbac_views.py`, `api/auth_serializers.py` e `api/rbac_serializers.py`.

@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 from common.models import SoftDeleteModel, TimeStampedModel
-from core.users.managers import UserManager
+from apps.users.managers import UserManager
 
 
 class UserStatus(models.TextChoices):

@@ -1,4 +1,4 @@
-from core.users.authorization_service import log_access_denied
+from apps.users.authorization_service import log_access_denied
 
 
 class AuthorizationAuditMiddleware:

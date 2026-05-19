@@ -19,9 +19,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.access.models import Session
 from apps.analytics.models import AnalyticsEvent
-from core.users.constants import DEFAULT_SIGNUP_ROLE
-from core.users.models import Role, User, UserRole, UserStatus
-from core.users.selectors import (
+from apps.users.constants import DEFAULT_SIGNUP_ROLE
+from apps.users.models import Role, User, UserRole, UserStatus
+from apps.users.selectors import (
     get_user_permissions,
     get_user_roles,
     invalidate_user_permissions_cache,

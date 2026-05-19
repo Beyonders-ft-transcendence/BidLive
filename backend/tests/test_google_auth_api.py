@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.access.models import OAuthAccount, OAuthProvider
 from apps.analytics.models import AnalyticsEvent
-from core.users.models import User
+from apps.users.models import User
 
 
 GOOGLE_PROFILE = {
@@ -34,7 +34,7 @@ def _mock_google_userinfo_response():
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
 def test_google_login_creates_user_and_returns_jwt(mock_get, google_settings):
     client = APIClient()
 
@@ -62,7 +62,7 @@ def test_google_login_creates_user_and_returns_jwt(mock_get, google_settings):
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
 def test_google_login_links_existing_user_by_email(mock_get, google_settings, user):
     user.email = GOOGLE_PROFILE["email"]
     user.save(update_fields=["email"])
@@ -80,8 +80,8 @@ def test_google_login_links_existing_user_by_email(mock_get, google_settings, us
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.post")
-@patch("core.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+@patch("apps.users.oauth_service.requests.post")
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
 def test_google_callback_exchanges_code(mock_get, mock_post, google_settings):
     token_response = MagicMock()
     token_response.status_code = 200

@@ -1,7 +1,7 @@
 from rest_framework.test import APIClient
 
 from apps.domain.models import Project
-from core.users.models import User
+from apps.users.models import User
 
 
 def test_project_list_requires_auth(db):
