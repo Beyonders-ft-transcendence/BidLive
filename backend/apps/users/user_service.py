@@ -5,15 +5,15 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from core.users.authorization_service import (
+from apps.users.authorization_service import (
     invalidate_user_role_cache,
     log_permission_audit,
     user_has_permission,
     user_is_super_admin,
 )
-from core.users.constants import DEFAULT_SIGNUP_ROLE
-from core.users.models import Role, User, UserRole, UserStatus
-from core.users.selectors import get_user_roles
+from apps.users.constants import DEFAULT_SIGNUP_ROLE
+from apps.users.models import Role, User, UserRole, UserStatus
+from apps.users.selectors import get_user_roles
 
 
 @transaction.atomic

@@ -1,6 +1,6 @@
 import django_filters
 
-from core.users.models import User, UserStatus
+from apps.users.models import User, UserStatus
 
 
 class UserFilter(django_filters.FilterSet):

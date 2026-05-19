@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.users.models import Permission, Role, User
+from apps.users.models import Permission, Role, User
 
 
 class PermissionSerializer(serializers.ModelSerializer):

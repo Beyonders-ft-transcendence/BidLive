@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import transaction
 
 from apps.auctions.models import Auction, Bid
-from core.users.models import User
+from apps.users.models import User
 
 
 @transaction.atomic

@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.responses import error_response, success_response
-from core.users.permissions import HasRBACPermission
-from core.users.serializers import (
+from apps.users.permissions import HasRBACPermission
+from apps.users.serializers import (
     ChangePasswordSerializer,
     EmptySuccessResponseSerializer,
     FortyTwoAuthorizeResponseSerializer,
@@ -30,7 +30,7 @@ from core.users.serializers import (
     UserMeResponseSerializer,
     UserSerializer,
 )
-from core.users.services import (
+from apps.users.services import (
     authenticate_user,
     change_user_password,
     create_user,
@@ -39,14 +39,14 @@ from core.users.services import (
     request_password_reset,
     reset_user_password,
 )
-from core.users.oauth_service import (
+from apps.users.oauth_service import (
     authenticate_42_with_code,
     authenticate_google_user,
     authenticate_google_with_code,
     authenticate_google_with_id_token,
     build_42_authorization_url,
 )
-from core.users.throttles import AuthLoginThrottle, AuthPasswordThrottle, AuthRegisterThrottle
+from apps.users.throttles import AuthLoginThrottle, AuthPasswordThrottle, AuthRegisterThrottle
 
 
 def _client_ip(request) -> str:

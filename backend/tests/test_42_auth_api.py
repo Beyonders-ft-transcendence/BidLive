@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.access.models import OAuthAccount, OAuthProvider, Session
 from apps.analytics.models import AnalyticsEvent
-from core.users.models import User
+from apps.users.models import User
 
 
 FORTY_TWO_PROFILE = {
@@ -74,7 +74,7 @@ def test_42_callback_rejects_invalid_state(forty_two_settings):
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.post")
+@patch("apps.users.oauth_service.requests.post")
 def test_42_callback_returns_error_for_invalid_code(mock_post, forty_two_settings):
     mock_response = MagicMock()
     mock_response.status_code = 400
@@ -95,8 +95,8 @@ def test_42_callback_returns_error_for_invalid_code(mock_post, forty_two_setting
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
-@patch("core.users.oauth_service.requests.post", return_value=_mock_42_token_response())
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
+@patch("apps.users.oauth_service.requests.post", return_value=_mock_42_token_response())
 def test_42_callback_creates_user_returns_jwt_and_session(mock_post, mock_get, forty_two_settings):
     client = APIClient()
     authorize = client.get("/api/auth/42/")
@@ -131,8 +131,8 @@ def test_42_callback_creates_user_returns_jwt_and_session(mock_post, mock_get, f
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
-@patch("core.users.oauth_service.requests.post", return_value=_mock_42_token_response())
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
+@patch("apps.users.oauth_service.requests.post", return_value=_mock_42_token_response())
 def test_42_callback_links_existing_user_by_email(mock_post, mock_get, forty_two_settings, user):
     user.email = FORTY_TWO_PROFILE["email"]
     user.save(update_fields=["email"])
@@ -151,8 +151,8 @@ def test_42_callback_links_existing_user_by_email(mock_post, mock_get, forty_two
 
 
 @pytest.mark.django_db
-@patch("core.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
-@patch("core.users.oauth_service.requests.post", return_value=_mock_42_token_response())
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
+@patch("apps.users.oauth_service.requests.post", return_value=_mock_42_token_response())
 def test_42_callback_authenticates_existing_linked_user(mock_post, mock_get, forty_two_settings, user):
     user.email = FORTY_TWO_PROFILE["email"]
     user.save(update_fields=["email"])

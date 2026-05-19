@@ -3,8 +3,8 @@ from typing import Any
 from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from core.users.authorization_service import log_permission_audit, user_has_permission
-from core.users.models import Permission, RolePermission, User
+from apps.users.authorization_service import log_permission_audit, user_has_permission
+from apps.users.models import Permission, RolePermission, User
 
 
 @transaction.atomic
