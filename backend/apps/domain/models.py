@@ -23,5 +23,8 @@ class Domain(models.Model):
 
     objects = DomainManager()
 
+    class Meta:
+        db_table = "domain_project"
+
     def __str__(self):
         return self.name

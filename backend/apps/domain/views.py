@@ -17,16 +17,16 @@ class DomainViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
-            return Project.objects.none()
+            return Domain.objects.none()
         user = getattr(self.request, "user", None)
         if not user or getattr(user, "is_anonymous", True):
-            return Project.objects.none()
-        return Project.objects.filter(owner=user).order_by("-created_at")
+            return Domain.objects.none()
+        return Domain.objects.filter(owner=user).order_by("-created_at")
 
     def perform_create(self, serializer):
-        project = create_domain(owner=self.request.user, data=serializer.validated_data)
-        serializer.instance = project
+        domain = create_domain(owner=self.request.user, data=serializer.validated_data)
+        serializer.instance = domain
 
     def perform_update(self, serializer):
-        project = update_domain(project=serializer.instance, data=serializer.validated_data)
-        serializer.instance = project
+        domain = update_domain(domain=serializer.instance, data=serializer.validated_data)
+        serializer.instance = domain

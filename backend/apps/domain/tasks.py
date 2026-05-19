@@ -4,8 +4,8 @@ from apps.domain.models import Domain
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
-def notify_domain_created(self, project_id: int) -> None:
-    Project.objects.filter(id=project_id).update(status="active")
+def notify_domain_created(self, domain_id: int) -> None:
+    Domain.objects.filter(id=domain_id).update(status="active")
 
 
 @shared_task
