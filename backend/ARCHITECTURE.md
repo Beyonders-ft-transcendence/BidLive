@@ -134,7 +134,7 @@ Isso substitui a organizacao antiga em `core/users`.
 `apps/domain` contem o fluxo principal de projetos:
 
 - `models.py`: entidades do dominio
-- `views.py`: `ProjectViewSet`
+- `views.py`: `DomainViewSet`
 - `serializers.py`: serializacao do recurso
 - `services.py`: criacao e atualizacao de projetos
 - `filters.py`: filtros do endpoint

@@ -1,14 +1,14 @@
 from apps.domain import tasks
-from apps.domain.models import Project
+from apps.domain.models import Domain
 
 
-def create_project(*, owner, data: dict) -> Project:
-    project = Project.objects.create(owner=owner, **data)
-    tasks.notify_project_created.delay(project.id)
+def create_domain(*, owner, data: dict) -> Domain:
+    project = Domain.objects.create(owner=owner, **data)
+    tasks.notify_domain_created.delay(project.id)
     return project
 
 
-def update_project(*, project: Project, data: dict) -> Project:
+def update_domain(*, project: Domain, data: dict) -> Domain:
     for field, value in data.items():
         setattr(project, field, value)
     project.save(update_fields=list(data.keys()))

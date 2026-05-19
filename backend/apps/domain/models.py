@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.db import models
 
-from apps.domain.managers import ProjectManager
+from apps.domain.managers import DomainManager
 
 
-class Project(models.Model):
+class Domain(models.Model):
     STATUS_CHOICES = [
         ("draft", "Draft"),
         ("active", "Active"),
@@ -21,7 +21,7 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = ProjectManager()
+    objects = DomainManager()
 
     def __str__(self):
         return self.name

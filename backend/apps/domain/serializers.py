@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from apps.domain.models import Project
+from apps.domain.models import Domain
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class DomainSerializer(serializers.ModelSerializer):
     owner_email = serializers.EmailField(source="owner.email", read_only=True)
 
     class Meta:
-        model = Project
+        model = Domain
         fields = (
             "id",
             "owner",

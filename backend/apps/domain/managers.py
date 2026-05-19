@@ -1,14 +1,14 @@
 from django.db import models
 
 
-class ProjectQuerySet(models.QuerySet):
+class DomainQuerySet(models.QuerySet):
     def active(self):
         return self.filter(is_archived=False)
 
 
-class ProjectManager(models.Manager):
+class DomainManager(models.Manager):
     def get_queryset(self):
-        return ProjectQuerySet(self.model, using=self._db)
+        return DomainQuerySet(self.model, using=self._db)
 
     def active(self):
         return self.get_queryset().active()

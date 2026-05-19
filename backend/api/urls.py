@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from apps.domain.views import ProjectViewSet
+from apps.domain.views import DomainViewSet
 from apps.users.views import (
     ChangePasswordView,
     FortyTwoAuthorizeView,
@@ -19,7 +19,7 @@ from apps.users.views import (
 )
 
 router = DefaultRouter()
-router.register("domain", ProjectViewSet, basename="domain")
+router.register("domain", DomainViewSet, basename="domain")
 
 urlpatterns = [
     path("auth/register/", RegisterView.as_view(), name="auth-register"),
