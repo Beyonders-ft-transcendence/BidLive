@@ -94,3 +94,12 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
 		return success_response(message="Pedido rejeitado.")
+	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Pedidos de amizade recebidos")
+	@action(detail=False, methods=["get"], url_path="requests/received")
+	def requests_received(self, request: Request):
+		"""GET /api/social/friendships/requests/received/"""
+		qs = list_pending_requests_received(user=request.user)
+		return success_response(data=FriendshipSerializer(qs, many=True).data)
+	
+	
