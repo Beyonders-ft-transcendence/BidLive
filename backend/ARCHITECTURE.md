@@ -94,10 +94,6 @@ Codigo transversal compartilhado por todo o projeto:
 - `middleware.py`: middleware compartilhado
 - `models.py`: bases comuns quando necessario
 
-### `infrastructure/`
-
-Espaco para integracoes e adaptadores compartilhados entre dominios, como cache, storage, filas ou clientes externos.
-
 ### `tests/`
 
 Suite principal de testes do backend, com foco em integracao e API.
@@ -156,7 +152,6 @@ O roteamento principal esta dividido assim:
 
 Exemplos de rotas atuais:
 
-- `/api/health/`
 - `/api/auth/register/`
 - `/api/auth/login/`
 - `/api/auth/refresh/`
