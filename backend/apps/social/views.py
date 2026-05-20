@@ -106,3 +106,9 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		qs = list_pending_requests_sent(user=request.user)
 		return success_response(data=FriendshipSerializer(qs, many=True).data)
 	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Amigos online")
+	@action(detail=False, methods=["get"], url_path="online")
+	def online(self, request: Request):
+		friends = list_online_friends(user=request.user)
+		return success_response(data=PublicUserSerializer(friends, many=True).data)
+	
