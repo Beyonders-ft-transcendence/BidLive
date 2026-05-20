@@ -74,3 +74,11 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		
 		return success_response(message="Amizade removida.")
 	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Aceitar pedido de amizade")
+	@action(detail=True, methods=["post"], url_path="accept")
+	def accept(self, request: Request, pk=None):
+		try:
+			friendship = accept_friend_request(friendship_id=pk, user=request.user)
+		except Exception as exc:
+			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+	
