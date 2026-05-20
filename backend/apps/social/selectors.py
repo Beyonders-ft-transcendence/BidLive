@@ -34,3 +34,8 @@ def list_friends(*, user: User) -> QuerySet[User]:
 		is_active=True,
 		is_deleted=False,
 	)
+
+
+def list_online_friends(*, user: User) -> QuerySet[User]:
+	return list_friends(user=user).filter(is_online=True)
+
