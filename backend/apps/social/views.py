@@ -49,3 +49,20 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		serializer = PublicUserSerializer(friends, many=True)
 		return success_response(data=serializer.data)
 	
+	def create(self, request: Request):
+		serializer = FriendshipCreateSerializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+
+		addressee: User = serializer.validated_data["addressee_id"]
+
+		try:
+			friendship = send_friend_request(
+				requester=request.user,
+				addressee=addressee,
+			)
+		except Exception as exc:
+			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+		
+		out = FriendshipSerializer(friendship)
+		return success_response(data=out.data, status_code=status.HTTP_201_CREATED)
+	
