@@ -46,3 +46,9 @@ def list_pending_requests_received(*, user: User) -> QuerySet[Friendship]:
 		status=FriendshipStatus.PENDING,
 	).select_related("addressee")
 
+
+def list_pending_requests_sent(*, user: User) -> QuerySet[Friendship]:
+	return Friendship.objects.filter(
+		requester=user,
+		status=FriendshipStatus.PENDING,
+	).select_related("addressee")
