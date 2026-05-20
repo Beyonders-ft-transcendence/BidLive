@@ -84,4 +84,13 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 	
 		return success_response(data=FriendshipSerializer(friendship).data)
 	
-	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Rejeitar pedido de amizade")
+	@action(detail=True, methods=["post"], url_path="reject")
+	def reject(self, request: Request, pk=None):
+		"""POST /api/social/friendships/{id}/reject/"""
+		try:
+			reject_friend_request(friendship_id=pk, user=request.user)
+		except Exception as exc:
+			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+
+		return success_response(message="Pedido rejeitado.")
