@@ -82,3 +82,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		except Exception as exc:
 			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 	
+		return success_response(data=FriendshipSerializer(friendship).data)
+	
+	
