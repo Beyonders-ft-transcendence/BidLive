@@ -18,3 +18,19 @@ def get_friendship_by_id(*, friendship_id: int, user: User) -> Friendship:
 	)
 
 
+def list_friends(*, user: User) -> QuerySet[User]:
+	addressee_ids = Friendship.objects.filter(
+		requester=user, status=FriendshipStatus.ACCEPTED
+	).values_list("addressee_id", flat=True)
+
+	requester_ids = Friendship.objects.filter(
+		addressee=user, status=FriendshipStatus.ACCEPTED
+	).values_list("requester_id", flat=True)
+
+	friends_id = list(addressee_ids) + list(requester_ids)
+
+	return User.objects.filter(
+		id__in=friends_id,
+		is_active=True,
+		is_deleted=False,
+	)
