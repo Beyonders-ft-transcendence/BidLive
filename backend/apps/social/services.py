@@ -60,3 +60,16 @@ def reject_friend_request(*, friendship_id: int, user: User) -> None:
 		raise ValidationError({"detail": "Este pedido não está pendente."})
 	
 	friendship.delete()
+
+
+@transaction.atomic
+def remove_friend(*, friendship_id: int, user: User) -> None:
+	try:
+		friendship = get_friendship_by_id(friendship_id=friendship_id, user=user)
+	except Friendship.DoesNotExist:
+		raise ValidationError({"detail": "Amizade não encontrada."})
+	
+	if friendship.status != FriendshipStatus.ACCEPTED:
+		raise ValidationError({"detail": "Não há amizade ativa para remover."})
+	
+	friendship.delete()
