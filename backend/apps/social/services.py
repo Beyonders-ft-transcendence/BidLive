@@ -97,3 +97,17 @@ def block_user(*, blocker: User, blocked: User) -> Friendship:
 		addressee=blocked,
 		status=FriendshipStatus.BLOCKED,
 	)
+
+
+@transaction.atomic
+def unblock_user(*, blocker: User, blocked: User) -> None:
+	try:
+		friendship = Friendship.objects.get(
+			requester=blocker,
+			addressee=blocked,
+			status=FriendshipStatus.BLOCKED,
+		)
+	except Friendship.DoesNotExist:
+		raise ValidationError({"detail": "Não existe bloqueio para remover."})
+	
+	friendship.delete()
