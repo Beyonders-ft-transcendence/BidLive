@@ -28,3 +28,20 @@ def send_friend_request(*, requester: User, addressee: User) -> Friendship:
 	)
 
 
+@transaction.atomic
+def accept_friend_request(*, friendship_id: int, user: User) -> Friendship:
+	try:
+		friendship = get_friendship_by_id(friendship_id=friendship_id, user=user)
+	except Friendship.DoesNotExist:
+		raise ValidationError({"detail": "Pedido não encontrado."})
+	
+	if friendship.addressee_id != user.id:
+		raise PermissionDenied({"detail": "Só o destinatário pode aceitar o pedido."})
+	
+	if friendship.status != FriendshipStatus.PENDING:
+		raise ValidationError({"detail": "Este pedido não está pendente."})
+	
+	friendship.status = FriendshipStatus.ACCEPTED
+	friendship.save(update_fields=["status", "updated_at"])
+	return friendship
+
