@@ -52,3 +52,11 @@ def list_pending_requests_sent(*, user: User) -> QuerySet[Friendship]:
 		requester=user,
 		status=FriendshipStatus.PENDING,
 	).select_related("addressee")
+
+
+def is_blocked(*, user: User, other_user: User) -> bool:
+	return Friendship.objects.filter(
+		Q(requester=user, addressee=other_user)
+		| Q(requester=other_user, adrressee=user),
+		status=FriendshipStatus.BLOCKED,
+	).exists()
