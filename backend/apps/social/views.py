@@ -66,3 +66,10 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		out = FriendshipSerializer(friendship)
 		return success_response(data=out.data, status_code=status.HTTP_201_CREATED)
 	
+	def destroy(self, request: Request, pk=None):
+		try:
+			remove_friend(friendship_id=pk, user=request.user)
+		except Exception as exc:
+			return error_response(errrors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+		
+		return success_response(message="Amizade removida.")
