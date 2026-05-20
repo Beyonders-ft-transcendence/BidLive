@@ -87,7 +87,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 	@extend_schema(tags=SOCIAL_TAGS, summary="Rejeitar pedido de amizade")
 	@action(detail=True, methods=["post"], url_path="reject")
 	def reject(self, request: Request, pk=None):
-		"""POST /api/social/friendships/{id}/reject/"""
 		try:
 			reject_friend_request(friendship_id=pk, user=request.user)
 		except Exception as exc:
@@ -98,7 +97,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 	@extend_schema(tags=SOCIAL_TAGS, summary="Pedidos de amizade recebidos")
 	@action(detail=False, methods=["get"], url_path="requests/received")
 	def requests_received(self, request: Request):
-		"""GET /api/social/friendships/requests/received/"""
 		qs = list_pending_requests_received(user=request.user)
 		return success_response(data=FriendshipSerializer(qs, many=True).data)
 	
