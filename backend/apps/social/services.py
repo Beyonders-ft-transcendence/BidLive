@@ -5,6 +5,7 @@ from apps.social.models import Friendship, FriendshipStatus
 from apps.social.selectors import get_friendship, get_friendship_by_id
 from apps.users.models import User
 
+
 @transaction.atomic
 def send_friend_request(*, requester: User, addressee: User) -> Friendship:
 	if requester.id == addressee.id:
@@ -25,3 +26,5 @@ def send_friend_request(*, requester: User, addressee: User) -> Friendship:
 		addressee=addressee,
 		status=FriendshipStatus.PENDING,
 	)
+
+
