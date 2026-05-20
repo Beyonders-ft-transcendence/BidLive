@@ -44,4 +44,8 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 			return FriendshipCreateSerializer
 		return FriendshipSerializer
 	
+	def list(self, request: Request):
+		friends = list_friends(user=request.user)
+		serializer = PublicUserSerializer(friends, many=True)
+		return success_response(data=serializer.data)
 	
