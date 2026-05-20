@@ -73,3 +73,4 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 			return error_response(errrors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 		
 		return success_response(message="Amizade removida.")
+	
