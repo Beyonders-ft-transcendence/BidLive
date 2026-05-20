@@ -27,4 +27,21 @@ from apps.social.services import (
 from apps.users.models import User
 from common.responses import error_response, success_response
 
+
 SOCIAL_TAGS = [social]
+
+
+@extend_schema_view(
+	list=extend_schema(tags=SOCIAL_TAGS, summary="Listar amigos"),
+	create=extend_schema(tags=SOCIAL_TAGS, summary="Enviar pedido de amizade"),
+	destroy=extend_schema(tags=SOCIAL_TAGS, summary="Remover amizade"),
+)
+class FriendshipViewSet(viewsets.GenericViewSet):
+	permission_classes = [IsAuthenticated]
+
+	def get_serializer_class(self):
+		if self.action == "create":
+			return FriendshipCreateSerializer
+		return FriendshipSerializer
+	
+	
