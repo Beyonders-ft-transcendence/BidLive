@@ -35,3 +35,12 @@ class FriendshipSerializer(serializers.ModelSerializer):
 			)
 		read_only_fields = fields
 
+
+class FriendshipCreateSerializer(serializers.Serializer):
+	addressee_id = serializers.IntegerField()
+
+	def validate_addressee_id(self, value: int) -> User:
+		try:
+			return User.objects.get(id=value, is_active=True, is_deleted=False)
+		except User.DoesNotExist:
+			raise serializers.ValidationError("Utilizador não encontrado.");
