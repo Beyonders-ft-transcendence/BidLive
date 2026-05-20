@@ -8,3 +8,9 @@ def get_friendship(*, user: User, other_user: User) -> Friendship | None:
 		Q(requester=user, addressee=other_user)
 		| Q(requester=other_user, addressee=user)
 	).first()
+
+def get_friendship_by_id(*, friendship_id: int, user: User) -> Friendship:
+	return Friendship.objects.get(
+		Q(requester=user) | Q(addressee=user),
+		id=friendship_id,
+	)
