@@ -39,3 +39,10 @@ def list_friends(*, user: User) -> QuerySet[User]:
 def list_online_friends(*, user: User) -> QuerySet[User]:
 	return list_friends(user=user).filter(is_online=True)
 
+
+def list_pending_requests_received(*, user: User) -> QuerySet[Friendship]:
+	return Friendship.objects.filter(
+		requester=user,
+		status=FriendshipStatus.PENDING,
+	).select_related("addressee")
+
