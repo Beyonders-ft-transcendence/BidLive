@@ -100,4 +100,9 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 		qs = list_pending_requests_received(user=request.user)
 		return success_response(data=FriendshipSerializer(qs, many=True).data)
 	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Pedidos de amizade enviados")
+	@action(detail=False, methods=["get"], url_path="requests/sent")
+	def requests_sent(self, request: Request):
+		qs = list_pending_requests_sent(user=request.user)
+		return success_response(data=FriendshipSerializer(qs, many=True).data)
 	
