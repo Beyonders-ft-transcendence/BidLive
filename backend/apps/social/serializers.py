@@ -43,4 +43,4 @@ class FriendshipCreateSerializer(serializers.Serializer):
 		try:
 			return User.objects.get(id=value, is_active=True, is_deleted=False)
 		except User.DoesNotExist:
-			raise serializers.ValidationError("Utilizador não encontrado.");
+			raise serializers.ValidationError("Utilizador não encontrado.")
