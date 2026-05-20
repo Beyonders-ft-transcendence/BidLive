@@ -73,3 +73,27 @@ def remove_friend(*, friendship_id: int, user: User) -> None:
 		raise ValidationError({"detail": "Não há amizade ativa para remover."})
 	
 	friendship.delete()
+
+
+@transaction.atomic
+def block_user(*, blocker: User, blocked: User) -> Friendship:
+	if blocker.id == blocked.id:
+		raise ValidationError({"detail": "Não podes bloquear-te a ti mesmo."})
+	
+	existing = get_friendship(user=blocker, other_user=blocked)
+
+	if existing:
+		if existing.status == FriendshipStatus.BLOCKED:
+			raise ValidationError({"detail": "Utilizador já está bloqueado."})
+		
+		existing.requester = blocker
+		existing.addressee = blocked
+		existing.status = FriendshipStatus.BLOCKED
+		existing.save(update_fields=["requester", "addressee", "status", "upadted_at"])
+		return existing
+
+	return Friendship.objects.create(
+		requester=blocker,
+		addressee=blocked,
+		status=FriendshipStatus.BLOCKED,
+	)
