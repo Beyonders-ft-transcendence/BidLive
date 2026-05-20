@@ -137,4 +137,24 @@ class BlockViewSet(viewsets.GenericViewSet):
 
 		return success_response(message="Utilizador bloqueado.")
 	
-	
+	@extend_schema(tags=SOCIAL_TAGS, summary="Desbloquear utilizador")
+	@action(detail=False, methods=["post"], url_path="unblock")
+	def unblock(self, request: Request):
+		"""POST /api/social/users/unblock/"""
+		user_id = request.data.get("user_id")
+		if not user_id:
+			return error_response(
+				errors={"user_id": ["Este campo é obrigatório."]},
+				status_code=status.HTTP_400_BAD_REQUEST,
+			)
+
+		blocked_user = get_object_or_404(
+			User, id=user_id, is_active=True, is_deleted=False
+		)
+
+		try:
+			unblock_user(blocker=request.user, blocked=blocked_user)
+		except Exception as exc:
+			return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+
+		return success_response(message="Bloqueio removido.")
