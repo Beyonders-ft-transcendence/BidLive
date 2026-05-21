@@ -1,7 +1,19 @@
-AUCTION_CREATED = "auction_created"
-AUCTION_UPDATED = "auction_updated"
-AUCTION_STARTED = "auction_started"
-AUCTION_CANCELLED = "auction_cancelled"
-AUCTION_ENDED = "auction_ended"
-BID_CREATED = "new_bid"
-BUY_NOW_COMPLETED = "buy_now"
+from apps.auctions.events.types import (
+    AUCTION_CANCELLED,
+    AUCTION_CREATED,
+    AUCTION_ENDED,
+    AUCTION_STARTED,
+    AUCTION_UPDATED,
+    BID_CREATED,
+    BUY_NOW_COMPLETED,
+)
+
+__all__ = [
+    "AUCTION_CREATED",
+    "AUCTION_UPDATED",
+    "AUCTION_STARTED",
+    "AUCTION_CANCELLED",
+    "AUCTION_ENDED",
+    "BID_CREATED",
+    "BUY_NOW_COMPLETED",
+]
