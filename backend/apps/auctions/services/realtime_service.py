@@ -4,7 +4,7 @@ from django.core.cache import cache
 
 
 def auction_group_name(*, auction_id: int) -> str:
-    return f"auction:{auction_id}"
+    return f"auction_{auction_id}"
 
 
 def publish_auction_event(*, auction_id: int, event_type: str, payload: dict) -> None:

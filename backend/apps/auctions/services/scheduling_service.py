@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 
 def schedule_auction_activation(*, auction_id: int, start_time) -> None:
@@ -7,7 +8,8 @@ def schedule_auction_activation(*, auction_id: int, start_time) -> None:
     if start_time <= now:
         activate_auction_task.delay(auction_id)
         return
-    activate_auction_task.apply_async(args=[auction_id], eta=start_time)
+    if not getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        activate_auction_task.apply_async(args=[auction_id], eta=start_time)
 
 
 def schedule_auction_close(*, auction_id: int, end_time) -> None:
@@ -17,4 +19,5 @@ def schedule_auction_close(*, auction_id: int, end_time) -> None:
     if end_time <= now:
         close_auction_task.delay(auction_id)
         return
-    close_auction_task.apply_async(args=[auction_id], eta=end_time)
+    if not getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        close_auction_task.apply_async(args=[auction_id], eta=end_time)

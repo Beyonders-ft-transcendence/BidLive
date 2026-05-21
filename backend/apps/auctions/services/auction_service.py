@@ -38,7 +38,17 @@ def _auction_lock_key(auction_id: int) -> str:
     return f"auction:{auction_id}:lock"
 
 
+class _NoOpLock:
+    def acquire(self, blocking=True):
+        return True
+
+    def release(self):
+        return None
+
+
 def _acquire_lock(*, auction_id: int):
+    if not hasattr(cache, "lock"):
+        return _NoOpLock()
     lock_timeout = int(getattr(settings, "AUCTION_LOCK_TIMEOUT", 10))
     blocking_timeout = int(getattr(settings, "AUCTION_LOCK_BLOCKING_TIMEOUT", 5))
     return cache.lock(_auction_lock_key(auction_id), timeout=lock_timeout, blocking_timeout=blocking_timeout)
