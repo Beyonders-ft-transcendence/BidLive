@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.auctions.models import AuctionCategory
-from apps.users.models import Permission, Role, RolePermission, UserRole
+from apps.users.models import Permission, Role, RolePermission, User, UserRole
 from apps.users.selectors import invalidate_user_permissions_cache
 
 
@@ -66,7 +66,7 @@ def test_auction_create_update_cancel_flow(db, user):
 
 
 def test_auction_bid_and_buy_now(db, user):
-    _grant_permissions(user, ["auction.create", "auction.read", "auction.buy_now"])
+    _grant_permissions(user, ["auction.create", "auction.read"])
     category, _ = AuctionCategory.objects.get_or_create(name="Art", slug="art")
 
     client = APIClient()
@@ -92,8 +92,15 @@ def test_auction_bid_and_buy_now(db, user):
     )
     auction_id = create_response.data["data"]["id"]
 
-    _grant_permissions(user, ["auction.read"])
-    bid_response = client.post(
+    bidder, _ = User.objects.get_or_create(
+        email="bidder@example.com",
+        defaults={"username": "bidder", "full_name": "Bidder User"},
+    )
+    _grant_permissions(bidder, ["auction.read", "auction.buy_now"])
+    bidder_client = APIClient()
+    bidder_client.force_authenticate(user=bidder)
+
+    bid_response = bidder_client.post(
         f"/api/auctions/{auction_id}/bids/",
         {"amount": "55.00"},
         format="json",
@@ -101,8 +108,7 @@ def test_auction_bid_and_buy_now(db, user):
     assert bid_response.status_code == 200
     assert bid_response.data["data"]["amount"] == "55.00"
 
-    _grant_permissions(user, ["auction.buy_now", "auction.read"])
-    buy_now_response = client.post(
+    buy_now_response = bidder_client.post(
         f"/api/auctions/{auction_id}/buy-now/",
         {},
         format="json",
