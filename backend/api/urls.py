@@ -40,4 +40,5 @@ urlpatterns = [
 urlpatterns += router.urls
 urlpatterns += [
     path("", include("apps.users.api.urls")),
+    path("", include("apps.auctions.api.urls")),
 ]
