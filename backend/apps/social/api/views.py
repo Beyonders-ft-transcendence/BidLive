@@ -28,7 +28,7 @@ from apps.users.models import User
 from common.responses import error_response, success_response
 
 
-SOCIAL_TAGS = [social]
+SOCIAL_TAGS = ["social"]
 
 
 @extend_schema_view(
