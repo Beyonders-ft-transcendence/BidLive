@@ -167,19 +167,15 @@ class AuctionViewSet(viewsets.GenericViewSet):
         updated = buy_now(buyer=request.user, auction=auction, ip_address=_client_ip(request))
         return success_response(AuctionDetailSerializer(updated).data, message="Compra imediata concluida.")
 
-    @extend_schema(tags=AUCTION_TAGS, responses={200: OpenApiResponse(description="Watch added.")})
-    @action(detail=True, methods=["post"], url_path="watch")
+    @extend_schema(tags=AUCTION_TAGS, responses={200: OpenApiResponse(description="Watch toggled.")})
+    @action(detail=True, methods=["post", "delete"], url_path="watch")
     def watch(self, request, pk=None):
         auction = self.get_queryset().get(pk=int(pk))
+        if request.method == "DELETE":
+            unwatch_auction(user=request.user, auction=auction)
+            return success_response({}, message="Leilao removido dos favoritos.")
         watch_auction(user=request.user, auction=auction)
         return success_response({}, message="Leilao adicionado aos favoritos.")
-
-    @extend_schema(tags=AUCTION_TAGS, responses={200: OpenApiResponse(description="Watch removed.")})
-    @action(detail=True, methods=["delete"], url_path="watch")
-    def unwatch(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
-        unwatch_auction(user=request.user, auction=auction)
-        return success_response({}, message="Leilao removido dos favoritos.")
 
     @extend_schema(
         tags=AUCTION_TAGS,
