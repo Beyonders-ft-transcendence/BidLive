@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_filters",
+    "channels",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -236,8 +237,34 @@ CACHES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [env("REDIS_URL", default="redis://localhost:6379/0")],
+        },
+    }
+}
+
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=env("REDIS_URL", default=""))
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=env("REDIS_URL", default=""))
+
+CELERY_BEAT_SCHEDULE = {
+    "auctions-activate-scheduled": {
+        "task": "apps.auctions.tasks.activate_auction.activate_scheduled_auctions",
+        "schedule": timedelta(minutes=1),
+    },
+    "auctions-close-expired": {
+        "task": "apps.auctions.tasks.close_auction.close_expired_auctions",
+        "schedule": timedelta(minutes=1),
+    },
+}
+
+AUCTION_IMAGE_ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"]
+AUCTION_IMAGE_MAX_SIZE = 5 * 1024 * 1024
+AUCTION_IMAGE_MAX_COUNT = 8
+AUCTION_LOCK_TIMEOUT = 10
+AUCTION_LOCK_BLOCKING_TIMEOUT = 5
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
