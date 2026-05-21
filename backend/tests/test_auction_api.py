@@ -19,7 +19,7 @@ def _grant_permissions(user, permissions):
 
 def test_auction_create_update_cancel_flow(db, user):
     _grant_permissions(user, ["auction.create", "auction.read", "auction.update", "auction.cancel"])
-    category = AuctionCategory.objects.create(name="Electronics", slug="electronics")
+    category, _ = AuctionCategory.objects.get_or_create(name="Electronics", slug="electronics")
 
     client = APIClient()
     client.force_authenticate(user=user)
@@ -67,7 +67,7 @@ def test_auction_create_update_cancel_flow(db, user):
 
 def test_auction_bid_and_buy_now(db, user):
     _grant_permissions(user, ["auction.create", "auction.read", "auction.buy_now"])
-    category = AuctionCategory.objects.create(name="Art", slug="art")
+    category, _ = AuctionCategory.objects.get_or_create(name="Art", slug="art")
 
     client = APIClient()
     client.force_authenticate(user=user)
@@ -113,7 +113,7 @@ def test_auction_bid_and_buy_now(db, user):
 
 def test_auction_watch_toggle(db, user):
     _grant_permissions(user, ["auction.create", "auction.read", "auction.watch"])
-    category = AuctionCategory.objects.create(name="Fashion", slug="fashion")
+    category, _ = AuctionCategory.objects.get_or_create(name="Fashion", slug="fashion")
 
     client = APIClient()
     client.force_authenticate(user=user)
@@ -147,7 +147,7 @@ def test_auction_watch_toggle(db, user):
 
 def test_category_list_requires_permission(db, user):
     _grant_permissions(user, ["auction.read"])
-    AuctionCategory.objects.create(name="Gaming", slug="gaming")
+    AuctionCategory.objects.get_or_create(name="Gaming", slug="gaming")
 
     client = APIClient()
     client.force_authenticate(user=user)
