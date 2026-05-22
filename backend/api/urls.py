@@ -1,7 +1,4 @@
 from django.urls import include, path
-from rest_framework.routers import DefaultRouter
-
-from apps.domain.views import DomainViewSet
 from apps.users.views import (
     ChangePasswordView,
     FortyTwoAuthorizeView,
@@ -18,9 +15,6 @@ from apps.users.views import (
     UserMeView,
 )
 
-router = DefaultRouter()
-router.register("domain", DomainViewSet, basename="domain")
-
 urlpatterns = [
     path("auth/register/", RegisterView.as_view(), name="auth-register"),
     path("auth/login/", LoginView.as_view(), name="auth-login"),
@@ -36,9 +30,8 @@ urlpatterns = [
     path("auth/42/", FortyTwoAuthorizeView.as_view(), name="auth-42"),
     path("auth/42/callback/", FortyTwoCallbackView.as_view(), name="auth-42-callback"),
 ]
-
-urlpatterns += router.urls
 urlpatterns += [
+    path("", include("apps.domain.api.urls")),
     path("", include("apps.users.api.urls")),
 	path("social/", include("apps.social.api.urls")),
     path("", include("apps.auctions.api.urls")),
