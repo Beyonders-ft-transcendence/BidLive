@@ -50,7 +50,7 @@ export default function Header() {
                         </ul>
                     </div>
 
-                    <div className='bg-gray-200 p-2 flex items-center rounded-md w-96' >
+                    <div className='bg-gray-50 border-gray-200 border p-2 flex items-center rounded-md w-96' >
                         <input type="text"
                             placeholder="Buscar leilões, categorias, vendedores..."
                             className='flex-1 bg-transparent outline-none'

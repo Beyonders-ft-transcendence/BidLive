@@ -3,85 +3,90 @@ import herobcg from "@/assets/images/hero-img.jpg";
 
 export default function HeroSection() {
     return (
-        <section className="mt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-                {/* Main Banner Card */}
-                <div className="lg:col-span-2">
-                    <div className="relative h-100 rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-linear-to-r from-slate-900 to-slate-800">
-                        {/* Background Image */}
-                        <Image
-                            src={herobcg}
-                            alt="Hero Background"
-                            layout="fill"
-                            objectFit="cover"
-                            className="opacity-40"
-                        />
+        <section className="py-8 bg-gray-100">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[420px] max-w-7xl mx-auto">
 
-                        {/* Overlay Gradient */}
-                        <div className="absolute inset-0 bg-linear-to-r from-slate-900/70 to-transparent"></div>
+                {/* Search Card */}
+                <div className="bg-white rounded-md shadow-sm border border-gray-100 p-5 flex flex-col justify-between">
 
-                        {/* Card Content */}
-                        <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-12">
-                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 max-w-xl">
-                                Leilões ao Vivo
-                            </h1>
-                            <p className="text-lg text-gray-200 mb-8 max-w-md">
-                                Participe dos melhores leilões em tempo real e ganhe as melhores oportunidades.
-                            </p>
-                            <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md">
-                                Comece Agora
-                            </button>
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-800 mb-4">
+                            Encontrar Leilões
+                        </h3>
+
+                        <div className="space-y-3">
+
+                            <div>
+                                <label className="text-xs text-gray-500 mb-1 block">
+                                    Categoria
+                                </label>
+
+                                <select className="w-full border rounded-md border-gray-300 px-3 py-2 text-sm outline-none0">
+                                    <option>Todos</option>
+                                    <option>Imóveis</option>
+                                    <option>Veículos</option>
+                                    <option>Tecnologia</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="text-xs text-gray-500 mb-1 block">
+                                    Localização
+                                </label>
+
+                                <input
+                                    type="text"
+                                    placeholder="Digite a cidade"
+                                    className="w-full border rounded-md px-3 py-2 text-sm outline-none border-gray-300"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-xs text-gray-500 mb-1 block">
+                                    Tipo
+                                </label>
+
+                                <select className="w-full border rounded-md px-3 py-2 text-sm outline-none border-gray-300">
+                                    <option>Ao Vivo</option>
+                                    <option>Agendado</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-3 rounded-md transition">
+                        Procurar
+                    </button>
                 </div>
 
-                {/* Right Side Small Cards Grid */}
-                <div className="grid grid-cols-2 gap-2">
-                    {/* Card 1 - Ofertas Quentes */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/hot-offers.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
-                        <div className="relative z-10">
-                            <h3 className="text-sm font-bold mb-1">Ofertas Quentes</h3>
-                            <p className="text-xs opacity-90">Maior movimento</p>
-                        </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
-                            Ver
-                        </button>
-                    </div>
+                {/* Main Hero Banner */}
+                <div className="lg:col-span-3 relative overflow-hidden rounded-md">
 
-                    {/* Card 2 - Próximos Leilões */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/upcoming-auctions.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
-                        <div className="relative z-10">
-                            <h3 className="text-sm font-bold mb-1">Próximos Leilões</h3>
-                            <p className="text-xs opacity-90">Agendados hoje</p>
-                        </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
-                            Ver
-                        </button>
-                    </div>
+                    {/* Background */}
+                    <Image
+                        src={herobcg}
+                        alt="Hero Background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
 
-                    {/* Card 3 - Minhas Apostas */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/my-bids.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
-                        <div className="relative z-10">
-                            <h3 className="text-sm font-bold mb-1">Minhas Apostas</h3>
-                            <p className="text-xs opacity-90">Acompanhe aqui</p>
-                        </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
-                            Ver
-                        </button>
-                    </div>
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/45" />
 
-                    {/* Card 4 - Histórico */}
-                    <div className="rounded-sm overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col justify-between text-white relative" style={{ backgroundImage: "url('/images/cards/history.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                        <div className="absolute inset-0 bg-linear-to-br from-gray-600/60 to-gray-700/80"></div>
-                        <div className="relative z-10">
-                            <h3 className="text-sm font-bold mb-1">Histórico</h3>
-                            <p className="text-xs opacity-90">Seus leilões</p>
-                        </div>
-                        <button className="self-start px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded transition-colors duration-200 mt-2 relative z-10">
-                            Ver
+                    {/* Content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+
+                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 max-w-2xl leading-tight">
+                            Os Melhores Leilões Online
+                        </h1>
+
+                        <p className="text-gray-200 text-sm md:text-base mb-6 max-w-xl">
+                            Participe de leilões em tempo real e descubra oportunidades exclusivas.
+                        </p>
+
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-sm font-medium transition">
+                            Explorar Agora
                         </button>
                     </div>
                 </div>
