@@ -17,7 +17,7 @@ export default function FeaturesBar() {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="bg-white border rounded-sm px-5 py-4 flex items-center gap-3"
+                            className="bg-white border border-gray-300 rounded-sm px-5 py-4 flex items-center gap-3"
                         >
 
                             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">

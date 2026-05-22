@@ -64,7 +64,7 @@ export default function AuctionSection() {
                     {auctions.map((item) => (
                         <div
                             key={item.id}
-                            className="bg-white border rounded-sm overflow-hidden hover:shadow-md transition"
+                            className="bg-white border border-gray-300 rounded-sm overflow-hidden hover:shadow-md transition"
                         >
 
                             {/* Image */}

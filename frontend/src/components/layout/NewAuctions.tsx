@@ -55,7 +55,7 @@ export default function NewAuctionsSection() {
                     {auctions.map((item) => (
                         <div
                             key={item.id}
-                            className="border bg-white rounded-sm p-3 flex gap-4 hover:shadow-md transition"
+                            className="border border-gray-300 bg-white rounded-sm p-3 flex gap-4 hover:shadow-md transition"
                         >
 
                             {/* Image */}
