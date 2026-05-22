@@ -11,7 +11,7 @@ export default function Home() {
     <div className="bg-white flex-1">
       <Header />
 
-      <main className="">
+      <main className="pt-[72px]">
         <HeroSection />
         <AuctionSection />
         <div className="bg-gray-100" >
