@@ -8,6 +8,7 @@ from apps.users.authorization_service import (
     log_permission_audit,
     user_has_permission,
 )
+from apps.users.constants import SYSTEM_ROLE_NAMES
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
@@ -52,6 +53,10 @@ def update_role(
         raise PermissionDenied({"permission": ["Permissao role.manage necessaria."]})
 
     if "name" in data:
+        if role.name in SYSTEM_ROLE_NAMES and data["name"] != role.name:
+            raise ValidationError({"name": ["Nao e permitido renomear roles do sistema."]})
+        if Role.objects.exclude(pk=role.pk).filter(name=data["name"]).exists():
+            raise ValidationError({"name": ["Role ja existe."]})
         role.name = data["name"]
     if "description" in data:
         role.description = data["description"]
@@ -77,6 +82,8 @@ def update_role(
 def delete_role(*, actor: User, role: Role, ip_address: str = "") -> None:
     if not user_has_permission(user=actor, permission_name="role.manage"):
         raise PermissionDenied({"permission": ["Permissao role.manage necessaria."]})
+    if role.name in SYSTEM_ROLE_NAMES:
+        raise ValidationError({"role": ["Nao e permitido remover roles do sistema."]})
     if UserRole.objects.filter(role=role).exists():
         raise ValidationError({"role": ["Role possui usuarios associados."]})
 
