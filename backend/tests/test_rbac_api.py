@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from apps.users.constants import ROLE_PERSONAL_USER, ROLE_SUPER_ADMIN
+from apps.users.constants import ROLE_SUPER_ADMIN, ROLE_USER, ROLE_VISITOR
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
@@ -41,8 +41,8 @@ def test_super_admin_lists_users(super_admin_client):
 
 
 @pytest.mark.django_db
-def test_personal_user_cannot_list_users(user):
-    role, _ = Role.objects.get_or_create(name=ROLE_PERSONAL_USER)
+def test_user_cannot_list_users(user):
+    role, _ = Role.objects.get_or_create(name=ROLE_USER)
     UserRole.objects.get_or_create(user=user, role=role)
 
     client = APIClient()
@@ -56,6 +56,16 @@ def test_personal_user_cannot_list_users(user):
     response = client.get("/api/users/")
     assert response.status_code == 200
     assert len(response.data["data"]["results"] if "results" in response.data["data"] else response.data["data"]) == 1
+
+
+@pytest.mark.django_db
+def test_super_admin_cannot_delete_system_role(super_admin_client):
+    role, _ = Role.objects.get_or_create(name=ROLE_VISITOR)
+
+    response = super_admin_client.delete(f"/api/roles/{role.id}/")
+
+    assert response.status_code == 400
+    assert response.data["success"] is False
 
 
 @pytest.mark.django_db
