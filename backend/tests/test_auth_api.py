@@ -4,6 +4,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework.test import APIClient
 
+from apps.users.constants import ROLE_USER
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 
 
@@ -23,6 +24,8 @@ def test_auth_register_and_login_flow():
     )
     assert register_response.status_code == 201
     assert register_response.data["success"] is True
+    created_user = User.objects.get(email="new.user@example.com")
+    assert created_user.roles.filter(name=ROLE_USER).exists()
 
     login_response = client.post(
         "/api/auth/login/",
@@ -87,7 +90,7 @@ def test_auth_me_includes_roles_permissions():
         full_name="Member User",
         password="StrongPass123!",
     )
-    role, _ = Role.objects.get_or_create(name="PERSONAL_USER")
+    role, _ = Role.objects.get_or_create(name=ROLE_USER)
     permission, _ = Permission.objects.get_or_create(name="auction.bid")
     RolePermission.objects.get_or_create(role=role, permission=permission)
     UserRole.objects.get_or_create(user=user, role=role)
