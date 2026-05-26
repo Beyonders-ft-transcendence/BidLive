@@ -58,10 +58,21 @@ RBAC_TAGS = ["rbac"]
     destroy=extend_schema(tags=RBAC_TAGS, summary="Remover usuario (soft delete)"),
 )
 class UserViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
+    serializer_class = UserDetailSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = UserFilter
     search_fields = ["email", "username", "full_name"]
     ordering_fields = ["created_at", "email", "username", "status"]
+
+    def get_serializer_class(self):
+        serializer_map = {
+            "list": UserListSerializer,
+            "retrieve": UserDetailSerializer,
+            "create": UserCreateSerializer,
+            "partial_update": UserUpdateSerializer,
+            "ban": UserBanSerializer,
+        }
+        return serializer_map.get(self.action, self.serializer_class)
 
     def get_required_permissions(self):
         action_map = {
@@ -215,6 +226,16 @@ class UserViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
 )
 class RoleViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
     required_permissions = ["role.manage"]
+    serializer_class = RoleSerializer
+
+    def get_serializer_class(self):
+        serializer_map = {
+            "list": RoleSerializer,
+            "retrieve": RoleSerializer,
+            "create": RoleWriteSerializer,
+            "partial_update": RoleWriteSerializer,
+        }
+        return serializer_map.get(self.action, self.serializer_class)
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -302,6 +323,16 @@ class RoleViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
 )
 class PermissionViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
     required_permissions = ["permission.manage"]
+    serializer_class = PermissionSerializer
+
+    def get_serializer_class(self):
+        serializer_map = {
+            "list": PermissionSerializer,
+            "retrieve": PermissionSerializer,
+            "create": PermissionWriteSerializer,
+            "partial_update": PermissionWriteSerializer,
+        }
+        return serializer_map.get(self.action, self.serializer_class)
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
