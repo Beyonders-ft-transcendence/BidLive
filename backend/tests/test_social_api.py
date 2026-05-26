@@ -191,3 +191,36 @@ class TestRejectFriendRequest:
             f"/api/social/friendships/{friendship_accepted.id}/reject/"
         )
         assert res.status_code == 400
+
+
+# REMOVE FRIEND
+
+@pytest.mark.django_db
+class TestRemoveFriend:
+
+    def test_remove_friendship_by_requester(self, auth_client, friendship_accepted):
+        """The sender of the original request can remove the friendship."""
+        res = auth_client.delete(f"/api/social/friendships/{friendship_accepted.id}/")
+        assert res.status_code == 200
+        assert res.data["success"] is True
+
+    def test_remove_friendship_by_addressee(self, other_auth_client, friendship_accepted):
+        """The recipient can also remove the friendship."""
+        res = other_auth_client.delete(f"/api/social/friendships/{friendship_accepted.id}/")
+        assert res.status_code == 200
+
+    def test_remove_deletes_db_record(self, auth_client, friendship_accepted):
+        """Confirms that the record has been deleted from the database."""
+        pk = friendship_accepted.id
+        auth_client.delete(f"/api/social/friendships/{pk}/")
+        assert not Friendship.objects.filter(id=pk).exists()
+
+    def test_remove_pending_friendship_fails(self, auth_client, friendship_pending):
+        """The sender cannot remove a pending friendship."""
+        res = auth_client.delete(f"/api/social/friendships/{friendship_pending.id}/")
+        assert res.status_code == 400
+
+    def test_remove_nonexistent_friendship(self, auth_client):
+        """ID nonexistent → 400."""
+        res = auth_client.delete("/api/social/friendships/99999/")
+        assert res.status_code == 400
