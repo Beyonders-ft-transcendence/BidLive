@@ -199,6 +199,8 @@ REST_FRAMEWORK = {
         "auth_login": "10/minute",
         "auth_register": "5/minute",
         "auth_password": "5/minute",
+        "bid_user": "30/minute",
+        "bid_ip": "60/minute",
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -265,6 +267,10 @@ AUCTION_IMAGE_MAX_SIZE = 5 * 1024 * 1024
 AUCTION_IMAGE_MAX_COUNT = 8
 AUCTION_LOCK_TIMEOUT = 10
 AUCTION_LOCK_BLOCKING_TIMEOUT = 5
+AUCTION_BID_RATE_LIMIT_COUNT = 5
+AUCTION_BID_RATE_LIMIT_WINDOW_SECONDS = 10
+AUCTION_BID_RATE_LIMIT_BLOCK_SECONDS = 30
+AUCTION_BID_COOLDOWN_SECONDS = 0
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
