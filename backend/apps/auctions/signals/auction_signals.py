@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from apps.auctions.events import AUCTION_ENDED, AUCTION_STARTED, AUCTION_UPDATED
 from apps.auctions.models import Auction, AuctionStatus
-from apps.auctions.services.realtime_service import publish_auction_event, publish_auction_snapshot
+from apps.auctions.services.realtime_service import build_auction_snapshot, publish_auction_event, publish_auction_snapshot
 
 
 @receiver(pre_save, sender=Auction)
@@ -34,5 +34,6 @@ def _publish_status_changes(sender, instance: Auction, **kwargs):
     )
     publish_auction_snapshot(
         auction_id=instance.id,
-        snapshot={"status": instance.status, "start_time": instance.start_time, "end_time": instance.end_time},
+        snapshot=build_auction_snapshot(auction=instance),
+        broadcast=True,
     )
