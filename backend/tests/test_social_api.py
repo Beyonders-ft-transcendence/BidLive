@@ -224,3 +224,48 @@ class TestRemoveFriend:
         """ID nonexistent → 400."""
         res = auth_client.delete("/api/social/friendships/99999/")
         assert res.status_code == 400
+
+
+# LIST FRIENDS 
+
+@pytest.mark.django_db
+class TestListFriends:
+
+    def test_list_friends_returns_accepted_only(self, auth_client, friendship_accepted, other_user):
+        """Only ACCEPTED friendships appear in the list."""
+        res = auth_client.get("/api/social/friendships/")
+        assert res.status_code == 200
+        ids = [f["id"] for f in res.data["data"]]
+        assert other_user.id in ids
+
+    def test_list_friends_excludes_pending(self, auth_client, friendship_pending):
+        """Only ACCEPTED friendships appear in the list."""
+        res = auth_client.get("/api/social/friendships/")
+        assert res.status_code == 200
+        assert len(res.data["data"]) == 0
+
+    def test_list_friends_empty_when_no_friends(self, auth_client):
+        """Only ACCEPTED friendships appear in the list."""
+        res = auth_client.get("/api/social/friendships/")
+        assert res.status_code == 200
+        assert res.data["data"] == []
+
+    def test_list_online_friends(self, auth_client, other_user, friendship_accepted):
+        """Only friends with is_online=True appear in the list."""
+        other_user.is_online = True
+        other_user.save(update_fields=["is_online"])
+
+        res = auth_client.get("/api/social/friendships/online/")
+        assert res.status_code == 200
+        ids = [f["id"] for f in res.data["data"]]
+        assert other_user.id in ids
+
+    def test_list_online_friends_excludes_offline(self, auth_client, other_user, friendship_accepted):
+        """Only friends with is_online=True appear in the list."""
+        other_user.is_online = False
+        other_user.save(update_fields=["is_online"])
+
+        res = auth_client.get("/api/social/friendships/online/")
+        assert res.status_code == 200
+        assert res.data["data"] == []
+
