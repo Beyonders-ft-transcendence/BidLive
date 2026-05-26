@@ -85,3 +85,11 @@ def friendship_accepted(user, other_user):
     )
 
 
+@pytest.fixture()
+def friendship_blocked(user, other_user):
+    """Blocking: user blocked other_user."""
+    return Friendship.objects.create(
+        requester=user,
+        addressee=other_user,
+        status=FriendshipStatus.BLOCKED,
+    )
