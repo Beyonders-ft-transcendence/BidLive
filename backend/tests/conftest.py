@@ -75,3 +75,13 @@ def friendship_pending(user, other_user):
     )
 
 
+@pytest.fixture()
+def friendship_accepted(user, other_user):
+    """Accepted friendship: user → other_user."""
+    return Friendship.objects.create(
+        requester=user,
+        addressee=other_user,
+        status=FriendshipStatus.ACCEPTED,
+    )
+
+
