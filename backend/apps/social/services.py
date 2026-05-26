@@ -89,7 +89,7 @@ def block_user(*, blocker: User, blocked: User) -> Friendship:
 		existing.requester = blocker
 		existing.addressee = blocked
 		existing.status = FriendshipStatus.BLOCKED
-		existing.save(update_fields=["requester", "addressee", "status", "upadted_at"])
+		existing.save(update_fields=["requester", "addressee", "status", "updated_at"])
 		return existing
 
 	return Friendship.objects.create(
