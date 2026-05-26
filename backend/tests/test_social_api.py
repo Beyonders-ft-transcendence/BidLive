@@ -300,3 +300,114 @@ class TestListRequests:
         res = auth_client.get("/api/social/friendships/requests/sent/")
         assert res.status_code == 200
         assert len(res.data["data"]) == 0
+
+
+# BLOCK / UNBLOCK SYSTEM
+
+@pytest.mark.django_db
+class TestBlockUser:
+
+    def test_block_success(self, auth_client, other_user):
+        """Block a user → BLOCKED record created."""
+        res = auth_client.post(
+            "/api/social/users/block/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+
+    def test_block_creates_blocked_record(self, auth_client, user, other_user):
+        """Confirm the BLOCKED record is created in the DB."""
+        auth_client.post(
+            "/api/social/users/block/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert Friendship.objects.filter(
+            requester=user,
+            addressee=other_user,
+            status=FriendshipStatus.BLOCKED,
+        ).exists()
+
+    def test_block_converts_existing_friendship(self, auth_client, user, other_user, friendship_accepted):
+        """
+        If they were already friends, blocking converts the existing record
+        instead of creating a duplicate.
+        """
+        auth_client.post(
+            "/api/social/users/block/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        # Deve existir só 1 registo (o convertido), não 2
+        assert Friendship.objects.filter(
+            requester=user, addressee=other_user
+        ).count() == 1
+        assert Friendship.objects.get(
+            requester=user, addressee=other_user
+        ).status == FriendshipStatus.BLOCKED
+
+    def test_block_already_blocked_user(self, auth_client, other_user, friendship_blocked):
+        """Block someone who is already blocked → 400."""
+        res = auth_client.post(
+            "/api/social/users/block/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert res.status_code == 400
+
+    def test_block_self(self, auth_client, user):
+        """Cannot block yourself → 400."""
+        res = auth_client.post(
+            "/api/social/users/block/",
+            {"user_id": user.id},
+            format="json",
+        )
+        assert res.status_code == 400
+
+    def test_block_missing_user_id(self, auth_client):
+        """Missing user_id field → 400."""
+        res = auth_client.post("/api/social/users/block/", {}, format="json")
+        assert res.status_code == 400
+
+    def test_unblock_success(self, auth_client, other_user, friendship_blocked):
+        """Unblock a user → BLOCKED record deleted."""
+        res = auth_client.post(
+            "/api/social/users/unblock/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+
+    def test_unblock_deletes_record(self, auth_client, user, other_user, friendship_blocked):
+        """Confirm the BLOCKED record is deleted from the DB."""
+        auth_client.post(
+            "/api/social/users/unblock/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert not Friendship.objects.filter(
+            requester=user,
+            addressee=other_user,
+            status=FriendshipStatus.BLOCKED,
+        ).exists()
+
+    def test_unblock_when_not_blocked(self, auth_client, other_user):
+        """Unblock someone who is not blocked → 400."""
+        res = auth_client.post(
+            "/api/social/users/unblock/",
+            {"user_id": other_user.id},
+            format="json",
+        )
+        assert res.status_code == 400
+
+    def test_blocked_user_cannot_send_request(self, auth_client, other_user, friendship_blocked):
+        """After blocking, the blocker cannot send a request to the blocked user → 400."""
+        res = auth_client.post(
+            "/api/social/friendships/",
+            {"addressee_id": other_user.id},
+            format="json",
+        )
+        assert res.status_code == 400
