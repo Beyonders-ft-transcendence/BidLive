@@ -35,7 +35,16 @@ def list_bids_for_auction(*, auction_id: int) -> QuerySet[Bid]:
     return (
         Bid.objects.filter(auction_id=auction_id)
         .select_related("bidder")
-        .order_by("-amount", "created_at")
+        .order_by("-created_at", "-id")
+    )
+
+
+def get_highest_bid_for_auction(*, auction_id: int) -> Bid | None:
+    return (
+        Bid.objects.filter(auction_id=auction_id)
+        .select_related("bidder")
+        .order_by("-amount", "created_at", "id")
+        .first()
     )
 
 
