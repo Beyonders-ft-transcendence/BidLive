@@ -50,8 +50,14 @@ def api_client():
 
 @pytest.fixture()
 def auth_client(user):
-    """ Client authenticated as `user`. """
+    """Client authenticated as `user`. """
     client = APIClient()
     client.force_authenticate(user=user)
     return client
 
+@pytest.fixture()
+def other_auth_client(other_user):
+    """Client authenticated as `other_user`."""
+    client = APIClient()
+    client.force_authenticate(user=other_user)
+    return client
