@@ -115,3 +115,45 @@ class TestSendFriendRequest:
         """Required field missing → 400."""
         res = auth_client.post("/api/social/friendships/", {}, format="json")
         assert res.status_code == 400
+
+
+# ACCEPT FRIEND REQUEST
+
+@pytest.mark.django_db
+class TestAcceptFriendRequest:
+
+    def test_accept_success(self, other_auth_client, friendship_pending):
+        """other_user accepts the request sent by user."""
+        res = other_auth_client.post(
+            f"/api/social/friendships/{friendship_pending.id}/accept/"
+        )
+        assert res.status_code == 200
+        assert res.data["data"]["status"] == FriendshipStatus.ACCEPTED
+
+    def test_accept_updates_db_status(self, other_auth_client, friendship_pending):
+        """Confirms that the status has been updated in the database."""
+        other_auth_client.post(f"/api/social/friendships/{friendship_pending.id}/accept/")
+        friendship_pending.refresh_from_db()
+        assert friendship_pending.status == FriendshipStatus.ACCEPTED
+
+    def test_requester_cannot_accept_own_request(self, auth_client, friendship_pending):
+        """
+        The sender of the request cannot accept it — only the recipient can.
+        auth_client is the requester → 400.
+        """
+        res = auth_client.post(
+            f"/api/social/friendships/{friendship_pending.id}/accept/"
+        )
+        assert res.status_code == 400
+
+    def test_accept_already_accepted(self, other_auth_client, friendship_accepted):
+        """Request already accepted → 400."""
+        res = other_auth_client.post(
+            f"/api/social/friendships/{friendship_accepted.id}/accept/"
+        )
+        assert res.status_code == 400
+
+    def test_accept_nonexistent_friendship(self, auth_client):
+        """ID that does not exist → 400."""
+        res = auth_client.post("/api/social/friendships/99999/accept/")
+        assert res.status_code == 400
