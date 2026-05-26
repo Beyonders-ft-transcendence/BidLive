@@ -340,7 +340,6 @@ class TestBlockUser:
             {"user_id": other_user.id},
             format="json",
         )
-        # Deve existir só 1 registo (o convertido), não 2
         assert Friendship.objects.filter(
             requester=user, addressee=other_user
         ).count() == 1
