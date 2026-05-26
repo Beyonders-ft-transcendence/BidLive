@@ -38,11 +38,7 @@ SOCIAL_TAGS = ["social"]
     destroy=extend_schema(tags=SOCIAL_TAGS, summary="Remover amizade"),
 )
 class FriendshipViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet para gerir amizades.
-    Usa apenas IsAuthenticated — qualquer utilizador autenticado
-    gere as suas próprias amizades, sem necessidade de RBAC.
-    """
+
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -140,7 +136,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
 
 class BlockViewSet(viewsets.GenericViewSet):
-    """ViewSet para bloquear/desbloquear utilizadores."""
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(tags=SOCIAL_TAGS, summary="Bloquear utilizador")
