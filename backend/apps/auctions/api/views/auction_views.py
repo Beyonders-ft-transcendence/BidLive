@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
 from apps.auctions.filters import AuctionFilter
@@ -21,6 +22,8 @@ from apps.auctions.serializers import (
     BidSerializer,
 )
 from apps.auctions.services import buy_now, cancel_auction, create_auction, place_bid, update_auction, watch_auction, unwatch_auction
+from apps.auctions.services.anti_spam_service import BidRateLimitExceeded
+from apps.auctions.throttles import BidIPThrottle, BidUserThrottle
 from apps.users.authorization_service import user_has_permission
 from apps.users.permissions.rbac import HasRBACPermission
 from common.responses import error_response, success_response
@@ -44,6 +47,7 @@ AUCTION_TAGS = ["auctions"]
     destroy=extend_schema(tags=AUCTION_TAGS, summary="Remover leilao"),
 )
 class AuctionViewSet(viewsets.GenericViewSet):
+    serializer_class = AuctionDetailSerializer
     permission_classes = [IsAuthenticated, HasRBACPermission, IsAuctionOwnerOrManager]
     filterset_class = AuctionFilter
     search_fields = ["item__title", "item__description"]
@@ -68,6 +72,18 @@ class AuctionViewSet(viewsets.GenericViewSet):
     def required_permissions(self):
         return self.get_required_permissions()
 
+    def get_serializer_class(self):
+        serializer_map = {
+            "list": AuctionListSerializer,
+            "retrieve": AuctionDetailSerializer,
+            "create": AuctionCreateSerializer,
+            "partial_update": AuctionUpdateSerializer,
+            "cancel": AuctionCancelSerializer,
+            "buy_now": AuctionBuyNowSerializer,
+            "bids": BidSerializer if self.request.method.lower() == "get" else BidCreateSerializer,
+        }
+        return serializer_map.get(self.action, self.serializer_class)
+
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Auction.objects.none()
@@ -76,6 +92,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
         if user_has_permission(user=user, permission_name="auction.manage"):
             return queryset
         return queryset.filter(Q(item__seller=user) | Q(status=AuctionStatus.LIVE))
+
+    def get_throttles(self):
+        if self.action == "bids" and self.request.method.lower() == "post":
+            return [BidUserThrottle(), BidIPThrottle()]
+        return super().get_throttles()
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
@@ -179,6 +200,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
+        summary="Listar ou registrar bids",
+        description=(
+            "GET returns paginated bid history ordered by newest first. "
+            "POST validates and registers a realtime bid with anti-spam protection."
+        ),
         request=BidCreateSerializer,
         responses={200: BidSerializer(many=False)},
     )
@@ -195,10 +221,16 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
         serializer = BidCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        bid = place_bid(
-            bidder=request.user,
-            auction=auction,
-            amount=serializer.validated_data["amount"],
-            ip_address=_client_ip(request),
-        )
+        try:
+            bid = place_bid(
+                bidder=request.user,
+                auction=auction,
+                amount=serializer.validated_data["amount"],
+                ip_address=_client_ip(request),
+                metadata=serializer.validated_data.get("metadata") or {},
+            )
+        except BidRateLimitExceeded as exc:
+            return error_response([exc.detail], status_code=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as exc:
+            return error_response([exc.detail], status_code=status.HTTP_400_BAD_REQUEST)
         return success_response(BidSerializer(bid).data, message="Bid registrado.")
