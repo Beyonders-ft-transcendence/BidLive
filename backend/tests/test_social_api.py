@@ -269,3 +269,34 @@ class TestListFriends:
         assert res.status_code == 200
         assert res.data["data"] == []
 
+
+# LIST RECEIVED AND SENT FRIEND REQUESTS
+
+@pytest.mark.django_db
+class TestListRequests:
+
+    def test_list_received_requests(self, other_auth_client, friendship_pending, user):
+        """other_user received a request from user → appears in /requests/received/."""
+        res = other_auth_client.get("/api/social/friendships/requests/received/")
+        assert res.status_code == 200
+        requester_ids = [f["requester"]["id"] for f in res.data["data"]]
+        assert user.id in requester_ids
+
+    def test_list_sent_requests(self, auth_client, friendship_pending, other_user):
+        """user sent a request to other_user → appears in /requests/sent/."""
+        res = auth_client.get("/api/social/friendships/requests/sent/")
+        assert res.status_code == 200
+        addressee_ids = [f["addressee"]["id"] for f in res.data["data"]]
+        assert other_user.id in addressee_ids
+
+    def test_received_excludes_accepted(self, other_auth_client, friendship_accepted):
+        """Accepted friendships do not appear in received requests."""
+        res = other_auth_client.get("/api/social/friendships/requests/received/")
+        assert res.status_code == 200
+        assert len(res.data["data"]) == 0
+
+    def test_sent_excludes_accepted(self, auth_client, friendship_accepted):
+        """Accepted friendships do not appear in sent requests."""
+        res = auth_client.get("/api/social/friendships/requests/sent/")
+        assert res.status_code == 200
+        assert len(res.data["data"]) == 0
