@@ -157,3 +157,37 @@ class TestAcceptFriendRequest:
         """ID that does not exist → 400."""
         res = auth_client.post("/api/social/friendships/99999/accept/")
         assert res.status_code == 400
+
+
+# REJECT FRIEND REQUEST
+
+@pytest.mark.django_db
+class TestRejectFriendRequest:
+
+    def test_reject_success(self, other_auth_client, friendship_pending):
+        """Recipient rejects request → record deleted from database."""
+        res = other_auth_client.post(
+            f"/api/social/friendships/{friendship_pending.id}/reject/"
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+
+    def test_reject_deletes_db_record(self, other_auth_client, friendship_pending):
+        """Confirms that the record has been deleted from the database."""
+        pk = friendship_pending.id
+        other_auth_client.post(f"/api/social/friendships/{pk}/reject/")
+        assert not Friendship.objects.filter(id=pk).exists()
+
+    def test_requester_cannot_reject_own_request(self, auth_client, friendship_pending):
+        """The sender of the request cannot reject it — only the recipient can."""
+        res = auth_client.post(
+            f"/api/social/friendships/{friendship_pending.id}/reject/"
+        )
+        assert res.status_code == 400
+
+    def test_reject_already_accepted_friendship(self, other_auth_client, friendship_accepted):
+        """The recipient cannot reject a friendship that has already been accepted."""
+        res = other_auth_client.post(
+            f"/api/social/friendships/{friendship_accepted.id}/reject/"
+        )
+        assert res.status_code == 400
