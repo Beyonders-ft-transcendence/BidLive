@@ -77,26 +77,32 @@ def remove_friend(*, friendship_id: int, user: User) -> None:
 
 @transaction.atomic
 def block_user(*, blocker: User, blocked: User) -> Friendship:
-	if blocker.id == blocked.id:
-		raise ValidationError({"detail": "Não podes bloquear-te a ti mesmo."})
-	
-	existing = get_friendship(user=blocker, other_user=blocked)
+    if blocker.id == blocked.id:
+        raise ValidationError({"detail": "Não podes bloquear-te a ti mesmo."})
 
-	if existing:
-		if existing.status == FriendshipStatus.BLOCKED:
-			raise ValidationError({"detail": "Utilizador já está bloqueado."})
-		
-		existing.requester = blocker
-		existing.addressee = blocked
-		existing.status = FriendshipStatus.BLOCKED
-		existing.save(update_fields=["requester", "addressee", "status", "updated_at"])
-		return existing
+    existing = Friendship.objects.filter(
+        requester=blocker,
+        addressee=blocked
+    ).first() or Friendship.objects.filter(
+        requester=blocked,
+        addressee=blocker
+    ).first()
 
-	return Friendship.objects.create(
-		requester=blocker,
-		addressee=blocked,
-		status=FriendshipStatus.BLOCKED,
-	)
+    if existing:
+        if existing.status == FriendshipStatus.BLOCKED:
+            raise ValidationError({"detail": "Utilizador já está bloqueado."})
+
+        existing.requester = blocker
+        existing.addressee = blocked
+        existing.status = FriendshipStatus.BLOCKED
+        existing.save(update_fields=["requester", "addressee", "status", "updated_at"])
+        return existing
+
+    return Friendship.objects.create(
+        requester=blocker,
+        addressee=blocked,
+        status=FriendshipStatus.BLOCKED,
+    )
 
 
 @transaction.atomic
