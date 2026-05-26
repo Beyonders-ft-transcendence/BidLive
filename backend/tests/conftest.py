@@ -61,3 +61,17 @@ def other_auth_client(other_user):
     client = APIClient()
     client.force_authenticate(user=other_user)
     return client
+
+
+# Friendship fixtures — pre-created states
+
+@pytest.fixture()
+def friendship_pending(user, other_user):
+    """Pending friendship request: user → other_user."""
+    return Friendship.objects.create(
+        requester=user,
+        addressee=other_user,
+        status=FriendshipStatus.PENDING,
+    )
+
+
