@@ -1,27 +1,13 @@
 from rest_framework import serializers
 
 from apps.chat.models import ChatRoom, Message, PrivateConversation, PrivateMessage
+from apps.users.models import User
 
 
-class ChatRoomSerializer(serializers.ModelSerializer):
+class ChatUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChatRoom
-        fields = ("id", "auction", "name", "created_at")
+        model = User
+        fields = ("id", "username", "full_name", "avatar_url", "is_online")
+        read_only_fields = fields
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Message
-        fields = ("id", "room", "sender", "message", "is_deleted", "created_at")
-
-
-class PrivateConversationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PrivateConversation
-        fields = ("id", "user_one", "user_two", "created_at")
-
-
-class PrivateMessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PrivateMessage
-        fields = ("id", "conversation", "sender", "message", "is_read", "created_at")
