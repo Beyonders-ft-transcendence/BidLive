@@ -25,7 +25,7 @@ from apps.social.services import (
     send_friend_request,
     unblock_user,
 )
-from apps.users.models import User  # ← apps.users (não core.users)
+from apps.users.models import User
 from common.responses import error_response, success_response
 
 
