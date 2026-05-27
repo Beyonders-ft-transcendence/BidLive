@@ -101,3 +101,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         model = ChatRoom
         fields = ("id", "auction", "name", "created_at")
         read_only_fields = fields
+
+
+class SendRoomMessageSerializer(serializers.Serializer):
+    message = serializers.CharField(max_length=2000, trim_whitespace=True)
