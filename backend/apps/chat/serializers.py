@@ -78,3 +78,12 @@ class SendPrivateMessageSerializer(serializers.Serializer):
             return User.objects.get(id=value, is_active=True, is_deleted=False)
         except User.DoesNotExist:
             raise serializers.ValidationError("Utilizador não encontrado.")
+
+
+class RoomMessageSerializer(serializers.ModelSerializer):
+    sender = ChatUserSerializer(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ("id", "room", "sender", "message", "is_deleted", "created_at")
+        read_only_fields = fields
