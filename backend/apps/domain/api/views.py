@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
@@ -8,6 +9,17 @@ from apps.domain.serializers import DomainSerializer
 from apps.domain.services import create_domain, update_domain
 
 
+DOMAIN_TAGS = ["domains"]
+
+
+@extend_schema_view(
+    list=extend_schema(tags=DOMAIN_TAGS, summary="Listar dominios"),
+    retrieve=extend_schema(tags=DOMAIN_TAGS, summary="Detalhar dominio"),
+    create=extend_schema(tags=DOMAIN_TAGS, summary="Criar dominio"),
+    update=extend_schema(tags=DOMAIN_TAGS, summary="Atualizar dominio"),
+    partial_update=extend_schema(tags=DOMAIN_TAGS, summary="Atualizar dominio"),
+    destroy=extend_schema(tags=DOMAIN_TAGS, summary="Remover dominio"),
+)
 class DomainViewSet(viewsets.ModelViewSet):
     serializer_class = DomainSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
