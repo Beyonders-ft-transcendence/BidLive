@@ -67,3 +67,14 @@ class PrivateConversationSerializer(serializers.ModelSerializer):
         if not request:
             return 0
         return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
+
+
+class SendPrivateMessageSerializer(serializers.Serializer):
+    recipient_id = serializers.IntegerField()
+    message = serializers.CharField(max_length=2000, trim_whitespace=True)
+
+    def validate_recipient_id(self, value: int) -> User:
+        try:
+            return User.objects.get(id=value, is_active=True, is_deleted=False)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Utilizador não encontrado.")
