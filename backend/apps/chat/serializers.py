@@ -85,5 +85,12 @@ class RoomMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ("id", "room", "sender", "message", "is_deleted", "created_at")
+        fields = (
+            "id", 
+            "room", 
+            "sender", 
+            "message", 
+            "is_deleted", 
+            "created_at"
+        )
         read_only_fields = fields
