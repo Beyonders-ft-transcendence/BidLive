@@ -52,3 +52,22 @@ def list_private_messages(
             conversation__user_two=user,
         )
     ).select_related("sender").order_by("created_at")
+
+
+def get_or_create_auction_room(*, auction_id: int) -> tuple[ChatRoom, bool]:
+    return ChatRoom.objects.get_or_create(
+        auction_id=auction_id,
+        defaults={"name": f"Auction {auction_id} Chat"},
+    )
+
+
+def get_room_messages(*, room_id: int) -> QuerySet[Message]:
+    return (
+        Message.objects.filter(room_id=room_id, is_deleted=False)
+        .select_related("sender")
+        .order_by("created_at")
+    )
+
+
+def get_room(*, room_id: int) -> ChatRoom | None:
+    return ChatRoom.objects.filter(id=room_id).select_related("auction").first()
