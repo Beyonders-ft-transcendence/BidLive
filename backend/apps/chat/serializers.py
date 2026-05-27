@@ -17,3 +17,18 @@ class ChatUserSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class PrivateMessageSerializer(serializers.ModelSerializer):
+    sender = ChatUserSerializer(read_only=True)
+
+    class Meta:
+        model = PrivateMessage
+        fields = (
+            "id", 
+            "conversation", 
+            "sender", 
+            "message", 
+            "is_read", 
+            "created_at"
+        )
+        read_only_fields = fields
+
