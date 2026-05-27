@@ -94,3 +94,10 @@ class RoomMessageSerializer(serializers.ModelSerializer):
             "created_at"
         )
         read_only_fields = fields
+
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatRoom
+        fields = ("id", "auction", "name", "created_at")
+        read_only_fields = fields
