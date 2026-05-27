@@ -67,3 +67,34 @@ def delete_private_message(*, message_id: int, user: User) -> None:
         raise PermissionDenied({"detail": "Não tens permissão para apagar esta mensagem."})
 
     message.delete()
+
+
+@transaction.atomic
+def send_room_message(
+    *, sender: User, auction_id: int, text: str
+) -> Message:
+    if not text or not text.strip():
+        raise ValidationError({"detail": "A mensagem não pode estar vazia."})
+
+    room, _ = get_or_create_auction_room(auction_id=auction_id)
+
+    return Message.objects.create(
+        room=room,
+        sender=sender,
+        message=text.strip(),
+    )
+
+
+@transaction.atomic
+def soft_delete_room_message(*, message_id: int, user: User) -> Message:
+    try:
+        message = Message.objects.get(id=message_id)
+    except Message.DoesNotExist:
+        raise ValidationError({"detail": "Mensagem não encontrada."})
+
+    if message.sender_id != user.id:
+        raise PermissionDenied({"detail": "Só o autor pode apagar esta mensagem."})
+
+    message.is_deleted = True
+    message.save(update_fields=["is_deleted", "updated_at"])
+    return message
