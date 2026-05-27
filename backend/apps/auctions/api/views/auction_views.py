@@ -112,6 +112,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
+        summary="Criar leilao",
         request=AuctionCreateSerializer,
         responses={201: AuctionDetailSerializer},
     )
@@ -132,6 +133,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
+        summary="Atualizar leilao",
         request=AuctionUpdateSerializer,
         responses={200: AuctionDetailSerializer},
     )
@@ -161,6 +163,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
+        summary="Cancelar leilao",
         request=AuctionCancelSerializer,
         responses={200: AuctionDetailSerializer},
     )
@@ -179,6 +182,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
+        summary="Comprar agora",
         request=AuctionBuyNowSerializer,
         responses={200: AuctionDetailSerializer},
     )
@@ -188,7 +192,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
         updated = buy_now(buyer=request.user, auction=auction, ip_address=_client_ip(request))
         return success_response(AuctionDetailSerializer(updated).data, message="Compra imediata concluida.")
 
-    @extend_schema(tags=AUCTION_TAGS, responses={200: OpenApiResponse(description="Watch toggled.")})
+    @extend_schema(
+        tags=AUCTION_TAGS,
+        summary="Adicionar ou remover favorito",
+        responses={200: OpenApiResponse(description="Watch toggled.")},
+    )
     @action(detail=True, methods=["post", "delete"], url_path="watch")
     def watch(self, request, pk=None):
         auction = self.get_queryset().get(pk=int(pk))
@@ -200,11 +208,16 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         tags=AUCTION_TAGS,
-        summary="Listar ou registrar bids",
-        description=(
-            "GET returns paginated bid history ordered by newest first. "
-            "POST validates and registers a realtime bid with anti-spam protection."
-        ),
+        methods=["GET"],
+        summary="Listar bids",
+        description="Returns paginated bid history ordered by newest first.",
+        responses={200: BidSerializer(many=True)},
+    )
+    @extend_schema(
+        tags=AUCTION_TAGS,
+        methods=["POST"],
+        summary="Registrar bid",
+        description="Validates and registers a realtime bid with anti-spam protection.",
         request=BidCreateSerializer,
         responses={200: BidSerializer(many=False)},
     )
