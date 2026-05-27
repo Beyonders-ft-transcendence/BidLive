@@ -37,3 +37,18 @@ def list_private_conversations(*, user: User) -> QuerySet[PrivateConversation]:
         .select_related("user_one", "user_two")
         .order_by("-updated_at")
     )
+
+
+def list_private_messages(
+    *, conversation_id: int, user: User
+) -> QuerySet[PrivateMessage]:
+    return (
+        PrivateMessage.objects.filter(
+            conversation_id=conversation_id,
+            conversation__user_one=user,
+        )
+        | PrivateMessage.objects.filter(
+            conversation_id=conversation_id,
+            conversation__user_two=user,
+        )
+    ).select_related("sender").order_by("created_at")
