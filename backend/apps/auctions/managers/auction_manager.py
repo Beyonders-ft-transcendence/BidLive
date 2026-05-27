@@ -1,9 +1,6 @@
 from django.db import models
 
-
-class AuctionQuerySet(models.QuerySet):
-    def live(self):
-        return self.filter(status="LIVE")
+from apps.auctions.managers.querysets import AuctionQuerySet
 
 
 class AuctionManager(models.Manager):
@@ -12,3 +9,9 @@ class AuctionManager(models.Manager):
 
     def live(self):
         return self.get_queryset().live()
+
+    def scheduled(self):
+        return self.get_queryset().scheduled()
+
+    def active(self):
+        return self.get_queryset().active()
