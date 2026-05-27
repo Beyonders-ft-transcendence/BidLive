@@ -1,0 +1,69 @@
+from django.db import transaction
+from django.utils import timezone
+from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from apps.chat.models import Message, PrivateMessage
+from apps.chat.selectors import (
+    get_or_create_auction_room,
+    get_or_create_private_conversation,
+    get_private_conversation,
+)
+from apps.notifications.models import Notification, NotificationType
+from apps.notifications.services import create_notification
+from apps.users.models import User
+
+
+@transaction.atomic
+def send_private_message(
+    *, sender: User, recipient: User, text: str
+) -> PrivateMessage:
+    if not text or not text.strip():
+        raise ValidationError({"detail": "A mensagem não pode estar vazia."})
+
+    if sender.id == recipient.id:
+        raise ValidationError({"detail": "Não podes enviar mensagem a ti mesmo."})
+
+    conversation, _ = get_or_create_private_conversation(
+        user_one=sender,
+        user_two=recipient,
+    )
+
+    message = PrivateMessage.objects.create(
+        conversation=conversation,
+        sender=sender,
+        message=text.strip(),
+        is_read=False,
+    )
+
+    create_notification(
+        user=recipient,
+        type=NotificationType.MESSAGE,
+        title=f"Nova mensagem de {sender.full_name}",
+        content=text[:100],
+    )
+
+    return message
+
+
+@transaction.atomic
+def mark_messages_as_read(*, conversation_id: int, user: User) -> int:
+    conversation = get_private_conversation(conversation_id=conversation_id, user=user)
+    if not conversation:
+        raise ValidationError({"detail": "Conversa não encontrada."})
+
+    updated = PrivateMessage.objects.filter(
+        conversation_id=conversation_id,
+        is_read=False,
+    ).exclude(sender=user).update(is_read=True)
+
+    return updated
+
+
+@transaction.atomic
+def delete_private_message(*, message_id: int, user: User) -> None:
+    try:
+        message = PrivateMessage.objects.get(id=message_id, sender=user)
+    except PrivateMessage.DoesNotExist:
+        raise PermissionDenied({"detail": "Não tens permissão para apagar esta mensagem."})
+
+    message.delete()
