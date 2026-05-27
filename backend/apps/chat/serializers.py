@@ -32,3 +32,38 @@ class PrivateMessageSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+
+class PrivateConversationSerializer(serializers.ModelSerializer):
+    user_one = ChatUserSerializer(read_only=True)
+    user_two = ChatUserSerializer(read_only=True)
+    last_message = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PrivateConversation
+        fields = (
+            "id", 
+            "user_one", 
+            "user_two", 
+            "last_message", 
+            "unread_count", 
+            "created_at"
+        )
+        read_only_fields = fields
+
+    def get_last_message(self, obj) -> dict | None:
+        last = obj.messages.order_by("-created_at").first()
+        if not last:
+            return None
+        return {
+            "id": last.id,
+            "message": last.message[:80],
+            "sender_id": last.sender_id,
+            "created_at": last.created_at,
+        }
+
+    def get_unread_count(self, obj) -> int:
+        request = self.context.get("request")
+        if not request:
+            return 0
+        return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
