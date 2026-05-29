@@ -58,4 +58,5 @@ class AuctionAuditLogAdmin(admin.ModelAdmin):
 
 @admin.register(LiveStream)
 class LiveStreamAdmin(admin.ModelAdmin):
-    list_display = ("stream_key", "auction", "streamer", "is_live")
+    list_display = ("stream_key", "auction", "streamer", "status", "is_live", "viewer_count")
+    list_filter = ("status", "visibility", "is_live")
