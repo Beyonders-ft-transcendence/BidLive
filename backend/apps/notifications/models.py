@@ -10,6 +10,9 @@ class NotificationType(models.TextChoices):
     MESSAGE = "MESSAGE", "Message"
     FRIEND_REQUEST = "FRIEND_REQUEST", "Friend Request"
     STREAM_STARTED = "STREAM_STARTED", "Stream Started"
+    STREAM_ENDED = "STREAM_ENDED", "Stream Ended"
+    STREAM_CANCELLED = "STREAM_CANCELLED", "Stream Cancelled"
+    FEATURED_STREAM = "FEATURED_STREAM", "Featured Stream"
     AUCTION_ENDED = "AUCTION_ENDED", "Auction Ended"
 
 
