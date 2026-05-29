@@ -38,6 +38,7 @@ from apps.auctions.services.realtime_service import (
     publish_auction_event,
     publish_auction_snapshot,
 )
+from apps.auctions.services.stream_service import end_active_streams_for_auction
 from apps.auctions.services.scheduling_service import schedule_auction_activation, schedule_auction_close
 from apps.auctions.services.winner_service import determine_winner
 from apps.notifications.models import NotificationType
@@ -309,6 +310,7 @@ def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str
         title="Auction cancelled",
         content=f"Auction {auction.id} was cancelled.",
     )
+    end_active_streams_for_auction(auction_id=auction.id, reason="auction_cancelled")
 
     publish_auction_event(
         auction_id=auction.id,
@@ -478,6 +480,7 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
             content=f"Auction {auction.id} sold via buy now.",
             exclude_user_ids=[buyer.id],
         )
+        end_active_streams_for_auction(auction_id=auction.id, reason="auction_sold")
 
         publish_auction_event(
             auction_id=auction.id,
@@ -549,6 +552,7 @@ def close_auction(*, auction: Auction) -> Auction:
         title="Auction ended",
         content=f"Auction {auction.id} has ended.",
     )
+    end_active_streams_for_auction(auction_id=auction.id, reason="auction_closed")
     if auction.winner_id:
         notify_user(
             user=auction.winner,
