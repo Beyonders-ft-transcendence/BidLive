@@ -11,9 +11,10 @@ import {
   EyeOff,
   Globe,
   GraduationCap,
-  X,
   IdCard,
 } from "lucide-react";
+
+import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -39,34 +40,32 @@ const TOTAL_STEPS = 2;
 
 export default function SignUp() {
   const router = useRouter();
-  const register = useAuthStore((s) => s.register);
-  const isLoading = useAuthStore((s) => s.isLoading);
-  const apiError = useAuthStore((s) => s.error);
-  const clearError = useAuthStore((s) => s.clearError);
+
+  const register = useAuthStore((state) => state.register);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const apiError = useAuthStore((state) => state.error);
+  const clearError = useAuthStore((state) => state.clearError);
 
   const [form, setForm] = useState<SignUpFormState>(INITIAL_FORM);
   const [step, setStep] = useState<SignUpStep>(1);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const onChange =
     (field: keyof SignUpFormState) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      if (apiError) {
-        clearError();
-      }
+      (event: ChangeEvent<HTMLInputElement>) => {
+        if (apiError) clearError();
+        if (localError) setLocalError(null);
 
-      if (localError) {
-        setLocalError(null);
-      }
-
-      setForm((prev) => ({
-        ...prev,
-        [field]: event.target.value,
-      }));
-    };
+        setForm((prev) => ({
+          ...prev,
+          [field]: event.target.value,
+        }));
+      };
 
   const validateStepOne = () => {
     if (!form.full_name || !form.username || !form.email) {
@@ -86,7 +85,7 @@ export default function SignUp() {
     }
 
     if (form.password.length < 8) {
-      return "A senha precisa ter pelo menos 8 caracteres.";
+      return "A senha deve ter pelo menos 8 caracteres.";
     }
 
     if (form.password !== form.password_confirm) {
@@ -96,12 +95,11 @@ export default function SignUp() {
     return null;
   };
 
-  const goToNextStep = () => {
-    setSuccessMessage(null);
-    const validationMessage = validateStepOne();
+  const nextStep = () => {
+    const validation = validateStepOne();
 
-    if (validationMessage) {
-      setLocalError(validationMessage);
+    if (validation) {
+      setLocalError(validation);
       return;
     }
 
@@ -109,189 +107,201 @@ export default function SignUp() {
     setStep(2);
   };
 
-  const goToPreviousStep = () => {
+  const previousStep = () => {
     setLocalError(null);
     setStep(1);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSuccessMessage(null);
 
-    const validationMessage = validateStepTwo();
-    if (validationMessage) {
-      setLocalError(validationMessage);
+    const validation = validateStepTwo();
+
+    if (validation) {
+      setLocalError(validation);
       return;
     }
 
     try {
       await register({
-        email: form.email,
-        username: form.username,
         full_name: form.full_name,
+        username: form.username,
+        email: form.email,
         password: form.password,
       });
 
-      setSuccessMessage("Conta criada com sucesso. Faça login para continuar.");
-      setForm(INITIAL_FORM);
+      setSuccessMessage(
+        "Conta criada com sucesso. Faça login para continuar."
+      );
+
       router.push("/signin");
     } catch {
-      // A mensagem de erro já é alimentada pelo auth store.
+      // erro tratado pela store
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-5xl bg-white shadow-2xl rounded-sm overflow-hidden">
-        <div className="grid md:grid-cols-2" style={{ minHeight: 600 }}>
+        <div
+          className="grid md:grid-cols-2"
+          style={{ minHeight: "600px" }}
+        >
+          {/* LEFT */}
           <div className="relative p-10 flex flex-col justify-center">
-            <Link href="/signin" className="absolute top-6 left-6 text-gray-700 hover:text-black">
-              <X size={20} />
-            </Link>
-
+   
             <div className="max-w-sm mx-auto w-full">
-              <h1 className="text-2xl font-semibold text-gray-800 mb-2">Criar Conta</h1>
-              <p className="text-sm text-gray-500 mb-6">Preencha os dados para começar.</p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit}>
                 {step === 1 && (
-                  <>
-                    <div className="relative">
-                      <IdCard
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Nome completo"
-                        value={form.full_name}
-                        onChange={onChange("full_name")}
-                        className="w-full border border-gray-200 rounded px-12 py-3 outline-none focus:border-blue-500"
-                      />
-                    </div>
+                  <div className="space-y-4">
+                    <Input
+                      value={form.full_name}
+                      onChange={onChange("full_name")}
+                      placeholder="Nome completo"
+                      icon={<IdCard size={18} />}
+                      fullWidth
+                    />
 
-                    <div className="relative">
-                      <User
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Nome de usuário"
-                        value={form.username}
-                        onChange={onChange("username")}
-                        className="w-full border border-gray-200 rounded px-12 py-3 outline-none focus:border-blue-500"
-                      />
-                    </div>
+                    <Input
+                      value={form.username}
+                      onChange={onChange("username")}
+                      placeholder="Nome de usuário"
+                      icon={<User size={18} />}
+                      fullWidth
+                    />
 
-                    <div className="relative">
-                      <Mail
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type="email"
-                        placeholder="E-mail"
-                        value={form.email}
-                        onChange={onChange("email")}
-                        className="w-full border border-gray-200 rounded px-12 py-3 outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </>
+                    <Input
+                      type="email"
+                      value={form.email}
+                      onChange={onChange("email")}
+                      placeholder="E-mail"
+                      icon={<Mail size={18} />}
+                      fullWidth
+                    />
+                  </div>
                 )}
 
                 {step === 2 && (
-                  <>
+                  <div className="space-y-4">
                     <div className="relative">
-                      <Lock
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
+                      <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Senha"
                         value={form.password}
                         onChange={onChange("password")}
-                        className="w-full border border-gray-200 rounded px-12 py-3 pr-12 outline-none focus:border-blue-500"
+                        placeholder="Senha"
+                        icon={<Lock size={18} />}
+                        fullWidth
+                        className="pr-12"
                       />
+
                       <button
                         type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
+                        onClick={() =>
+                          setShowPassword(!showPassword)
+                        }
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                        aria-label="Mostrar ou ocultar senha"
                       >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
                       </button>
                     </div>
 
                     <div className="relative">
-                      <Lock
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirmar senha"
+                      <Input
+                        type={
+                          showConfirmPassword
+                            ? "text"
+                            : "password"
+                        }
                         value={form.password_confirm}
                         onChange={onChange("password_confirm")}
-                        className="w-full border border-gray-200 rounded px-12 py-3 pr-12 outline-none focus:border-blue-500"
+                        placeholder="Confirmar senha"
+                        icon={<Lock size={18} />}
+                        fullWidth
+                        className="pr-12"
                       />
+
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        onClick={() =>
+                          setShowConfirmPassword(
+                            !showConfirmPassword
+                          )
+                        }
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                        aria-label="Mostrar ou ocultar confirmação de senha"
                       >
-                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
                       </button>
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {(localError || apiError) && (
-                  <p className="text-sm text-red-600">
-                    {localError ?? apiError}
-                  </p>
+                  <div className="mt-4 text-sm text-red-500">
+                    {localError || apiError}
+                  </div>
                 )}
 
-                {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
+                {successMessage && (
+                  <div className="mt-4 text-sm text-green-600">
+                    {successMessage}
+                  </div>
+                )}
 
-                {step === 1 ? (
-                  <div className="flex justify-end">
-                    <button
+                <div className="mt-6">
+                  {step === 1 ? (
+                    <Button
                       type="button"
-                      onClick={goToNextStep}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded text-sm font-medium transition"
+                      variant="primary"
+                      onClick={nextStep}
+                      fullWidth
                     >
                       CONTINUAR
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={goToPreviousStep}
-                      className="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded text-sm font-medium transition"
-                    >
-                      VOLTAR
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-1/2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-8 py-3 rounded text-sm font-medium transition"
-                    >
-                      {isLoading ? "CRIANDO..." : "CRIAR CONTA"}
-                    </button>
-                  </div>
-                )}
+                    </Button>
+                  ) : (
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={previousStep}
+                        className="flex-1"
+                      >
+                        VOLTAR
+                      </Button>
+
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isLoading}
+                        className="flex-1"
+                      >
+                        CRIAR CONTA
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </form>
 
               <div className="flex justify-between text-sm mt-6 mb-8">
-                <Link href="/signin" className="text-blue-500 hover:underline">
+                <Link
+                  href="/signin"
+                  className="text-blue-500 hover:underline"
+                >
                   Já tenho conta
                 </Link>
 
-                <Link href="/signin" className="text-gray-500 hover:underline">
+                <Link
+                  href="/signin"
+                  className="text-gray-500 hover:underline"
+                >
                   Voltar ao login
                 </Link>
               </div>
@@ -332,6 +342,7 @@ export default function SignUp() {
             </div>
           </div>
 
+          {/* RIGHT */}
           <div className="bg-gray-200 relative">
             <div
               className="absolute inset-0"
@@ -340,14 +351,24 @@ export default function SignUp() {
                   "linear-gradient(to bottom right, rgb(243 244 246), rgb(229 231 235), rgb(209 213 219))",
               }}
             />
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[82%] max-w-sm bg-white/85 backdrop-blur-sm rounded-md border border-white/60 p-4 shadow-sm">
-              <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                <span>Etapa {step} de {TOTAL_STEPS}</span>
-                <span>{step === 1 ? "Dados pessoais" : "Senha e confirmação"}</span>
+
+            <div className="absolute top-10 left-10 right-10 bg-white/80 backdrop-blur-sm rounded-xl p-5 shadow-lg">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+                <span>
+                  Etapa {step} de {TOTAL_STEPS}
+                </span>
+
+                <span>
+                  {step === 1
+                    ? "Informações pessoais"
+                    : "Segurança da conta"}
+                </span>
               </div>
-              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full bg-blue-500 transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`}
+                  className={`h-full bg-blue-500 transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"
+                    }`}
                 />
               </div>
             </div>

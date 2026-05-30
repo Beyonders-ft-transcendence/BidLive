@@ -1,6 +1,6 @@
 import { User, Lock,
     Eye, Globe,
-    GraduationCap, X,
+    GraduationCap,
 } from "lucide-react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -12,9 +12,6 @@ export default function SignIn() {
                 <div className="grid md:grid-cols-2" style={{ minHeight: 600 }}>
                     {/* Left Side */}
                     <div className="relative p-10 flex flex-col justify-center">
-                        <button className="absolute top-6 left-6 text-gray-700 hover:text-black">
-                            <X size={20} />
-                        </button>
 
                         <div className="max-w-sm mx-auto w-full">
                             {/* Username */}
