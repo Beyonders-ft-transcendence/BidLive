@@ -83,7 +83,7 @@ export interface UserUpdate {
 export interface RegisterPayload {
   email: string;
   username: string;
-  full_name?: string;
+  full_name: string;
   password: string;
   password_confirm?: string; // For frontend validation
 }
@@ -94,7 +94,7 @@ export interface LoginPayload {
 }
 
 export interface ChangePasswordPayload {
-  old_password: string;
+  current_password: string;
   new_password: string;
   new_password_confirm?: string; // For frontend validation
 }
@@ -104,6 +104,7 @@ export interface ForgotPasswordPayload {
 }
 
 export interface ResetPasswordPayload {
+  uid: string;
   token: string;
   new_password: string;
   new_password_confirm?: string; // For frontend validation
@@ -121,7 +122,7 @@ export interface TokenPair {
 }
 
 export interface RefreshTokenPayload {
-  refresh: string;
+  refresh_token: string;
 }
 
 export interface DecodedToken {
@@ -152,6 +153,28 @@ export interface AuthTokenData {
   user: User;
 }
 
+export interface FortyTwoAuthorizeData {
+  authorization_url: string;
+  state: string;
+  expires_in: number;
+}
+
+export interface SwaggerOAuth2TokenRequestPayload {
+  grant_type?: string;
+  username: string;
+  password: string;
+  scope?: string;
+  client_id?: string;
+  client_secret?: string;
+}
+
+export interface SwaggerOAuth2TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+}
+
 export interface AuthResponse<T = never> {
   success: boolean;
   message: string;
@@ -159,13 +182,13 @@ export interface AuthResponse<T = never> {
   errors?: Record<string, string[]>;
 }
 
-export type RegisterResponse = AuthResponse<AuthTokenData>;
+export type RegisterResponse = AuthResponse<User>;
 
 export type LoginResponse = AuthResponse<AuthTokenData>;
 
-export type RefreshResponse = AuthResponse<TokenPair>;
+export type RefreshResponse = AuthResponse<AuthTokenData>;
 
-export type LogoutResponse = AuthResponse<null>;
+export type LogoutResponse = AuthResponse<Record<string, never>>;
 
 export type MeResponse = AuthResponse<User>;
 
@@ -173,16 +196,16 @@ export interface ChangePasswordMessage {
   message: string;
 }
 
-export type ChangePasswordResponse = AuthResponse<ChangePasswordMessage>;
+export type ChangePasswordResponse = AuthResponse<Record<string, never>>;
 
 export interface ForgotPasswordMessage {
   message: string;
   message_code?: string;
 }
 
-export type ForgotPasswordResponse = AuthResponse<ForgotPasswordMessage>;
+export type ForgotPasswordResponse = AuthResponse<Record<string, never>>;
 
-export type ResetPasswordResponse = AuthResponse<null>;
+export type ResetPasswordResponse = AuthResponse<Record<string, never>>;
 
 // ============================================================================
 // OAUTH / SOCIAL AUTH
@@ -206,7 +229,7 @@ export interface GoogleUser {
 export interface FortyTwoCallbackPayload {
   code: string;
   state: string;
-  redirect_uri: string;
+  redirect_uri?: string;
 }
 
 export interface FortyTwoUser {
@@ -224,6 +247,8 @@ export interface OAuth42State {
   state: string;
   expires_at: number; // Unix timestamp
 }
+
+export type FortyTwoAuthorizeResponse = AuthResponse<FortyTwoAuthorizeData>;
 
 export interface OAuthAccount {
   id: number;
