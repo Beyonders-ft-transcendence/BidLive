@@ -1,10 +1,6 @@
-import {
-    User,
-    Lock,
-    Eye,
-    Globe,
-    GraduationCap,
-    X,
+import { User, Lock,
+    Eye, Globe,
+    GraduationCap, X,
 } from "lucide-react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
