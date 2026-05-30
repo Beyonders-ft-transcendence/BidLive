@@ -2,9 +2,8 @@ import {
     User,
     Lock,
     Eye,
-    MessageCircle,
-    Send,
     Globe,
+    GraduationCap,
     X,
 } from "lucide-react";
 import Input from "@/components/common/Input";
@@ -83,32 +82,31 @@ export default function SignIn() {
 
                             {/* Social Buttons */}
                             <div className="space-y-4">
-                                <button className="w-full flex items-center bg-[#3b5998] text-white rounded overflow-hidden">
-                                    <span className="px-4 py-3 border-r border-white/20">
-                                        <MessageCircle size={18} />
-                                    </span>
-                                    <span className="flex-1 py-3 text-sm font-medium">
-                                        ENTRAR COM FACEBOOK
-                                    </span>
-                                </button>
+                                <Button
+                                    variant="social"
+                                    fullWidth
+                                    icon={<Globe size={18} />}
+                                    className="justify-start text-white hover:text-white"
+                                    style={{
+                                        backgroundColor: "#ea4335",
+                                        borderColor: "#ea4335",
+                                    }}
+                                >
+                                    ENTRAR COM GOOGLE
+                                </Button>
 
-                                <button className="w-full flex items-center bg-[#1da1f2] text-white rounded overflow-hidden">
-                                    <span className="px-4 py-3 border-r border-white/20">
-                                        <Send size={18} />
-                                    </span>
-                                    <span className="flex-1 py-3 text-sm font-medium">
-                                        ENTRAR COM TWITTER
-                                    </span>
-                                </button>
-
-                                <button className="w-full flex items-center bg-[#ea4335] text-white rounded overflow-hidden">
-                                    <span className="px-4 py-3 border-r border-white/20">
-                                        <Globe size={18} />
-                                    </span>
-                                    <span className="flex-1 py-3 text-sm font-medium">
-                                        ENTRAR COM GOOGLE
-                                    </span>
-                                </button>
+                                <Button
+                                    variant="social"
+                                    fullWidth
+                                    icon={<GraduationCap size={18} />}
+                                    className="justify-start text-white hover:text-white"
+                                    style={{
+                                        backgroundColor: "#111827",
+                                        borderColor: "#111827",
+                                    }}
+                                >
+                                    ENTRAR COM 42
+                                </Button>
                             </div>
                         </div>
                     </div>

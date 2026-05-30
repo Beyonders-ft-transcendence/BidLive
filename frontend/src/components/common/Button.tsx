@@ -1,7 +1,7 @@
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-	variant?: "primary" | "secondary" | "danger" | "success" | "outline";
+	variant?: "primary" | "secondary" | "danger" | "success" | "outline" | "social";
 	size?: "sm" | "md" | "lg";
 	fullWidth?: boolean;
 	loading?: boolean;
@@ -30,7 +30,7 @@ export default function Button({
 		danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-100",
 		success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-100",
 		outline: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-blue-100",
-		social: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-blue-100",
+		social: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-blue-100 flex items-center",
 	};
 	
 	const sizes = {
@@ -73,7 +73,9 @@ export default function Button({
 				</>
 			) : (
 				<>
-					{icon && iconPosition === "left" && <span>{icon}</span>}
+					{icon && iconPosition === "left" && (
+						<span className="mr-2 border-r border-gray-300 pr-2">{icon}</span>
+					)}
 					<span>{children}</span>
 					{icon && iconPosition === "right" && <span>{icon}</span>}
 				</>
