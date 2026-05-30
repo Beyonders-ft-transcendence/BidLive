@@ -143,7 +143,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-5xl bg-white shadow-2xl rounded-sm overflow-hidden">
-        <div className="grid md:grid-cols-2 min-h-[600px]">
+        <div className="grid md:grid-cols-2" style={{ minHeight: 600 }}>
           <div className="relative p-10 flex flex-col justify-center">
             <Link href="/signin" className="absolute top-6 left-6 text-gray-700 hover:text-black">
               <X size={20} />
@@ -328,7 +328,13 @@ export default function SignUp() {
           </div>
 
           <div className="bg-gray-200 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300" />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to bottom right, rgb(243 244 246), rgb(229 231 235), rgb(209 213 219))",
+              }}
+            />
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[82%] max-w-sm bg-white/85 backdrop-blur-sm rounded-md border border-white/60 p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
                 <span>Etapa {step} de {TOTAL_STEPS}</span>

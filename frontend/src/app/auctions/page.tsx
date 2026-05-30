@@ -92,7 +92,7 @@ export default function Auctions() {
       <main className="max-w-[1400px] mx-auto px-4 pb-12">
 
         {/* 1. HERO COMPACTA (Premium & Dynamic) */}
-        <section className="relative mt-6 mb-8 rounded-sm bg-primary overflow-hidden shadow-sm border border-primary-light">
+        <section className="relative mt-6 mb-8 rounded-sm bg-blue-500 overflow-hidden shadow-sm border border-primary-light">
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-8 md:p-10 min-h-[25vh]">
             <div className="md:w-1/2 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-white/10 border border-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2">
@@ -186,7 +186,7 @@ export default function Auctions() {
                           )}
                         </div>
 
-                        <button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2.5 rounded-sm transition-all shadow-sm flex items-center justify-center gap-2">
+                        <button className="w-full bg-blue-500 hover:bg-blue-500/90 text-white font-bold py-2.5 rounded-sm transition-all shadow-sm flex items-center justify-center gap-2">
                           {auction.isLive ? (
                             <>Entrar no Leilão <PlayCircle size={16} /></>
                           ) : (
@@ -215,7 +215,7 @@ export default function Auctions() {
 
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Activity size={16} className="text-primary" /> Atividade Live
+                  <Activity size={16} className="text-blue-500" /> Atividade Live
                 </h3>
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -229,7 +229,7 @@ export default function Auctions() {
 
                 {activities.map((act, index) => (
                   <div key={act.id} className="relative z-10 flex gap-3 items-start animate-fade-in-up">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 border-2 border-white shadow-sm ${index === 0 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 border-2 border-white shadow-sm ${index === 0 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
                       {act.value ? <TrendingUp size={10} /> : <Bell size={10} />}
                     </div>
                     <div>

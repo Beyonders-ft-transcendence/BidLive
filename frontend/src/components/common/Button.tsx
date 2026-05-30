@@ -22,20 +22,21 @@ export default function Button({
 	disabled,
 	...props
 }: ButtonProps) {
-	const baseStyles = "inline-flex cursor-pointer items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed";
+	const baseStyles = "inline-flex cursor-pointer items-center justify-center rounded px-4 py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed";
 	
 	const variants = {
-		primary: "bg-primary text-white hover:bg-[#1d4ed8] focus:ring-gray-300",
-		secondary: "bg-[#60a5fa] text-white hover:bg-[#3b82f6] focus:ring-gray-300",
-		danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-gray-300",
-		success: "bg-green-600 text-white hover:bg-green-700 focus:ring-gray-300",
-		outline: "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-300",
+		primary: "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-100",
+		secondary: "bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-100",
+		danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-100",
+		success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-100",
+		outline: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-blue-100",
+		social: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-blue-100",
 	};
 	
 	const sizes = {
-		sm: "px-3 py-1.5 text-sm gap-1.5",
-		md: "px-4 py-2.5 text-base gap-2",
-		lg: "px-6 py-3 text-lg gap-2.5",
+		sm: "px-3 py-2 text-xs gap-1.5",
+		md: "px-4 py-3 text-sm gap-2",
+		lg: "px-6 py-3.5 text-base gap-2.5",
 	};
 
 	const widthClass = fullWidth ? "w-full" : "";

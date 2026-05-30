@@ -93,7 +93,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='cursor-pointer hover:text-primary transition-colors'
+                                className='cursor-pointer hover:text-blue-500 transition-colors'
                             >
                                 Entrar
                             </button>
@@ -101,7 +101,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='bg-primary text-white px-4 py-2 rounded-md hover:bg-[#1d4ed8] transition-colors'
+                                className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors'
                             >
                                 Registrar
                             </button>
@@ -109,7 +109,7 @@ export default function Header() {
                         <li>
                             <button
                                 onClick={openSignin}
-                                className='flex items-center cursor-pointer hover:text-primary transition-colors'
+                                className='flex items-center cursor-pointer hover:text-blue-500 transition-colors'
                             >
                                 Favoritos
                                 <Image
@@ -125,7 +125,7 @@ export default function Header() {
 
                     {/* Hamburger button – mobile only */}
                     <button
-                        className='lg:hidden cursor-pointer p-2 -mr-2 text-gray-700 hover:text-primary transition-colors'
+                        className='lg:hidden cursor-pointer p-2 -mr-2 text-gray-700 hover:text-blue-500 transition-colors'
                         onClick={() => setIsMobileMenuOpen(true)}
                         aria-label="Abrir menu"
                     >
@@ -187,7 +187,7 @@ export default function Header() {
                 <nav className='flex flex-col px-4 space-y-1'>
                     <Link
                         href="/"
-                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors font-medium'
+                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium'
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Leilões
@@ -197,7 +197,7 @@ export default function Header() {
                     </div>
                     <Link
                         href="/"
-                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors font-medium'
+                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium'
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Vendedor
@@ -211,19 +211,19 @@ export default function Header() {
                 <div className='flex flex-col px-4 space-y-2'>
                     <button
                         onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
-                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors font-medium text-left cursor-pointer'
+                        className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium text-left cursor-pointer'
                     >
                         Entrar
                     </button>
                     <button
                         onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
-                        className='bg-primary text-white px-4 py-3 rounded-md hover:bg-[#1d4ed8] transition-colors font-medium text-center cursor-pointer'
+                        className='bg-blue-500 text-white px-4 py-3 rounded-md hover:bg-[#1d4ed8] transition-colors font-medium text-center cursor-pointer'
                     >
                         Registrar
                     </button>
                     <button
                         onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
-                        className='flex items-center px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors font-medium cursor-pointer'
+                        className='flex items-center px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium cursor-pointer'
                     >
                         Favoritos
                         <Image

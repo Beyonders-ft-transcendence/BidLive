@@ -13,7 +13,7 @@ export default function Signin({ onClose }: { onClose?: () => void }) {
                         Entrar ou criar uma conta
                     </h2>
                     <p className="text-gray-600 text-sm" >
-                        Ao clicar em qualquer um dos botões "Continuar" abaixo, você concorda com os <Link href="/terms" className="text-primary hover:underline">Termos de Uso do BidLive</Link> e reconhece nossa <Link href="/privacy" className="text-primary hover:underline">Política de Privacidade</Link>.
+                        Ao clicar em qualquer um dos botões "Continuar" abaixo, você concorda com os <Link href="/terms" className="text-blue-500 hover:underline">Termos de Uso do BidLive</Link> e reconhece nossa <Link href="/privacy" className="text-blue-500 hover:underline">Política de Privacidade</Link>.
                     </p>
                 </div>
                 <div className="flex flex-col gap-3 mt-6">
