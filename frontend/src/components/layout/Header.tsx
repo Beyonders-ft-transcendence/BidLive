@@ -1,21 +1,17 @@
 "use client";
 
 import Image from 'next/image';
-import Link from 'next/dist/client/link';
-import icon from '@/assets/images/icon.png'
-import law from '@/assets/images/law.png';
-import search from '@/assets/images/search.png';
-import Signin from "@/components/layout/Signin";
-import CategoriesDropdown from "@/components/common/CategoriesDropdown";
-import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import Link from 'next/dist/client/link';
+import law from '@/assets/images/law.png';
+import icon from '@/assets/images/icon.png'
+import { useState, useEffect } from 'react';
+import search from '@/assets/images/search.png';
+import router from 'next/router';
+import CategoriesDropdown from "@/components/common/CategoriesDropdown";
 
 export default function Header() {
-    const [isSigninOpen, setIsSigninOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-    const openSignin = () => setIsSigninOpen(true);
-    const closeSignin = () => setIsSigninOpen(false);
 
     // Close mobile menu on resize to desktop
     useEffect(() => {
@@ -42,9 +38,6 @@ export default function Header() {
         <>
             <header className="bg-white shadow-sm border-b border-gray-200 py-4 fixed top-0 left-0 w-full z-50">
                 <nav className='max-w-7xl mx-auto flex items-center justify-between px-4 lg:px-0'>
-
-
-
                     {/* Left: Logo + Desktop Nav */}
                     <div className='flex items-center space-x-8'>
                         <Image
@@ -60,9 +53,6 @@ export default function Header() {
                                 <Link href="/">
                                     Leilões
                                 </Link>
-                            </li>
-                            <li>
-                                <CategoriesDropdown />
                             </li>
                             <li>
                                 <Link href="/">
@@ -92,7 +82,7 @@ export default function Header() {
                     <ul className='hidden lg:flex items-center space-x-4'>
                         <li>
                             <button
-                                onClick={openSignin}
+                                onClick={() => router.push("/signin")}
                                 className='cursor-pointer hover:text-blue-500 transition-colors'
                             >
                                 Entrar
@@ -100,7 +90,7 @@ export default function Header() {
                         </li>
                         <li>
                             <button
-                                onClick={openSignin}
+                                onClick={() => router.push("/signup")}
                                 className='bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors'
                             >
                                 Registrar
@@ -108,7 +98,7 @@ export default function Header() {
                         </li>
                         <li>
                             <button
-                                onClick={openSignin}
+                                onClick={() => router.push("/signin")}
                                 className='flex items-center cursor-pointer hover:text-blue-500 transition-colors'
                             >
                                 Favoritos
@@ -131,7 +121,6 @@ export default function Header() {
                     >
                         <Menu size={24} />
                     </button>
-
                 </nav>
             </header>
 
@@ -192,9 +181,6 @@ export default function Header() {
                     >
                         Leilões
                     </Link>
-                    <div className='px-3 py-1'>
-                        <CategoriesDropdown />
-                    </div>
                     <Link
                         href="/"
                         className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium'
@@ -210,19 +196,19 @@ export default function Header() {
                 {/* Sidebar Auth */}
                 <div className='flex flex-col px-4 space-y-2'>
                     <button
-                        onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
+                        onClick={() => router.push("/signin")}
                         className='px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium text-left cursor-pointer'
                     >
                         Entrar
                     </button>
                     <button
-                        onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
+                        onClick={() => router.push("/signup")}
                         className='bg-blue-500 text-white px-4 py-3 rounded-md hover:bg-[#1d4ed8] transition-colors font-medium text-center cursor-pointer'
                     >
                         Registrar
                     </button>
                     <button
-                        onClick={() => { openSignin(); setIsMobileMenuOpen(false); }}
+                        onClick={() => router.push("/signin")}
                         className='flex items-center px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-blue-500 transition-colors font-medium cursor-pointer'
                     >
                         Favoritos
@@ -237,7 +223,6 @@ export default function Header() {
                 </div>
             </aside>
 
-            {isSigninOpen && <Signin onClose={closeSignin} />}
         </>
     );
 }
