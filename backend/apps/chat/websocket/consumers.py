@@ -148,3 +148,92 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             "reader_id": event["reader_id"],
         })
  
+
+class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.auction_id = self.scope["url_route"]["kwargs"]["auction_id"]
+        user = self.scope.get("user")
+ 
+        if not user or not user.is_authenticated:
+            await self.close(code=4401)
+            return
+ 
+        self.user = user
+        self.group_name = auction_chat_group_name(int(self.auction_id))
+ 
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+ 
+    async def disconnect(self, close_code):
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+ 
+    async def receive_json(self, content: dict):
+        event_type = content.get("type")
+ 
+        if event_type == "chat.message":
+            await self._handle_message(content)
+        elif event_type == "chat.typing":
+            await self._handle_typing(content)
+        else:
+            await self.send_json({"error": f"Evento desconhecido: {event_type}"})
+ 
+    async def _handle_message(self, content: dict):
+        text = content.get("message", "").strip()
+        if not text:
+            await self.send_json({"error": "Mensagem vazia."})
+            return
+ 
+        room, _ = await sync_to_async(get_or_create_auction_room)(
+            auction_id=int(self.auction_id)
+        )
+ 
+        message = await sync_to_async(Message.objects.create)(
+            room=room,
+            sender=self.user,
+            message=text,
+        )
+ 
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "chat.message",
+                "message_id": message.id,
+                "message": text,
+                "sender_id": self.user.id,
+                "sender_username": self.user.username,
+                "sender_avatar": self.user.avatar_url or "",
+                "created_at": message.created_at.isoformat(),
+            },
+        )
+ 
+    async def _handle_typing(self, content: dict):
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "chat.typing",
+                "user_id": self.user.id,
+                "username": self.user.username,
+                "is_typing": content.get("is_typing", True),
+            },
+        )
+ 
+    async def chat_message(self, event: dict):
+        await self.send_json({
+            "type": "chat.message",
+            "message_id": event["message_id"],
+            "message": event["message"],
+            "sender_id": event["sender_id"],
+            "sender_username": event["sender_username"],
+            "sender_avatar": event["sender_avatar"],
+            "created_at": event["created_at"],
+        })
+ 
+    async def chat_typing(self, event: dict):
+        await self.send_json({
+            "type": "chat.typing",
+            "user_id": event["user_id"],
+            "username": event["username"],
+            "is_typing": event["is_typing"],
+        })
+ 
