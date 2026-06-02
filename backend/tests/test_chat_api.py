@@ -102,3 +102,55 @@ class TestListConversations:
         conv = res.data["data"][0]
         assert conv["last_message"] is None
  
+
+# PRIVATE MESSAGE HISTORY
+ 
+@pytest.mark.django_db
+class TestPrivateConversationMessages:
+ 
+    def test_list_messages_success(self, auth_client, private_conversation, private_message):
+        """Message history successfully returned."""
+        res = auth_client.get(f"/api/chat/conversations/{private_conversation.id}/messages/")
+        assert res.status_code == 200
+        assert res.data["success"] is True
+        assert len(res.data["data"]) == 1
+ 
+    def test_list_messages_contains_correct_content(
+        self, auth_client, private_conversation, private_message
+    ):
+        """Message contains the expected fields."""
+        res = auth_client.get(f"/api/chat/conversations/{private_conversation.id}/messages/")
+        msg = res.data["data"][0]
+        assert msg["id"] == private_message.id
+        assert msg["message"] == private_message.message
+        assert "sender" in msg
+        assert msg["sender"]["id"] is not None
+ 
+    def test_list_messages_empty_conversation(self, auth_client, private_conversation):
+        """Conversation without messages → empty list."""
+        res = auth_client.get(f"/api/chat/conversations/{private_conversation.id}/messages/")
+        assert res.status_code == 200
+        assert res.data["data"] == []
+ 
+    def test_list_messages_conversation_not_found(self, auth_client):
+        """Conversation does not exist → 404."""
+        res = auth_client.get("/api/chat/conversations/99999/messages/")
+        assert res.status_code == 404
+ 
+    def test_list_messages_not_participant(
+        self, other_auth_client, private_conversation, private_message, user
+    ):
+        from apps.users.models import User
+        stranger = User.objects.create_user(
+            email="stranger@example.com",
+            username="stranger",
+            full_name="Stranger",
+            password="pass",
+        )
+        from rest_framework.test import APIClient
+        stranger_client = APIClient()
+        stranger_client.force_authenticate(user=stranger)
+ 
+        res = stranger_client.get(f"/api/chat/conversations/{private_conversation.id}/messages/")
+        assert res.status_code == 404
+ 
