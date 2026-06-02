@@ -154,3 +154,125 @@ class TestPrivateConversationMessages:
         res = stranger_client.get(f"/api/chat/conversations/{private_conversation.id}/messages/")
         assert res.status_code == 404
  
+
+# SEND PRIVATE MESSAGE (REST)
+ 
+@pytest.mark.django_db
+class TestSendPrivateMessage:
+ 
+    def test_send_message_success(self, auth_client, other_user):
+        res = auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": other_user.id,
+            "message": "Olá, como estás?",
+        }, format="json")
+        assert res.status_code == 201
+        assert res.data["success"] is True
+        assert res.data["data"]["message"] == "Olá, como estás?"
+ 
+    def test_send_message_creates_conversation(self, auth_client, user, other_user):
+        assert not PrivateConversation.objects.filter(
+            user_one_id=min(user.id, other_user.id),
+            user_two_id=max(user.id, other_user.id),
+        ).exists()
+ 
+        auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": other_user.id,
+            "message": "Primeira mensagem",
+        }, format="json")
+ 
+        assert PrivateConversation.objects.filter(
+            user_one_id=min(user.id, other_user.id),
+            user_two_id=max(user.id, other_user.id),
+        ).exists()
+ 
+    def test_send_message_creates_db_record(self, auth_client, user, other_user):
+        """Message created in the database."""
+        auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": other_user.id,
+            "message": "Mensagem gravada",
+        }, format="json")
+ 
+        assert PrivateMessage.objects.filter(
+            sender=user,
+            message="Mensagem gravada",
+        ).exists()
+ 
+    def test_send_message_to_self_fails(self, auth_client, user):
+        res = auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": user.id,
+            "message": "Mensagem para mim",
+        }, format="json")
+        assert res.status_code == 400
+ 
+    def test_send_empty_message_fails(self, auth_client, other_user):
+        res = auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": other_user.id,
+            "message": "   ",
+        }, format="json")
+        assert res.status_code == 400
+ 
+    def test_send_message_nonexistent_recipient(self, auth_client):
+        res = auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": 99999,
+            "message": "Olá",
+        }, format="json")
+        assert res.status_code == 400
+ 
+    def test_send_message_missing_fields(self, auth_client):
+        res = auth_client.post("/api/chat/conversations/send/", {}, format="json")
+        assert res.status_code == 400
+ 
+    def test_send_message_creates_notification(self, auth_client, other_user):
+        from apps.notifications.models import Notification, NotificationType
+        auth_client.post("/api/chat/conversations/send/", {
+            "recipient_id": other_user.id,
+            "message": "Notificação teste",
+        }, format="json")
+ 
+        assert Notification.objects.filter(
+            user=other_user,
+            type=NotificationType.MESSAGE,
+        ).exists()
+ 
+
+# MARK MESSAGES AS READ
+ 
+@pytest.mark.django_db
+class TestMarkMessagesAsRead:
+ 
+    def test_mark_as_read_success(
+        self, other_auth_client, private_conversation, private_message
+    ):
+        res = other_auth_client.post(
+            f"/api/chat/conversations/{private_conversation.id}/read/"
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+ 
+    def test_mark_as_read_updates_db(
+        self, other_auth_client, private_conversation, private_message
+    ):
+        other_auth_client.post(f"/api/chat/conversations/{private_conversation.id}/read/")
+        private_message.refresh_from_db()
+        assert private_message.is_read is True
+ 
+    def test_mark_as_read_does_not_mark_own_messages(
+        self, auth_client, private_conversation, private_message
+    ):
+        res = auth_client.post(f"/api/chat/conversations/{private_conversation.id}/read/")
+        assert res.status_code == 200
+        private_message.refresh_from_db()
+        assert private_message.is_read is False
+ 
+    def test_mark_already_read_messages(
+        self, other_auth_client, private_conversation, read_private_message
+    ):
+        res = other_auth_client.post(
+            f"/api/chat/conversations/{private_conversation.id}/read/"
+        )
+        assert res.status_code == 200
+ 
+    def test_mark_read_conversation_not_found(self, auth_client):
+        res = auth_client.post("/api/chat/conversations/99999/read/")
+        assert res.status_code == 400
+ 
