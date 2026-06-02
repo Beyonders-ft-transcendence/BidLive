@@ -276,3 +276,35 @@ class TestMarkMessagesAsRead:
         res = auth_client.post("/api/chat/conversations/99999/read/")
         assert res.status_code == 400
  
+
+# DELETE PRIVATE MESSAGE
+ 
+@pytest.mark.django_db
+class TestDeletePrivateMessage:
+ 
+    def test_delete_own_message_success(
+        self, auth_client, private_message
+    ):
+        res = auth_client.delete(
+            f"/api/chat/conversations/messages/{private_message.id}/"
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+ 
+    def test_delete_removes_db_record(self, auth_client, private_message):
+        pk = private_message.id
+        auth_client.delete(f"/api/chat/conversations/messages/{pk}/")
+        assert not PrivateMessage.objects.filter(id=pk).exists()
+ 
+    def test_delete_other_user_message_fails(
+        self, other_auth_client, private_message
+    ):
+        res = other_auth_client.delete(
+            f"/api/chat/conversations/messages/{private_message.id}/"
+        )
+        assert res.status_code == 400
+ 
+    def test_delete_nonexistent_message(self, auth_client):
+        res = auth_client.delete("/api/chat/conversations/messages/99999/")
+        assert res.status_code == 400
+ 
