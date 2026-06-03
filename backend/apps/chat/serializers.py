@@ -97,6 +97,8 @@ class RoomMessageSerializer(serializers.ModelSerializer):
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):
+    auction = serializers.IntegerField(source="auction_id", read_only=True)
+    
     class Meta:
         model = ChatRoom
         fields = ("id", "auction", "name", "created_at")
