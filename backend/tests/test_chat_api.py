@@ -334,3 +334,36 @@ class TestAuctionRoom:
         auth_client.get(f"/api/chat/auctions/{auction.id}/room/")
         assert ChatRoom.objects.filter(auction=auction).count() == 1
  
+
+# AUCTION CHAT — MESSAGES
+ 
+@pytest.mark.django_db
+class TestAuctionRoomMessages:
+ 
+    def test_list_room_messages_success(self, auth_client, auction, room_message):
+        """Message history for the room."""
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert res.status_code == 200
+        assert len(res.data["data"]) == 1
+ 
+    def test_list_room_messages_excludes_deleted(
+        self, auth_client, auction, room_message, deleted_room_message
+    ):
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert res.status_code == 200
+        assert len(res.data["data"]) == 1
+        assert res.data["data"][0]["id"] == room_message.id
+ 
+    def test_list_room_messages_empty(self, auth_client, auction):
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert res.status_code == 200
+        assert res.data["data"] == []
+ 
+    def test_list_room_messages_contains_sender(
+        self, auth_client, auction, room_message, user
+    ):
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        msg = res.data["data"][0]
+        assert "sender" in msg
+        assert msg["sender"]["id"] == user.id
+ 
