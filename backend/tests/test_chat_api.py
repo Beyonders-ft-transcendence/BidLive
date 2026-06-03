@@ -410,3 +410,49 @@ class TestSendRoomMessage:
         res = auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {}, format="json")
         assert res.status_code == 400
  
+
+# DELETE MESSAGE FROM ROOM (SOFT DELETE)
+ 
+@pytest.mark.django_db
+class TestDeleteRoomMessage:
+ 
+    def test_soft_delete_own_message_success(self, auth_client, room_message):
+        res = auth_client.delete(
+            f"/api/chat/auctions/messages/{room_message.id}/"
+        )
+        assert res.status_code == 200
+        assert res.data["success"] is True
+ 
+    def test_soft_delete_marks_is_deleted(self, auth_client, room_message):
+        auth_client.delete(f"/api/chat/auctions/messages/{room_message.id}/")
+        room_message.refresh_from_db()
+        assert room_message.is_deleted is True
+ 
+    def test_soft_delete_keeps_record_in_db(self, auth_client, room_message):
+        pk = room_message.id
+        auth_client.delete(f"/api/chat/auctions/messages/{pk}/")
+        assert Message.objects.filter(id=pk).exists()
+ 
+    def test_soft_delete_other_user_message_fails(
+        self, other_auth_client, room_message
+    ):
+        res = other_auth_client.delete(
+            f"/api/chat/auctions/messages/{room_message.id}/"
+        )
+        assert res.status_code == 400
+ 
+    def test_soft_delete_nonexistent_message(self, auth_client):
+        res = auth_client.delete("/api/chat/auctions/messages/99999/")
+        assert res.status_code == 400
+ 
+    def test_deleted_message_hidden_from_history(
+        self, auth_client, auction, room_message
+    ):
+        res_before = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert len(res_before.data["data"]) == 1
+ 
+        auth_client.delete(f"/api/chat/auctions/messages/{room_message.id}/")
+ 
+        res_after = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert len(res_after.data["data"]) == 0
+ 
