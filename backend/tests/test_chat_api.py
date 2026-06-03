@@ -367,3 +367,46 @@ class TestAuctionRoomMessages:
         assert "sender" in msg
         assert msg["sender"]["id"] == user.id
  
+
+# SEND MESSAGE IN THE ROOM (REST)
+ 
+@pytest.mark.django_db
+class TestSendRoomMessage:
+ 
+    def test_send_room_message_success(self, auth_client, auction):
+        res = auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {
+            "message": "Bom leilão!",
+        }, format="json")
+        assert res.status_code == 201
+        assert res.data["success"] is True
+        assert res.data["data"]["message"] == "Bom leilão!"
+ 
+    def test_send_room_message_creates_db_record(self, auth_client, user, auction):
+        auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {
+            "message": "Mensagem da sala",
+        }, format="json")
+        assert Message.objects.filter(
+            sender=user,
+            message="Mensagem da sala",
+        ).exists()
+ 
+    def test_send_room_message_creates_room_if_needed(self, auth_client, auction):
+        from apps.chat.models import ChatRoom
+        assert not ChatRoom.objects.filter(auction=auction).exists()
+ 
+        auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {
+            "message": "Primeira mensagem",
+        }, format="json")
+ 
+        assert ChatRoom.objects.filter(auction=auction).exists()
+ 
+    def test_send_empty_room_message_fails(self, auth_client, auction):
+        res = auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {
+            "message": "  ",
+        }, format="json")
+        assert res.status_code == 400
+ 
+    def test_send_room_message_missing_field(self, auth_client, auction):
+        res = auth_client.post(f"/api/chat/auctions/{auction.id}/send/", {}, format="json")
+        assert res.status_code == 400
+ 
