@@ -308,3 +308,29 @@ class TestDeletePrivateMessage:
         res = auth_client.delete("/api/chat/conversations/messages/99999/")
         assert res.status_code == 400
  
+
+ # AUCTION CHAT — ROOM
+ 
+@pytest.mark.django_db
+class TestAuctionRoom:
+ 
+    def test_get_room_success(self, auth_client, auction):
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/room/")
+        assert res.status_code == 200
+        assert res.data["success"] is True
+        assert res.data["data"]["auction"] == auction.id
+ 
+    def test_get_room_creates_if_not_exists(self, auth_client, auction):
+        from apps.chat.models import ChatRoom
+        assert not ChatRoom.objects.filter(auction=auction).exists()
+ 
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/room/")
+        assert res.status_code == 200
+        assert ChatRoom.objects.filter(auction=auction).exists()
+ 
+    def test_get_room_idempotent(self, auth_client, auction):
+        from apps.chat.models import ChatRoom
+        auth_client.get(f"/api/chat/auctions/{auction.id}/room/")
+        auth_client.get(f"/api/chat/auctions/{auction.id}/room/")
+        assert ChatRoom.objects.filter(auction=auction).count() == 1
+ 
