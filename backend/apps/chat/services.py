@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.chat.models import Message, PrivateMessage
@@ -8,8 +7,8 @@ from apps.chat.selectors import (
     get_or_create_private_conversation,
     get_private_conversation,
 )
-from apps.notifications.models import Notification, NotificationType
-from apps.notifications.services import create_notification
+from apps.notifications.models import NotificationType
+from apps.notifications.services import notify_user
 from apps.users.models import User
 
 
@@ -18,10 +17,10 @@ def send_private_message(
     *, sender: User, recipient: User, text: str
 ) -> PrivateMessage:
     if not text or not text.strip():
-        raise ValidationError({"detail": "A mensagem não pode estar vazia."})
+        raise ValidationError("A mensagem não pode estar vazia.")
 
     if sender.id == recipient.id:
-        raise ValidationError({"detail": "Não podes enviar mensagem a ti mesmo."})
+        raise ValidationError("Não podes enviar mensagem a ti mesmo.")
 
     conversation, _ = get_or_create_private_conversation(
         user_one=sender,
@@ -35,9 +34,9 @@ def send_private_message(
         is_read=False,
     )
 
-    create_notification(
+    notify_user(
         user=recipient,
-        type=NotificationType.MESSAGE,
+        notification_type=NotificationType.MESSAGE,
         title=f"Nova mensagem de {sender.full_name}",
         content=text[:100],
     )
@@ -49,7 +48,7 @@ def send_private_message(
 def mark_messages_as_read(*, conversation_id: int, user: User) -> int:
     conversation = get_private_conversation(conversation_id=conversation_id, user=user)
     if not conversation:
-        raise ValidationError({"detail": "Conversa não encontrada."})
+        raise ValidationError("Conversa não encontrada.")
 
     updated = PrivateMessage.objects.filter(
         conversation_id=conversation_id,
@@ -64,17 +63,15 @@ def delete_private_message(*, message_id: int, user: User) -> None:
     try:
         message = PrivateMessage.objects.get(id=message_id, sender=user)
     except PrivateMessage.DoesNotExist:
-        raise PermissionDenied({"detail": "Não tens permissão para apagar esta mensagem."})
+        raise PermissionDenied("Não tens permissão para apagar esta mensagem.")
 
     message.delete()
 
 
 @transaction.atomic
-def send_room_message(
-    *, sender: User, auction_id: int, text: str
-) -> Message:
+def send_room_message(*, sender: User, auction_id: int, text: str) -> Message:
     if not text or not text.strip():
-        raise ValidationError({"detail": "A mensagem não pode estar vazia."})
+        raise ValidationError("A mensagem não pode estar vazia.")
 
     room, _ = get_or_create_auction_room(auction_id=auction_id)
 
@@ -90,10 +87,10 @@ def soft_delete_room_message(*, message_id: int, user: User) -> Message:
     try:
         message = Message.objects.get(id=message_id)
     except Message.DoesNotExist:
-        raise ValidationError({"detail": "Mensagem não encontrada."})
+        raise ValidationError("Mensagem não encontrada.")
 
     if message.sender_id != user.id:
-        raise PermissionDenied({"detail": "Só o autor pode apagar esta mensagem."})
+        raise PermissionDenied("Só o autor pode apagar esta mensagem.")
 
     message.is_deleted = True
     message.save(update_fields=["is_deleted", "updated_at"])
