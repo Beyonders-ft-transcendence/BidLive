@@ -72,6 +72,14 @@ docker run -d --name postgres \
   -e POSTGRES_PASSWORD=bidlive \
   -v postgres_data:/var/lib/postgresql/data \
   postgres:16-alpine
+
+docker run -d --name livekit \
+  -p 7880:7880 \
+  -p 7881:7881 \
+  -p 5000-5100:5000-5100/udp \
+  livekit/livekit-server:latest \
+  --dev \
+  --bind 0.0.0.0
 ```
 
 ## Main commands (uv)
