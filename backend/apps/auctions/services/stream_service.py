@@ -7,7 +7,6 @@ from decimal import Decimal
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
@@ -15,7 +14,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.analytics.services import track_event
 from apps.auctions.events import (
-    ICE_CANDIDATE,
+    LIVEKIT_ROOM_CLOSED,
+    LIVEKIT_ROOM_READY,
     STREAM_CANCELLED,
     STREAM_CREATED,
     STREAM_ENDED,
@@ -25,8 +25,6 @@ from apps.auctions.events import (
     VIEWER_COUNT_UPDATED,
     VIEWER_JOINED,
     VIEWER_LEFT,
-    WEBRTC_ANSWER,
-    WEBRTC_OFFER,
 )
 from apps.auctions.models import (
     Auction,
@@ -37,6 +35,12 @@ from apps.auctions.models import (
     StreamViewer,
 )
 from apps.auctions.selectors import list_streams_for_auction
+from apps.auctions.services.room_service import (
+    build_livekit_room_metadata,
+    build_livekit_room_name,
+    ensure_livekit_room,
+    remove_livekit_room,
+)
 from apps.auctions.services.realtime_service import auction_group_name
 from apps.notifications.models import NotificationType
 from apps.notifications.services import notify_auction_watchers, notify_user
@@ -217,6 +221,22 @@ def create_stream(
         is_live=False,
         stream_meta=data.get("stream_meta") or {},
     )
+    stream_meta = dict(stream.stream_meta or {})
+    stream_meta["livekit"] = {
+        **build_livekit_room_metadata(stream=stream),
+        "room_name": build_livekit_room_name(stream=stream),
+    }
+    stream.stream_meta = stream_meta
+    stream.save(update_fields=["stream_meta", "updated_at"])
+    room = ensure_livekit_room(stream=stream)
+    stream_meta["livekit"].update(
+        {
+            "room_sid": room.get("sid"),
+            "room_metadata": room.get("metadata"),
+        }
+    )
+    stream.stream_meta = stream_meta
+    stream.save(update_fields=["stream_meta", "updated_at"])
 
     log_permission_audit(
         actor=actor,
@@ -333,6 +353,7 @@ def start_stream(
     stream.is_live = True
     stream.started_at = stream.started_at or timezone.now()
     stream.save(update_fields=["status", "is_live", "started_at", "updated_at"])
+    ensure_livekit_room(stream=stream)
 
     notify_auction_watchers(
         auction=stream.auction,
@@ -367,6 +388,15 @@ def start_stream(
         event_type=STREAM_STARTED,
         payload=build_stream_snapshot(stream=stream),
     )
+    publish_stream_event(
+        stream=stream,
+        event_type=LIVEKIT_ROOM_READY,
+        payload={
+            "stream_id": stream.id,
+            "auction_id": stream.auction_id,
+            "room_name": build_livekit_room_name(stream=stream),
+        },
+    )
     publish_viewer_count(stream=stream)
     return stream
 
@@ -390,6 +420,10 @@ def end_stream(
     stream.save(update_fields=["status", "is_live", "ended_at", "viewer_count", "updated_at"])
     cache.delete(_stream_presence_key(stream_id=stream.id))
     StreamViewer.objects.filter(stream=stream).delete()
+    try:
+        remove_livekit_room(stream=stream)
+    except ValidationError:
+        pass
 
     if actor and getattr(actor, "is_authenticated", False):
         log_permission_audit(
@@ -432,6 +466,17 @@ def end_stream(
         stream=stream,
         event_type=event_type,
         payload={"stream_id": stream.id, "auction_id": stream.auction_id, "reason": reason, "status": status},
+    )
+    publish_stream_event(
+        stream=stream,
+        event_type=LIVEKIT_ROOM_CLOSED,
+        payload={
+            "stream_id": stream.id,
+            "auction_id": stream.auction_id,
+            "room_name": build_livekit_room_name(stream=stream),
+            "reason": reason,
+            "status": status,
+        },
     )
     return stream
 
@@ -538,9 +583,3 @@ def end_active_streams_for_auction(*, auction_id: int, reason: str = "auction_cl
         end_stream(stream=stream, reason=reason, status=LiveStreamStatus.ENDED)
         count += 1
     return count
-
-
-def publish_webrtc_signal(*, stream: LiveStream, event_type: str, payload: dict) -> None:
-    if event_type not in {WEBRTC_OFFER, WEBRTC_ANSWER, ICE_CANDIDATE}:
-        return
-    publish_stream_event(stream=stream, event_type=event_type, payload=payload)
