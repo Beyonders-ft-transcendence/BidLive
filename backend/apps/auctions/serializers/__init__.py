@@ -15,6 +15,8 @@ from apps.auctions.serializers.stream_serializers import (
     StreamCreateSerializer,
     StreamDetailSerializer,
     StreamEndSerializer,
+    StreamLiveKitTokenRequestSerializer,
+    StreamLiveKitTokenResponseSerializer,
     StreamListSerializer,
     StreamRegenerateKeySerializer,
     StreamStartSerializer,
@@ -43,4 +45,6 @@ __all__ = [
     "StreamStartSerializer",
     "StreamEndSerializer",
     "StreamRegenerateKeySerializer",
+    "StreamLiveKitTokenRequestSerializer",
+    "StreamLiveKitTokenResponseSerializer",
 ]
