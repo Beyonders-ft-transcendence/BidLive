@@ -1,13 +1,29 @@
+x-backend-env: &backend-env
+  DJANGO_ENV: ${DJANGO_ENV:-development}
+  DJANGO_SETTINGS_MODULE: config.settings.development
+  DATABASE_URL: ${DATABASE_URL:-postgresql://bidlive:bidlive@postgres:5432/bidlive}
+  DATABASE_HOST: postgres
+  DATABASE_PORT: ${DATABASE_PORT:-5432}
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/1
+  CELERY_RESULT_BACKEND: redis://redis:6379/2
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:3000}
+  LIVEKIT_URL: ${LIVEKIT_URL:-http://livekit:7880}
+  LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+  LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret}
+
 services:
   backend:
-    build: .
+    build:
+      context: .
     env_file:
       - .env
-    environment:
-      DJANGO_ENV: development
-      DJANGO_SETTINGS_MODULE: config.settings.development
+    environment: *backend-env
+    command: uv run uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips=*
     ports:
-      - "8000:8000"
+      - "${DJANGO_PORT:-8000}:8000"
     volumes:
       - ./:/app
       - static_data:/app/staticfiles
@@ -17,72 +33,148 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/health/ || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/schema/ >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
+    networks:
+      - app_net
+      - media_net
 
   celery_worker:
-    build: .
+    build:
+      context: .
     env_file:
       - .env
-    environment:
-      DJANGO_ENV: development
-      DJANGO_SETTINGS_MODULE: config.settings.development
+    environment: *backend-env
+    command: uv run celery -A config worker -l info
     volumes:
       - ./:/app
     depends_on:
+      backend:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A config worker -l info
+    networks:
+      - app_net
+      - media_net
 
   celery_beat:
-    build: .
+    build:
+      context: .
     env_file:
       - .env
-    environment:
-      DJANGO_ENV: development
-      DJANGO_SETTINGS_MODULE: config.settings.development
+    environment: *backend-env
+    command: uv run celery -A config beat -l info
     volumes:
       - ./:/app
     depends_on:
+      backend:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A config beat -l info
+    networks:
+      - app_net
+      - media_net
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3000
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000/api}
+      NEXT_PUBLIC_WS_BASE_URL: ${NEXT_PUBLIC_WS_BASE_URL:-ws://localhost:8000}
+      NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+    command: sh -c "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3000"
+    ports:
+      - "${NEXT_PORT:-3000}:3000"
+    volumes:
+      - ../frontend:/app
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - app_net
 
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: bidlive
-      POSTGRES_USER: bidlive
-      POSTGRES_PASSWORD: bidlive
+      POSTGRES_DB: ${POSTGRES_DB:-bidlive}
+      POSTGRES_USER: ${POSTGRES_USER:-bidlive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bidlive}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bidlive -d bidlive"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-bidlive} -d ${POSTGRES_DB:-bidlive}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - app_net
 
   redis:
     image: redis:7-alpine
+    command: redis-server --appendonly yes --save 60 1
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - app_net
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev --bind 0.0.0.0
+    env_file:
+      - .env
+    ports:
+      - "${LIVEKIT_HTTP_PORT:-7880}:7880"
+      - "${LIVEKIT_TCP_PORT:-7881}:7881/tcp"
+      - "${LIVEKIT_RTC_UDP_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_UDP_PORT_RANGE_END:-60000}:50000-60000/udp"
+    networks:
+      - media_net
+      - app_net
 
 volumes:
   postgres_data:
+  redis_data:
   static_data:
   media_data:
+  frontend_node_modules:
+  frontend_next:
+
+networks:
+  app_net:
+    driver: bridge
+  media_net:
+    driver: bridge
