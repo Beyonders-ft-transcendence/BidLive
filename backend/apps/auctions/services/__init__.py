@@ -43,13 +43,41 @@ from apps.auctions.services.stream_service import (
     leave_stream,
     publish_stream_event,
     publish_viewer_count,
-    publish_webrtc_signal,
     regenerate_stream_key,
     start_stream,
     update_stream,
 )
 from apps.auctions.services.scheduling_service import schedule_auction_activation, schedule_auction_close
 from apps.auctions.services.winner_service import determine_winner
+from apps.auctions.services.participant_service import (
+    LIVEKIT_ROLE_BROADCASTER,
+    LIVEKIT_ROLE_MODERATOR,
+    LIVEKIT_ROLE_VIEWER,
+    build_livekit_participant_identity,
+    build_livekit_participant_name,
+    can_moderate_room,
+    can_publish_data,
+    can_publish_tracks,
+    can_subscribe_tracks,
+    resolve_livekit_role,
+)
+from apps.auctions.services.presence_service import (
+    build_stream_presence_snapshot,
+    get_stream_presence_count,
+    list_stream_viewers,
+    record_viewer_join,
+    record_viewer_leave,
+    set_stream_presence_count,
+)
+from apps.auctions.services.room_service import (
+    build_livekit_room_metadata,
+    build_livekit_room_name,
+    ensure_livekit_room,
+    get_livekit_public_url,
+    get_livekit_server_url,
+    remove_livekit_room,
+)
+from apps.auctions.services.token_service import issue_livekit_stream_token
 
 __all__ = [
     "activate_auction",
@@ -94,11 +122,33 @@ __all__ = [
     "leave_stream",
     "publish_stream_event",
     "publish_viewer_count",
-    "publish_webrtc_signal",
     "regenerate_stream_key",
     "start_stream",
     "update_stream",
     "schedule_auction_activation",
     "schedule_auction_close",
     "determine_winner",
+    "LIVEKIT_ROLE_BROADCASTER",
+    "LIVEKIT_ROLE_VIEWER",
+    "LIVEKIT_ROLE_MODERATOR",
+    "build_livekit_participant_identity",
+    "build_livekit_participant_name",
+    "can_moderate_room",
+    "can_publish_data",
+    "can_publish_tracks",
+    "can_subscribe_tracks",
+    "resolve_livekit_role",
+    "build_stream_presence_snapshot",
+    "get_stream_presence_count",
+    "list_stream_viewers",
+    "record_viewer_join",
+    "record_viewer_leave",
+    "set_stream_presence_count",
+    "build_livekit_room_metadata",
+    "build_livekit_room_name",
+    "ensure_livekit_room",
+    "get_livekit_public_url",
+    "get_livekit_server_url",
+    "remove_livekit_room",
+    "issue_livekit_stream_token",
 ]
