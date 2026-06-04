@@ -11,6 +11,8 @@ from apps.auctions.serializers import (
     StreamCreateSerializer,
     StreamDetailSerializer,
     StreamEndSerializer,
+    StreamLiveKitTokenRequestSerializer,
+    StreamLiveKitTokenResponseSerializer,
     StreamListSerializer,
     StreamRegenerateKeySerializer,
     StreamStartSerializer,
@@ -21,6 +23,7 @@ from apps.auctions.services import (
     cancel_stream,
     create_stream,
     end_stream,
+    issue_livekit_stream_token,
     regenerate_stream_key,
     start_stream,
     update_stream,
@@ -117,6 +120,11 @@ class StreamViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, HasRBACPermission, IsLiveStreamOwnerOrManager]
     serializer_class = StreamDetailSerializer
 
+    def get_permissions(self):
+        if self.action == "livekit_token":
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
     def get_required_permissions(self):
         action_map = {
             "list": ["auction.read"],
@@ -128,6 +136,7 @@ class StreamViewSet(viewsets.GenericViewSet):
             "end": ["auction.update"],
             "regenerate_key": ["auction.update"],
             "viewers": ["auction.read"],
+            "livekit_token": [],
         }
         return action_map.get(self.action, [])
 
@@ -145,6 +154,7 @@ class StreamViewSet(viewsets.GenericViewSet):
             "end": StreamEndSerializer,
             "regenerate_key": StreamRegenerateKeySerializer,
             "viewers": StreamViewerSerializer,
+            "livekit_token": StreamLiveKitTokenRequestSerializer,
         }
         return serializer_map.get(self.action, self.serializer_class)
 
@@ -295,7 +305,7 @@ class StreamViewSet(viewsets.GenericViewSet):
                 "Requisicao de inicio",
                 value={
                     "stream_key": "sk_live_8f4e2c1a9d92b1f4",
-                    "metadata": {"source": "OBS", "protocol": "RTMP"},
+                    "metadata": {"source": "frontend", "protocol": "webrtc"},
                 },
                 request_only=True,
             ),
@@ -448,4 +458,36 @@ class StreamViewSet(viewsets.GenericViewSet):
         return success_response(
             {"count": viewers.count(), "results": serializer.data},
             message="Viewers carregados.",
+        )
+
+    @extend_schema(
+        tags=STREAM_TAGS,
+        summary="Emitir token LiveKit",
+        description=(
+            "Valida acesso ao auction/stream e emite um token LiveKit para o broadcaster ou viewer. "
+            "O frontend usa este token para conectar diretamente na room LiveKit."
+        ),
+        request=StreamLiveKitTokenRequestSerializer,
+        responses={
+            200: OpenApiResponse(response=StreamLiveKitTokenResponseSerializer, description="Token emitido com sucesso."),
+            401: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Autenticacao ausente ou invalida."),
+            403: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Usuario sem permissao para entrar na room."),
+            404: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Stream nao encontrada."),
+        },
+    )
+    @action(detail=True, methods=["post"], url_path="livekit-token")
+    def livekit_token(self, request, auction_id=None, pk=None):
+        stream = self.get_object()
+        serializer = StreamLiveKitTokenRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload = issue_livekit_stream_token(
+            stream=stream,
+            user=request.user,
+            requested_role=serializer.validated_data.get("role", "viewer"),
+            participant_name=serializer.validated_data.get("participant_name", ""),
+            metadata=serializer.validated_data.get("metadata") or {},
+        )
+        return success_response(
+            payload,
+            message="Token LiveKit emitido com sucesso.",
         )

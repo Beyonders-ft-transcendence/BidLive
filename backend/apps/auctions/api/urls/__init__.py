@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.auctions.api.urls.router import build_router
+from apps.auctions.api.views.livekit_webhook_views import LiveKitWebhookView
 from apps.auctions.api.views.stream_views import StreamViewSet
 
 router = build_router()
@@ -11,6 +12,8 @@ stream_start = StreamViewSet.as_view({"post": "start"})
 stream_end = StreamViewSet.as_view({"post": "end"})
 stream_regenerate_key = StreamViewSet.as_view({"post": "regenerate_key"})
 stream_viewers = StreamViewSet.as_view({"get": "viewers"})
+stream_livekit_token = StreamViewSet.as_view({"post": "livekit_token"})
+livekit_webhook = LiveKitWebhookView.as_view()
 
 urlpatterns = router.urls + [
     path("auctions/<int:auction_id>/streams/", stream_list, name="auction-stream-list"),
@@ -23,6 +26,12 @@ urlpatterns = router.urls + [
         name="auction-stream-regenerate-key",
     ),
     path("auctions/<int:auction_id>/streams/<int:pk>/viewers/", stream_viewers, name="auction-stream-viewers"),
+    path(
+        "auctions/<int:auction_id>/streams/<int:pk>/livekit-token/",
+        stream_livekit_token,
+        name="auction-stream-livekit-token",
+    ),
+    path("livekit/webhook/", livekit_webhook, name="livekit-webhook"),
 ]
 
 __all__ = ["router", "urlpatterns", "build_router"]
