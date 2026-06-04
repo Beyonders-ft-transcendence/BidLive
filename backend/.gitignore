@@ -14,6 +14,9 @@ tool/
 /media/
 htmlcov/
 
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
 .pytest_cache/
 .coverage
 coverage.xml
