@@ -153,3 +153,23 @@ class StreamEndSerializer(serializers.Serializer):
 
 class StreamRegenerateKeySerializer(serializers.Serializer):
     pass
+
+
+class StreamLiveKitTokenRequestSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=("viewer", "broadcaster", "moderator"), default="viewer")
+    participant_name = serializers.CharField(required=False, allow_blank=True)
+    metadata = serializers.JSONField(required=False)
+
+
+class StreamLiveKitTokenResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    room_name = serializers.CharField()
+    url = serializers.CharField()
+    identity = serializers.CharField()
+    name = serializers.CharField()
+    role = serializers.CharField()
+    can_publish = serializers.BooleanField()
+    can_subscribe = serializers.BooleanField()
+    expires_at = serializers.DateTimeField()
+    stream_id = serializers.IntegerField()
+    auction_id = serializers.IntegerField()
