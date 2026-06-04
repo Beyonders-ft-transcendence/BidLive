@@ -1,54 +1,76 @@
-import asyncio
 import json
 from datetime import timedelta
 from decimal import Decimal
-from urllib.parse import unquote, urlparse
 
 import pytest
-from asgiref.testing import ApplicationCommunicator
+import jwt
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.auctions.models import Auction, AuctionItem, AuctionStatus, LiveStream, LiveStreamStatus
 from apps.auctions.services import end_stream
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 from apps.users.selectors import invalidate_user_permissions_cache
-from config.asgi import application
 
 
-class WebsocketCommunicator(ApplicationCommunicator):
-    def __init__(self, application, path, headers=None, subprotocols=None):
-        parsed = urlparse(path)
-        scope = {
-            "type": "websocket",
-            "path": unquote(parsed.path),
-            "query_string": parsed.query.encode("utf-8"),
-            "headers": headers or [],
-            "subprotocols": subprotocols or [],
-        }
-        super().__init__(application, scope)
+@pytest.fixture(autouse=True)
+def mock_livekit_room_service(monkeypatch):
+    rooms = {}
 
-    async def connect(self, timeout=1):
-        await self.send_input({"type": "websocket.connect"})
-        response = await self.receive_output(timeout)
-        if response["type"] == "websocket.close":
-            return False, response.get("code", 1000)
-        assert response["type"] == "websocket.accept"
-        return True, response.get("subprotocol")
+    class FakeResponse:
+        def __init__(self, status_code=200, payload=None):
+            self.status_code = status_code
+            self._payload = payload if payload is not None else {}
 
-    async def send_json_to(self, data):
-        await self.send_input({"type": "websocket.receive", "text": json.dumps(data)})
+        @property
+        def ok(self):
+            return 200 <= self.status_code < 300
 
-    async def receive_json_from(self, timeout=1):
-        response = await self.receive_output(timeout)
-        assert response["type"] == "websocket.send"
-        return json.loads(response["text"])
+        @property
+        def content(self):
+            if self._payload is None:
+                return b""
+            return json.dumps(self._payload).encode("utf-8")
 
-    async def disconnect(self, code=1000, timeout=1):
-        await self.send_input({"type": "websocket.disconnect", "code": code})
-        await self.wait(timeout)
+        def json(self):
+            return self._payload
+
+        @property
+        def text(self):
+            return json.dumps(self._payload)
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        method = url.rsplit("/", 1)[-1]
+        body = json or {}
+        if method == "ListRooms":
+            names = body.get("names") or []
+            return FakeResponse(200, {"rooms": [rooms[name] for name in names if name in rooms]})
+        if method == "CreateRoom":
+            room = {
+                "sid": f"RM_{len(rooms) + 1}",
+                "name": body["name"],
+                "metadata": body.get("metadata", ""),
+                "num_participants": 0,
+            }
+            rooms[room["name"]] = room
+            return FakeResponse(200, room)
+        if method == "UpdateRoomMetadata":
+            room = rooms.get(body["room"])
+            if room is None:
+                return FakeResponse(404, {"code": "not_found", "msg": "room not found"})
+            room["metadata"] = body.get("metadata", "")
+            return FakeResponse(200, room)
+        if method == "DeleteRoom":
+            room_name = body["room"]
+            if room_name not in rooms:
+                return FakeResponse(404, {"code": "not_found", "msg": "room not found"})
+            rooms.pop(room_name, None)
+            return FakeResponse(200, {})
+        raise AssertionError(f"Unexpected LiveKit method: {method}")
+
+    monkeypatch.setattr("apps.auctions.services.livekit_client.requests.post", fake_post)
 
 
 def _grant_permissions(user, permissions):
@@ -135,42 +157,117 @@ def test_stream_api_lifecycle(db, user):
     assert end_response.data["data"]["status"] == "ENDED"
 
 
-@pytest.mark.django_db(transaction=True)
-def test_stream_websocket_presence_and_heartbeat(db, user, other_user):
+def test_stream_livekit_token_endpoint_issues_broadcaster_token(db, user):
+    cache.clear()
+    _grant_permissions(user, ["auction.read", "auction.update"])
+    auction = _create_live_auction(seller=user, title="LiveKit Broadcaster")
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    create_response = client.post(
+        f"/api/auctions/{auction.id}/streams/",
+        {"title": "LiveKit Stream", "visibility": "PUBLIC"},
+        format="json",
+    )
+    assert create_response.status_code == 201
+    stream_id = create_response.data["data"]["id"]
+
+    token_response = client.post(
+        f"/api/auctions/{auction.id}/streams/{stream_id}/livekit-token/",
+        {"role": "broadcaster", "participant_name": "Main Camera"},
+        format="json",
+    )
+
+    assert token_response.status_code == 200
+    payload = token_response.data["data"]
+    decoded = jwt.decode(payload["token"], settings.LIVEKIT_API_SECRET, algorithms=["HS256"])
+
+    assert payload["role"] == "broadcaster"
+    assert payload["can_publish"] is True
+    assert payload["can_subscribe"] is True
+    assert payload["room_name"] == f"auction-{auction.id}-stream-{stream_id}"
+    assert payload["url"] == settings.LIVEKIT_PUBLIC_URL
+    assert decoded["iss"] == settings.LIVEKIT_API_KEY
+    assert decoded["video"]["room"] == payload["room_name"]
+    assert decoded["video"]["canPublish"] is True
+    assert decoded["video"]["canSubscribe"] is True
+    decoded_metadata = json.loads(decoded["metadata"])
+    assert decoded_metadata["role"] == "broadcaster"
+    assert decoded_metadata["stream_id"] == stream_id
+    assert decoded_metadata["auction_id"] == auction.id
+
+
+def test_stream_livekit_token_endpoint_issues_viewer_token_for_live_stream(db, user, other_user):
     cache.clear()
     _grant_permissions(user, ["auction.read", "auction.update"])
     _grant_permissions(other_user, ["auction.read"])
-    auction = _create_live_auction(seller=user, title="Realtime Live")
-    stream = _create_stream(auction=auction, streamer=user)
-    stream.status = LiveStreamStatus.LIVE
-    stream.is_live = True
-    stream.started_at = timezone.now()
-    stream.save(update_fields=["status", "is_live", "started_at"])
+    auction = _create_live_auction(seller=user, title="LiveKit Viewer")
 
-    async def _scenario():
-        token = str(AccessToken.for_user(other_user))
-        communicator = WebsocketCommunicator(
-            application,
-            f"/ws/auctions/{auction.id}/streams/{stream.id}/?token={token}",
-        )
-        connected, _ = await communicator.connect()
-        assert connected is True
+    owner_client = APIClient()
+    owner_client.force_authenticate(user=user)
+    create_response = owner_client.post(
+        f"/api/auctions/{auction.id}/streams/",
+        {"title": "LiveKit Viewer Stream", "visibility": "PUBLIC"},
+        format="json",
+    )
+    assert create_response.status_code == 201
+    stream_id = create_response.data["data"]["id"]
+    stream_key = create_response.data["data"]["stream_key"]
 
-        first_event = await communicator.receive_json_from()
-        second_event = await communicator.receive_json_from()
-        event_names = {first_event["event"], second_event["event"]}
-        assert "stream_snapshot" in event_names
-        assert "viewer_joined" in event_names or "viewer_count_updated" in event_names
+    start_response = owner_client.post(
+        f"/api/auctions/{auction.id}/streams/{stream_id}/start/",
+        {"stream_key": stream_key},
+        format="json",
+    )
+    assert start_response.status_code == 200
 
-        await communicator.send_json_to({"action": "ping"})
-        pong = await communicator.receive_json_from()
-        assert pong["event"] == "pong"
+    viewer_client = APIClient()
+    viewer_client.force_authenticate(user=other_user)
+    token_response = viewer_client.post(
+        f"/api/auctions/{auction.id}/streams/{stream_id}/livekit-token/",
+        {"role": "viewer"},
+        format="json",
+    )
 
-        await communicator.disconnect()
+    assert token_response.status_code == 200
+    payload = token_response.data["data"]
+    decoded = jwt.decode(payload["token"], settings.LIVEKIT_API_SECRET, algorithms=["HS256"])
 
-    asyncio.run(_scenario())
+    assert payload["role"] == "viewer"
+    assert payload["can_publish"] is False
+    assert payload["can_subscribe"] is True
+    assert payload["room_name"] == f"auction-{auction.id}-stream-{stream_id}"
+    assert payload["url"] == settings.LIVEKIT_PUBLIC_URL
+    assert decoded["video"]["canPublish"] is False
+    assert decoded["video"]["canSubscribe"] is True
 
 
+def test_stream_livekit_token_endpoint_rejects_viewer_before_stream_is_live(db, user, other_user):
+    cache.clear()
+    _grant_permissions(user, ["auction.read", "auction.update"])
+    _grant_permissions(other_user, ["auction.read"])
+    auction = _create_live_auction(seller=user, title="LiveKit Viewer Denied")
+
+    owner_client = APIClient()
+    owner_client.force_authenticate(user=user)
+    create_response = owner_client.post(
+        f"/api/auctions/{auction.id}/streams/",
+        {"title": "LiveKit Viewer Denied Stream", "visibility": "PUBLIC"},
+        format="json",
+    )
+    assert create_response.status_code == 201
+    stream_id = create_response.data["data"]["id"]
+
+    viewer_client = APIClient()
+    viewer_client.force_authenticate(user=other_user)
+    token_response = viewer_client.post(
+        f"/api/auctions/{auction.id}/streams/{stream_id}/livekit-token/",
+        {"role": "viewer"},
+        format="json",
+    )
+
+    assert token_response.status_code == 403
 def test_stream_end_service_closes_live_stream(db, user):
     cache.clear()
     auction = _create_live_auction(seller=user, title="End Live")
