@@ -156,6 +156,11 @@ FORTY_TWO_REDIRECT_URI = env(
 )
 FORTY_TWO_SCOPES = env("FORTY_TWO_SCOPES", default="public")
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
+LIVEKIT_URL = env("LIVEKIT_URL", default="http://livekit:7880")
+LIVEKIT_PUBLIC_URL = env("LIVEKIT_PUBLIC_URL", default="ws://localhost:7880")
+LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
+LIVEKIT_API_SECRET = env("LIVEKIT_API_SECRET", default="")
+LIVEKIT_TOKEN_TTL_MINUTES = env("LIVEKIT_TOKEN_TTL_MINUTES", default=60)
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
