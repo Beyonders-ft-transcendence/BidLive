@@ -30,7 +30,7 @@ export default function Sidebar() {
     ];
 
     return (
-        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-white border-r border-gray-150 flex flex-col justify-between items-center py-6 z-30 select-none">
+        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-white border-r border-gray-100 flex flex-col justify-between items-center py-6 z-30 select-none">
             {/* Top: Light/Dark Mode Mock Toggles */}
             <div className="flex flex-col gap-1.5 items-center">
                 <button className="w-8 h-8 rounded-full flex items-center justify-center text-amber-500 bg-amber-50 shadow-sm transition-all duration-300">
