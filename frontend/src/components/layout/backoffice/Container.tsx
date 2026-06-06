@@ -1,22 +1,23 @@
-import Header from "./Header"
-import Sidebar from "./Sidebar"
+"use client";
+
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 
 export default function Container({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex min-h-screen bg-[#F8FAFC] text-gray-900 font-sans">
-            {/* Sidebar */}
-            <Sidebar />
+        <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-gray-900 font-sans select-none">
+            {/* Top Full-width Header */}
+            <Header />
             
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 pl-60">
-                {/* Top Header */}
-                <Header />
+            <div className="flex flex-1 min-h-0 relative">
+                {/* Sidebar under header */}
+                <Sidebar />
                 
-                {/* Dashboard / Backoffice Page Content */}
-                <div className="flex-1 p-6 md:p-8 ">
+                {/* Main Scrollable Content */}
+                <div className="flex-1 overflow-y-auto">
                     {children}
                 </div>
             </div>
         </div>
-    )
+    );
 }
