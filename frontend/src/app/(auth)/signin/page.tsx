@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Divider from "@/components/common/Divider";
-import { GoogleIcon } from "@/components/common/Icons";
 import { useAuthStore } from "@/store/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AuthSidebar from "@/components/auth/AuthSidebar";
+import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 import { signInSchema, type SignInInput } from "@/schema/auth.schema";
 import { Lineicons } from "@lineiconshq/react-lineicons";
 import { Envelope1Outlined, Locked1Outlined, EyeOutlined, EyeStroke } from "@lineiconshq/free-icons";
@@ -81,32 +81,7 @@ export default function SignIn() {
                         <p className="text-xs text-gray-400 mt-1 font-normal">Licite, acompanhe e compre de forma inteligente</p>
 
                         {/* Social Sign-In grid */}
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                fullWidth
-                                className="text-xs font-semibold py-2.5"
-                                icon={<GoogleIcon />}
-                            >
-                                Entrar com Google
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                fullWidth
-                                onClick={handle42Login}
-                                className="text-xs font-semibold py-2.5"
-                                icon={
-                                    <svg className="h-4 w-4 text-gray-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                                        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-                                    </svg>
-                                }
-                            >
-                                Entrar com 42
-                            </Button>
-                        </div>
+                        <SocialAuthButtons mode="signin" onFortyTwoClick={handle42Login} />
 
                         {/* Divider */}
                         <Divider>Ou com e-mail</Divider>
