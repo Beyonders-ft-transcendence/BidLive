@@ -1,322 +1,182 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
-import { categoryStatusColor, CategoryStatus } from "@/utils/category";
+import TableSection from "@/components/common/TableSection";
+import categoryService from "@/services/category.service";
+import type { Category } from "@/types/category.types";
 import {
-  Edit3,
-  Trash2,
-  Plus,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  X,
+  Folder,
+  ArrowRight,
+  Layers
 } from "lucide-react";
-import { useMemo, useState } from "react";
-
-interface CategoryData {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  auctionsCount: number;
-  status: CategoryStatus;
-  createdAt: string;
-}
-
-const initialCategories: CategoryData[] = [
-  {
-    id: "CAT-001",
-    name: "Veículos",
-    slug: "veiculos",
-    description: "Carros, motos, barcos e outros veículos motorizados.",
-    auctionsCount: 145,
-    status: "Ativo",
-    createdAt: "10 Jan 2025",
-  },
-  {
-    id: "CAT-002",
-    name: "Imóveis",
-    slug: "imoveis",
-    description: "Casas, apartamentos, terrenos e galpões comerciais.",
-    auctionsCount: 82,
-    status: "Ativo",
-    createdAt: "12 Jan 2025",
-  },
-  {
-    id: "CAT-003",
-    name: "Eletrônicos",
-    slug: "eletronicos",
-    description: "Smartphones, laptops, câmeras e acessórios.",
-    auctionsCount: 215,
-    status: "Ativo",
-    createdAt: "15 Jan 2025",
-  },
-  {
-    id: "CAT-004",
-    name: "Equipamentos",
-    slug: "equipamentos",
-    description: "Maquinário industrial e equipamentos de construção.",
-    auctionsCount: 43,
-    status: "Ativo",
-    createdAt: "20 Jan 2025",
-  },
-  {
-    id: "CAT-005",
-    name: "Arte & Colecionáveis",
-    slug: "arte-colecionaveis",
-    description: "Pinturas, moedas raras, selos e antiguidades.",
-    auctionsCount: 12,
-    status: "Inativo",
-    createdAt: "05 Fev 2025",
-  },
-];
 
 export default function Categories() {
-  const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const res = await categoryService.list();
+      if (res.success && res.data) {
+        setCategories(res.data);
+      }
+    } catch (err) {
+      console.error("Erro ao obter categorias do backend:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((cat) => {
       const matchSearch =
         cat.name.toLowerCase().includes(search.toLowerCase()) ||
-        cat.slug.toLowerCase().includes(search.toLowerCase());
+        cat.slug.toLowerCase().includes(search.toLowerCase()) ||
+        (cat.description && cat.description.toLowerCase().includes(search.toLowerCase()));
 
-      const matchStatus = statusFilter ? cat.status === statusFilter : true;
+      const matchStatus = statusFilter
+        ? (statusFilter === "Ativo" ? cat.is_active : !cat.is_active)
+        : true;
 
       return matchSearch && matchStatus;
     });
   }, [categories, search, statusFilter]);
 
-  const handleOpenModal = (category?: CategoryData) => {
-    if (category) {
-      setEditingCategory(category);
-    } else {
-      setEditingCategory(null);
-    }
-    setIsModalOpen(true);
+  // Find parent name helper
+  const getParentCategoryName = (parentId: number | null) => {
+    if (!parentId) return "—";
+    const parent = categories.find((c) => c.id === parentId);
+    return parent ? parent.name : `ID: ${parentId}`;
   };
 
+  const filtersSlot = (
+    <TableFilters
+      search={search}
+      onSearchChange={setSearch}
+      showFilters={showFilters}
+      onShowFiltersChange={setShowFilters}
+      filters={{
+        status: statusFilter,
+      }}
+      onFilterChange={(filterName, value) => {
+        if (filterName === "status") setStatusFilter(value);
+      }}
+      onClearFilters={() => {
+        setSearch("");
+        setStatusFilter("");
+      }}
+      filterOptions={{
+        statusOptions: [
+          { value: "", label: "Todos os Estados" },
+          { value: "Ativo", label: "Ativas" },
+          { value: "Inativo", label: "Inativas" },
+        ],
+      }}
+    />
+  );
+
   return (
-    <>
+    <div className="flex flex-col gap-5 p-1 select-none">
+      
+      {/* HEADER SECTION */}
       <ActionCard
         title="Gestão de Categorias"
-        buttonLabel="Nova Categoria"
-        onButtonClick={() => handleOpenModal()}
+        subtitle="Consulte e gerencie as taxonomias e agrupamentos de leilões da plataforma. A modificação de categorias é feita no painel administrativo principal do Django."
       />
 
-      {/* TABLE */}
-      <div className="bg-white p-4 rounded-sm shadow-sm mt-4 overflow-hidden">
-        {/* SEARCH & FILTERS */}
-        <TableFilters
-          search={search}
-          onSearchChange={setSearch}
-          showFilters={showFilters}
-          onShowFiltersChange={setShowFilters}
-          filters={{
-            status: statusFilter,
-          }}
-          onFilterChange={(filterName, value) => {
-            if (filterName === "status") setStatusFilter(value);
-          }}
-          onClearFilters={() => {
-            setSearch("");
-            setStatusFilter("");
-          }}
-          filterOptions={{
-            statusOptions: [
-              { value: "", label: "Todos os Status" },
-              { value: "Ativo", label: "Ativo" },
-              { value: "Inativo", label: "Inativo" },
-            ],
-          }}
-        />
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-300">
-            <thead className="bg-gray-50 text-left">
-              <tr className="text-xs text-gray-600 border-b border-gray-200">
-                <th className="p-3 font-semibold">Nome da Categoria</th>
-                <th className="text-xs font-semibold">Slug</th>
-                <th className="text-xs font-semibold">Descrição</th>
-                <th className="text-xs font-semibold">Leilões</th>
-                <th className="text-xs font-semibold">Status</th>
-                <th className="text-xs font-semibold">Data Criação</th>
-                <th className="text-xs font-semibold">Ações</th>
+      {/* TABLE SECTION */}
+      <TableSection
+        filters={filtersSlot}
+        entityName="categorias"
+      >
+        <table className="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr className="border-b border-gray-100 text-[9px] text-gray-400 font-bold uppercase tracking-wider bg-gray-50/50">
+              <th className="p-3">Categoria</th>
+              <th className="py-3">Caminho (Slug)</th>
+              <th className="py-3">Categoria Pai</th>
+              <th className="py-3">Descrição</th>
+              <th className="py-3">Status</th>
+              <th className="py-3 text-right pr-6">ID Interno</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50 text-[10px] text-gray-700">
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-gray-400 font-medium">
+                  Carregando categorias da API...
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {filteredCategories.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-6 text-center text-xs text-gray-500">
-                    Nenhuma categoria encontrada
+            ) : filteredCategories.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-gray-400 font-medium">
+                  Nenhuma categoria encontrada com os filtros selecionados.
+                </td>
+              </tr>
+            ) : (
+              filteredCategories.map((cat) => (
+                <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-sm bg-primary/5 text-primary flex items-center justify-center border border-primary/10">
+                        <Folder size={12} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-gray-950 text-xs leading-tight">
+                          {cat.name}
+                        </span>
+                        <span className="text-[8px] font-bold text-gray-400 mt-0.5 tracking-wider uppercase font-mono">
+                          Ordem: {cat.sort_order}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 font-mono text-gray-500">/{cat.slug}</td>
+                  <td className="py-3">
+                    {cat.parent ? (
+                      <div className="flex items-center gap-1.5 text-gray-800">
+                        <Layers size={10} className="text-gray-400" />
+                        <span className="font-medium">{getParentCategoryName(cat.parent)}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 font-semibold">—</span>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    <span className="text-gray-600 font-medium line-clamp-1 max-w-[280px]">
+                      {cat.description || "Sem descrição disponível."}
+                    </span>
+                  </td>
+                  <td className="py-3">
+                    {cat.is_active ? (
+                      <span className="px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase bg-green-50 text-green-600">
+                        Ativo
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase bg-gray-100 text-gray-400">
+                        Inativo
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3 text-right pr-6 font-mono text-gray-400 font-bold">
+                    #{cat.id}
                   </td>
                 </tr>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <tr
-                    key={cat.id}
-                    className="border-b border-gray-200 hover:bg-gray-50 transition text-xs"
-                  >
-                    <td className="p-3 font-medium text-gray-900">{cat.name}</td>
-                    <td className="text-xs text-gray-500">/{cat.slug}</td>
-                    <td className="text-xs text-gray-600 max-w-xs truncate">
-                      {cat.description}
-                    </td>
-                    <td className="text-xs font-medium text-blue-600">
-                      {cat.auctionsCount}
-                    </td>
-                    <td className="text-xs">
-                      <span
-                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${categoryStatusColor(
-                          cat.status
-                        )}`}
-                      >
-                        {cat.status}
-                      </span>
-                    </td>
-                    <td className="text-xs text-gray-500">{cat.createdAt}</td>
-                    <td className="text-xs">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleOpenModal(cat)}
-                          className="p-1.5 rounded-sm hover:bg-blue-100 text-blue-600 transition"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          className="p-1.5 rounded-sm hover:bg-red-100 text-red-600 transition"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div className="flex items-center justify-between p-3 border-t border-gray-100">
-          <div className="text-xs text-gray-500">
-            Mostrando 1–5 de {filteredCategories.length}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-            <button className="px-2.5 py-1 bg-blue-600 text-white rounded-sm text-xs font-medium shadow-sm">
-              1
-            </button>
-            <button className="p-1 border border-gray-200 rounded-sm hover:bg-gray-50">
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* MODAL NOVA/EDITAR CATEGORIA */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-sm max-w-md w-full p-6 shadow-xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-gray-900">
-                {editingCategory ? "Editar Categoria" : "Nova Categoria"}
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Nome da Categoria
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ex: Veículos"
-                  defaultValue={editingCategory?.name}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Slug
-                </label>
-                <div className="flex items-center">
-                  <span className="bg-gray-100 px-3 py-2 border border-r-0 border-gray-200 rounded-l-sm text-xs text-gray-500">
-                    /
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="veiculos"
-                    defaultValue={editingCategory?.slug}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-r-sm text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Status
-                </label>
-                <select 
-                  defaultValue={editingCategory?.status || "Ativo"}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white"
-                >
-                  <option value="Ativo">Ativo</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Descrição
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Descreva o tipo de itens nesta categoria..."
-                  defaultValue={editingCategory?.description}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none"
-                ></textarea>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 rounded-sm border border-gray-200 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-sm shadow-sm transition"
-                >
-                  {editingCategory ? "Salvar Alterações" : "Criar Categoria"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+              ))
+            )}
+          </tbody>
+        </table>
+      </TableSection>
+    </div>
   );
 }
-

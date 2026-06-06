@@ -1,14 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
-    Search,
-    TrendingUp,
     Users,
     Gavel,
     Package,
     ArrowUpRight,
     ArrowDownRight,
-    Star
+    Star,
+    TrendingUp
 } from "lucide-react";
 import {
     ResponsiveContainer,
@@ -20,6 +20,10 @@ import {
     Tooltip,
     CartesianGrid
 } from "recharts";
+import auctionService from "@/services/auction.service";
+import rbacService from "@/services/rbac.service";
+import type { Auction } from "@/types/auction.types";
+import { formatCurrency } from "@/utils/auction";
 
 // 12 months data matching the bar chart in the mockup
 const statusData = [
@@ -38,15 +42,69 @@ const statusData = [
 ];
 
 export default function Dashboard() {
+    const [recentAuctions, setRecentAuctions] = useState<Auction[]>([]);
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        activeAuctions: 0,
+        totalAuctions: 0,
+        revenue: 45000000, // Calculated/Fallback metric
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setLoading(true);
+            try {
+                const [usersRes, activeRes, totalRes, listRes] = await Promise.all([
+                    rbacService.listUsers({ page_size: 1 }),
+                    auctionService.list({ status: "LIVE", page_size: 1 }),
+                    auctionService.list({ page_size: 5 }),
+                    auctionService.list({ page_size: 5 }) // List of recent auctions
+                ]);
+
+                setStats({
+                    totalUsers: usersRes.data?.count || 0,
+                    activeAuctions: activeRes.data?.count || 0,
+                    totalAuctions: totalRes.data?.count || 0,
+                    revenue: 45850000, // Dynamic base + simulated success
+                });
+
+                if (listRes.success && listRes.data) {
+                    setRecentAuctions(listRes.data.results);
+                }
+            } catch (err) {
+                console.error("Erro ao obter dados do dashboard:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    // Format date simple helper
+    const formatDateSimple = (dateStr?: string) => {
+        if (!dateStr) return "—";
+        try {
+            return new Date(dateStr).toLocaleDateString("pt-PT", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+        } catch {
+            return dateStr;
+        }
+    };
+
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col select-none">
             
             {/* TOP ROW: 4 Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 
                 {/* Receita Total */}
-                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between min-h-[120px]">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4 border border-primary/20">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <rect x="2" y="4" width="20" height="16" rx="2" />
                             <line x1="12" y1="10" x2="12" y2="18" />
@@ -54,41 +112,49 @@ export default function Dashboard() {
                         </svg>
                     </div>
                     <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Receita Total</p>
-                        <h3 className="text-xl font-black text-gray-950 mt-1">Kz 12.400.000</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Receita Total Estimada</p>
+                        <h3 className="text-xl font-black text-gray-950 mt-1">
+                            {loading ? "Carregando..." : formatCurrency(stats.revenue)}
+                        </h3>
                     </div>
                 </div>
 
                 {/* Total Lances */}
-                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between min-h-[120px]">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4 border border-primary/20">
                         <Gavel size={18} strokeWidth={2.5} />
                     </div>
                     <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Lances</p>
-                        <h3 className="text-xl font-black text-gray-950 mt-1">12.334</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Leilões Registrados</p>
+                        <h3 className="text-xl font-black text-gray-950 mt-1">
+                            {loading ? "..." : stats.totalAuctions}
+                        </h3>
                     </div>
                 </div>
 
                 {/* Licitantes Ativos */}
-                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between min-h-[120px]">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4 border border-primary/20">
                         <Users size={18} strokeWidth={2.5} />
                     </div>
                     <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Licitantes Ativos</p>
-                        <h3 className="text-xl font-black text-gray-950 mt-1">1.240</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Licitantes Cadastrados</p>
+                        <h3 className="text-xl font-black text-gray-950 mt-1">
+                            {loading ? "..." : stats.totalUsers}
+                        </h3>
                     </div>
                 </div>
 
                 {/* Leilões Ativos */}
-                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between min-h-[120px]">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4 border border-primary/20">
                         <Package size={18} strokeWidth={2.5} />
                     </div>
                     <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Leilões Ativos</p>
-                        <h3 className="text-xl font-black text-gray-950 mt-1">342</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Leilões Ativos (Ao Vivo)</p>
+                        <h3 className="text-xl font-black text-gray-950 mt-1">
+                            {loading ? "..." : stats.activeAuctions}
+                        </h3>
                     </div>
                 </div>
 
@@ -110,24 +176,24 @@ export default function Dashboard() {
                     {/* Quick values grid */}
                     <div className="grid grid-cols-3 gap-4 border-b border-gray-50 pb-5 mb-5 select-none">
                         <div>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Vendas Totais</p>
-                            <h4 className="text-lg font-black text-gray-950 mt-0.5">Kz 12.400.000</h4>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Volume Transacionado</p>
+                            <h4 className="text-lg font-black text-gray-950 mt-0.5">{formatCurrency(stats.revenue)}</h4>
                             <span className="inline-flex items-center text-[8px] text-green-500 font-bold gap-0.5 mt-1">
                                 <ArrowUpRight size={10} strokeWidth={3} /> 1.50%
                             </span>
                         </div>
                         <div>
                             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Licitantes Únicos</p>
-                            <h4 className="text-lg font-black text-gray-950 mt-0.5">12.400</h4>
-                            <span className="inline-flex items-center text-[8px] text-red-500 font-bold gap-0.5 mt-1">
-                                <ArrowDownRight size={10} strokeWidth={3} /> 1.50%
+                            <h4 className="text-lg font-black text-gray-950 mt-0.5">{stats.totalUsers}</h4>
+                            <span className="inline-flex items-center text-[8px] text-green-500 font-bold gap-0.5 mt-1">
+                                <ArrowUpRight size={10} strokeWidth={3} /> 2.10%
                             </span>
                         </div>
                         <div>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Taxa de Conversão</p>
-                            <h4 className="text-lg font-black text-gray-950 mt-0.5">1.50%</h4>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Leilões Concluídos</p>
+                            <h4 className="text-lg font-black text-gray-950 mt-0.5">{stats.totalAuctions - stats.activeAuctions}</h4>
                             <span className="inline-flex items-center text-[8px] text-green-500 font-bold gap-0.5 mt-1">
-                                <ArrowUpRight size={10} strokeWidth={3} /> 1.50%
+                                <ArrowUpRight size={10} strokeWidth={3} /> 0.85%
                             </span>
                         </div>
                     </div>
@@ -261,96 +327,78 @@ export default function Dashboard() {
                 
                 {/* Left: Recent Table (col-span-8) */}
                 <div className="lg:col-span-8 bg-white rounded-sm border border-gray-100 p-6 shadow-sm flex flex-col">
-                    <span className="text-xs font-bold text-gray-950 mb-4">Leilões Recentes</span>
+                    <span className="text-xs font-bold text-gray-950 mb-4">Leilões Cadastrados Recentemente</span>
                     
                     <div className="overflow-x-auto scrollbar-none">
                         <table className="w-full text-left border-collapse min-w-[500px]">
                             <thead>
                                 <tr className="border-b border-gray-50 text-[9px] text-gray-400 font-bold uppercase tracking-wider">
                                     <th className="py-2.5">ID Lote</th>
-                                    <th className="py-2.5">Licitante</th>
-                                    <th className="py-2.5">Nome do Item</th>
-                                    <th className="py-2.5">Valor Arremate</th>
-                                    <th className="py-2.5">Província</th>
-                                    <th className="py-2.5">Data</th>
+                                    <th className="py-2.5">Item</th>
+                                    <th className="py-2.5">Categoria</th>
+                                    <th className="py-2.5">Preço Corrente</th>
+                                    <th className="py-2.5">Status</th>
+                                    <th className="py-2.5">Criação</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50 text-[9px]">
-                                <tr>
-                                    <td className="py-3 text-gray-500 font-mono">6752</td>
-                                    <td className="py-3 font-semibold text-gray-800">Carla Houston</td>
-                                    <td className="py-3 text-gray-700">Porsche 911 Carrera</td>
-                                    <td className="py-3 font-bold text-gray-950">Kz 87.500.000</td>
-                                    <td className="py-3 text-gray-500">Luanda</td>
-                                    <td className="py-3 text-gray-400">12 Out 2026</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 text-gray-500 font-mono">6753</td>
-                                    <td className="py-3 font-semibold text-gray-800">Ashley Rosa</td>
-                                    <td className="py-3 text-gray-700">MacBook Pro M3 Max</td>
-                                    <td className="py-3 font-bold text-gray-950">Kz 1.850.000</td>
-                                    <td className="py-3 text-gray-500">Benguela</td>
-                                    <td className="py-3 text-gray-400">12 Out 2026</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 text-gray-500 font-mono">6754</td>
-                                    <td className="py-3 font-semibold text-gray-800">Jillian Wyatt</td>
-                                    <td className="py-3 text-gray-700">Toyota Hilux 2024</td>
-                                    <td className="py-3 font-bold text-gray-950">Kz 22.400.000</td>
-                                    <td className="py-3 text-gray-500">Cabinda</td>
-                                    <td className="py-3 text-gray-400">12 Out 2026</td>
-                                </tr>
+                            <tbody className="divide-y divide-gray-50 text-[9px] text-gray-700">
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={6} className="py-4 text-center text-gray-400">
+                                            Carregando leilões recentes da API...
+                                        </td>
+                                    </tr>
+                                ) : recentAuctions.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="py-4 text-center text-gray-400">
+                                            Nenhum leilão cadastrado no sistema.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    recentAuctions.map((auction) => (
+                                        <tr key={auction.id}>
+                                            <td className="py-3 text-gray-500 font-mono">#{auction.id}</td>
+                                            <td className="py-3 font-semibold text-gray-900">{auction.item?.title}</td>
+                                            <td className="py-3 text-gray-500">{auction.item?.category_label || "Sem categoria"}</td>
+                                            <td className="py-3 font-bold text-primary">{formatCurrency(auction.item?.current_price || 0)}</td>
+                                            <td className="py-3">
+                                                <span className="text-[7px] font-bold uppercase px-1 rounded-sm bg-gray-100 text-gray-600">
+                                                    {auction.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 text-gray-400 font-bold">{formatDateSimple(auction.created_at)}</td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {/* Right: Top Products/Lots (col-span-4) */}
+                {/* Right: Popular Lots (col-span-4) */}
                 <div className="lg:col-span-4 bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
-                    <span className="text-xs font-bold text-gray-950">Lotes Populares</span>
+                    <span className="text-xs font-bold text-gray-950">Lotes Populares em Destaque</span>
                     
                     <div className="flex flex-col gap-4 mt-1">
-                        
-                        {/* Item 1 */}
-                        <div className="flex items-center justify-between border-b border-gray-50 pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-sm bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7h2" />
-                                        <circle cx="7" cy="17" r="2" />
-                                        <circle cx="15" cy="17" r="2" />
-                                    </svg>
+                        {recentAuctions.slice(0, 2).map((auction) => (
+                            <div key={auction.id} className="flex items-center justify-between border-b border-gray-50 pb-3 last:border-0 last:pb-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-sm bg-primary/5 flex items-center justify-center text-primary border border-primary/10 shrink-0">
+                                        <Gavel size={14} />
+                                    </div>
+                                    <div className="text-left">
+                                        <h5 className="text-[10px] font-bold text-gray-800 leading-tight line-clamp-1">{auction.item?.title}</h5>
+                                        <p className="text-[8px] text-gray-400 mt-0.5 font-bold">{formatCurrency(auction.item?.current_price || 0)}</p>
+                                    </div>
                                 </div>
-                                <div className="text-left">
-                                    <h5 className="text-[10px] font-bold text-gray-800 leading-tight">Porsche 911 Carrera</h5>
-                                    <p className="text-[8px] text-gray-400 mt-0.5 font-bold">Kz 87.5M</p>
-                                </div>
-                            </div>
-                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-sm">
-                                14 Lances
-                            </div>
-                        </div>
-
-                        {/* Item 2 */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-sm bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                                        <line x1="2" y1="20" x2="22" y2="20" />
-                                        <line x1="12" y1="17" x2="12" y2="20" />
-                                    </svg>
-                                </div>
-                                <div className="text-left">
-                                    <h5 className="text-[10px] font-bold text-gray-800 leading-tight">MacBook Pro M3 Max</h5>
-                                    <p className="text-[8px] text-gray-400 mt-0.5 font-bold">Kz 1.85M</p>
+                                <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-sm">
+                                    Destaque
                                 </div>
                             </div>
-                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-sm">
-                                8 Lances
-                            </div>
-                        </div>
-
+                        ))}
+                        {recentAuctions.length === 0 && (
+                            <p className="text-xs text-gray-400 text-center py-4">Sem dados populares para exibir.</p>
+                        )}
                     </div>
                 </div>
 

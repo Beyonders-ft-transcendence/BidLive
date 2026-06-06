@@ -1,6 +1,6 @@
 "use client";
 
-import { auctionStatusColor, formatCurrency, AuctionStatus } from "@/utils/auction";
+import { auctionStatusColor, formatCurrency } from "@/utils/auction";
 import TableFilters from "@/components/common/TableFilters";
 import ActionCard from "@/components/common/ActionCard";
 import {
@@ -14,7 +14,7 @@ interface MyAuction {
   id: string;
   title: string;
   image: string;
-  status: AuctionStatus;
+  status: string;
   currentPrice: number;
   startingPrice: number;
   bidsCount: number;
