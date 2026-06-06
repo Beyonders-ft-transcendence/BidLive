@@ -148,12 +148,12 @@ export default function SignIn() {
                             {/* Income / Expenses header */}
                             <div className="flex justify-between items-center text-[10px] text-gray-400 font-medium px-1">
                                 <div>
-                                    <p className="text-gray-400 font-normal">Income</p>
-                                    <p className="text-sm font-bold text-gray-900 mt-0.5">$24,908.00</p>
+                                    <p className="text-gray-400 font-normal">Licitações</p>
+                                    <p className="text-sm font-bold text-gray-900 mt-0.5">$24.908,00</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-gray-400 font-normal">Expenses</p>
-                                    <p className="text-sm font-bold text-gray-900 mt-0.5">$1,028.00</p>
+                                    <p className="text-gray-400 font-normal">Arrematado</p>
+                                    <p className="text-sm font-bold text-gray-900 mt-0.5">$1.028,00</p>
                                 </div>
                             </div>
 
@@ -171,16 +171,16 @@ export default function SignIn() {
                                     </linearGradient>
                                 </defs>
                                 <div className="absolute top-[8px] left-[18%] bg-gray-900 text-[8px] text-white px-2 py-0.5 rounded-md shadow-md font-semibold">
-                                    $5,052
+                                    Lance: $5.052
                                 </div>
                             </div>
 
                             {/* Dates */}
                             <div className="flex justify-between text-[8px] text-gray-400 mt-1 px-1">
-                                <span>Jan 12</span>
-                                <span>Jan 13</span>
-                                <span>Jan 14</span>
-                                <span>Jan 15</span>
+                                <span>06 Jun</span>
+                                <span>07 Jun</span>
+                                <span>08 Jun</span>
+                                <span>09 Jun</span>
                             </div>
 
                             {/* Transactions list */}
@@ -189,27 +189,27 @@ export default function SignIn() {
                                 <div className="flex justify-between items-center text-[9px]">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center text-[#1B59F8] font-bold text-[8px]">
-                                            S
+                                            M
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-800">Stripe</p>
-                                            <p className="text-[7px] text-gray-400 font-light">Today at 7:18 AM</p>
+                                            <p className="font-semibold text-gray-800">MacBook Pro</p>
+                                            <p className="text-[7px] text-gray-400 font-light">Hoje às 07:18</p>
                                         </div>
                                     </div>
-                                    <span className="font-bold text-gray-900">+$523.10</span>
+                                    <span className="font-bold text-gray-900">+$523,10</span>
                                 </div>
                                 {/* Facebook */}
                                 <div className="flex justify-between items-center text-[9px]">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-[#1B59F8] font-bold text-[8px]">
-                                            f
+                                            P
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-800">Facebook charge</p>
-                                            <p className="text-[7px] text-gray-400 font-light">Today at 6:24 AM</p>
+                                            <p className="font-semibold text-gray-800">PlayStation 5</p>
+                                            <p className="text-[7px] text-gray-400 font-light">Hoje às 06:24</p>
                                         </div>
                                     </div>
-                                    <span className="font-bold text-gray-500">-$600.00</span>
+                                    <span className="font-bold text-gray-500">-$550,00</span>
                                 </div>
                             </div>
                         </div>
@@ -222,8 +222,8 @@ export default function SignIn() {
                                 </svg>
                             </div>
                             <div className="text-[8px]">
-                                <p className="text-gray-400 font-normal">Payment Received</p>
-                                <p className="font-bold text-[#1B59F8]">+$34,908.00</p>
+                                <p className="text-gray-400 font-normal">Lance Vencedor</p>
+                                <p className="font-bold text-[#1B59F8]">+$24.900,00</p>
                             </div>
                         </div>
 
@@ -234,18 +234,18 @@ export default function SignIn() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <p className="text-[7px] text-gray-400 leading-tight">Transfer was successful</p>
-                            <p className="text-[9px] font-bold text-gray-900">$35,798.00</p>
+                            <p className="text-[7px] text-gray-400 leading-tight">Licitação Confirmada</p>
+                            <p className="text-[9px] font-bold text-gray-900">$950,00</p>
                         </div>
                     </div>
 
                     {/* Bottom Content */}
                     <div className="z-10 text-center md:text-left">
                         <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
-                            Speedy, Easy and Fast
+                            Rápido, Simples e Seguro
                         </h3>
                         <p className="text-xs md:text-[13px] text-blue-100 mt-3 font-light leading-relaxed max-w-[290px]">
-                            BidLive ajuda-o a gerir os seus leilões, licitações e negócios de forma transparente e eficiente. Aceda instantaneamente a milhares de produtos.
+                            O BidLive ajuda-o a gerir os seus leilões, licitações e negócios em tempo real com total transparência e segurança. Licite agora.
                         </p>
                         {/* Carousel indicators */}
                         <div className="flex justify-center md:justify-start gap-1.5 mt-5">
@@ -263,7 +263,7 @@ export default function SignIn() {
 
                     {/* Form Wrap */}
                     <div className="max-w-[370px] w-full mx-auto py-6">
-                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Sign in to your account</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Entrar na sua conta</h2>
                         <p className="text-xs text-gray-400 mt-1 font-normal">Licite, acompanhe e compre de forma inteligente</p>
 
                         {/* Social Sign-In grid */}
@@ -278,7 +278,7 @@ export default function SignIn() {
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                                 </svg>
-                                Sign In with Google
+                                Sign In com Google
                             </button>
                             <button
                                 type="button"
@@ -286,14 +286,14 @@ export default function SignIn() {
                                 className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-sm py-2.5 text-xs font-semibold transition cursor-pointer shrink-0"
                             >
                                 <GraduationCap size={16} className="text-gray-700 shrink-0" />
-                                Sign In with 42
+                                Entrar com 42
                             </button>
                         </div>
 
                         {/* Divider */}
                         <div className="relative flex py-5 items-center select-none pointer-events-none">
                             <div className="flex-grow border-t border-gray-100"></div>
-                            <span className="flex-shrink mx-4 text-gray-400 text-[10px] font-normal">Or with email</span>
+                            <span className="flex-shrink mx-4 text-gray-400 text-[10px] font-normal">Ou com e-mail</span>
                             <div className="flex-grow border-t border-gray-100"></div>
                         </div>
 
@@ -317,7 +317,7 @@ export default function SignIn() {
                                     type={showPassword ? "text" : "password"}
                                     value={form.password}
                                     onChange={onChange("password")}
-                                    placeholder="Password"
+                                    placeholder="Senha"
                                     className="w-full rounded-sm px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 placeholder-gray-400 font-normal pr-10"
                                     required
                                 />
@@ -355,7 +355,7 @@ export default function SignIn() {
                                 disabled={isLoading}
                                 className="w-full bg-[#1B59F8] hover:bg-[#1A50DC] active:bg-[#1540B3] text-white font-semibold rounded-sm py-3.5 text-sm transition-all duration-200 mt-4 shadow-md shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                             >
-                                {isLoading ? "Carregando..." : "Sign In"}
+                                {isLoading ? "Carregando..." : "Entrar"}
                             </button>
                         </form>
 
@@ -370,7 +370,7 @@ export default function SignIn() {
 
                     {/* Footer Policy and Copyright */}
                     <div className="flex justify-between items-center text-[10px] text-gray-400 mt-4 border-t border-gray-50 pt-4">
-                        <Link href="#" className="hover:underline">Privacy Policy</Link>
+                        <Link href="#" className="hover:underline">Política de Privacidade</Link>
                         <span>Copyright 2026</span>
                     </div>
                 </div>
