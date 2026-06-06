@@ -4,8 +4,8 @@ import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   title?: string | ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "full";
   children: ReactNode;
@@ -20,7 +20,7 @@ const sizeClasses = {
 };
 
 export default function Modal({
-  isOpen,
+  isOpen = true,
   onClose,
   title,
   size = "md",
@@ -29,7 +29,7 @@ export default function Modal({
   // Close on ESC key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape" && isOpen && onClose) {
         onClose();
       }
     };
