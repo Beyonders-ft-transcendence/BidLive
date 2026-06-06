@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 
 export default function Container({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#1B59F8] p-2 text-gray-900 font-sans select-none">
+        <div className="flex h-screen w-screen overflow-hidden bg-[#1B59F8]/25 p-2 text-gray-900 font-sans select-none">
             {/* White card container holding both sidebar and content */}
             <div className="flex flex-1 w-full h-full bg-white rounded-md shadow-xl overflow-hidden p-6 gap-6 relative">
                 {/* Sidebar on the left */}

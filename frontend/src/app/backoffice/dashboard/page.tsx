@@ -102,7 +102,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 {/* Receita Total */}
-                <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col justify-between min-h-[130px]">
+                <div className="bg-white rounded-md border border-slate-200 p-5 shadow-md flex flex-col justify-between min-h-[130px]">
                     <div className="w-10 h-10 rounded-lg bg-primary/5 text-primary flex items-center justify-center mb-3 border border-primary/10 shrink-0">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -119,7 +119,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Total Lances */}
-                <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col justify-between min-h-[130px]">
+                <div className="bg-white rounded-md border border-slate-200 p-5 shadow-md flex flex-col justify-between min-h-[130px]">
                     <div className="w-10 h-10 rounded-lg bg-primary/5 text-primary flex items-center justify-center mb-3 border border-primary/10 shrink-0">
                         <Gavel size={18} strokeWidth={2.5} />
                     </div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Licitantes Ativos */}
-                <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col justify-between min-h-[130px]">
+                <div className="bg-white rounded-md border border-slate-200 p-5 shadow-md flex flex-col justify-between min-h-[130px]">
                     <div className="w-10 h-10 rounded-lg bg-primary/5 text-primary flex items-center justify-center mb-3 border border-primary/10 shrink-0">
                         <Users size={18} strokeWidth={2.5} />
                     </div>
@@ -145,7 +145,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Leilões Ativos */}
-                <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col justify-between min-h-[130px]">
+                <div className="bg-white rounded-md border border-slate-200 p-5 shadow-md flex flex-col justify-between min-h-[130px]">
                     <div className="w-10 h-10 rounded-lg bg-primary/5 text-primary flex items-center justify-center mb-3 border border-primary/10 shrink-0">
                         <Package size={18} strokeWidth={2.5} />
                     </div>
@@ -159,44 +159,17 @@ export default function Dashboard() {
 
             </div>
 
-            {/* MIDDLE ROW: Store Status & Rating/Gender (Grid 12-cols) */}
+            {/* MIDDLE ROW: Store Status & Popular Lots (Grid 12-cols) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
                 {/* Left: Platform status/Bar chart (col-span-8) */}
-                <div className="lg:col-span-8 bg-white rounded-xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+                <div className="lg:col-span-8 bg-white rounded-md border border-slate-200 p-6 shadow-md flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-center mb-5">
                             <span className="text-sm font-bold text-slate-900">Status da Plataforma</span>
-                            <select className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-xs text-slate-500 font-bold focus:outline-none cursor-pointer">
-                                <option>Anual</option>
-                                <option>Mensal</option>
-                            </select>
                         </div>
 
-                        {/* Quick values grid */}
-                        <div className="grid grid-cols-3 gap-4 border-b border-slate-50 pb-5 mb-5 select-none">
-                            <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Volume Transacionado</p>
-                                <h4 className="text-lg font-black text-slate-900 mt-0.5">{formatCurrency(stats.revenue)}</h4>
-                                <span className="inline-flex items-center text-xs text-green-500 font-bold gap-0.5 mt-1">
-                                    <ArrowUpRight size={12} strokeWidth={3} /> 1.50%
-                                </span>
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Licitantes Únicos</p>
-                                <h4 className="text-lg font-black text-slate-900 mt-0.5">{stats.totalUsers}</h4>
-                                <span className="inline-flex items-center text-xs text-green-500 font-bold gap-0.5 mt-1">
-                                    <ArrowUpRight size={12} strokeWidth={3} /> 2.10%
-                                </span>
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Leilões Concluídos</p>
-                                <h4 className="text-lg font-black text-slate-900 mt-0.5">{stats.totalAuctions - stats.activeAuctions}</h4>
-                                <span className="inline-flex items-center text-xs text-green-500 font-bold gap-0.5 mt-1">
-                                    <ArrowUpRight size={12} strokeWidth={3} /> 0.85%
-                                </span>
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Recharts Bar chart matching mockup style */}
@@ -220,121 +193,47 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Right: Gender & Reviews (col-span-4) */}
-                <div className="lg:col-span-4 flex flex-col gap-6">
+                {/* Right: Popular Lots (col-span-4) */}
+                <div className="lg:col-span-4 bg-white rounded-md border border-slate-200 p-5 shadow-md flex flex-col gap-4">
+                    <span className="text-sm font-bold text-slate-900">Lotes Populares em Destaque</span>
                     
-                    {/* Gênero dos Licitantes */}
-                    <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col gap-4">
-                        <span className="text-sm font-bold text-slate-900">Gênero dos Licitantes</span>
-                        
-                        <div className="grid grid-cols-2 gap-4 mt-1">
-                            {/* Male */}
-                            <div className="bg-slate-50/50 rounded-xl p-3.5 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                        <circle cx="10" cy="14" r="5" />
-                                        <path d="M19 5l-5.5 5.5M14 5h5v5" />
-                                    </svg>
+                    <div className="flex flex-col gap-4 mt-1">
+                        {recentAuctions.slice(0, 5).map((auction) => (
+                            <div key={auction.id} className="flex items-center justify-between border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary border border-primary/10 shrink-0">
+                                        <Gavel size={16} />
+                                    </div>
+                                    <div className="text-left min-w-0">
+                                        <h5 className="text-xs font-bold text-slate-800 leading-tight truncate">{auction.item?.title}</h5>
+                                        <p className="text-xs text-[#1B59F8] mt-0.5 font-bold">{formatCurrency(auction.item?.current_price || 0)}</p>
+                                    </div>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Masc.</p>
-                                    <p className="text-xs font-black text-slate-800">40%</p>
+                                <div className="bg-primary/5 text-primary text-[10px] font-bold px-2 py-1 rounded-md shrink-0">
+                                    Destaque
                                 </div>
                             </div>
-
-                            {/* Female */}
-                            <div className="bg-slate-50/50 rounded-xl p-3.5 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-pink-100 text-pink-500 flex items-center justify-center shrink-0">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="9" r="6" />
-                                        <path d="M12 15v6M9 18h6" />
-                                    </svg>
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Fem.</p>
-                                    <p className="text-xs font-black text-slate-800">60%</p>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
+                        {recentAuctions.length === 0 && (
+                            <p className="text-xs text-slate-400 text-center py-4">Sem dados populares para exibir.</p>
+                        )}
                     </div>
-
-                    {/* Avaliação da Plataforma */}
-                    <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col gap-3.5 flex-1 justify-between">
-                        <span className="text-sm font-bold text-slate-900">Avaliação da Plataforma</span>
-                        
-                        <div className="flex items-center gap-3 mt-1">
-                            <div className="flex gap-0.5 text-amber-400">
-                                <Star size={14} fill="currentColor" />
-                                <Star size={14} fill="currentColor" />
-                                <Star size={14} fill="currentColor" />
-                                <Star size={14} fill="currentColor" />
-                                <Star size={14} className="text-slate-200" />
-                            </div>
-                            <span className="text-xs font-bold text-slate-800">4.0 de 5</span>
-                        </div>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Total de 445 avaliações</p>
-
-                        {/* Star Rating list */}
-                        <div className="flex flex-col gap-2 mt-2">
-                            {/* 5 star */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                                <span className="w-16">5 estrelas</span>
-                                <div className="flex-1 bg-slate-100 h-1.5 rounded-full mx-2 overflow-hidden">
-                                    <div className="bg-primary h-full w-[50%]" />
-                                </div>
-                                <span className="w-8 text-right">50%</span>
-                            </div>
-                            {/* 4 star */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                                <span className="w-16">4 estrelas</span>
-                                <div className="flex-1 bg-slate-100 h-1.5 rounded-full mx-2 overflow-hidden">
-                                    <div className="bg-primary h-full w-[15%]" />
-                                </div>
-                                <span className="w-8 text-right">15%</span>
-                            </div>
-                            {/* 3 star */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                                <span className="w-16">3 estrelas</span>
-                                <div className="flex-1 bg-slate-100 h-1.5 rounded-full mx-2 overflow-hidden">
-                                    <div className="bg-primary h-full w-[13%]" />
-                                </div>
-                                <span className="w-8 text-right">13%</span>
-                            </div>
-                            {/* 2 star */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                                <span className="w-16">2 estrelas</span>
-                                <div className="flex-1 bg-slate-100 h-1.5 rounded-full mx-2 overflow-hidden">
-                                    <div className="bg-primary h-full w-[12%]" />
-                                </div>
-                                <span className="w-8 text-right">12%</span>
-                            </div>
-                            {/* 1 star */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                                <span className="w-16">1 estrela</span>
-                                <div className="flex-1 bg-slate-100 h-1.5 rounded-full mx-2 overflow-hidden">
-                                    <div className="bg-primary h-full w-[10%]" />
-                                </div>
-                                <span className="w-8 text-right">10%</span>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
             </div>
 
-            {/* BOTTOM ROW: Recent Table & Top Lots (Grid 12-cols) */}
+            {/* BOTTOM ROW: Recent Table (Grid 12-cols) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
-                {/* Left: Recent Table (col-span-8) */}
-                <div className="lg:col-span-8 bg-white rounded-xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+                {/* Left: Recent Table (col-span-12) */}
+                <div className="lg:col-span-12 bg-white rounded-md border border-slate-200 p-6 shadow-md flex flex-col justify-between">
                     <div>
                         <span className="text-sm font-bold text-slate-900 block mb-4">Leilões Cadastrados Recentemente</span>
                         
                         <div className="overflow-x-auto scrollbar-none">
                             <table className="w-full text-left border-collapse min-w-[500px]">
                                 <thead>
-                                    <tr className="border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider">
+                                    <tr className="border-b border-slate-200 text-xs text-slate-400 font-bold uppercase tracking-wider">
                                         <th className="pb-3 pr-2">ID Lote</th>
                                         <th className="pb-3 pr-2">Item</th>
                                         <th className="pb-3 pr-2">Categoria</th>
@@ -343,7 +242,7 @@ export default function Dashboard() {
                                         <th className="pb-3">Criação</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50 text-xs text-slate-700">
+                                <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                                     {loading ? (
                                         <tr>
                                             <td colSpan={6} className="py-4 text-center text-slate-400">
@@ -364,7 +263,7 @@ export default function Dashboard() {
                                                 <td className="py-3.5 text-slate-500">{auction.item?.category_label || "Sem categoria"}</td>
                                                 <td className="py-3.5 font-bold text-[#1B59F8]">{formatCurrency(auction.item?.current_price || 0)}</td>
                                                 <td className="py-3.5">
-                                                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 border border-slate-100">
+                                                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 border border-slate-200">
                                                         {auction.status}
                                                     </span>
                                                 </td>
@@ -375,33 +274,6 @@ export default function Dashboard() {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
-
-                {/* Right: Popular Lots (col-span-4) */}
-                <div className="lg:col-span-4 bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col gap-4">
-                    <span className="text-sm font-bold text-slate-900">Lotes Populares em Destaque</span>
-                    
-                    <div className="flex flex-col gap-4 mt-1">
-                        {recentAuctions.slice(0, 2).map((auction) => (
-                            <div key={auction.id} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary border border-primary/10 shrink-0">
-                                        <Gavel size={16} />
-                                    </div>
-                                    <div className="text-left min-w-0">
-                                        <h5 className="text-xs font-bold text-slate-800 leading-tight truncate">{auction.item?.title}</h5>
-                                        <p className="text-xs text-[#1B59F8] mt-0.5 font-bold">{formatCurrency(auction.item?.current_price || 0)}</p>
-                                    </div>
-                                </div>
-                                <div className="bg-primary/5 text-primary text-[10px] font-bold px-2 py-1 rounded-md shrink-0">
-                                    Destaque
-                                </div>
-                            </div>
-                        ))}
-                        {recentAuctions.length === 0 && (
-                            <p className="text-xs text-slate-400 text-center py-4">Sem dados populares para exibir.</p>
-                        )}
                     </div>
                 </div>
 
