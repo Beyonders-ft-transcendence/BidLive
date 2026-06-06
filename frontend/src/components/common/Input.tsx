@@ -26,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ) => {
         const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
-        const baseInputStyles = "w-full rounded px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-50 disabled:cursor-not-allowed";
+        const baseInputStyles = "w-full rounded-sm px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 disabled:bg-gray-50 disabled:cursor-not-allowed";
 
         const errorStyles = error
             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
