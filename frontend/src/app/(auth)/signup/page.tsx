@@ -42,9 +42,21 @@ export default function SignUp() {
   const router = useRouter();
 
   const register = useAuthStore((state) => state.register);
+  const authorizeFortyTwo = useAuthStore((state) => state.authorizeFortyTwo);
   const isLoading = useAuthStore((state) => state.isLoading);
   const apiError = useAuthStore((state) => state.error);
   const clearError = useAuthStore((state) => state.clearError);
+
+  const handle42Login = async () => {
+    try {
+      const url = await authorizeFortyTwo();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch {
+      // erro tratado pela store
+    }
+  };
 
   const [form, setForm] = useState<SignUpFormState>(INITIAL_FORM);
   const [step, setStep] = useState<SignUpStep>(1);
@@ -329,6 +341,7 @@ export default function SignUp() {
                 <Button
                   variant="social"
                   fullWidth
+                  onClick={handle42Login}
                   icon={<GraduationCap size={18} />}
                   className="justify-start text-white hover:text-white"
                   style={{
