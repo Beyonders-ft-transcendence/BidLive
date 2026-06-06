@@ -39,7 +39,7 @@ export default function TableSection({
   const hasNext = showPagination && pagination.currentPage < totalPages;
 
   return (
-    <div className="bg-white p-4 rounded-sm border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white p-5 rounded-md border border-gray-100 shadow-sm overflow-hidden flex flex-col">
       {/* FILTER BAR SLOT */}
       {filters && <div className="mb-4">{filters}</div>}
 
@@ -51,26 +51,26 @@ export default function TableSection({
       {/* PAGINATION FOOTER */}
       {showPagination && (
         <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-4">
-          <span className="text-[10px] text-gray-400 font-bold">
+          <span className="text-xs text-gray-500 font-semibold">
             Mostrando {startRange}–{endRange} de {pagination.totalCount} {entityName}
           </span>
           
-          <div className="flex items-center gap-1 select-none">
+          <div className="flex items-center gap-1.5 select-none">
             {/* Prev Button */}
             <button
               onClick={() => hasPrevious && pagination.onPageChange(pagination.currentPage - 1)}
               disabled={!hasPrevious}
-              className={`p-1 border border-gray-100 bg-white rounded-sm transition-colors ${
+              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${
                 hasPrevious
                   ? "text-gray-600 hover:bg-gray-50 cursor-pointer"
-                  : "text-gray-300 cursor-not-allowed"
+                  : "text-gray-400 cursor-not-allowed opacity-55"
               }`}
             >
-              <ChevronLeft size={12} />
+              <ChevronLeft size={14} />
             </button>
 
             {/* Current Page Indicator */}
-            <button className="px-2.5 py-0.5 bg-primary text-white text-[10px] font-bold rounded-sm focus:outline-none">
+            <button className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-md focus:outline-none shadow-sm">
               {pagination.currentPage}
             </button>
 
@@ -78,13 +78,13 @@ export default function TableSection({
             <button
               onClick={() => hasNext && pagination.onPageChange(pagination.currentPage + 1)}
               disabled={!hasNext}
-              className={`p-1 border border-gray-100 bg-white rounded-sm transition-colors ${
+              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${
                 hasNext
                   ? "text-gray-600 hover:bg-gray-50 cursor-pointer"
-                  : "text-gray-300 cursor-not-allowed"
+                  : "text-gray-400 cursor-not-allowed opacity-55"
               }`}
             >
-              <ChevronRight size={12} />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>

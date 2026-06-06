@@ -16,15 +16,15 @@ interface ConfirmModalProps {
 
 const variantStyles = {
   danger: {
-    icon: <AlertTriangle size={20} className="text-red-500" />,
+    icon: <AlertTriangle size={22} className="text-red-500" />,
     confirmButton: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500/20",
   },
   warning: {
-    icon: <AlertCircle size={20} className="text-amber-500" />,
+    icon: <AlertCircle size={22} className="text-amber-500" />,
     confirmButton: "bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500/20",
   },
   primary: {
-    icon: <Info size={20} className="text-primary" />,
+    icon: <Info size={22} className="text-primary" />,
     confirmButton: "bg-primary hover:bg-primary/95 text-white focus:ring-primary/20",
   },
 };
@@ -43,31 +43,31 @@ export default function ConfirmModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
-      <div className="p-5 flex flex-col gap-4">
+      <div className="p-6 flex flex-col gap-4 select-none">
         {/* Warning Icon and Message */}
         <div className="flex gap-3">
           <div className="shrink-0">{styles.icon}</div>
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-gray-950">
+            <h4 className="text-sm font-bold text-gray-950 uppercase tracking-wide">
               {title}
             </h4>
-            <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
               {message}
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-2 mt-2">
+        <div className="flex justify-end gap-2.5 mt-3">
           <button
             onClick={onClose}
-            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 font-bold text-[10px] py-1.5 px-3 rounded-sm transition-colors cursor-pointer focus:outline-none"
+            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs py-2 px-4 rounded-md transition-colors cursor-pointer focus:outline-none"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className={`font-bold text-[10px] py-1.5 px-4 rounded-sm transition-colors cursor-pointer focus:outline-none ${styles.confirmButton}`}
+            className={`font-semibold text-xs py-2 px-5 rounded-md transition-colors cursor-pointer focus:outline-none shadow-sm ${styles.confirmButton}`}
           >
             {confirmText}
           </button>
