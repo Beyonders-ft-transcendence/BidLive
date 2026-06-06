@@ -11,6 +11,7 @@ import Button from "@/components/common/Button";
 import Divider from "@/components/common/Divider";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
+import AuthFooter from "@/components/auth/AuthFooter";
 import { signUpSchema, type SignUpInput } from "@/schema/auth.schema";
 import { Lineicons } from "@lineiconshq/react-lineicons";
 import {
@@ -251,10 +252,7 @@ export default function SignUp() {
                     </div>
 
                     {/* Footer Policy and Copyright */}
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 mt-4 border-t border-gray-50 pt-4">
-                        <Link href="#" className="hover:underline">Política de Privacidade</Link>
-                        <span>Copyright 2026</span>
-                    </div>
+                    <AuthFooter />
                 </div>
             </div>
         </div>

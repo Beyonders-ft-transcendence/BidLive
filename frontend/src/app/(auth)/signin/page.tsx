@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
+import AuthFooter from "@/components/auth/AuthFooter";
 import { signInSchema, type SignInInput } from "@/schema/auth.schema";
 import { Lineicons } from "@lineiconshq/react-lineicons";
 import { Envelope1Outlined, Locked1Outlined, EyeOutlined, EyeStroke } from "@lineiconshq/free-icons";
@@ -162,10 +163,7 @@ export default function SignIn() {
                     </div>
 
                     {/* Footer Policy and Copyright */}
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 mt-4 border-t border-gray-50 pt-4">
-                        <Link href="#" className="hover:underline">Política de Privacidade</Link>
-                        <span>Copyright 2026</span>
-                    </div>
+                    <AuthFooter />
                 </div>
             </div>
         </div>
