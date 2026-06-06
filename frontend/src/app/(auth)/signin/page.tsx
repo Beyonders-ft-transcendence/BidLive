@@ -106,7 +106,7 @@ export default function SignIn() {
 
             <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-[620px]">
                 {/* Left Side (Blue Dashboard Visual) */}
-                <div className="md:col-span-5 bg-[#1B59F8] p-8 md:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+                <div className="md:col-span-5 bg-primary p-8 md:p-10 text-white flex flex-col justify-between relative overflow-hidden">
                     {/* Top Right Dot Grid Pattern */}
                     <div className="absolute top-8 right-8 opacity-20 text-white select-none pointer-events-none">
                         <svg className="w-12 h-12" viewBox="0 0 48 48">
@@ -163,12 +163,12 @@ export default function SignIn() {
                             <div className="relative h-16 mt-4">
                                 <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                                     <path d="M 0,40 Q 15,10 30,28 T 60,12 T 90,20 T 100,8 L 100,40 Z" fill="url(#chart-gradient)" opacity="0.08" />
-                                    <path d="M 0,35 Q 15,10 30,28 T 60,12 T 90,20 T 100,8" fill="none" stroke="#1B59F8" strokeWidth="2.5" strokeLinecap="round" />
-                                    <circle cx="30" cy="28" r="3" fill="#1B59F8" />
+                                    <path d="M 0,35 Q 15,10 30,28 T 60,12 T 90,20 T 100,8" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
+                                    <circle cx="30" cy="28" r="3" fill="var(--primary)" />
                                 </svg>
                                 <defs>
                                     <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#1B59F8" />
+                                        <stop offset="0%" stopColor="var(--primary)" />
                                         <stop offset="100%" stopColor="#FFFFFF" />
                                     </linearGradient>
                                 </defs>
@@ -190,7 +190,7 @@ export default function SignIn() {
                                 {/* Stripe */}
                                 <div className="flex justify-between items-center text-[9px]">
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center text-[#1B59F8] font-bold text-[8px]">
+                                        <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center text-primary font-bold text-[8px]">
                                             M
                                         </div>
                                         <div>
@@ -203,7 +203,7 @@ export default function SignIn() {
                                 {/* Facebook */}
                                 <div className="flex justify-between items-center text-[9px]">
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-[#1B59F8] font-bold text-[8px]">
+                                        <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-primary font-bold text-[8px]">
                                             P
                                         </div>
                                         <div>
@@ -225,7 +225,7 @@ export default function SignIn() {
                             </div>
                             <div className="text-[8px]">
                                 <p className="text-gray-400 font-normal">Lance Vencedor</p>
-                                <p className="font-bold text-[#1B59F8]">+$24.900,00</p>
+                                <p className="font-bold text-primary">+$24.900,00</p>
                             </div>
                         </div>
 
@@ -345,7 +345,7 @@ export default function SignIn() {
                             {/* Remember me + Forgot password */}
                             <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" className="rounded-sm border-gray-300 text-[#1B59F8] focus:ring-[#1B59F8]" />
+                                    <input type="checkbox" className="rounded-sm border-gray-300 text-primary focus:ring-primary" />
                                     Lembrar de mim
                                 </label>
                                 <Link href="#" className="hover:underline text-gray-500 hover:text-gray-700">

@@ -10,8 +10,8 @@
   --background: #ffffff;
   --foreground: #0b1f3b; /* azul-marinho principal */
 
-  --primary: oklch(62.3% 0.214 259.815) ;
-  --primary-light: #1a3b6f;
+  --primary: #1B59F8;
+  --primary-light: #467cfa;
 
   /* 🧠 UI */
   --muted: #6b7280;

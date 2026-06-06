@@ -27,11 +27,11 @@ export default function Button({
 		"inline-flex cursor-pointer items-center justify-center rounded-sm px-4 py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed";
 
 	const variants = {
-		primary: "bg-[#1B59F8] text-white hover:bg-[#1A50DC] focus:ring-[#1B59F8]/20",
+		primary: "bg-primary text-white hover:bg-primary-light focus:ring-primary/20",
 		secondary: "bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-100",
 		danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-100",
 		success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-100",
-		outline: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-[#1B59F8]/20",
+		outline: "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-primary/20",
 		social: "w-full overflow-hidden rounded-sm text-white hover:opacity-90",
 	};
 
