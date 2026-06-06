@@ -104,12 +104,12 @@ export default function SignUp() {
 
     return (
         <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4 md:p-8 font-sans antialiased">
-            <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-[620px]">
+            <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-0 md:min-h-[620px]">
                 {/* Left Side (Blue Dashboard Visual - Signup mode) */}
                 <AuthSidebar mode="signup" />
 
                 {/* Right Side (Auth Form) */}
-                <div className="md:col-span-7 bg-white p-8 md:p-12 flex flex-col justify-between min-h-[550px]">
+                <div className="col-span-12 md:col-span-7 bg-white p-6 sm:p-10 md:p-12 flex flex-col justify-between min-h-0 md:min-h-[550px]">
                     {/* Top spacer for layout alignment */}
                     <div className="hidden md:block"></div>
 

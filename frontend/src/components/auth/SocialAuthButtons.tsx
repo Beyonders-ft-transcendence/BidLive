@@ -14,7 +14,7 @@ export default function SocialAuthButtons({ onFortyTwoClick, onGoogleClick, mode
     const fortyTwoLabel = isSignIn ? "Entrar com 42" : "Criar com 42";
 
     return (
-        <div className="grid grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
             <Button
                 type="button"
                 variant="outline"

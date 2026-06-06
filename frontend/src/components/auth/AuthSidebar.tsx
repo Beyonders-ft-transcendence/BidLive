@@ -10,7 +10,7 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
     const isSignIn = mode === "signin";
 
     return (
-        <div className="md:col-span-5 bg-primary p-8 md:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+        <div className="hidden md:flex md:col-span-5 bg-primary p-8 md:p-10 text-white flex-col justify-between relative overflow-hidden">
             {/* Top Right Dot Grid Pattern */}
             <div className="absolute top-8 right-8 opacity-20 text-white select-none pointer-events-none">
                 <svg className="w-12 h-12" viewBox="0 0 48 48">
