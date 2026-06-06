@@ -1,14 +1,15 @@
 "use client";
 
-import { Search, Bell, ChevronDown, LogOut, Globe } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Globe, Moon } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function Header() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const router = useRouter();
+    const pathname = usePathname();
     const [showDropdown, setShowDropdown] = useState(false);
 
     const handleLogout = async () => {
@@ -18,6 +19,19 @@ export default function Header() {
         } catch (err) {
             console.error("Erro ao fazer logout:", err);
         }
+    };
+
+    // Map path to title dynamically
+    const getPageTitle = () => {
+        if (!pathname) return "Painel de Controle";
+        if (pathname.includes("/dashboard")) return "Painel Geral";
+        if (pathname.includes("/users")) return "Gestão de Usuários";
+        if (pathname.includes("/auctions")) return "Gestão de Leilões";
+        if (pathname.includes("/bids")) return "Histórico de Lances";
+        if (pathname.includes("/categories")) return "Categorias";
+        if (pathname.includes("/reports")) return "Denúncias e Moderação";
+        if (pathname.includes("/settings")) return "Configurações";
+        return "Painel de Controle";
     };
 
     // Calculate initials
@@ -32,28 +46,21 @@ export default function Header() {
 
     return (
         <header className="w-full bg-white h-16 flex items-center justify-between px-2 select-none border-b border-slate-100 text-slate-800 z-30 shrink-0 pb-4 mb-4">
-            {/* LEFT: Greeting Message */}
+            {/* LEFT: Dynamic Page Title */}
             <div className="flex flex-col text-left">
-                <span className="text-sm font-bold text-slate-900 leading-tight">
-                    Olá, {user?.full_name?.split(" ")[0] || "Administrador"}! 👋
-                </span>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                    Painel de Controle
+                <span className="text-xl text-slate-900 font-black tracking-tight">
+                    {getPageTitle()}
                 </span>
             </div>
 
-            {/* MIDDLE: Modern Search Bar */}
-            <div className="relative w-80 max-w-xs md:max-w-md hidden sm:block">
-                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="Pesquisar..."
-                    className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-slate-200 transition-all font-sans"
-                />
-            </div>
-
-            {/* RIGHT: Language, Notifications, Profile & Logout */}
+            {/* RIGHT: Theme, Language, Notifications, Profile & Logout */}
             <div className="flex items-center gap-4 relative">
+                
+                {/* Theme Switcher Toggle */}
+                <button className="w-9 h-9 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors relative cursor-pointer border border-transparent">
+                    <Moon size={16} />
+                </button>
+
                 {/* Language Switcher */}
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 cursor-pointer hover:text-slate-800 transition-colors">
                     <Globe size={13} className="text-slate-400" />
