@@ -49,7 +49,13 @@ export default function SignIn() {
     const onSubmit = async (data: SignInInput) => {
         try {
             await login(data);
-            router.push("/");
+            const user = useAuthStore.getState().user;
+            
+            if (user?.is_staff || user?.roles?.includes("SUPER_ADMIN") || user?.roles?.includes("MONITOR")) {
+                router.push("/backoffice");
+            } else {
+                router.push("/user");
+            }
         } catch {
             // erro tratado pela store
         }
