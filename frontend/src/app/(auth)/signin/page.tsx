@@ -129,7 +129,7 @@ export default function SignIn() {
                                     <input type="checkbox" className="rounded-sm border-gray-300 text-primary focus:ring-primary" />
                                     Lembrar de mim
                                 </label>
-                                <Link href="#" className="hover:underline text-gray-500 hover:text-gray-700">
+                                <Link href="/forgot-password" className="hover:underline text-gray-500 hover:text-gray-700">
                                     Esqueceu a senha?
                                 </Link>
                             </div>

@@ -34,3 +34,13 @@ export const signUpSchema = z.object({
 
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
+
+export const forgotPasswordSchema = z.object({
+    email: z
+        .string()
+        .min(1, { message: "O e-mail é obrigatório." })
+        .email({ message: "Informe um e-mail válido." }),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
