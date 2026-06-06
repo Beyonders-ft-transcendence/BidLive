@@ -13,6 +13,7 @@ import AuthSidebar from "@/components/auth/AuthSidebar";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 import AuthFooter from "@/components/auth/AuthFooter";
 import { signInSchema, type SignInInput } from "@/schema/auth.schema";
+import { UserRole } from "@/types/auth.types";
 import { Lineicons } from "@lineiconshq/react-lineicons";
 import { Envelope1Outlined, Locked1Outlined, EyeOutlined, EyeStroke } from "@lineiconshq/free-icons";
 
@@ -51,7 +52,7 @@ export default function SignIn() {
             await login(data);
             const user = useAuthStore.getState().user;
             
-            if (user?.is_staff || user?.roles?.includes("SUPER_ADMIN") || user?.roles?.includes("MONITOR")) {
+            if (user?.is_staff || user?.roles?.includes(UserRole.SUPER_ADMIN) || user?.roles?.includes(UserRole.MONITOR)) {
                 router.push("/backoffice");
             } else {
                 router.push("/user");

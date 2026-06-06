@@ -84,6 +84,7 @@ export interface Auction {
   buy_now_by: number | null;
   reserve_met: boolean;
   rules: Record<string, any> | null;
+  bids_count?: number;
   created_at: string;
 }
 
