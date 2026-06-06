@@ -1,4 +1,4 @@
-import Header from "@/components/layout/backoffice/Header";
+import Container from "@/components/layout/backoffice/Container";
 
 export default function BackofficeLayout({
   children,
@@ -6,11 +6,10 @@ export default function BackofficeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col bg-gray-100 min-h-screen">
-      <Header />
-      <main className="max-w-7xl mx-auto w-full px-4 py-6 flex-1">
+    <Container>
+      <main className="flex-1 px-4 py-6">
         {children}
       </main>
-    </div>
+    </Container>
   );
 }

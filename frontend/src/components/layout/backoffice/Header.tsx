@@ -1,98 +1,94 @@
 "use client";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import {
-    Search, Bell, Mail, ChevronDown,
-    LayoutDashboard, Users, Settings,
-    Gavel, TrendingUp, AlertCircle, Tag
-} from 'lucide-react';
-import icon from '@/assets/images/icon2.png';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Search, Bell, HelpCircle, User } from "lucide-react";
 
 export default function Header() {
     const pathname = usePathname();
 
     const NAV = [
-        { name: 'Dashboard', href: '/backoffice/dashboard', icon: LayoutDashboard },
-        { name: 'Usuários', href: '/backoffice/users', icon: Users },
-        { name: 'Leilões', href: '/backoffice/auctions', icon: Gavel },
-        { name: 'Categorias', href: '/backoffice/categories', icon: Tag },
-        { name: 'Lances', href: '/backoffice/bids', icon: TrendingUp },
-        { name: 'Denúncias', href: '/backoffice/reports', icon: AlertCircle },
-        { name: 'Configurações', href: '/backoffice/settings', icon: Settings },
-    ]
+        { name: "Overview", href: "/backoffice/dashboard" },
+        { name: "Activity", href: "/backoffice/bids" },
+        { name: "Manage", href: "/backoffice/auctions" },
+        { name: "Program", href: "/backoffice/categories" },
+        { name: "Account", href: "/backoffice/users" },
+        { name: "Reports", href: "/backoffice/reports" }
+    ];
 
+    // Helper to determine active state of general nav items
+    const getIsActive = (href: string) => {
+        if (href === "/backoffice/dashboard") {
+            return pathname === href || pathname === "/backoffice";
+        }
+        return pathname.startsWith(href);
+    };
 
     return (
-        <header className="w-full bg-white shadow-sm">
-            <div className='bg-[#0B1F3B] text-white'>
-                <div className="flex items-center justify-between max-w-7xl mx-auto px-6 py-3">
+        <header className="w-full bg-white border-b border-gray-150 h-16 flex items-center justify-between px-6 select-none sticky top-0 z-20">
+            {/* LEFT: Logo & Icon */}
+            <div className="flex items-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-md shadow-primary/25">
+                    <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" fill="none" />
+                        <path d="M6 18L18 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                </div>
+                <span className="text-base font-black ml-2 tracking-tight text-gray-900">BidLive.</span>
+            </div>
 
-                    {/* LEFT */}
-                    <div className="flex items-center gap-6">
-
-                        {/* Logo */}
-                        <Link href="/backoffice" className="flex items-center gap-2">
-                            <Image src={icon} alt="logo" width={130} height={40} />
+            {/* CENTER: Navigation Links (Pill Style) */}
+            <nav className="hidden md:flex items-center gap-1.5">
+                {NAV.map((item) => {
+                    const isActive = getIsActive(item.href);
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+                                isActive
+                                    ? "bg-primary text-white shadow-sm shadow-primary/20"
+                                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                            }`}
+                        >
+                            {item.name}
                         </Link>
+                    );
+                })}
+            </nav>
+
+            {/* RIGHT: Quick Tools & Profile */}
+            <div className="flex items-center gap-4">
+                {/* Icons Grid */}
+                <div className="flex items-center gap-1.5">
+                    <button className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors border border-gray-100">
+                        <Search size={14} />
+                    </button>
+                    <button className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors border border-gray-100 relative">
+                        <Bell size={14} />
+                        <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    </button>
+                    <button className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors border border-gray-100">
+                        <HelpCircle size={14} />
+                    </button>
+                </div>
+
+                {/* Divider */}
+                <div className="w-[1px] h-6 bg-gray-100"></div>
+
+                {/* Profile Widget */}
+                <div className="flex items-center gap-2.5">
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20">
+                        SA
                     </div>
-
-                    {/* Search */}
-                    <div className="relative hidden md:block w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                        <input
-                            type="text"
-                            placeholder="Buscar usuários, leilões..."
-                            className="w-full pl-9 pr-4 py-1 rounded-md bg-white/10 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-white/30"
-                        />
-                    </div>
-
-                    {/* RIGHT */}
-                    <div className="flex items-center gap-4">
-
-                        <button className="hover:bg-white/10 p-2 rounded-full">
-                            <Mail size={18} />
-                        </button>
-
-                        <button className="hover:bg-white/10 p-2 rounded-full">
-                            <Bell size={18} />
-                        </button>
-
-                        {/* User */}
-                        <div className="flex items-center gap-2 cursor-pointer hover:bg-white/10 px-2 py-1 rounded-md">
-                            <span className="text-sm hidden sm:block">Super Admin</span>
-                            <ChevronDown size={14} />
-                        </div>
+                    {/* Details */}
+                    <div className="hidden sm:flex flex-col text-left">
+                        <span className="text-[10px] font-bold text-gray-900 leading-none">Super Admin</span>
+                        <span className="text-[8px] text-gray-400 mt-0.5 leading-none">admin@bidlive.co.ao</span>
                     </div>
                 </div>
             </div>
-
-            {/* NAV ADMIN */}
-            <nav className='max-w-7xl mx-auto px-6 py-3'>
-                <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
-                    {
-                        NAV.map((item) => {
-                            const IconComponent = item.icon
-                            const isActive = pathname === item.href
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`flex items-center gap-1.5 transition-colors ${
-                                        isActive 
-                                        ? "text-blue-600 border-b-2 border-blue-600 pb-1" 
-                                        : "text-gray-600 hover:text-blue-600"
-                                    }`}
-                                >
-                                    <IconComponent size={16} />
-                                    {item.name}
-                                </Link>
-                            )
-                        })
-                    }
-                </div>
-            </nav>
         </header>
-    )
+    );
 }
