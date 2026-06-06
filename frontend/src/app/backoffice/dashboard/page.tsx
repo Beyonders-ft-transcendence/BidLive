@@ -1,6 +1,8 @@
 "use client";
 
 import {
+    Search,
+    TrendingUp,
     Users,
     Gavel,
     Package,
@@ -43,8 +45,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 
                 {/* Receita Total */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <rect x="2" y="4" width="20" height="16" rx="2" />
                             <line x1="12" y1="10" x2="12" y2="18" />
@@ -58,8 +60,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Total Lances */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <Gavel size={18} strokeWidth={2.5} />
                     </div>
                     <div>
@@ -69,8 +71,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Licitantes Ativos */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <Users size={18} strokeWidth={2.5} />
                     </div>
                     <div>
@@ -80,8 +82,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Leilões Ativos */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col justify-between">
+                    <div className="w-10 h-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <Package size={18} strokeWidth={2.5} />
                     </div>
                     <div>
@@ -96,10 +98,10 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 items-stretch">
                 
                 {/* Left: Platform status/Bar chart (col-span-8) */}
-                <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col">
+                <div className="lg:col-span-8 bg-white rounded-sm border border-gray-100 p-6 shadow-sm flex flex-col">
                     <div className="flex justify-between items-center mb-5">
                         <span className="text-sm font-bold text-gray-950">Status da Plataforma</span>
-                        <select className="bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1 text-[10px] text-gray-500 font-bold focus:outline-none cursor-pointer">
+                        <select className="bg-gray-50 border border-gray-100 rounded-sm px-2.5 py-1 text-[10px] text-gray-500 font-bold focus:outline-none cursor-pointer">
                             <option>Anual</option>
                             <option>Mensal</option>
                         </select>
@@ -138,7 +140,7 @@ export default function Dashboard() {
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 9 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 9 }} />
                                 <Tooltip cursor={{ fill: 'transparent' }} />
-                                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={16}>
+                                <Bar dataKey="value" radius={[2, 2, 0, 0]} barSize={16}>
                                     {statusData.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
@@ -155,13 +157,13 @@ export default function Dashboard() {
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     
                     {/* Gênero dos Licitantes */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
+                    <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
                         <span className="text-xs font-bold text-gray-950">Gênero dos Licitantes</span>
                         
                         <div className="grid grid-cols-2 gap-4 mt-1">
                             {/* Male */}
-                            <div className="bg-gray-50/50 rounded-xl p-3 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                            <div className="bg-gray-50/50 rounded-sm p-3 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-sm bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                         <circle cx="10" cy="14" r="5" />
                                         <path d="M19 5l-5.5 5.5M14 5h5v5" />
@@ -174,8 +176,8 @@ export default function Dashboard() {
                             </div>
 
                             {/* Female */}
-                            <div className="bg-gray-50/50 rounded-xl p-3 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-pink-100 text-pink-500 flex items-center justify-center shrink-0">
+                            <div className="bg-gray-50/50 rounded-sm p-3 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-sm bg-pink-100 text-pink-500 flex items-center justify-center shrink-0">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                         <circle cx="12" cy="9" r="6" />
                                         <path d="M12 15v6M9 18h6" />
@@ -190,7 +192,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Avaliação da Plataforma */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-3.5 flex-1 justify-between">
+                    <div className="bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col gap-3.5 flex-1 justify-between">
                         <span className="text-xs font-bold text-gray-950">Avaliação da Plataforma</span>
                         
                         <div className="flex items-center gap-3 mt-1">
@@ -210,7 +212,7 @@ export default function Dashboard() {
                             {/* 5 star */}
                             <div className="flex items-center justify-between text-[9px] font-medium text-gray-500">
                                 <span className="w-8">5 estrelas</span>
-                                <div className="flex-1 bg-gray-100 h-1.5 rounded-full mx-2 overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-1.5 rounded-sm mx-2 overflow-hidden">
                                     <div className="bg-primary h-full w-[50%]" />
                                 </div>
                                 <span className="w-6 text-right">50%</span>
@@ -218,7 +220,7 @@ export default function Dashboard() {
                             {/* 4 star */}
                             <div className="flex items-center justify-between text-[9px] font-medium text-gray-500">
                                 <span className="w-8">4 estrelas</span>
-                                <div className="flex-1 bg-gray-100 h-1.5 rounded-full mx-2 overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-1.5 rounded-sm mx-2 overflow-hidden">
                                     <div className="bg-primary h-full w-[15%]" />
                                 </div>
                                 <span className="w-6 text-right">15%</span>
@@ -226,7 +228,7 @@ export default function Dashboard() {
                             {/* 3 star */}
                             <div className="flex items-center justify-between text-[9px] font-medium text-gray-500">
                                 <span className="w-8">3 estrelas</span>
-                                <div className="flex-1 bg-gray-100 h-1.5 rounded-full mx-2 overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-1.5 rounded-sm mx-2 overflow-hidden">
                                     <div className="bg-primary h-full w-[13%]" />
                                 </div>
                                 <span className="w-6 text-right">13%</span>
@@ -234,7 +236,7 @@ export default function Dashboard() {
                             {/* 2 star */}
                             <div className="flex items-center justify-between text-[9px] font-medium text-gray-500">
                                 <span className="w-8">2 estrelas</span>
-                                <div className="flex-1 bg-gray-100 h-1.5 rounded-full mx-2 overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-1.5 rounded-sm mx-2 overflow-hidden">
                                     <div className="bg-primary h-full w-[12%]" />
                                 </div>
                                 <span className="w-6 text-right">12%</span>
@@ -242,7 +244,7 @@ export default function Dashboard() {
                             {/* 1 star */}
                             <div className="flex items-center justify-between text-[9px] font-medium text-gray-500">
                                 <span className="w-8">1 estrela</span>
-                                <div className="flex-1 bg-gray-100 h-1.5 rounded-full mx-2 overflow-hidden">
+                                <div className="flex-1 bg-gray-100 h-1.5 rounded-sm mx-2 overflow-hidden">
                                     <div className="bg-primary h-full w-[10%]" />
                                 </div>
                                 <span className="w-6 text-right">10%</span>
@@ -258,7 +260,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
                 {/* Left: Recent Table (col-span-8) */}
-                <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col">
+                <div className="lg:col-span-8 bg-white rounded-sm border border-gray-100 p-6 shadow-sm flex flex-col">
                     <span className="text-xs font-bold text-gray-950 mb-4">Leilões Recentes</span>
                     
                     <div className="overflow-x-auto scrollbar-none">
@@ -304,7 +306,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Right: Top Products/Lots (col-span-4) */}
-                <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
+                <div className="lg:col-span-4 bg-white rounded-sm border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
                     <span className="text-xs font-bold text-gray-950">Lotes Populares</span>
                     
                     <div className="flex flex-col gap-4 mt-1">
@@ -312,7 +314,7 @@ export default function Dashboard() {
                         {/* Item 1 */}
                         <div className="flex items-center justify-between border-b border-gray-50 pb-3">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
+                                <div className="w-9 h-9 rounded-sm bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                         <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7h2" />
                                         <circle cx="7" cy="17" r="2" />
@@ -321,10 +323,10 @@ export default function Dashboard() {
                                 </div>
                                 <div className="text-left">
                                     <h5 className="text-[10px] font-bold text-gray-800 leading-tight">Porsche 911 Carrera</h5>
-                                    <p className="text-[8px] text-gray-400 mt-0.5">Preço: Kz 87.5M</p>
+                                    <p className="text-[8px] text-gray-400 mt-0.5 font-bold">Kz 87.5M</p>
                                 </div>
                             </div>
-                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-lg">
+                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-sm">
                                 14 Lances
                             </div>
                         </div>
@@ -332,7 +334,7 @@ export default function Dashboard() {
                         {/* Item 2 */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
+                                <div className="w-9 h-9 rounded-sm bg-gray-50 flex items-center justify-center text-primary border border-gray-100">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                         <rect x="2" y="3" width="20" height="14" rx="2" />
                                         <line x1="2" y1="20" x2="22" y2="20" />
@@ -341,10 +343,10 @@ export default function Dashboard() {
                                 </div>
                                 <div className="text-left">
                                     <h5 className="text-[10px] font-bold text-gray-800 leading-tight">MacBook Pro M3 Max</h5>
-                                    <p className="text-[8px] text-gray-400 mt-0.5">Preço: Kz 1.85M</p>
+                                    <p className="text-[8px] text-gray-400 mt-0.5 font-bold">Kz 1.85M</p>
                                 </div>
                             </div>
-                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-lg">
+                            <div className="bg-primary/5 text-primary text-[8px] font-bold px-2 py-1 rounded-sm">
                                 8 Lances
                             </div>
                         </div>
