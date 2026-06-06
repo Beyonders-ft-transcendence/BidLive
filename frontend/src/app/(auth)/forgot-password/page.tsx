@@ -53,7 +53,7 @@ export default function ForgotPassword() {
         <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4 md:p-8 font-sans antialiased">
             <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-0 md:min-h-[620px]">
                 {/* Left Side (Blue Dashboard Visual) */}
-                <AuthSidebar />
+                <AuthSidebar mode="forgot-password" />
 
                 {/* Right Side (Auth Form) */}
                 <div className="col-span-12 md:col-span-7 bg-white p-6 sm:p-10 md:p-12 flex flex-col justify-between min-h-0 md:min-h-[550px]">

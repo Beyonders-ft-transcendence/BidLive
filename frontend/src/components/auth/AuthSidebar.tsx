@@ -3,7 +3,7 @@ import { Lineicons } from "@lineiconshq/react-lineicons";
 import { Bolt2Outlined, Locked1Outlined, TrendUp1Outlined } from "@lineiconshq/free-icons";
 
 interface AuthSidebarProps {
-    mode?: "signin" | "signup";
+    mode?: "signin" | "signup" | "forgot-password";
 }
 
 export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
@@ -48,7 +48,56 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
             </div>
 
             {/* Center Mockup Visuals */}
-            {isSignIn ? (
+            {mode === "forgot-password" ? (
+                <div className="relative w-full max-w-[280px] mx-auto my-auto aspect-[1.1] scale-95 md:scale-100 transition-all duration-300">
+                    {/* Main White Card - Security Lock */}
+                    <div className="bg-white rounded-sm shadow-2xl p-5 text-gray-800 relative z-0 w-[90%] mx-auto flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-primary mb-3">
+                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                        </div>
+                        
+                        <h4 className="font-bold text-[11px] text-gray-900 text-center">Proteção de Conta</h4>
+                        <p className="text-[7px] text-gray-400 text-center mt-0.5 leading-relaxed">
+                            Criptografia de ponta a ponta para redefinição de credenciais.
+                        </p>
+
+                        {/* Security Step List */}
+                        <div className="w-full mt-4 space-y-2 text-[8px]">
+                            <div className="flex items-center gap-2 text-green-600 font-semibold">
+                                <div className="w-3.5 h-3.5 rounded-full bg-green-50 flex items-center justify-center border border-green-200">
+                                    ✓
+                                </div>
+                                <span>Solicitar redefinição</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-primary font-semibold">
+                                <div className="w-3.5 h-3.5 rounded-full bg-blue-50 flex items-center justify-center border border-blue-200 animate-pulse">
+                                    •
+                                </div>
+                                <span>Verificar caixa de correio</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400 font-normal">
+                                <div className="w-3.5 h-3.5 rounded-full bg-gray-50 flex items-center justify-center border border-gray-200">
+                                    3
+                                </div>
+                                <span>Definir nova senha</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Floating Card - Notification */}
+                    <div className="absolute right-[-10px] top-[15%] bg-white rounded-sm shadow-lg border border-gray-50 p-2 flex items-center gap-1.5 z-10 w-[115px] text-gray-800 animate-bounce-slow">
+                        <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-primary shrink-0">
+                            ✉
+                        </div>
+                        <div className="text-[7px]">
+                            <p className="font-bold text-gray-800">Token gerado</p>
+                            <p className="text-gray-400 font-light">Expira em 1 hora</p>
+                        </div>
+                    </div>
+                </div>
+            ) : isSignIn ? (
                 <div className="relative w-full max-w-[280px] mx-auto my-auto aspect-[1.1] scale-95 md:scale-100 transition-all duration-300">
                     {/* Main White Card */}
                     <div className="bg-white rounded-sm shadow-2xl p-4 text-gray-800 relative z-0 w-[90%] mx-auto">
@@ -197,18 +246,24 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
             {/* Bottom Content */}
             <div className="z-10 text-center md:text-left">
                 <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
-                    {isSignIn ? "Rápido, Simples e Seguro" : "Junte-se à Comunidade"}
+                    {mode === "forgot-password"
+                        ? "Recupere o seu Acesso"
+                        : isSignIn
+                        ? "Rápido, Simples e Seguro"
+                        : "Junte-se à Comunidade"}
                 </h3>
                 <p className="text-xs md:text-[13px] text-blue-100 mt-3 font-light leading-relaxed max-w-[290px]">
-                    {isSignIn
+                    {mode === "forgot-password"
+                        ? "Não se preocupe! Insira o seu e-mail para receber as instruções e recuperar o acesso às suas licitações e leilões ativos."
+                        : isSignIn
                         ? "O BidLive ajuda-o a gerir os seus leilões, licitações e negócios em tempo real com total transparência e segurança. Licite agora."
                         : "Crie a sua conta no BidLive para aceder instantaneamente a milhares de leilões ativos, licitar em tempo real e fechar negócios incríveis com total transparência."}
                 </p>
                 {/* Carousel indicators */}
                 <div className="flex justify-center md:justify-start gap-1.5 mt-5">
-                    <span className={`h-1 rounded-full transition-all duration-300 ${isSignIn ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
-                    <span className={`h-1 rounded-full transition-all duration-300 ${!isSignIn ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
-                    <span className="w-1 h-1 bg-white/40 rounded-full"></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signin" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signup" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "forgot-password" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
                 </div>
             </div>
         </div>
