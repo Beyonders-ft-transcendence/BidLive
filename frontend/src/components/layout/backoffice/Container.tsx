@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 
 export default function Container({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-gray-900 font-sans select-none">
+        <div className="flex flex-col h-screen overflow-hidden bg-[#F8FAFC] text-gray-900 font-sans select-none">
             {/* Top Full-width Header */}
             <Header />
             

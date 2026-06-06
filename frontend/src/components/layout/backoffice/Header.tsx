@@ -4,7 +4,7 @@ import { Search, Bell, Menu, ChevronDown, PlusCircle } from "lucide-react";
 
 export default function Header() {
     return (
-        <header className="w-full bg-primary h-14 flex items-center justify-between px-6 select-none shadow-md text-white sticky top-0 z-30">
+        <header className="w-full bg-primary h-14 flex items-center justify-between px-6 select-none shadow-md text-white z-30">
             {/* LEFT: Hamburger & Brand Logo */}
             <div className="flex items-center gap-4 shrink-0">
                 <span className="text-xl font-black tracking-tight">BidLive</span>

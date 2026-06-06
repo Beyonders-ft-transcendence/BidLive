@@ -39,7 +39,7 @@ const statusData = [
 
 export default function Dashboard() {
     return (
-        <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+        <div className="flex flex-col">
             
             {/* TOP ROW: 4 Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">

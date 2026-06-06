@@ -7,7 +7,7 @@ export default function BackofficeLayout({
 }) {
   return (
     <Container>
-      <main className="flex-1 px-4 py-6 max-w-7xl mx-auto">
+      <main className="flex-1 px-6 py-8 max-w-7xl mx-auto w-full">
         {children}
       </main>
     </Container>
