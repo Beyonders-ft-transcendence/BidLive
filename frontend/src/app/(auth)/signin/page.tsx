@@ -74,7 +74,6 @@ export default function SignIn() {
                 <div className="md:col-span-7 bg-white p-8 md:p-12 flex flex-col justify-between min-h-[550px]">
                     {/* Top spacer for layout alignment */}
                     <div className="hidden md:block"></div>
-
                     {/* Form Wrap */}
                     <div className="max-w-[370px] w-full mx-auto py-6">
                         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Entrar na sua conta</h2>
