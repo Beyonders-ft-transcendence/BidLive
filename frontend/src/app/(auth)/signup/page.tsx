@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, User, Mail, IdCard } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/store/auth.store";
@@ -13,6 +12,15 @@ import Divider from "@/components/common/Divider";
 import { GoogleIcon } from "@/components/common/Icons";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import { signUpSchema, type SignUpInput } from "@/schema/auth.schema";
+import { Lineicons } from "@lineiconshq/react-lineicons";
+import {
+    Envelope1Outlined,
+    Locked1Outlined,
+    EyeOutlined,
+    EyeStroke,
+    User4Outlined,
+    UserMultiple4Outlined,
+} from "@lineiconshq/free-icons";
 
 export default function SignUp() {
     const router = useRouter();
@@ -149,7 +157,7 @@ export default function SignUp() {
                                         type="text"
                                         placeholder="Nome completo"
                                         fullWidth
-                                        icon={<IdCard size={16} />}
+                                        leftIcon={<Lineicons icon={UserMultiple4Outlined} size={16} />}
                                         error={errors.full_name?.message}
                                         {...register("full_name")}
                                     />
@@ -157,7 +165,7 @@ export default function SignUp() {
                                         type="text"
                                         placeholder="Nome de usuário"
                                         fullWidth
-                                        icon={<User size={16} />}
+                                        leftIcon={<Lineicons icon={User4Outlined} size={16} />}
                                         error={errors.username?.message}
                                         {...register("username")}
                                     />
@@ -165,7 +173,7 @@ export default function SignUp() {
                                         type="email"
                                         placeholder="E-mail"
                                         fullWidth
-                                        icon={<Mail size={16} />}
+                                        leftIcon={<Lineicons icon={Envelope1Outlined} size={16} />}
                                         error={errors.email?.message}
                                         {...register("email")}
                                     />
@@ -176,16 +184,15 @@ export default function SignUp() {
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Senha"
                                         fullWidth
-                                        iconPosition="right"
-                                        error={errors.password?.message}
-                                        icon={
+                                        leftIcon={<Lineicons icon={Locked1Outlined} size={16} />}
+                                        rightIcon={
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 className="text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none flex items-center"
                                                 aria-label="Mostrar senha"
                                             >
-                                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                {showPassword ? <Lineicons icon={EyeStroke} size={16} /> : <Lineicons icon={EyeOutlined} size={16} />}
                                             </button>
                                         }
                                         {...register("password")}
@@ -194,16 +201,15 @@ export default function SignUp() {
                                         type={showConfirmPassword ? "text" : "password"}
                                         placeholder="Confirmar senha"
                                         fullWidth
-                                        iconPosition="right"
-                                        error={errors.password_confirm?.message}
-                                        icon={
+                                        leftIcon={<Lineicons icon={Locked1Outlined} size={16} />}
+                                        rightIcon={
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 className="text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none flex items-center"
                                                 aria-label="Mostrar confirmação de senha"
                                             >
-                                                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                {showConfirmPassword ? <Lineicons icon={EyeStroke} size={16} /> : <Lineicons icon={EyeOutlined} size={16} />}
                                             </button>
                                         }
                                         {...register("password_confirm")}

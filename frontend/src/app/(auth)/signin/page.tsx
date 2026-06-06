@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/common/Input";
@@ -13,6 +12,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import { signInSchema, type SignInInput } from "@/schema/auth.schema";
+import { Lineicons } from "@lineiconshq/react-lineicons";
+import { Envelope1Outlined, Locked1Outlined, EyeOutlined, EyeStroke } from "@lineiconshq/free-icons";
 
 export default function SignIn() {
     const router = useRouter();
@@ -118,6 +119,7 @@ export default function SignIn() {
                                     type="email"
                                     placeholder="E-mail"
                                     fullWidth
+                                    leftIcon={<Lineicons icon={Envelope1Outlined} size={16} />}
                                     error={errors.email?.message}
                                     {...register("email")}
                                 />
@@ -129,18 +131,18 @@ export default function SignIn() {
                                     type={showPassword ? "text" : "password"}
                                     placeholder="Senha"
                                     fullWidth
-                                    iconPosition="right"
-                                    error={errors.password?.message}
-                                    icon={
+                                    leftIcon={<Lineicons icon={Locked1Outlined} size={16} />}
+                                    rightIcon={
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none flex items-center"
                                             aria-label="Mostrar senha"
                                         >
-                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            {showPassword ? <Lineicons icon={EyeStroke} size={16} /> : <Lineicons icon={EyeOutlined} size={16} />}
                                         </button>
                                     }
+                                    error={errors.password?.message}
                                     {...register("password")}
                                 />
                             </div>

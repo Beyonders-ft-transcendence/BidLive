@@ -6,6 +6,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     helperText?: string;
     icon?: ReactNode;
     iconPosition?: "left" | "right";
+    leftIcon?: ReactNode;
+    rightIcon?: ReactNode;
     fullWidth?: boolean;
 }
 
@@ -17,6 +19,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             helperText,
             icon,
             iconPosition = "left",
+            leftIcon,
+            rightIcon,
             fullWidth = false,
             className = "",
             id,
@@ -32,11 +36,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
             : "";
 
-        const iconPaddingStyles = icon
-            ? iconPosition === "left"
-                ? "pl-11"
-                : "pr-11"
-            : "";
+        const finalLeftIcon = leftIcon || (icon && iconPosition === "left" ? icon : undefined);
+        const finalRightIcon = rightIcon || (icon && iconPosition === "right" ? icon : undefined);
+
+        const iconPaddingStyles = `${finalLeftIcon ? "pl-11" : ""} ${finalRightIcon ? "pr-11" : ""}`;
 
         return (
             <div className={`${fullWidth ? "w-full" : ""}`}>
@@ -51,9 +54,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 )}
 
                 <div className="relative">
-                    {icon && iconPosition === "left" && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                            {icon}
+                    {finalLeftIcon && (
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 flex items-center justify-center">
+                            {finalLeftIcon}
                         </div>
                     )}
 
@@ -64,9 +67,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         {...props}
                     />
 
-                    {icon && iconPosition === "right" && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                            {icon}
+                    {finalRightIcon && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 flex items-center justify-center">
+                            {finalRightIcon}
                         </div>
                     )}
                 </div>
