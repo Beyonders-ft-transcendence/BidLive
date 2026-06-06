@@ -102,7 +102,7 @@ export default function SignIn() {
                 }
             `}</style>
 
-            <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-[28px] overflow-hidden grid md:grid-cols-12 min-h-[620px]">
+            <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-[620px]">
                 {/* Left Side (Blue Dashboard Visual) */}
                 <div className="md:col-span-5 bg-[#1B59F8] p-8 md:p-10 text-white flex flex-col justify-between relative overflow-hidden">
                     {/* Top Right Dot Grid Pattern */}
@@ -144,7 +144,7 @@ export default function SignIn() {
                     {/* Center Mockup Visuals */}
                     <div className="relative w-full max-w-[280px] mx-auto my-auto aspect-[1.1] scale-95 md:scale-100 transition-all duration-300">
                         {/* Main White Card */}
-                        <div className="bg-white rounded-[24px] shadow-2xl p-4 text-gray-800 relative z-0 w-[90%] mx-auto">
+                        <div className="bg-white rounded-sm shadow-2xl p-4 text-gray-800 relative z-0 w-[90%] mx-auto">
                             {/* Income / Expenses header */}
                             <div className="flex justify-between items-center text-[10px] text-gray-400 font-medium px-1">
                                 <div>
@@ -215,8 +215,8 @@ export default function SignIn() {
                         </div>
 
                         {/* Floating Card 1: Payment Received */}
-                        <div className="absolute right-[-12px] top-[26%] bg-white rounded-xl shadow-lg border border-gray-50 p-2.5 flex items-center gap-2 z-10 w-[135px] text-gray-800 animate-bounce-slow">
-                            <div className="w-6 h-6 rounded-lg bg-green-50 flex items-center justify-center text-green-500 shrink-0">
+                        <div className="absolute right-[-12px] top-[26%] bg-white rounded-sm shadow-lg border border-gray-50 p-2.5 flex items-center gap-2 z-10 w-[135px] text-gray-800 animate-bounce-slow">
+                            <div className="w-6 h-6 rounded-sm bg-green-50 flex items-center justify-center text-green-500 shrink-0">
                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -228,7 +228,7 @@ export default function SignIn() {
                         </div>
 
                         {/* Floating Card 2: Transfer Successful */}
-                        <div className="absolute left-[-20px] bottom-[12%] bg-white rounded-xl shadow-lg border border-gray-50 p-2.5 flex flex-col items-center gap-1 z-10 w-[95px] text-center text-gray-800 animate-bounce-slow-reverse">
+                        <div className="absolute left-[-20px] bottom-[12%] bg-white rounded-sm shadow-lg border border-gray-50 p-2.5 flex flex-col items-center gap-1 z-10 w-[95px] text-center text-gray-800 animate-bounce-slow-reverse">
                             <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -270,7 +270,7 @@ export default function SignIn() {
                         <div className="grid grid-cols-2 gap-4 mt-6">
                             <button
                                 type="button"
-                                className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer shrink-0"
+                                className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-sm py-2.5 text-xs font-semibold transition cursor-pointer shrink-0"
                             >
                                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -283,7 +283,7 @@ export default function SignIn() {
                             <button
                                 type="button"
                                 onClick={handle42Login}
-                                className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer shrink-0"
+                                className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-sm py-2.5 text-xs font-semibold transition cursor-pointer shrink-0"
                             >
                                 <GraduationCap size={16} className="text-gray-700 shrink-0" />
                                 Sign In with 42
@@ -306,7 +306,7 @@ export default function SignIn() {
                                     value={form.email}
                                     onChange={onChange("email")}
                                     placeholder="E-mail"
-                                    className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 placeholder-gray-400 font-normal"
+                                    className="w-full rounded-sm px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 placeholder-gray-400 font-normal"
                                     required
                                 />
                             </div>
@@ -318,7 +318,7 @@ export default function SignIn() {
                                     value={form.password}
                                     onChange={onChange("password")}
                                     placeholder="Password"
-                                    className="w-full rounded-xl px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 placeholder-gray-400 font-normal pr-10"
+                                    className="w-full rounded-sm px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-[#1B59F8] focus:ring-1 focus:ring-[#1B59F8]/20 placeholder-gray-400 font-normal pr-10"
                                     required
                                 />
                                 <button
@@ -334,7 +334,7 @@ export default function SignIn() {
                             {/* Remember me + Forgot password */}
                             <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" className="rounded border-gray-300 text-[#1B59F8] focus:ring-[#1B59F8]" />
+                                    <input type="checkbox" className="rounded-sm border-gray-300 text-[#1B59F8] focus:ring-[#1B59F8]" />
                                     Lembrar de mim
                                 </label>
                                 <Link href="#" className="hover:underline text-gray-500 hover:text-gray-700">
@@ -353,7 +353,7 @@ export default function SignIn() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-[#1B59F8] hover:bg-[#1A50DC] active:bg-[#1540B3] text-white font-semibold rounded-xl py-3.5 text-sm transition-all duration-200 mt-4 shadow-md shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                                className="w-full bg-[#1B59F8] hover:bg-[#1A50DC] active:bg-[#1540B3] text-white font-semibold rounded-sm py-3.5 text-sm transition-all duration-200 mt-4 shadow-md shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                             >
                                 {isLoading ? "Carregando..." : "Sign In"}
                             </button>
