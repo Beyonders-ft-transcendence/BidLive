@@ -96,29 +96,13 @@ export default function SignUp() {
     return (
         <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4 md:p-8 font-sans antialiased">
             <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-[620px]">
-                {/* Left Side (Blue Dashboard Visual) */}
-                <AuthSidebar />
+                {/* Left Side (Blue Dashboard Visual - Signup mode) */}
+                <AuthSidebar mode="signup" />
 
                 {/* Right Side (Auth Form) */}
                 <div className="md:col-span-7 bg-white p-8 md:p-12 flex flex-col justify-between min-h-[550px]">
-                    {/* Top: Progress indicator */}
-                    <div className="w-full max-w-[370px] mx-auto pt-2">
-                        <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2">
-                            <span>
-                                Etapa {step} de 2
-                            </span>
-                            <span className="font-semibold text-gray-700">
-                                {step === 1 ? "Informações pessoais" : "Segurança da conta"}
-                            </span>
-                        </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full bg-primary transition-all duration-300 ${
-                                    step === 1 ? "w-1/2" : "w-full"
-                                }`}
-                            />
-                        </div>
-                    </div>
+                    {/* Top spacer for layout alignment */}
+                    <div className="hidden md:block"></div>
 
                     {/* Form Wrap */}
                     <div className="max-w-[370px] w-full mx-auto py-4">
