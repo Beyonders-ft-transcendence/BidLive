@@ -1,13 +1,18 @@
 export type UserStatus = "Ativo" | "Suspenso" | "Bloqueado";
 
-export function statusColor(status: UserStatus): string {
+export function statusColor(status: string): string {
   switch (status) {
+    case "ACTIVE":
     case "Ativo":
-      return "bg-green-100 text-green-600";
+      return "bg-green-100 text-green-600 border border-green-200/30";
+    case "SUSPENDED":
     case "Suspenso":
-      return "bg-yellow-100 text-yellow-600";
+      return "bg-yellow-100 text-yellow-600 border border-yellow-200/30";
+    case "BANNED":
     case "Bloqueado":
-      return "bg-red-100 text-red-600";
+      return "bg-red-100 text-red-600 border border-red-200/30";
+    default:
+      return "bg-gray-100 text-gray-500 border border-gray-200/30";
   }
 }
 
