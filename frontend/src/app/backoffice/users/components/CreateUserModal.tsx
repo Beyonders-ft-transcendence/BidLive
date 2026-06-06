@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import Modal from "@/components/common/Modal";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
-import { type UserStatus } from "@/types/auth.types";
-import { UserStatus as AuthUserStatus } from "@/types/auth.types";
 
 interface CreateUserFormData {
   username: string;
@@ -13,9 +11,7 @@ interface CreateUserFormData {
   full_name: string;
   password: string;
   bio: string;
-  is_verified: boolean;
-  is_staff: boolean;
-  status: UserStatus;
+  role: string;
 }
 
 interface CreateUserModalProps {
@@ -41,9 +37,7 @@ export default function CreateUserModal({
       full_name: "",
       password: "",
       bio: "",
-      is_verified: false,
-      is_staff: false,
-      status: AuthUserStatus.ACTIVE,
+      role: "USER",
     },
   });
 
@@ -109,15 +103,15 @@ export default function CreateUserModal({
 
           <div className="flex flex-col">
             <label className="block text-sm font-medium text-gray-600 mb-1.5">
-              Estado Inicial
+              Cargo / Função Principal
             </label>
             <select
-              {...register("status")}
+              {...register("role")}
               className="w-full rounded-sm px-4 py-3 text-sm border border-gray-200 bg-white transition-all duration-200 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 cursor-pointer"
             >
-              <option value={AuthUserStatus.ACTIVE}>Ativo (ACTIVE)</option>
-              <option value={AuthUserStatus.SUSPENDED}>Suspenso (SUSPENDED)</option>
-              <option value={AuthUserStatus.BANNED}>Banido (BANNED)</option>
+              <option value="USER">Licitante (USER)</option>
+              <option value="MONITOR">Moderador (MONITOR)</option>
+              <option value="SUPER_ADMIN">Administrador (SUPER_ADMIN)</option>
             </select>
           </div>
 
@@ -127,33 +121,6 @@ export default function CreateUserModal({
             error={errors.bio?.message}
             {...register("bio")}
           />
-        </div>
-
-        {/* Toggles & Checkboxes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b border-gray-50 py-3">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_verified"
-              className="rounded-sm border-gray-300 text-primary focus:ring-primary/20 h-4 w-4 cursor-pointer"
-              {...register("is_verified")}
-            />
-            <label htmlFor="is_verified" className="text-xs font-bold text-gray-600 cursor-pointer">
-              Conta de e-mail pré-verificada
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_staff"
-              className="rounded-sm border-gray-300 text-primary focus:ring-primary/20 h-4 w-4 cursor-pointer"
-              {...register("is_staff")}
-            />
-            <label htmlFor="is_staff" className="text-xs font-bold text-gray-600 cursor-pointer">
-              Membro do Staff Administrativo (Staff Access)
-            </label>
-          </div>
         </div>
 
         {/* Submit panel */}

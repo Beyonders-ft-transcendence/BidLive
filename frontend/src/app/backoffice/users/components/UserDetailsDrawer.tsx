@@ -5,24 +5,24 @@ import SideDrawer from "@/components/common/SideDrawer";
 import { statusColor } from "@/utils/user";
 import {
   ShieldAlert,
-  MapPin,
   Mail,
   Calendar,
   Trash2,
-  AlertTriangle,
-  UserCheck,
-  UserX,
   Compass,
-  Layers,
-  Activity
+  Activity,
+  CheckCircle,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
-import { type User, UserStatus } from "@/types/auth.types";
+import { type UserManaged } from "@/types/rbac.types";
+import { UserStatus } from "@/types/auth.types";
 
 interface UserDetailsDrawerProps {
-  user: User | null;
+  user: UserManaged | null;
   onClose: () => void;
   onToggleStatus: (userId: number, status: UserStatus) => void;
   onToggleVerification: (userId: number) => void;
+  onToggleActive: (userId: number) => void;
   onDeleteClick: (userId: number) => void;
 }
 
@@ -31,6 +31,7 @@ export default function UserDetailsDrawer({
   onClose,
   onToggleStatus,
   onToggleVerification,
+  onToggleActive,
   onDeleteClick,
 }: UserDetailsDrawerProps) {
   if (!user) return null;
@@ -88,7 +89,8 @@ export default function UserDetailsDrawer({
   );
 
   // Parse dates nicely
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "Sem registo";
     try {
       return new Date(dateStr).toLocaleDateString("pt-PT", {
         day: "2-digit",
@@ -109,9 +111,9 @@ export default function UserDetailsDrawer({
         <div className="bg-red-50 border border-red-100 rounded-sm p-3 flex gap-2 text-red-700">
           <ShieldAlert size={16} className="shrink-0 text-red-500" />
           <div>
-            <h5 className="text-[10px] font-bold uppercase tracking-wider">Conta Inativa / Desativada</h5>
+            <h5 className="text-[10px] font-bold uppercase tracking-wider">Conta Inativa</h5>
             <p className="text-[9px] mt-0.5 text-red-600 leading-relaxed">
-              Esta conta foi desativada pelo sistema ou pelo utilizador. Lances e logins estão temporariamente proibidos.
+              Esta conta de utilizador está desativada no sistema. Lances e autenticação estão bloqueados.
             </p>
           </div>
         </div>
@@ -161,10 +163,12 @@ export default function UserDetailsDrawer({
             <Calendar size={12} className="text-gray-400" />
             <span className="text-gray-400 font-medium">Registado em: {formatDate(user.created_at)}</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <Activity size={12} className="text-gray-400" />
-            <span className="text-gray-400 font-medium">Última atualização: {formatDate(user.updated_at)}</span>
-          </div>
+          {user.updated_at && (
+            <div className="flex items-center gap-2.5">
+              <Activity size={12} className="text-gray-400" />
+              <span className="text-gray-400 font-medium">Última atualização: {formatDate(user.updated_at)}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -183,35 +187,23 @@ export default function UserDetailsDrawer({
             </span>
           </div>
           <div>
-            <span className="text-[8px] text-gray-400 font-bold block uppercase">Último Login (IP)</span>
-            <span className="font-mono font-bold text-gray-700">
-              {user.last_login_ip || "Sem registo"}
-            </span>
-          </div>
-          <div className="col-span-2">
-            <span className="text-[8px] text-gray-400 font-bold block uppercase">Visto pela Última Vez</span>
-            <span className="font-medium text-gray-600">
-              {formatDate(user.last_seen)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Security details */}
-      <div className="flex flex-col gap-2.5">
-        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider border-b border-gray-50 pb-1">
-          Segurança
-        </span>
-        <div className="grid grid-cols-2 gap-3 text-[10px]">
-          <div className="flex flex-col bg-gray-50/50 rounded-sm p-2 border border-gray-100">
-            <span className="text-[8px] text-gray-400 font-bold block uppercase">Logins Falhados</span>
-            <span className="font-black text-gray-900 mt-0.5">{user.failed_login_attempts}</span>
-          </div>
-          <div className="flex flex-col bg-gray-50/50 rounded-sm p-2 border border-gray-100">
-            <span className="text-[8px] text-gray-400 font-bold block uppercase">Bloqueado Até</span>
-            <span className="font-semibold text-gray-700 mt-0.5 text-[9px]">
-              {user.locked_until ? formatDate(user.locked_until) : "Não Bloqueado"}
-            </span>
+            <span className="text-[8px] text-gray-400 font-bold block uppercase">Status de Atividade</span>
+            <button
+              onClick={() => onToggleActive(user.id)}
+              className="flex items-center gap-1 mt-0.5 text-gray-600 hover:text-primary transition-colors focus:outline-none"
+            >
+              {user.is_active ? (
+                <>
+                  <ToggleRight size={18} className="text-primary" />
+                  <span className="text-[9px] font-bold text-primary uppercase">Ativa</span>
+                </>
+              ) : (
+                <>
+                  <ToggleLeft size={18} className="text-gray-400" />
+                  <span className="text-[9px] font-bold text-gray-400 uppercase">Inativa</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -219,37 +211,17 @@ export default function UserDetailsDrawer({
       {/* RBAC details */}
       <div className="flex flex-col gap-2.5">
         <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider border-b border-gray-50 pb-1">
-          Papéis & Permissões (RBAC)
+          Papéis / Roles (RBAC)
         </span>
-        <div className="flex flex-col gap-2">
-          {/* Roles list */}
-          <div className="flex flex-wrap gap-1">
-            {user.roles.map((role) => (
+        <div className="flex flex-wrap gap-1">
+          {user.roles && user.roles.length > 0 ? (
+            user.roles.map((role) => (
               <span key={role} className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 text-[8px] font-bold uppercase rounded-sm">
                 {role}
               </span>
-            ))}
-            {user.is_staff && (
-              <span className="px-2 py-0.5 bg-purple-50 text-purple-600 border border-purple-100 text-[8px] font-bold uppercase rounded-sm">
-                STAFF
-              </span>
-            )}
-          </div>
-          {/* Permissions list */}
-          {user.permissions.length > 0 ? (
-            <div className="mt-1 flex flex-col gap-1 max-h-32 overflow-y-auto bg-gray-50 p-2 rounded-sm border border-gray-100">
-              <span className="text-[8px] text-gray-400 font-bold uppercase block mb-1">Permissões de Acesso</span>
-              <div className="grid grid-cols-1 gap-1 text-[9px] font-mono text-gray-600">
-                {user.permissions.map((perm) => (
-                  <div key={perm} className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0"></span>
-                    <span>{perm}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))
           ) : (
-            <p className="text-[9px] text-gray-400 italic">Nenhuma permissão específica atribuída.</p>
+            <span className="text-[9px] text-gray-400 italic">Nenhum papel atribuído.</span>
           )}
         </div>
       </div>
