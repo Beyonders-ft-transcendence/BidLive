@@ -13,7 +13,7 @@ export default function Container({ children }: { children: React.ReactNode }) {
                 <Header />
                 
                 {/* Dashboard / Backoffice Page Content */}
-                <div className="flex-1 p-6 md:p-8">
+                <div className="flex-1 p-6 md:p-8 ">
                     {children}
                 </div>
             </div>

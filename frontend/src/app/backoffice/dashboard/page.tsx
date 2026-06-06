@@ -1,17 +1,11 @@
 "use client";
 
 import {
-    Search,
-    TrendingUp,
     Users,
     Gavel,
     Package,
     ArrowUpRight,
     ArrowDownRight,
-    MessageSquare,
-    Settings,
-    HelpCircle,
-    User,
     Star
 } from "lucide-react";
 import {
