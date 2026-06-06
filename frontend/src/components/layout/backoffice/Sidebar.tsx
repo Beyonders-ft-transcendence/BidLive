@@ -4,87 +4,94 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
-    Users,
     Gavel,
-    Tag,
     TrendingUp,
+    Users,
+    Tag,
     AlertCircle,
     Settings,
-    Sun,
-    Moon,
-    HelpCircle,
-    LogOut
+    HelpCircle
 } from "lucide-react";
 
 export default function Sidebar() {
     const pathname = usePathname();
 
-    const items = [
-        { href: "/backoffice/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-        { href: "/backoffice/users", icon: Users, label: "Usuários" },
+    const menuItems = [
+        { href: "/backoffice/dashboard", icon: LayoutDashboard, label: "Painel" },
         { href: "/backoffice/auctions", icon: Gavel, label: "Leilões" },
-        { href: "/backoffice/categories", icon: Tag, label: "Categorias" },
         { href: "/backoffice/bids", icon: TrendingUp, label: "Lances" },
-        { href: "/backoffice/reports", icon: AlertCircle, label: "Denúncias" },
-        { href: "/backoffice/settings", icon: Settings, label: "Configurações" }
+        { href: "/backoffice/users", icon: "Users", label: "Licitantes" },
+        { href: "/backoffice/categories", icon: "Tag", label: "Categorias" },
+        { href: "/backoffice/reports", icon: "AlertCircle", label: "Denúncias" }
     ];
 
+    const getIsActive = (href: string) => {
+        if (href === "/backoffice/dashboard") {
+            return pathname === href || pathname === "/backoffice";
+        }
+        return pathname.startsWith(href);
+    };
+
     return (
-        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-white border-r border-gray-100 flex flex-col justify-between items-center py-6 z-30 select-none">
-            {/* Top: Light/Dark Mode Mock Toggles */}
-            <div className="flex flex-col gap-1.5 items-center">
-                <button className="w-8 h-8 rounded-full flex items-center justify-center text-amber-500 bg-amber-50 shadow-sm transition-all duration-300">
-                    <Sun size={15} strokeWidth={2.5} />
-                </button>
-                <button className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-300">
-                    <Moon size={15} />
-                </button>
+        <aside className="fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-gray-100 flex flex-col justify-between z-30 select-none">
+            <div className="flex flex-col flex-1">
+                {/* Logo Stack similar to mockup */}
+                <div className="flex items-center gap-2.5 px-6 h-16 border-b border-gray-50 shrink-0">
+                    <svg className="h-6 w-6 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                    </svg>
+                    <span className="text-lg font-black tracking-tight text-gray-900">BidLive</span>
+                </div>
+
+                {/* Primary Nav Links */}
+                <nav className="flex flex-col gap-1 px-3 py-6">
+                    {menuItems.map((item) => {
+                        const isActive = getIsActive(item.href);
+                        let Icon;
+                        if (item.icon === "Users") Icon = Users;
+                        else if (item.icon === "Tag") Icon = Tag;
+                        else if (item.icon === "AlertCircle") Icon = AlertCircle;
+                        else Icon = item.icon as any;
+
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                                    isActive
+                                        ? "bg-primary/5 text-primary border-l-4 border-primary pl-3"
+                                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50 pl-4"
+                                }`}
+                            >
+                                <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
             </div>
 
-            {/* Middle: Navigation Icons */}
-            <nav className="flex flex-col gap-3.5 my-auto">
-                {items.map((item) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            title={item.label}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 relative group ${
-                                isActive
-                                    ? "bg-primary text-white shadow-md shadow-primary/25"
-                                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                            }`}
-                        >
-                            <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-                            
-                            {/* Hover tooltip */}
-                            <span className="absolute left-[78px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md z-50">
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </nav>
-
-            {/* Bottom: Support & Signout */}
-            <div className="flex flex-col gap-3.5 items-center">
-                <button className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-300 relative group">
-                    <HelpCircle size={16} />
-                    <span className="absolute left-[78px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md z-50">
-                        Ajuda & Suporte
-                    </span>
-                </button>
+            {/* Bottom Admin Tools */}
+            <div className="flex flex-col gap-1 px-3 py-6 border-t border-gray-50">
                 <Link
-                    href="/signin"
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 relative group"
+                    href="/backoffice/settings"
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                        getIsActive("/backoffice/settings")
+                            ? "bg-primary/5 text-primary border-l-4 border-primary pl-3"
+                            : "text-gray-500 hover:text-gray-900 hover:bg-gray-50 pl-4"
+                    }`}
                 >
-                    <LogOut size={16} />
-                    <span className="absolute left-[78px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md z-50">
-                        Sair
-                    </span>
+                    <Settings size={16} />
+                    Configurações
                 </Link>
+                <button
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-50 pl-4 text-left w-full cursor-pointer"
+                >
+                    <HelpCircle size={16} />
+                    Ajuda
+                </button>
             </div>
         </aside>
     );

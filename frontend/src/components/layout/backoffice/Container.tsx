@@ -8,7 +8,7 @@ export default function Container({ children }: { children: React.ReactNode }) {
             <Sidebar />
             
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 pl-[72px]">
+            <div className="flex-1 flex flex-col min-w-0 pl-60">
                 {/* Top Header */}
                 <Header />
                 
