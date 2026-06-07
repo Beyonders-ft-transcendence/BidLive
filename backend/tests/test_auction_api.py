@@ -1,9 +1,14 @@
+import json
 from datetime import timedelta
 
+import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.auctions.models import AuctionCategory
+from apps.auctions.models import Auction, AuctionCategory, AuctionStatus
+from apps.storage.models import File
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 from apps.users.selectors import invalidate_user_permissions_cache
 
@@ -15,6 +20,266 @@ def _grant_permissions(user, permissions):
         RolePermission.objects.get_or_create(role=role, permission=permission)
     UserRole.objects.get_or_create(user=user, role=role)
     invalidate_user_permissions_cache(user=user)
+
+
+def _auction_client(user, permissions):
+    _grant_permissions(user, permissions)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
+
+
+def _sample_image(name="rolex.webp", content_type="image/webp", content=None):
+    return SimpleUploadedFile(
+        name,
+        content if content is not None else b"fake-image-content",
+        content_type=content_type,
+    )
+
+
+def _valid_create_payload(*, category_id, start_time=None, end_time=None, **overrides):
+    start_time = start_time or (timezone.now() + timedelta(hours=2))
+    end_time = end_time or (start_time + timedelta(hours=2))
+    payload = {
+        "title": "Rolex Daytona",
+        "description": "Platinum ice blue dial",
+        "category_id": category_id,
+        "condition_type": "NEW",
+        "starting_price": "100.00",
+        "minimum_increment": "5.00",
+        "reserve_price": "150.00",
+        "buy_now_price": "300.00",
+        "start_time": start_time.isoformat(),
+        "end_time": end_time.isoformat(),
+        "is_draft": False,
+        "rules": json.dumps({"auto_extend_seconds": 30}),
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _assert_field_error(response, field, expected_fragment):
+    assert response.status_code == 400
+    assert response.data["success"] is False
+    errors = response.data["errors"][0]
+    assert field in errors
+    assert expected_fragment in str(errors[field][0])
+
+
+def test_auction_create_with_all_parameters(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Watches", slug="watches")
+    client = _auction_client(user, ["auction.create", "auction.read"])
+    image = _sample_image()
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": image,
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201
+    data = response.data["data"]
+    item = data["item"]
+
+    assert data["status"] == "SCHEDULED"
+    assert item["title"] == "Rolex Daytona"
+    assert item["description"] == "Platinum ice blue dial"
+    assert item["category"]["id"] == category.id
+    assert item["condition_type"] == "NEW"
+    assert item["starting_price"] == "100.00"
+    assert item["minimum_increment"] == "5.00"
+    assert item["reserve_price"] == "150.00"
+    assert item["buy_now_price"] == "300.00"
+    assert data["rules"] == {"auto_extend_seconds": 30}
+    assert len(item["images"]) == 1
+    assert item["images"][0]["is_primary"] is True
+    assert item["images"][0]["file"]["mime_type"] == "image/webp"
+    assert File.objects.filter(uploader=user, original_name="rolex.webp").exists()
+
+
+def test_auction_create_with_image_upload(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Collectibles", slug="collectibles")
+    client = _auction_client(user, ["auction.create", "auction.read"])
+    primary = _sample_image("primary.webp")
+    secondary = _sample_image("secondary.png", content_type="image/png")
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": [primary, secondary],
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201
+    images = response.data["data"]["item"]["images"]
+    assert len(images) == 2
+    assert images[0]["is_primary"] is True
+    assert images[1]["is_primary"] is False
+    assert images[0]["sort_order"] == 0
+    assert images[1]["sort_order"] == 1
+    assert File.objects.filter(uploader=user).count() == 2
+
+
+def test_auction_create_draft_publish_and_delete_flow(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Drafts", slug="drafts")
+    client = _auction_client(user, ["auction.create", "auction.read", "auction.update"])
+
+    start_time = timezone.now() + timedelta(hours=3)
+    end_time = start_time + timedelta(hours=2)
+
+    create_response = client.post(
+        "/api/auctions/",
+        _valid_create_payload(
+            category_id=category.id,
+            start_time=start_time,
+            end_time=end_time,
+            is_draft=True,
+            rules=json.dumps({"visibility": "seller_only"}),
+        ),
+        format="multipart",
+    )
+
+    assert create_response.status_code == 201
+    auction_id = create_response.data["data"]["id"]
+    assert create_response.data["data"]["status"] == "DRAFT"
+    assert create_response.data["data"]["rules"] == {"visibility": "seller_only"}
+
+    delete_response = client.delete(f"/api/auctions/{auction_id}/")
+    assert delete_response.status_code == 204
+    assert not Auction.objects.filter(pk=auction_id).exists()
+
+    republish_response = client.post(
+        "/api/auctions/",
+        _valid_create_payload(
+            category_id=category.id,
+            start_time=start_time,
+            end_time=end_time,
+            is_draft=True,
+        ),
+        format="multipart",
+    )
+    published_id = republish_response.data["data"]["id"]
+
+    publish_response = client.patch(
+        f"/api/auctions/{published_id}/",
+        {"publish": True},
+        format="multipart",
+    )
+
+    assert publish_response.status_code == 200
+    assert publish_response.data["data"]["status"] == "SCHEDULED"
+
+
+def test_auction_create_reserve_price_persists(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Reserve", slug="reserve")
+    client = _auction_client(user, ["auction.create", "auction.read"])
+
+    response = client.post(
+        "/api/auctions/",
+        _valid_create_payload(category_id=category.id, reserve_price="250.00"),
+        format="multipart",
+    )
+
+    assert response.status_code == 201
+    assert response.data["data"]["item"]["reserve_price"] == "250.00"
+    assert response.data["data"]["reserve_met"] is False
+
+
+@pytest.mark.parametrize(
+    ("override", "field", "message"),
+    [
+        ({"starting_price": "-1.00"}, "starting_price", "Starting price must be >= 0."),
+        ({"minimum_increment": "0.00"}, "minimum_increment", "Minimum increment must be > 0."),
+        ({"buy_now_price": "50.00"}, "buy_now_price", "Buy now must be >= starting price."),
+        ({"reserve_price": "25.00"}, "reserve_price", "Reserve price must be >= starting price."),
+        ({"condition_type": "INVALID"}, "condition_type", "is not a valid choice"),
+        ({"category_id": 999999}, "category_id", "Invalid pk"),
+    ],
+)
+def test_auction_create_rejects_invalid_fields(db, user, override, field, message):
+    category, _ = AuctionCategory.objects.get_or_create(name="Validation", slug="validation")
+    client = _auction_client(user, ["auction.create"])
+
+    payload = _valid_create_payload(category_id=category.id)
+    payload.update(override)
+    response = client.post("/api/auctions/", payload, format="multipart")
+
+    _assert_field_error(response, field, message)
+
+
+def test_auction_create_rejects_end_time_before_start_time(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Dates", slug="dates")
+    client = _auction_client(user, ["auction.create"])
+    start_time = timezone.now() + timedelta(hours=2)
+
+    response = client.post(
+        "/api/auctions/",
+        _valid_create_payload(
+            category_id=category.id,
+            start_time=start_time,
+            end_time=start_time,
+        ),
+        format="multipart",
+    )
+
+    _assert_field_error(response, "end_time", "End time must be after start time.")
+
+
+def test_auction_create_rejects_string_images_in_json_body(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="ImagesJson", slug="images-json")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "rules": {"note": "valid json"},
+            "images": ["https://example.com/image.webp"],
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert response.data["success"] is False
+    assert "images" in response.data["errors"][0]
+
+
+def test_auction_create_rejects_unsupported_image_type(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Mime", slug="mime")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": _sample_image("document.pdf", content_type="application/pdf"),
+        },
+        format="multipart",
+    )
+
+    _assert_field_error(response, "images", "Unsupported image type.")
+
+
+@override_settings(AUCTION_IMAGE_MAX_SIZE=8)
+def test_auction_create_rejects_oversized_image(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Size", slug="size")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": _sample_image(content=b"0123456789"),
+        },
+        format="multipart",
+    )
+
+    _assert_field_error(response, "images", "Image too large.")
 
 
 def test_auction_create_update_cancel_flow(db, user):
@@ -161,3 +426,25 @@ def test_category_list_requires_permission(db, user):
     response = client.get("/api/categories/")
     assert response.status_code == 200
     assert len(response.data["data"]) >= 1
+
+
+def test_draft_auction_is_hidden_from_other_users(db, user, other_user):
+    category, _ = AuctionCategory.objects.get_or_create(name="Hidden", slug="hidden")
+    seller_client = _auction_client(user, ["auction.create", "auction.read"])
+    other_client = _auction_client(other_user, ["auction.read"])
+
+    create_response = seller_client.post(
+        "/api/auctions/",
+        _valid_create_payload(category_id=category.id, is_draft=True),
+        format="multipart",
+    )
+    auction_id = create_response.data["data"]["id"]
+
+    seller_list = seller_client.get("/api/auctions/")
+    other_list = other_client.get("/api/auctions/")
+
+    seller_ids = {item["id"] for item in seller_list.data["data"]["results"]}
+    other_ids = {item["id"] for item in other_list.data["data"]["results"]}
+
+    assert auction_id in seller_ids
+    assert auction_id not in other_ids
