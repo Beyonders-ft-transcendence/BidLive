@@ -22,6 +22,7 @@ from apps.notifications.models import Notification
 from apps.reports.models import Report, ReportReason, ReportStatus, ReportTargetType
 from apps.social.models import Friendship, FriendshipStatus
 from apps.storage.models import File
+from apps.storage.services import save_external_file_url
 from apps.users.models import User
 from apps.users.seed.demo_data import (
     DEMO_ANALYTICS_EVENTS,
@@ -121,17 +122,9 @@ def _seed_users(*, password: str) -> dict[str, User]:
 def _attach_images(*, item: AuctionItem, uploader: User, image_urls: tuple[str, ...]) -> None:
     AuctionImage.objects.filter(item=item).delete()
     for index, image_url in enumerate(image_urls):
-        file_name = image_url.rsplit("/", 1)[-1].split("?")[0] or f"image-{index + 1}.jpg"
-        file_obj, _ = File.objects.get_or_create(
-            uploader=uploader,
-            url=image_url,
-            defaults={
-                "file_name": file_name,
-                "original_name": file_name,
-                "mime_type": "image/jpeg",
-                "size": 0,
-            },
-        )
+        file_obj = File.objects.filter(uploader=uploader, url=image_url).first()
+        if file_obj is None:
+            file_obj = save_external_file_url(uploader=uploader, url=image_url)
         AuctionImage.objects.create(
             item=item,
             file=file_obj,

@@ -4,6 +4,7 @@ from apps.auctions.models import LiveStream, StreamViewer
 from apps.auctions.models.streaming import LiveStreamStatus, LiveStreamVisibility
 from apps.auctions.serializers.common import FileBriefSerializer
 from apps.storage.models import File
+from apps.storage.services import is_http_url
 
 
 class StreamViewerSerializer(serializers.ModelSerializer):
@@ -113,6 +114,7 @@ class StreamCreateSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    thumbnail_url = serializers.CharField(required=False, allow_blank=True)
     visibility = serializers.ChoiceField(
         choices=LiveStreamVisibility.choices,
         required=False,
@@ -125,6 +127,11 @@ class StreamCreateSerializer(serializers.Serializer):
     )
     stream_meta = serializers.JSONField(required=False)
 
+    def validate_thumbnail_url(self, value):
+        if value and not is_http_url(value):
+            raise serializers.ValidationError("Thumbnail URL must start with http:// or https://.")
+        return value
+
 
 class StreamUpdateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255, required=False, allow_blank=True)
@@ -135,10 +142,16 @@ class StreamUpdateSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    thumbnail_url = serializers.CharField(required=False, allow_blank=True)
     visibility = serializers.ChoiceField(
         choices=LiveStreamVisibility.choices,
         required=False,
     )
+
+    def validate_thumbnail_url(self, value):
+        if value and not is_http_url(value):
+            raise serializers.ValidationError("Thumbnail URL must start with http:// or https://.")
+        return value
     stream_meta = serializers.JSONField(required=False)
 
 

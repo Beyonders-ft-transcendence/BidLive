@@ -1,7 +1,6 @@
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from django.db import transaction
 from django.db.models import Q
-from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -21,9 +20,18 @@ from apps.auctions.serializers import (
     BidCreateSerializer,
     BidSerializer,
 )
-from apps.auctions.services import buy_now, cancel_auction, create_auction, place_bid, update_auction, watch_auction, unwatch_auction
+from apps.auctions.services import (
+    buy_now,
+    cancel_auction,
+    create_auction,
+    place_bid,
+    unwatch_auction,
+    update_auction,
+    watch_auction,
+)
 from apps.auctions.services.anti_spam_service import BidRateLimitExceeded
 from apps.auctions.throttles import BidIPThrottle, BidUserThrottle
+from apps.storage.media_inputs import collect_auction_image_inputs
 from apps.users.authorization_service import user_has_permission
 from apps.users.permissions.rbac import HasRBACPermission
 from common.responses import error_response, success_response
@@ -119,10 +127,13 @@ class AuctionViewSet(viewsets.GenericViewSet):
     def create(self, request):
         serializer = AuctionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        payload = dict(serializer.validated_data)
+        images, image_urls = collect_auction_image_inputs(request, payload)
         auction = create_auction(
             seller=request.user,
-            data=serializer.validated_data,
-            images=request.FILES.getlist("images"),
+            data=payload,
+            images=images,
+            image_urls=image_urls,
             ip_address=_client_ip(request),
         )
         return success_response(
@@ -141,11 +152,14 @@ class AuctionViewSet(viewsets.GenericViewSet):
         auction = self.get_queryset().get(pk=int(pk))
         serializer = AuctionUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        payload = dict(serializer.validated_data)
+        images, image_urls = collect_auction_image_inputs(request, payload)
         updated = update_auction(
             actor=request.user,
             auction=auction,
-            data=serializer.validated_data,
-            images=request.FILES.getlist("images"),
+            data=payload,
+            images=images,
+            image_urls=image_urls,
             ip_address=_client_ip(request),
         )
         return success_response(AuctionDetailSerializer(updated).data, message="Leilao atualizado.")

@@ -29,6 +29,7 @@ from apps.auctions.services import (
     update_stream,
 )
 from apps.users.permissions.rbac import HasRBACPermission
+from apps.storage.media_inputs import apply_optional_file_reference
 from common.responses import error_response, success_response
 
 
@@ -239,10 +240,18 @@ class StreamViewSet(viewsets.GenericViewSet):
         auction = self.get_auction()
         serializer = StreamCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        stream_data = apply_optional_file_reference(
+            data=serializer.validated_data,
+            uploader=request.user,
+            uploaded_file=request.FILES.get("thumbnail"),
+            url_field="thumbnail_url",
+            target_field="thumbnail",
+            prefix="streams",
+        )
         stream = create_stream(
             actor=request.user,
             auction=auction,
-            data=serializer.validated_data,
+            data=stream_data,
             ip_address=_client_ip(request),
         )
         return success_response(
@@ -268,10 +277,18 @@ class StreamViewSet(viewsets.GenericViewSet):
         stream = self.get_object()
         serializer = StreamUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        stream_data = apply_optional_file_reference(
+            data=serializer.validated_data,
+            uploader=request.user,
+            uploaded_file=request.FILES.get("thumbnail"),
+            url_field="thumbnail_url",
+            target_field="thumbnail",
+            prefix="streams",
+        )
         updated = update_stream(
             actor=request.user,
             stream=stream,
-            data=serializer.validated_data,
+            data=stream_data,
             ip_address=_client_ip(request),
         )
         return success_response(StreamDetailSerializer(updated).data, message="Stream atualizada.")
