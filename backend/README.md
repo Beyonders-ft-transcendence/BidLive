@@ -143,6 +143,33 @@ Login: `POST /api/auth/login/` com `email` e `password`.
 
 > Os emails usam o domínio `@bidlive.dev` para facilitar limpeza (`make seed-clear`). O conteúdo (títulos, descrições, imagens, valores) segue o `mockData.ts`.
 
+## Imagens: upload ou URL externa
+
+Endpoints que aceitam arquivos (ex.: criar/atualizar leilão, thumbnail de stream) suportam **dois modos**:
+
+| Entrada | Comportamento |
+|---------|----------------|
+| Arquivo binário (`images` em `multipart/form-data`) | Upload normal para o storage |
+| URL `http://` ou `https://` | Grava apenas o link em `files.url` (sem upload) |
+
+### Leilões
+
+- **Multipart:** envie arquivos em `images` e/ou URLs em `image_urls`
+- **JSON:** envie URLs em `images` (lista de strings) ou em `image_urls`
+
+```json
+{
+  "title": "Rolex Daytona",
+  "image_urls": ["https://images.unsplash.com/photo-1547996160-81dfa63595aa"]
+}
+```
+
+### Streams
+
+- `thumbnail` — arquivo (multipart)
+- `thumbnail_url` — URL externa
+- `thumbnail_id` — ID de um `File` já existente
+
 ## API docs
 
 - OpenAPI schema (raw JSON/YAML): /api/schema/

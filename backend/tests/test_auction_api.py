@@ -230,7 +230,7 @@ def test_auction_create_rejects_end_time_before_start_time(db, user):
     _assert_field_error(response, "end_time", "End time must be after start time.")
 
 
-def test_auction_create_rejects_string_images_in_json_body(db, user):
+def test_auction_create_accepts_image_urls_in_json_body(db, user):
     category, _ = AuctionCategory.objects.get_or_create(name="ImagesJson", slug="images-json")
     client = _auction_client(user, ["auction.create"])
 
@@ -244,9 +244,67 @@ def test_auction_create_rejects_string_images_in_json_body(db, user):
         format="json",
     )
 
-    assert response.status_code == 400
-    assert response.data["success"] is False
-    assert "images" in response.data["errors"][0]
+    assert response.status_code == 201
+    images = response.data["data"]["item"]["images"]
+    assert len(images) == 1
+    assert images[0]["file"]["url"] == "https://example.com/image.webp"
+
+
+def test_auction_create_accepts_image_urls_field(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="ImageUrls", slug="image-urls")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "image_urls": [
+                "https://example.com/one.webp",
+                "https://example.com/two.webp",
+            ],
+        },
+        format="json",
+    )
+
+    assert response.status_code == 201
+    assert len(response.data["data"]["item"]["images"]) == 2
+
+
+def test_auction_create_rejects_invalid_image_string_in_json_body(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="BadImages", slug="bad-images")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": ["not-a-valid-url"],
+        },
+        format="json",
+    )
+
+    _assert_field_error(response, "images", "http://")
+
+
+def test_auction_create_supports_mixed_upload_and_urls(db, user):
+    category, _ = AuctionCategory.objects.get_or_create(name="MixedImages", slug="mixed-images")
+    client = _auction_client(user, ["auction.create"])
+
+    response = client.post(
+        "/api/auctions/",
+        {
+            **_valid_create_payload(category_id=category.id),
+            "images": _sample_image("uploaded.webp"),
+            "image_urls": ["https://example.com/external.webp"],
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201
+    images = response.data["data"]["item"]["images"]
+    assert len(images) == 2
+    urls = {image["file"]["url"] for image in images}
+    assert "https://example.com/external.webp" in urls
 
 
 def test_auction_create_rejects_unsupported_image_type(db, user):

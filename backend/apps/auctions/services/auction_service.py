@@ -128,8 +128,9 @@ def _publish_snapshot(*, auction: Auction, broadcast: bool = False) -> None:
 
 
 @transaction.atomic
-def create_auction(*, seller, data: dict, images=None, ip_address: str = "") -> Auction:
+def create_auction(*, seller, data: dict, images=None, image_urls=None, ip_address: str = "") -> Auction:
     images = images or []
+    image_urls = image_urls or []
     item = AuctionItem.objects.create(
         seller=seller,
         title=data["title"],
@@ -158,7 +159,7 @@ def create_auction(*, seller, data: dict, images=None, ip_address: str = "") -> 
         started_at=now if status == AuctionStatus.LIVE else None,
     )
 
-    attach_images(item=item, uploader=seller, images=images)
+    attach_images(item=item, uploader=seller, images=images, image_urls=image_urls)
 
     AuctionAuditLog.objects.create(
         auction=auction,
@@ -191,7 +192,15 @@ def create_auction(*, seller, data: dict, images=None, ip_address: str = "") -> 
 
 
 @transaction.atomic
-def update_auction(*, actor, auction: Auction, data: dict, images=None, ip_address: str = "") -> Auction:
+def update_auction(
+    *,
+    actor,
+    auction: Auction,
+    data: dict,
+    images=None,
+    image_urls=None,
+    ip_address: str = "",
+) -> Auction:
     _ensure_owner_or_manager(user=actor, auction=auction)
     if auction.status not in (AuctionStatus.DRAFT, AuctionStatus.SCHEDULED):
         raise ValidationError({"status": ["Auction cannot be edited after it starts."]})
@@ -235,8 +244,9 @@ def update_auction(*, actor, auction: Auction, data: dict, images=None, ip_addre
     auction.save()
 
     images = images or []
-    if images:
-        attach_images(item=item, uploader=actor, images=images)
+    image_urls = image_urls or []
+    if images or image_urls:
+        attach_images(item=item, uploader=actor, images=images, image_urls=image_urls)
     if "primary_image_id" in data:
         set_primary_image(item=item, image_id=data["primary_image_id"])
 
