@@ -132,12 +132,12 @@ Horários (`startTime`, `endTime`, lances, mensagens) são calculados relativos 
 
 Senha padrão: `demo1234`
 
-| Email | Papel mock | Backend |
-|-------|------------|---------|
-| `admin@bidlive.dev` | ADMIN / u-current | SUPER_ADMIN |
-| `seller@bidlive.dev` | USER / u-2 (Ana Silva) | USER |
-| `manager@bidlive.dev` | MANAGER / u-3 (Carlos) | MONITOR |
-| `banned@bidlive.dev` | USER / u-4 (Beatriz) | USER (BANNED) |
+| Email | Papel mock | Backend | Password |
+|-------|------------|---------|---------|
+| `admin@bidlive.dev` | ADMIN / u-current | SUPER_ADMIN | demo1234 |
+| `seller@bidlive.dev` | USER / u-2 (Ana Silva) | USER | demo1234 |
+| `manager@bidlive.dev` | MANAGER / u-3 (Carlos) | MONITOR | demo1234 |
+| `banned@bidlive.dev` | USER / u-4 (Beatriz) | USER (BANNED) | demo1234 |
 
 Login: `POST /api/auth/login/` com `email` e `password`.
 
