@@ -1,14 +1,9 @@
 from rest_framework import serializers
 
 from apps.auctions.models import Auction, AuctionCategory, AuctionImage, AuctionItem
+from apps.auctions.serializers.category_serializers import AuctionCategorySerializer
 from apps.auctions.serializers.common import FileBriefSerializer
 from apps.storage.models import File
-
-
-class AuctionCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AuctionCategory
-        fields = ("id", "name", "slug", "description", "parent", "is_active", "sort_order")
 
 
 class AuctionImageSerializer(serializers.ModelSerializer):
