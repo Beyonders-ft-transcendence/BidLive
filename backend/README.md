@@ -37,10 +37,11 @@ uv venv
 uv sync
 ```
 
-3) Execute as migrações e inicie o servidor.
+3) Execute as migrações, popule dados demo e inicie o servidor.
 
 ```bash
 uv run python manage.py migrate
+make seed
 uv run python manage.py runserver
 ```
 
@@ -88,11 +89,59 @@ docker run -d --name livekit \
 uv sync
 uv run python manage.py makemigrations
 uv run python manage.py migrate
+make seed
 uv run python manage.py runserver 0.0.0.0:8000
 uv run pytest -q
 uv run celery -A config worker -l info
 uv run celery -A config beat -l info
 ```
+
+## Seed demo (`make seed`)
+
+Comando para popular o banco com dados de desenvolvimento alinhados ao `frontend/src/data/mockData.ts`. Útil para conectar o frontend à API real sem depender de mocks locais.
+
+```bash
+make seed          # cria dados demo (idempotente)
+make seed-clear    # remove todos os registros @bidlive.dev
+```
+
+Opções extras:
+
+```bash
+uv run python manage.py seed --force              # recria tudo do zero
+uv run python manage.py seed --password minha123  # senha customizada
+```
+
+### O que é criado
+
+| Recurso | Origem no mock | Quantidade |
+|---------|----------------|------------|
+| Usuários | `INITIAL_USERS` + `CURRENT_LOCAL_USER` | 4 |
+| Leilões | `INITIAL_AUCTIONS` (auc-1 .. auc-5) | 5 |
+| Lances | `INITIAL_BIDS` + histórico dos leilões | vários |
+| Streams | `INITIAL_STREAMS` (str-1, str-2) | 2 LIVE |
+| Mensagens de chat | `INITIAL_MESSAGES` | 3 |
+| Notificações | `INITIAL_NOTIFICATIONS` | 3 |
+| Reports | `INITIAL_REPORTS` | 1 |
+| Eventos analytics | `INITIAL_SYSTEM_LOGS` | 3 |
+| Domínios / amizades | extras para navegação | 2 / 3 |
+
+Horários (`startTime`, `endTime`, lances, mensagens) são calculados relativos a `timezone.now()`, igual ao `getDateOffset()` do frontend.
+
+### Contas demo
+
+Senha padrão: `demo1234`
+
+| Email | Papel mock | Backend |
+|-------|------------|---------|
+| `admin@bidlive.dev` | ADMIN / u-current | SUPER_ADMIN |
+| `seller@bidlive.dev` | USER / u-2 (Ana Silva) | USER |
+| `manager@bidlive.dev` | MANAGER / u-3 (Carlos) | MONITOR |
+| `banned@bidlive.dev` | USER / u-4 (Beatriz) | USER (BANNED) |
+
+Login: `POST /api/auth/login/` com `email` e `password`.
+
+> Os emails usam o domínio `@bidlive.dev` para facilitar limpeza (`make seed-clear`). O conteúdo (títulos, descrições, imagens, valores) segue o `mockData.ts`.
 
 ## API docs
 

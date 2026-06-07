@@ -1,6 +1,6 @@
 UV=uv
 
-.PHONY: uv-sync dev runserver lint format test migrate makemigrations superuser worker beat
+.PHONY: uv-sync dev runserver lint format test migrate makemigrations superuser worker beat seed seed-clear
 
 uv-sync:
 	$(UV) sync
@@ -35,6 +35,12 @@ worker:
 
 beat:
 	$(UV) run celery -A config beat -l info
+
+seed:
+	$(UV) run python manage.py seed
+
+seed-clear:
+	$(UV) run python manage.py seed --clear
 
 ngrok:
 	docker run --net=host -it -e NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN ngrok/ngrok:latest http --url=giovani-tippiest-overapprehensively.ngrok-free.dev 8000
