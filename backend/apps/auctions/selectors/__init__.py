@@ -15,10 +15,11 @@ from apps.auctions.selectors.stream_selectors import (
     list_streams_for_auction,
     list_viewers_for_stream,
 )
-from apps.auctions.selectors.category_selectors import list_categories
+from apps.auctions.selectors.category_selectors import get_category_by_id, list_categories
 
 __all__ = [
     "list_categories",
+    "get_category_by_id",
     "list_auctions",
     "get_auction_by_id",
     "get_auction_for_update",

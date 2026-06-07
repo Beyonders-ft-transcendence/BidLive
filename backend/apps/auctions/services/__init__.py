@@ -1,3 +1,4 @@
+from apps.auctions.services.category_service import create_category, delete_category, update_category
 from apps.auctions.services.auction_service import (
     activate_auction,
     activate_auction_by_id,
@@ -80,6 +81,9 @@ from apps.auctions.services.room_service import (
 from apps.auctions.services.token_service import issue_livekit_stream_token
 
 __all__ = [
+    "create_category",
+    "update_category",
+    "delete_category",
     "activate_auction",
     "activate_auction_by_id",
     "buy_now",
