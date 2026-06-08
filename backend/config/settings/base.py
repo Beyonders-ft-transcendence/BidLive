@@ -7,7 +7,10 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 env = environ.Env(
     DEBUG=(bool, False),
-    DATABASE_CONN_MAX_AGE=(int, 60),
+    # CONN_MAX_AGE=0 is required for ASGI (uvicorn) to avoid connection pool exhaustion.
+    # With CONN_MAX_AGE > 0, each thread in the ASGI ThreadPoolExecutor keeps an idle
+    # connection alive, quickly hitting PostgreSQL's max_connections limit.
+    DATABASE_CONN_MAX_AGE=(int, 0),
     DATABASE_ATOMIC_REQUESTS=(bool, True),
 )
 
@@ -96,6 +99,8 @@ DATABASES = {
 }
 DATABASES["default"]["CONN_MAX_AGE"] = env("DATABASE_CONN_MAX_AGE")
 DATABASES["default"]["ATOMIC_REQUESTS"] = env("DATABASE_ATOMIC_REQUESTS")
+# Detect and discard stale persistent connections before reuse.
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
