@@ -135,7 +135,7 @@ export default function LiveAuctionsSection() {
             Leilões Ao Vivo Agora
           </span>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0C1B33] text-center leading-tight tracking-tight">
-            Destaques da Plataforma em Tempo Real
+            Leilões ao Vivo
           </h2>
           <p className="text-sm text-gray-500 text-center max-w-lg mt-4 leading-relaxed">
             Acompanhe a atividade das ofertas, veja o relógio correr e dê seu lance antes que o martelo bata.
@@ -153,7 +153,7 @@ export default function LiveAuctionsSection() {
               return (
                 <div
                   key={auc.id}
-                  className="group relative overflow-hidden aspect-[4/3] rounded-sm border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
+                  className="group relative overflow-hidden aspect-4/3 rounded-sm border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
                 >
                   {/* Full Background Image */}
                   <img
