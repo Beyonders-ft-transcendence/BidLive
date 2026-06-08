@@ -3,6 +3,7 @@ import {
   Play,
   ArrowRight,
 } from "lucide-react";
+import heroImage from "@/assets/images/hero_bg.png"
 
 export default function Hero() {
   return (
@@ -10,14 +11,14 @@ export default function Hero() {
       {/* Fundo dividido */}
       <div className="absolute inset-0 flex">
         {/* Lado Azul */}
-        <div className="w-1/2 bg-[#102A83]" />
+        <div className="w-2/5 bg-[#0C263A]" />
 
         {/* Lado Imagem */}
         <div
-          className="w-1/2 bg-cover bg-center"
+          className="w-3/5 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1600')",
+              `url(${heroImage.src})`,
           }}
         />
       </div>
@@ -27,32 +28,20 @@ export default function Hero() {
         <div className="flex items-center h-full">
           
           {/* Card Branco */}
-          <div className="bg-white shadow-2xl max-w-xl p-12 lg:p-16">
-            
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-[#F5B321] mb-5">
-              <span className="w-2 h-2 rounded-full bg-[#F5B321]" />
-              Plataforma de Leilões Online
-            </span>
+          <div className="bg-white shadow-2xl max-w-xl p-8 lg:p-12 rounded-lg">
 
-            <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-[#102A83]">
-              Encontre
-              <br />
-              Grandes
-              <br />
-              Oportunidades
-              <br />
-              Em Leilões
+            <h1 className="text-3xl lg:text-4xl font-semibold leading-tight text-[#0C263A]">
+              Encontre Oportunidades Exclusivas e Participe dos Melhores Leilões Online em Tempo Real
             </h1>
 
             <p className="mt-6 text-gray-500 leading-relaxed max-w-md">
-              Descubra imóveis, veículos, equipamentos e muito mais
-              através da nossa plataforma moderna de leilões digitais.
+              Participe de leilões online em tempo real e tenha acesso a imóveis, veículos, equipamentos, eletrônicos e muito mais. Faça lances, acompanhe disputas ao vivo e conquiste os melhores negócios em uma plataforma segura e transparente.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-6">
               
               {/* Botão principal */}
-              <button className="bg-[#F5B321] hover:bg-[#e4a71d] transition-all rounded-full px-8 py-4 text-sm font-semibold text-black flex items-center gap-2">
+              <button className="bg-primary hover:bg-primary-light transition-all rounded-full px-8 py-4 text-sm font-semibold text-white flex items-center gap-2 shadow-md shadow-blue-500/20">
                 Explorar Leilões
                 <ArrowRight size={18} />
               </button>
@@ -62,7 +51,7 @@ export default function Hero() {
                 <div className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:shadow-md transition-all">
                   <Play
                     size={16}
-                    className="fill-[#F5B321] text-[#F5B321] ml-0.5"
+                    className="fill-primary text-primary ml-0.5"
                   />
                 </div>
 

@@ -4,6 +4,7 @@ import {
   Clock3,
 } from "lucide-react";
 
+
 export default function AboutSection() {
   return (
     <section className="py-28 bg-white">
