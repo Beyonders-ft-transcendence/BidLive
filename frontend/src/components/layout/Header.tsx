@@ -1,89 +1,80 @@
+// components/layout/Header.tsx
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
-
+import { Phone, User, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import icon from "@/assets/images/icon.png";
-import Button from "@/components/common/Button";
 
 const menuItems = [
   { label: "Home", href: "#" },
+  { label: "Sobre", href: "#" },
+  {
+    label: "Categorias",
+    href: "#",
+    dropdown: ["Imóveis", "Veículos", "Eletrônicos", "Equipamentos"],
+  },
   { label: "Leilões", href: "#" },
-  { label: "Como Funciona", href: "#" },
-  { label: "Categorias", href: "#" },
+  { label: "Blog", href: "#" },
   { label: "Contato", href: "#" },
 ];
 
 export default function Header() {
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
   return (
     <header className="absolute top-0 left-0 w-full z-50 font-sans antialiased">
       <div className="w-full bg-white shadow-sm">
-        
-        {/* THIN TOP BAR - Contact Info */}
-        {/* <div className="hidden lg:flex items-center justify-between px-6 lg:px-12 py-2 bg-[#F3F4F6] border-b border-gray-200 text-xs">
-          <div className="flex items-center gap-6 text-gray-500">
-            <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
-              <MapPin size={14} className="text-primary" />
-              <span>Luanda, Angola</span>
-            </div>
-            <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
-              <Phone size={14} className="text-primary" />
-              <span>+244 900 000 000</span>
-            </div>
-            <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-default">
-              <Mail size={14} className="text-primary" />
-              <span>suporte@bidlive.ao</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-gray-500">
-            <Link href="/ajuda" className="hover:text-primary transition-colors">Ajuda e Suporte</Link>
-            <span className="w-px h-3 bg-gray-300"></span>
-            <Link href="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link>
-          </div>
-        </div> */}
-
-        {/* MAIN NAVIGATION BAR */}
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-6 lg:px-12 h-20">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-6 lg:px-12 h-[68px]">
           
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
-            <Image
-              src={icon}
-              alt="BidLive"
-              width={140}
-              height={50}
-              priority
-              className="object-contain"
-            />
+            <Image src={icon} alt="BidLive" width={130} height={44} priority className="object-contain" />
           </Link>
 
-          {/* Menu Items */}
-          <nav className="hidden lg:flex items-center gap-8 ml-8">
+          {/* Nav */}
+          <nav className="hidden lg:flex items-center gap-7">
             {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-sm font-semibold text-gray-600 hover:text-primary transition-colors"
-              >
-                {item.label}
-              </Link>
+              <div key={item.label} className="relative">
+                {item.dropdown ? (
+                  <button
+                    onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
+                    className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+                  >
+                    {item.label}
+                    <ChevronDown size={14} className="text-gray-400" />
+                  </button>
+                ) : (
+                  <Link href={item.href} className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+                    {item.label}
+                  </Link>
+                )}
+
+                {item.dropdown && openDropdown === item.label && (
+                  <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                    {item.dropdown.map((sub) => (
+                      <Link key={sub} href="#" className="block px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-orange-50 transition-colors">
+                        {sub}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
-          {/* Auth Actions */}
-          <div className="flex items-center gap-3 ml-auto shrink-0">
+          {/* Actions */}
+          <div className="flex items-center gap-3 shrink-0">
             <Link href="/signin" className="hidden sm:block">
-              <Button variant="outline" size="md" className="font-semibold px-6 border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-primary">
+              <button className="px-5 py-2.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-primary transition-colors">
                 Entrar
-              </Button>
+              </button>
             </Link>
             <Link href="/signup">
-              <Button variant="primary" size="md" className="font-semibold px-6 shadow-md shadow-blue-500/10">
+              <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors">
+                <User size={15} />
                 Criar Conta
-              </Button>
+              </button>
             </Link>
           </div>
 
