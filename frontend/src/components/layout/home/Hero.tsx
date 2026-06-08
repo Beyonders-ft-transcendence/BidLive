@@ -50,7 +50,7 @@ export default function Hero() {
   const slide = slides[current];
 
   return (
-    <section className="relative h-[520px] lg:h-[600px] overflow-hidden">
+    <section className="relative mt-4 h-[520px] lg:h-[600px] max-w-7xl mx-auto rounded-xl overflow-hidden">
       
       {/* Background */}
       <div className="absolute inset-0">
@@ -65,7 +65,7 @@ export default function Hero() {
       </div>
 
       {/* Hero Card */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[720px] px-6 lg:px-0">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-[720px] px-6 lg:px-0 z-10">
         <div
           className={`bg-white rounded-xl shadow-2xl px-8 lg:px-10 py-8 lg:py-9 flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center transition-opacity duration-300 ${
             animating ? "opacity-0" : "opacity-100"
