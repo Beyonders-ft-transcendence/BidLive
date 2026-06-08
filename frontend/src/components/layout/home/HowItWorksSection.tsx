@@ -99,10 +99,10 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid lg:grid-cols-[380px_1fr] gap-4 items-stretch">
+        <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-0 items-stretch w-full">
 
           {/* Left — Steps List */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 w-full lg:w-[380px] xl:w-[400px] shrink-0">
             {steps.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === active;
@@ -142,7 +142,7 @@ export default function HowItWorksSection() {
           </div>
 
           {/* Right — Detail Card */}
-          <div className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px]">
+          <div className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px] w-full lg:w-[580px] xl:w-[740px] shrink-0">
 
             {/* Illustration panel */}
             <div className="lg:w-[220px] w-full h-48 lg:h-auto bg-primary/5 flex-shrink-0 flex items-center justify-center">
