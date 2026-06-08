@@ -1,0 +1,203 @@
+// components/layout/home/HowItWorksSection.tsx
+"use client";
+import { useState } from "react";
+import {
+  UserPlus,
+  Search,
+  Gavel,
+  Trophy,
+  PackageCheck,
+  CheckCircle2,
+} from "lucide-react";
+
+const steps = [
+  {
+    icon: UserPlus,
+    label: "Crie Sua Conta Grátis",
+    badge: "Passo 01",
+    title: "Cadastro Rápido e Gratuito",
+    description:
+      "Registre-se em menos de 2 minutos, sem taxas ou burocracia. Preencha seus dados, valide seu e-mail e já estará pronto para participar dos leilões.",
+    features: [
+      "Cadastro 100% gratuito",
+      "Verificação instantânea por e-mail",
+      "Dados protegidos com criptografia",
+    ],
+  },
+  {
+    icon: Search,
+    label: "Explore os Lotes Disponíveis",
+    badge: "Passo 02",
+    title: "Encontre as Melhores Oportunidades",
+    description:
+      "Navegue por centenas de lotes ativos: imóveis, veículos, eletrônicos e muito mais. Use filtros avançados para encontrar exatamente o que procura.",
+    features: [
+      "Busca por categoria e localização",
+      "Fotos e laudos de cada lote",
+      "Alertas de novos leilões",
+    ],
+  },
+  {
+    icon: Gavel,
+    label: "Dê Seu Lance em Tempo Real",
+    badge: "Passo 03",
+    title: "Lance ao Vivo com Segurança",
+    description:
+      "Acompanhe o pregão ao vivo, faça seus lances com um clique e receba notificações instantâneas. A plataforma garante total transparência em cada disputa.",
+    features: [
+      "Lances em tempo real",
+      "Notificações imediatas de superação",
+      "Histórico completo de lances",
+    ],
+  },
+  {
+    icon: Trophy,
+    label: "Arremate e Finalize",
+    badge: "Passo 04",
+    title: "Arremate o Lote e Finalize a Compra",
+    description:
+      "Venceu o leilão? Parabéns! Nossa equipe entra em contato para orientar todos os trâmites de pagamento e transferência do bem com segurança jurídica.",
+    features: [
+      "Contato imediato pós-arrematação",
+      "Pagamento via PIX, boleto ou cartão",
+      "Suporte jurídico e documental",
+    ],
+  },
+  {
+    icon: PackageCheck,
+    label: "Retire ou Receba Seu Bem",
+    badge: "Passo 05",
+    title: "Receba ou Retire Seu Bem com Facilidade",
+    description:
+      "Após quitado, o bem pode ser retirado no local ou, em casos elegíveis, entregue no endereço indicado. Simples, seguro e transparente do início ao fim.",
+    features: [
+      "Opção de retirada ou entrega",
+      "Agendamento online",
+      "Acompanhamento em tempo real",
+    ],
+  },
+];
+
+export default function HowItWorksSection() {
+  const [active, setActive] = useState(1);
+
+  const step = steps[active];
+  const StepDetailIcon = step.icon;
+
+  return (
+    <section className="py-24 bg-[#F4F5F7]">
+      <div className="max-w-7xl mx-auto px-6">
+
+        {/* Header */}
+        <div className="flex flex-col items-center mb-12">
+          <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-4 py-1.5 rounded-full border border-primary/20 mb-5">
+            Como Funciona
+          </span>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0C1B33] text-center leading-tight tracking-tight">
+            Participe de Leilões em<br />Apenas Alguns Passos
+          </h2>
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid lg:grid-cols-[380px_1fr] gap-4 items-stretch">
+
+          {/* Left — Steps List */}
+          <div className="flex flex-col gap-3">
+            {steps.map((s, i) => {
+              const Icon = s.icon;
+              const isActive = i === active;
+              return (
+                <button
+                  key={s.badge}
+                  onClick={() => setActive(i)}
+                  className={`flex items-center gap-4 px-5 py-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
+                    isActive
+                      ? "bg-primary border-primary shadow-lg shadow-primary/20"
+                      : "bg-white border-gray-100 hover:border-primary/30"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                      isActive
+                        ? "bg-white/20"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    <Icon
+                      size={19}
+                      className={isActive ? "text-white" : "text-gray-400"}
+                      strokeWidth={2.2}
+                    />
+                  </div>
+                  <span
+                    className={`text-sm font-bold transition-colors duration-200 ${
+                      isActive ? "text-white" : "text-[#0C1B33]"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right — Detail Card */}
+          <div className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px]">
+
+            {/* Illustration panel */}
+            <div className="lg:w-[220px] w-full h-48 lg:h-auto bg-primary/5 flex-shrink-0 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <StepDetailIcon size={36} className="text-primary" strokeWidth={1.5} />
+                </div>
+                <span className="text-[11px] font-bold tracking-[1.4px] uppercase text-primary/60">
+                  {step.badge}
+                </span>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex flex-col gap-4 p-7 lg:p-9 flex-1">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-1.5 w-fit">
+                <span className="text-[11px] font-extrabold tracking-[1.2px] uppercase text-primary">
+                  {step.badge}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33] leading-snug tracking-tight">
+                {step.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-sm text-gray-500 leading-relaxed">
+                {step.description}
+              </p>
+
+              {/* Features */}
+              <ul className="flex flex-col gap-2.5 mt-1">
+                {step.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-sm font-semibold text-[#0C1B33]">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <button className="self-start mt-auto bg-primary hover:bg-primary/90 text-white text-[11px] font-bold tracking-[1.2px] uppercase px-6 py-3.5 rounded-lg transition-colors">
+                Saiba Mais
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
