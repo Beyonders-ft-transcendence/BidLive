@@ -8,9 +8,9 @@ import Modal from "@/components/common/Modal";
 import ConfirmModal from "@/components/common/ConfirmModal";
 import { useAuthStore } from "@/store/auth.store";
 import auctionService from "@/services/auction.service";
-import { 
+import {
   ItemCondition, AuctionStatus,
-  type Auction, type AuctionCategory, type Bid 
+  type Auction, type AuctionCategory, type Bid
 } from "@/types/auction.types";
 import {
   Eye, Edit3, Ban, BarChart3, Trash2,
@@ -20,7 +20,7 @@ import {
 
 export default function MeusLeiloes() {
   const user = useAuthStore((state) => state.user);
-  
+
   // Data State
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [categories, setCategories] = useState<AuctionCategory[]>([]);
@@ -40,10 +40,10 @@ export default function MeusLeiloes() {
   const [loadingStatsBids, setLoadingStatsBids] = useState(false);
 
   const [detailAuction, setDetailAuction] = useState<Auction | null>(null);
-  
+
   const [confirmCancel, setConfirmCancel] = useState<Auction | null>(null);
   const [cancelReason, setCancelReason] = useState("");
-  
+
   const [confirmDelete, setConfirmDelete] = useState<Auction | null>(null);
 
   // Create / Edit Form State
@@ -281,12 +281,12 @@ export default function MeusLeiloes() {
 
   return (
     <div className="space-y-6 select-none">
-      
+
       {/* HEADER */}
-      <ActionCard 
-        title="Meus Leilões" 
-        subtitle="Gerencie e acompanhe todos os seus leilões criados" 
-        buttonLabel="Criar Leilão" 
+      <ActionCard
+        title="Meus Leilões"
+        subtitle="Gerencie e acompanhe todos os seus leilões criados"
+        buttonLabel="Criar Leilão"
         onButtonClick={handleOpenCreate}
       />
 
@@ -381,16 +381,16 @@ export default function MeusLeiloes() {
                   <td className="text-gray-500 font-bold">{new Date(auction.end_time).toLocaleString("pt-PT")}</td>
                   <td className="text-right pr-4">
                     <div className="flex items-center justify-end gap-1">
-                      <button 
-                        title="Ver Detalhes" 
+                      <button
+                        title="Ver Detalhes"
                         onClick={() => setDetailAuction(auction)}
                         className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-600 transition"
                       >
                         <Eye size={13} />
                       </button>
                       {auction.status === AuctionStatus.DRAFT && (
-                        <button 
-                          title="Editar/Publicar" 
+                        <button
+                          title="Editar/Publicar"
                           onClick={() => handleOpenEdit(auction)}
                           className="p-1.5 rounded-sm hover:bg-blue-50 text-primary transition"
                         >
@@ -398,8 +398,8 @@ export default function MeusLeiloes() {
                         </button>
                       )}
                       {auction.status === AuctionStatus.DRAFT && (
-                        <button 
-                          title="Excluir" 
+                        <button
+                          title="Excluir"
                           onClick={() => setConfirmDelete(auction)}
                           className="p-1.5 rounded-sm hover:bg-red-50 text-red-600 transition"
                         >
@@ -407,16 +407,16 @@ export default function MeusLeiloes() {
                         </button>
                       )}
                       {(auction.status === AuctionStatus.SCHEDULED || auction.status === AuctionStatus.LIVE) && (
-                        <button 
-                          title="Cancelar Leilão" 
+                        <button
+                          title="Cancelar Leilão"
                           onClick={() => setConfirmCancel(auction)}
                           className="p-1.5 rounded-sm hover:bg-red-50 text-red-600 transition"
                         >
                           <Ban size={13} />
                         </button>
                       )}
-                      <button 
-                        title="Estatísticas e Lances" 
+                      <button
+                        title="Estatísticas e Lances"
                         onClick={() => setStatsAuction(auction)}
                         className="p-1.5 rounded-sm hover:bg-purple-50 text-purple-600 transition"
                       >
@@ -437,7 +437,7 @@ export default function MeusLeiloes() {
               Mostrando {Math.min(totalCount, (currentPage - 1) * pageSize + 1)}–{Math.min(totalCount, currentPage * pageSize)} de {totalCount}
             </div>
             <div className="flex items-center gap-1.5">
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
                 className="p-1.5 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 transition cursor-pointer"
@@ -445,7 +445,7 @@ export default function MeusLeiloes() {
                 <ChevronLeft size={12} />
               </button>
               <span className="text-xs font-bold text-gray-900 px-3">{currentPage} / {totalPages}</span>
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="p-1.5 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 transition cursor-pointer"
@@ -458,24 +458,24 @@ export default function MeusLeiloes() {
       </div>
 
       {/* CREATE / EDIT DIALOG */}
-      <Modal 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+      <Modal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
         title={editAuction ? "Editar Leilão" : "Criar Novo Leilão"}
         size="lg"
       >
         <form onSubmit={handleFormSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
+
             {/* Title (Create only) */}
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Título do Item</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 disabled={!!editAuction}
-                value={formData.title} 
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Ex: iPhone 15 Pro Max 256GB"
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none disabled:bg-gray-100 transition"
               />
@@ -485,10 +485,10 @@ export default function MeusLeiloes() {
             {/* Description */}
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Descrição Detalhada</label>
-              <textarea 
+              <textarea
                 rows={3}
-                value={formData.description} 
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Detalhes sobre o estado do item, o que acompanha, etc."
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               />
@@ -498,9 +498,9 @@ export default function MeusLeiloes() {
             {/* Category */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Categoria</label>
-              <select 
-                value={formData.category_id} 
-                onChange={(e) => setFormData({...formData, category_id: e.target.value})}
+              <select
+                value={formData.category_id}
+                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                 className="px-3 py-2 border border-gray-200 bg-white rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               >
                 {categories.map((cat) => (
@@ -512,10 +512,10 @@ export default function MeusLeiloes() {
             {/* Condition Type (Create only) */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Condição do Item</label>
-              <select 
+              <select
                 disabled={!!editAuction}
-                value={formData.condition_type} 
-                onChange={(e) => setFormData({...formData, condition_type: e.target.value as ItemCondition})}
+                value={formData.condition_type}
+                onChange={(e) => setFormData({ ...formData, condition_type: e.target.value as ItemCondition })}
                 className="px-3 py-2 border border-gray-200 bg-white rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none disabled:bg-gray-100 transition"
               >
                 <option value={ItemCondition.NEW}>Novo / Selado</option>
@@ -528,12 +528,12 @@ export default function MeusLeiloes() {
             {/* Starting Price (Create only) */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Preço Inicial (AOA)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 required
                 disabled={!!editAuction}
-                value={formData.starting_price} 
-                onChange={(e) => setFormData({...formData, starting_price: e.target.value})}
+                value={formData.starting_price}
+                onChange={(e) => setFormData({ ...formData, starting_price: e.target.value })}
                 placeholder="Ex: 50000"
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none disabled:bg-gray-100 transition"
               />
@@ -543,12 +543,12 @@ export default function MeusLeiloes() {
             {/* Min Increment (Create only) */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Incremento Mínimo (AOA)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 required
                 disabled={!!editAuction}
-                value={formData.minimum_increment} 
-                onChange={(e) => setFormData({...formData, minimum_increment: e.target.value})}
+                value={formData.minimum_increment}
+                onChange={(e) => setFormData({ ...formData, minimum_increment: e.target.value })}
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none disabled:bg-gray-100 transition"
               />
               {formErrors.minimum_increment && <p className="text-[9px] font-bold text-red-500">{formErrors.minimum_increment[0]}</p>}
@@ -557,10 +557,10 @@ export default function MeusLeiloes() {
             {/* Reserve Price */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Preço Reserva (Opcional)</label>
-              <input 
-                type="number" 
-                value={formData.reserve_price} 
-                onChange={(e) => setFormData({...formData, reserve_price: e.target.value})}
+              <input
+                type="number"
+                value={formData.reserve_price}
+                onChange={(e) => setFormData({ ...formData, reserve_price: e.target.value })}
                 placeholder="Ex: 80000"
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               />
@@ -570,10 +570,10 @@ export default function MeusLeiloes() {
             {/* Buy Now Price */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Preço Compra Imediata (Opcional)</label>
-              <input 
-                type="number" 
-                value={formData.buy_now_price} 
-                onChange={(e) => setFormData({...formData, buy_now_price: e.target.value})}
+              <input
+                type="number"
+                value={formData.buy_now_price}
+                onChange={(e) => setFormData({ ...formData, buy_now_price: e.target.value })}
                 placeholder="Ex: 120000"
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               />
@@ -583,11 +583,11 @@ export default function MeusLeiloes() {
             {/* Start Time */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Data/Hora de Início</label>
-              <input 
-                type="datetime-local" 
+              <input
+                type="datetime-local"
                 required
-                value={formData.start_time} 
-                onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                value={formData.start_time}
+                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               />
               {formErrors.start_time && <p className="text-[9px] font-bold text-red-500">{formErrors.start_time[0]}</p>}
@@ -596,11 +596,11 @@ export default function MeusLeiloes() {
             {/* End Time */}
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Data/Hora de Fim</label>
-              <input 
-                type="datetime-local" 
+              <input
+                type="datetime-local"
                 required
-                value={formData.end_time} 
-                onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                value={formData.end_time}
+                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                 className="px-3 py-2 border border-gray-200 rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none transition"
               />
               {formErrors.end_time && <p className="text-[9px] font-bold text-red-500">{formErrors.end_time[0]}</p>}
@@ -610,9 +610,9 @@ export default function MeusLeiloes() {
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Imagens do Produto</label>
               <div className="border-2 border-dashed border-gray-200 rounded-sm p-4 text-center hover:bg-gray-50/50 transition relative">
-                <input 
-                  type="file" 
-                  multiple 
+                <input
+                  type="file"
+                  multiple
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files) {
@@ -641,10 +641,10 @@ export default function MeusLeiloes() {
               {editAuction ? (
                 editAuction.status === AuctionStatus.DRAFT && (
                   <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={formData.publish}
-                      onChange={(e) => setFormData({...formData, publish: e.target.checked})}
+                      onChange={(e) => setFormData({ ...formData, publish: e.target.checked })}
                       className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                     />
                     <span>Publicar Leilão Imediatamente</span>
@@ -652,10 +652,10 @@ export default function MeusLeiloes() {
                 )
               ) : (
                 <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={formData.is_draft}
-                    onChange={(e) => setFormData({...formData, is_draft: e.target.checked})}
+                    onChange={(e) => setFormData({ ...formData, is_draft: e.target.checked })}
                     className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   <span>Salvar como Rascunho</span>
@@ -666,15 +666,15 @@ export default function MeusLeiloes() {
           </div>
 
           <div className="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-4">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setIsFormOpen(false)}
               className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={formLoading}
               className="px-5 py-2 bg-primary hover:bg-primary/95 text-white font-semibold text-xs rounded-sm transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
             >
@@ -752,7 +752,7 @@ export default function MeusLeiloes() {
             </div>
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 onClick={() => setDetailAuction(null)}
                 className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
               >
@@ -838,7 +838,7 @@ export default function MeusLeiloes() {
             </div>
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 onClick={() => setStatsAuction(null)}
                 className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
               >
@@ -862,8 +862,8 @@ export default function MeusLeiloes() {
           </p>
           <div className="flex flex-col gap-1">
             <label className="text-[9px] font-bold text-gray-500 uppercase">Motivo do Cancelamento</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               required
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
@@ -872,13 +872,13 @@ export default function MeusLeiloes() {
             />
           </div>
           <div className="flex justify-end gap-2 border-t border-gray-100 pt-3">
-            <button 
+            <button
               onClick={() => { setConfirmCancel(null); setCancelReason(""); }}
               className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
             >
               Voltar
             </button>
-            <button 
+            <button
               onClick={handleCancelAuction}
               disabled={!cancelReason.trim()}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-sm transition cursor-pointer disabled:opacity-50"

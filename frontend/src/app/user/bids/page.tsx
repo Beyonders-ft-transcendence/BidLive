@@ -50,7 +50,7 @@ export default function MeusLances() {
   // States
   const [items, setItems] = useState<BiddingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -73,16 +73,16 @@ export default function MeusLances() {
       const res = await auctionService.list({ bidder_id: user.id, page_size: 100 });
       if (res.success && res.data) {
         const auctionsList = res.data.results;
-        
+
         // Fetch bids in parallel for each auction
         const detailed = await Promise.all(
           auctionsList.map(async (auction) => {
             const bidsRes = await auctionService.listBids(auction.id, { page_size: 100 });
             const bids = bidsRes.success && bidsRes.data ? bidsRes.data.results : [];
-            
+
             // Sort bids by amount descending
             const sortedBids = [...bids].sort((a, b) => Number(b.amount) - Number(a.amount));
-            
+
             // Filter user bids
             const userBids = sortedBids.filter(b => b.bidder?.id === user.id || b.bidder_id === user.id);
             const myBid = userBids.length > 0 ? Number(userBids[0].amount) : 0;
@@ -90,7 +90,7 @@ export default function MeusLances() {
 
             // Find position of highest user bid
             const position = sortedBids.findIndex(b => b.bidder?.id === user.id || b.bidder_id === user.id) + 1;
-            
+
             // Calculate unique bidders
             const uniqueBidders = new Set(bids.map(b => b.bidder?.id || b.bidder_id)).size;
 
@@ -116,8 +116,8 @@ export default function MeusLances() {
             }
 
             // Latest bid date
-            const bidDate = userBids.length > 0 
-              ? new Date(userBids[0].created_at || userBids[0].timestamp).toLocaleDateString("pt-PT") 
+            const bidDate = userBids.length > 0
+              ? new Date(userBids[0].created_at || userBids[0].timestamp).toLocaleDateString("pt-PT")
               : "—";
 
             // Bid history for graphs/logs
@@ -248,12 +248,12 @@ export default function MeusLances() {
 
   return (
     <div className="space-y-6 select-none">
-      
+
       {/* HEADER */}
-      <ActionCard 
-        title="Meus Lances" 
-        subtitle="Acompanhe seus lances e posições em tempo real" 
-        buttonLabel="Explorar Leilões" 
+      <ActionCard
+        title="Meus Lances"
+        subtitle="Acompanhe seus lances e posições em tempo real"
+        buttonLabel="Explorar Leilões"
         onButtonClick={() => window.location.href = "/auctions"}
       />
 
@@ -377,24 +377,24 @@ export default function MeusLances() {
                   </td>
                   <td className="text-right pr-4">
                     <div className="flex items-center justify-end gap-1.5">
-                      <button 
-                        title="Ver Leilão" 
+                      <button
+                        title="Ver Leilão"
                         onClick={() => window.location.href = `/auctions/${item.id}`}
                         className="p-1.5 rounded-sm hover:bg-gray-100 text-gray-600 transition"
                       >
                         <Eye size={13} />
                       </button>
                       {(item.status === "Vencendo" || item.status === "Ultrapassado" || item.status === "Ao Vivo") && (
-                        <button 
-                          title="Dar Novo Lance" 
+                        <button
+                          title="Dar Novo Lance"
                           onClick={() => { setNewBidModal(item); setNewBidValue(""); setBidSubmitError(""); }}
                           className="p-1.5 rounded-sm hover:bg-green-50 text-green-600 transition"
                         >
                           <ArrowUp size={13} />
                         </button>
                       )}
-                      <button 
-                        title="Histórico de Lances" 
+                      <button
+                        title="Histórico de Lances"
                         onClick={() => setHistoryBid(item)}
                         className="p-1.5 rounded-sm hover:bg-purple-50 text-purple-600 transition"
                       >
@@ -415,7 +415,7 @@ export default function MeusLances() {
               Mostrando {Math.min(filtered.length, (currentPage - 1) * pageSize + 1)}–{Math.min(filtered.length, currentPage * pageSize)} de {filtered.length}
             </div>
             <div className="flex items-center gap-1.5">
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
                 className="p-1.5 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 transition cursor-pointer"
@@ -423,7 +423,7 @@ export default function MeusLances() {
                 <ChevronLeft size={12} />
               </button>
               <span className="text-xs font-bold text-gray-900 px-3">{currentPage} / {totalPages}</span>
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="p-1.5 border border-gray-200 rounded-sm hover:bg-gray-50 disabled:opacity-50 transition cursor-pointer"
@@ -468,8 +468,8 @@ export default function MeusLances() {
 
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-gray-700 uppercase">Valor do Lance (AOA)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 required
                 value={newBidValue}
                 onChange={(e) => setNewBidValue(e.target.value)}
@@ -480,14 +480,14 @@ export default function MeusLances() {
             </div>
 
             <div className="flex justify-end gap-2 border-t border-gray-100 pt-3">
-              <button 
+              <button
                 type="button"
                 onClick={() => setNewBidModal(null)}
                 className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 type="button"
                 disabled={bidSubmitLoading || !newBidValue}
                 onClick={handlePlaceBid}
@@ -539,7 +539,7 @@ export default function MeusLances() {
             </div>
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 onClick={() => setHistoryBid(null)}
                 className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-sm transition cursor-pointer"
               >

@@ -51,11 +51,11 @@ export default function SignIn() {
         try {
             await login(data);
             const user = useAuthStore.getState().user;
-            
-            if (user?.is_staff || user?.roles?.includes(UserRole.SUPER_ADMIN) || user?.roles?.includes(UserRole.MONITOR)) {
-                router.push("/backoffice");
-            } else {
+
+            if (user?.roles?.includes(UserRole.USER)) {
                 router.push("/user");
+            } else {
+                router.push("/backoffice/dashboard");
             }
         } catch {
             // erro tratado pela store
