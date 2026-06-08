@@ -1,13 +1,13 @@
-
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import Hero from "@/components/layout/home/Hero";
+import AboutSection from "@/components/layout/home/About";
 
 export default function Home() {
   return (
-    <div className="bg-white flex-1">
+    <main>
       <Header />
-
-   
-    </div>
+      <Hero />
+      <AboutSection />
+    </main>
   );
 }

@@ -53,6 +53,13 @@ export default function Users() {
   const [verificationFilter, setVerificationFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Helper for showing errors on the frontend
+  const showError = (message: string, err: any) => {
+    console.error(message, err);
+    const apiMsg = err?.response?.data?.message || err?.response?.data?.detail || err?.message || "Erro desconhecido";
+    alert(`${message}\nDetalhes: ${apiMsg}`);
+  };
+
   // Fetch Stats dynamically from API
   const fetchStats = useCallback(async () => {
     try {
@@ -69,7 +76,7 @@ export default function Users() {
         banned: bannedRes.data?.count || 0,
       });
     } catch (err) {
-      console.error("Erro ao obter estatísticas da API:", err);
+      showError("Erro ao obter estatísticas da API.", err);
     }
   }, []);
 
@@ -100,7 +107,7 @@ export default function Users() {
         setTotalCount(res.data.count);
       }
     } catch (err) {
-      console.error("Erro ao carregar utilizadores:", err);
+      showError("Erro ao carregar utilizadores.", err);
     } finally {
       setLoading(false);
     }
@@ -123,7 +130,7 @@ export default function Users() {
         setSelectedUser(res.data);
       }
     } catch (err) {
-      console.error("Erro ao detalhar utilizador:", err);
+      showError("Erro ao detalhar utilizador.", err);
     }
   };
 
@@ -152,7 +159,7 @@ export default function Users() {
         fetchStats();
       }
     } catch (err) {
-      console.error("Erro ao registrar utilizador na API:", err);
+      showError("Erro ao registrar utilizador na API.", err);
     }
     setIsCreateModalOpen(false);
   };
@@ -172,7 +179,7 @@ export default function Users() {
         }
       }
     } catch (err) {
-      console.error("Erro ao alterar status do utilizador:", err);
+      showError("Erro ao alterar status do utilizador.", err);
     }
   };
 
@@ -194,7 +201,7 @@ export default function Users() {
         }
       }
     } catch (err) {
-      console.error("Erro ao alterar verificação do utilizador:", err);
+      showError("Erro ao alterar verificação do utilizador.", err);
     }
   };
 
@@ -215,7 +222,7 @@ export default function Users() {
         }
       }
     } catch (err) {
-      console.error("Erro ao alterar atividade do utilizador:", err);
+      showError("Erro ao alterar atividade do utilizador.", err);
     }
   };
 
@@ -231,7 +238,7 @@ export default function Users() {
         }
       }
     } catch (err) {
-      console.error("Erro ao excluir utilizador:", err);
+      showError("Erro ao excluir utilizador.", err);
     }
     setDeleteUserId(null);
   };
