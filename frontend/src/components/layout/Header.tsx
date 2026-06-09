@@ -23,8 +23,8 @@ export default function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   return (
-    <header className=" w-full z-50 font-sans antialiased">
-      <div className="w-full bg-white shadow-sm">
+    <header className="sticky top-0 w-full z-50 font-sans antialiased">
+      <div className="w-full bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between px-6 lg:px-12 h-[68px]">
           
           {/* Logo */}

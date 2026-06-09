@@ -153,7 +153,7 @@ export default function LiveAuctionsSection() {
               return (
                 <div
                   key={auc.id}
-                  className="group relative overflow-hidden aspect-4/3 rounded-sm border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
+                  className="group relative overflow-hidden aspect-4/3 rounded-xl border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
                 >
                   {/* Full Background Image */}
                   <img
@@ -236,7 +236,7 @@ export default function LiveAuctionsSection() {
 
           {/* Right: Premium Activity Sidebar (rounded-sm) */}
           <div className="w-full lg:w-[380px] shrink-0 flex flex-col">
-            <div className="bg-[#0C1B33] rounded-sm p-6 flex flex-col justify-between flex-1 text-white border border-slate-800 shadow-lg relative overflow-hidden">
+            <div className="bg-[#0C1B33] rounded-xl p-6 flex flex-col justify-between flex-1 text-white border border-slate-800 shadow-lg relative overflow-hidden">
               
               {/* Header Widget */}
               <div>

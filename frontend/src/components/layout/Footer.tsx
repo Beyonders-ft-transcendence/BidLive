@@ -1,122 +1,64 @@
 // components/layout/Footer.tsx
+import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className="bg-[#2f313d] text-gray-300">
-
+        <footer className="bg-[#0C1B33] text-gray-300 font-sans antialiased">
             {/* Top */}
-            <div className="max-w-7xl mx-auto px-4 py-14">
-
+            <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
 
                     {/* Brand */}
-                    <div>
-                        <h2 className="text-2xl font-bold text-white mb-4">
-                            TOURPRO X
-                        </h2>
+                    <div className="flex flex-col items-start">
+                        <Link href="/" className="mb-5 inline-block">
+                            <h2 className="text-3xl font-extrabold text-white tracking-tight">
+                                BidLive<span className="text-primary">.</span>
+                            </h2>
+                        </Link>
 
-                        <p className="text-sm text-gray-400 leading-6">
+                        <p className="text-sm text-gray-400 leading-relaxed pr-4">
                             Plataforma moderna para leilões online em tempo real,
-                            oferecendo segurança, transparência e praticidade.
+                            oferecendo segurança, transparência e praticidade na
+                            arrematação de bens.
                         </p>
                     </div>
 
                     {/* Column */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">
+                        <h3 className="text-white text-sm font-bold tracking-wider uppercase mb-5">
                             Informações
                         </h3>
-
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Sobre
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Como Funciona
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Termos
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Privacidade
-                                </a>
-                            </li>
+                        <ul className="space-y-3 text-sm">
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Sobre</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Como Funciona</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Termos de Uso</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Privacidade</Link></li>
                         </ul>
                     </div>
 
                     {/* Column */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">
+                        <h3 className="text-white text-sm font-bold tracking-wider uppercase mb-5">
                             Categorias
                         </h3>
-
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Imóveis
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Veículos
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Tecnologia
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Equipamentos
-                                </a>
-                            </li>
+                        <ul className="space-y-3 text-sm">
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Imóveis</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Veículos</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Eletrônicos</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Equipamentos</Link></li>
                         </ul>
                     </div>
 
                     {/* Column */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">
+                        <h3 className="text-white text-sm font-bold tracking-wider uppercase mb-5">
                             Suporte
                         </h3>
-
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Central de Ajuda
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Contactos
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    FAQ
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#" className="hover:text-white transition">
-                                    Atendimento
-                                </a>
-                            </li>
+                        <ul className="space-y-3 text-sm">
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Central de Ajuda</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Fale Conosco</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Dúvidas Frequentes (FAQ)</Link></li>
+                            <li><Link href="#" className="text-gray-400 hover:text-primary transition-colors">Atendimento</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -124,24 +66,21 @@ export default function Footer() {
 
             {/* Bottom */}
             <div className="border-t border-white/10">
-                <div className="max-w-[1400px] mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
-
-                    <p className="text-xs text-gray-500">
-                        © 2026 TOURPRO X. Todos os direitos reservados.
+                <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-gray-500">
+                        &copy; {new Date().getFullYear()} BidLive. Todos os direitos reservados.
                     </p>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <a href="#" className="hover:text-white transition">
-                            Política
-                        </a>
-
-                        <a href="#" className="hover:text-white transition">
+                    <div className="flex items-center gap-6 text-sm text-gray-500">
+                        <Link href="#" className="hover:text-primary transition-colors">
+                            Política de Privacidade
+                        </Link>
+                        <Link href="#" className="hover:text-primary transition-colors">
                             Termos
-                        </a>
-
-                        <a href="#" className="hover:text-white transition">
+                        </Link>
+                        <Link href="#" className="hover:text-primary transition-colors">
                             Segurança
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

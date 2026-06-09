@@ -3,6 +3,7 @@ import Hero from "@/components/layout/home/Hero";
 import AboutSection from "@/components/layout/home/About";
 import HowItWorksSection from "@/components/layout/home/HowItWorksSection";
 import LiveAuctionsSection from "@/components/layout/home/LiveAuctionsSection";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <AboutSection />
       <HowItWorksSection />
       <LiveAuctionsSection />
+      <Footer />
     </main>
   );
 }
