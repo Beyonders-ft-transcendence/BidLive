@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store/auth.store";
 import auctionService from "@/services/auction.service";
 import categoryService from "@/services/category.service";
 import rbacService from "@/services/rbac.service";
-import type { Auction, AuctionCategory, Bid } from "@/types/auction.types";
+import type { Auction } from "@/types/auction.types";
 import { AuctionStatus, ItemCondition } from "@/types/auction.types";
 import { Category } from "@/types/category.types";
 import { formatCurrency, getAuctionStatusLabel, auctionStatusColor } from "@/utils/auction";
@@ -22,16 +22,11 @@ import {
   Trash2,
   CheckCircle,
   Calendar,
-  DollarSign,
   User,
   Lock,
-  Globe,
-  Moon,
   Save,
-  EyeOff,
   CheckCircle2,
   AlertCircle,
-  X,
   FileText,
   LogOut
 } from "lucide-react";
