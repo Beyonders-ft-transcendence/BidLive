@@ -7,6 +7,7 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { useAuthStore } from "@/store/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import AuthFooter from "@/components/auth/AuthFooter";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/schema/auth.schema";
@@ -18,8 +19,6 @@ export default function ForgotPassword() {
     const isLoading = useAuthStore((state) => state.isLoading);
     const apiError = useAuthStore((state) => state.error);
     const clearError = useAuthStore((state) => state.clearError);
-
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const {
         register,
@@ -41,11 +40,11 @@ export default function ForgotPassword() {
 
     const onSubmit = async (data: ForgotPasswordInput) => {
         try {
-            setSuccessMessage(null);
             await forgotPassword(data);
-            setSuccessMessage("Um link de recuperação de senha foi enviado para o seu e-mail.");
+            toast.success("Um link de recuperação de senha foi enviado para o seu e-mail.");
         } catch {
-            // erro tratado pela store
+            const errMsg = useAuthStore.getState().error || "Erro ao solicitar redefinição de senha.";
+            toast.error(errMsg);
         }
     };
 
@@ -85,12 +84,7 @@ export default function ForgotPassword() {
                                 </div>
                             )}
 
-                            {/* Success message */}
-                            {successMessage && (
-                                <div className="text-xs text-green-600 font-medium pt-1">
-                                    {successMessage}
-                                </div>
-                            )}
+
 
                             {/* Submit Button */}
                             <Button

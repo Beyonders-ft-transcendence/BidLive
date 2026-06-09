@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 import AuthFooter from "@/components/auth/AuthFooter";
+import toast from "react-hot-toast";
 import { signInSchema, type SignInInput } from "@/schema/auth.schema";
 import { UserRole } from "@/types/auth.types";
 import { Lineicons } from "@lineiconshq/react-lineicons";
@@ -51,6 +52,7 @@ export default function SignIn() {
         try {
             await login(data);
             const user = useAuthStore.getState().user;
+            toast.success(`Bem-vindo de volta, ${user?.full_name || user?.username}!`);
 
             if (user?.roles?.includes(UserRole.USER)) {
                 router.push("/user");
@@ -58,7 +60,8 @@ export default function SignIn() {
                 router.push("/backoffice/dashboard");
             }
         } catch {
-            // erro tratado pela store
+            const errMsg = useAuthStore.getState().error || "Erro ao realizar login. Verifique suas credenciais.";
+            toast.error(errMsg);
         }
     };
 

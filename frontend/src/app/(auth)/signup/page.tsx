@@ -12,6 +12,7 @@ import Divider from "@/components/common/Divider";
 import AuthSidebar from "@/components/auth/AuthSidebar";
 import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 import AuthFooter from "@/components/auth/AuthFooter";
+import toast from "react-hot-toast";
 import { signUpSchema, type SignUpInput } from "@/schema/auth.schema";
 import { Lineicons } from "@lineiconshq/react-lineicons";
 import {
@@ -35,7 +36,6 @@ export default function SignUp() {
     const [step, setStep] = useState<1 | 2>(1);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const {
         register,
@@ -82,12 +82,13 @@ export default function SignUp() {
                 password: data.password,
             });
 
-            setSuccessMessage("Conta criada com sucesso. Redirecionando...");
+            toast.success("Conta criada com sucesso! Redirecionando para login...");
             setTimeout(() => {
                 router.push("/signin");
             }, 1500);
         } catch {
-            // erro tratado pela store
+            const errMsg = useAuthStore.getState().error || "Erro ao registrar conta. Tente outro e-mail/usuário.";
+            toast.error(errMsg);
         }
     };
 
@@ -200,12 +201,7 @@ export default function SignUp() {
                                 </div>
                             )}
 
-                            {/* Success message */}
-                            {successMessage && (
-                                <div className="text-xs text-green-600 font-medium pt-1">
-                                    {successMessage}
-                                </div>
-                            )}
+
 
                             {/* Navigation Buttons */}
                             <div className="pt-2">
