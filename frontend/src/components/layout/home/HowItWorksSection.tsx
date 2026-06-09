@@ -5,14 +5,17 @@ import {
   UserPlus,
   Search,
   Gavel,
-  Trophy,
-  PackageCheck,
   CheckCircle2,
 } from "lucide-react";
+import step1Image from "@/assets/images/step1.png"
+import step2Image from "@/assets/images/step2.png"
+import step3Image from "@/assets/images/step3.png"
+import Image from "next/image";
 
 const steps = [
   {
     icon: UserPlus,
+    image: step1Image,
     label: "Crie Sua Conta Grátis",
     badge: "Passo 01",
     title: "Cadastro Rápido e Gratuito",
@@ -26,6 +29,7 @@ const steps = [
   },
   {
     icon: Search,
+    image: step2Image,
     label: "Explore os Lotes Disponíveis",
     badge: "Passo 02",
     title: "Encontre as Melhores Oportunidades",
@@ -39,6 +43,7 @@ const steps = [
   },
   {
     icon: Gavel,
+    image: step3Image,
     label: "Dê Seu Lance em Tempo Real",
     badge: "Passo 03",
     title: "Lance ao Vivo com Segurança",
@@ -49,33 +54,7 @@ const steps = [
       "Notificações imediatas de superação",
       "Histórico completo de lances",
     ],
-  },
-  {
-    icon: Trophy,
-    label: "Arremate e Finalize",
-    badge: "Passo 04",
-    title: "Arremate o Lote e Finalize a Compra",
-    description:
-      "Venceu o leilão? Parabéns! Nossa equipe entra em contato para orientar todos os trâmites de pagamento e transferência do bem com segurança jurídica.",
-    features: [
-      "Contato imediato pós-arrematação",
-      "Pagamento via PIX, boleto ou cartão",
-      "Suporte jurídico e documental",
-    ],
-  },
-  {
-    icon: PackageCheck,
-    label: "Retire ou Receba Seu Bem",
-    badge: "Passo 05",
-    title: "Receba ou Retire Seu Bem com Facilidade",
-    description:
-      "Após quitado, o bem pode ser retirado no local ou, em casos elegíveis, entregue no endereço indicado. Simples, seguro e transparente do início ao fim.",
-    features: [
-      "Opção de retirada ou entrega",
-      "Agendamento online",
-      "Acompanhamento em tempo real",
-    ],
-  },
+  }
 ];
 
 export default function HowItWorksSection() {
@@ -88,21 +67,20 @@ export default function HowItWorksSection() {
     <section className="py-24 bg-[#F4F5F7]">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Header */}
-        <div className="flex flex-col items-center mb-12">
-          <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-4 py-1.5 rounded-full border border-primary/20 mb-5">
-            Como Funciona
-          </span>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0C1B33] text-center leading-tight tracking-tight">
-            Participe de Leilões em<br />Apenas Alguns Passos
-          </h2>
-        </div>
-
         {/* Main Grid */}
-        <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-0 items-stretch w-full">
+        <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-12 items-stretch w-full">
 
           {/* Left — Steps List */}
           <div className="flex flex-col gap-3 w-full lg:w-[380px] xl:w-[400px] shrink-0">
+            {/* Header */}
+            <div className="flex flex-col items-start mb-6">
+              <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-4 py-1.5 rounded-full border border-primary/20 mb-4">
+                Como Funciona
+              </span>
+              <h2 className="text-3xl font-extrabold text-[#0C1B33] text-left leading-tight tracking-tight">
+                Participe de Leilões em<br />Apenas Alguns Passos
+              </h2>
+            </div>
             {steps.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === active;
@@ -145,15 +123,13 @@ export default function HowItWorksSection() {
           <div className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px] w-full lg:w-[580px] xl:w-[740px] shrink-0">
 
             {/* Illustration panel */}
-            <div className="lg:w-[220px] w-full h-48 lg:h-auto bg-primary/5 flex-shrink-0 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
-                  <StepDetailIcon size={36} className="text-primary" strokeWidth={1.5} />
-                </div>
-                <span className="text-[11px] font-bold tracking-[1.4px] uppercase text-primary/60">
-                  {step.badge}
-                </span>
-              </div>
+            <div className="lg:w-[320px] w-full h-64 lg:h-auto bg-primary/5 flex-shrink-0 relative overflow-hidden">
+              <Image
+                src={step.image}
+                alt={step.title}
+                fill
+                className="object-cover"
+              />
             </div>
 
             {/* Content */}
