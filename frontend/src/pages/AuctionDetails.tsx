@@ -4,11 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Eye, Heart, Gavel, ArrowLeft, ShoppingBag, ShieldCheck, Award } from 'lucide-react';
+import { Eye, Heart, Gavel, ArrowLeft, ShoppingBag, ShieldCheck, Award, Video, PlayCircle, PowerOff } from 'lucide-react';
 import { Auction, Bid, Stream, User } from '../types';
 import LiveStreamPlayer from '../components/streams/LiveStreamPlayer';
+import LiveStreamBroadcaster from '../components/streams/LiveStreamBroadcaster';
 import LiveChat from '../components/chats/LiveChat';
 import { useAuctionSocket } from '../hooks/useAuctionSocket';
+import { apiService } from '../services/api';
 
 interface AuctionDetailsProps {
   auction: Auction | null;
@@ -42,6 +44,7 @@ export default function AuctionDetails({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showBuyNowModal, setShowBuyNowModal] = useState(false);
+  const [streamLoading, setStreamLoading] = useState(false);
 
   useAuctionSocket(auctionId, (type) => {
     if (
@@ -179,6 +182,42 @@ export default function AuctionDetails({
     }
   };
 
+  const handleCreateStream = async () => {
+    setStreamLoading(true);
+    const res = await apiService.createStream(auctionId, `Live: ${auction?.title}`);
+    if (res.success) {
+      setSuccessMsg('Stream criada com sucesso!');
+      onRefresh();
+    } else {
+      setErrorMsg(res.message || 'Erro ao criar stream');
+    }
+    setStreamLoading(false);
+  };
+
+  const handleStartStream = async (streamId: string) => {
+    setStreamLoading(true);
+    const res = await apiService.startStream(auctionId, streamId);
+    if (res.success) {
+      setSuccessMsg('Stream iniciada com sucesso!');
+      onRefresh();
+    } else {
+      setErrorMsg(res.message || 'Erro ao iniciar stream');
+    }
+    setStreamLoading(false);
+  };
+
+  const handleEndStream = async (streamId: string) => {
+    setStreamLoading(true);
+    const res = await apiService.endStream(auctionId, streamId);
+    if (res.success) {
+      setSuccessMsg('Stream encerrada com sucesso!');
+      onRefresh();
+    } else {
+      setErrorMsg(res.message || 'Erro ao encerrar stream');
+    }
+    setStreamLoading(false);
+  };
+
   return (
     <div className="space-y-8 pb-20">
       <div className="flex items-center justify-between">
@@ -205,16 +244,71 @@ export default function AuctionDetails({
         </button>
       </div>
 
+      {currentUser.id === auction.creatorId && (
+        <section className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm">
+          <h3 className="text-zinc-200 font-sans font-bold flex items-center gap-2">
+            <Video className="h-5 w-5 text-sky-400" />
+            Gerenciamento de Stream
+          </h3>
+          <p className="text-xs text-zinc-400">
+            Controle a transmissão ao vivo do seu leilão conectando-se ao LiveKit.
+          </p>
+
+          {!stream ? (
+            <button
+              onClick={handleCreateStream}
+              disabled={streamLoading}
+              className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-all shadow disabled:opacity-50"
+            >
+              <Video className="h-4 w-4" />
+              Criar Stream
+            </button>
+          ) : (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-md text-xs text-zinc-300">
+                Status: <span className={stream.status === 'LIVE' ? 'text-emerald-400 font-bold ml-1' : 'text-amber-400 font-bold ml-1'}>{stream.status}</span>
+              </div>
+              
+              {stream.status === 'SCHEDULED' && (
+                <button
+                  onClick={() => handleStartStream(stream.id)}
+                  disabled={streamLoading}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow disabled:opacity-50"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Iniciar Stream
+                </button>
+              )}
+
+              {stream.status === 'LIVE' && (
+                <button
+                  onClick={() => handleEndStream(stream.id)}
+                  disabled={streamLoading}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition-all shadow disabled:opacity-50"
+                >
+                  <PowerOff className="h-4 w-4" />
+                  Encerrar Stream
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
       {auction.status === 'ACTIVE' && stream && (
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <LiveStreamPlayer
-              streamId={stream.id}
-              streamTitle={stream.title}
-              streamerName={stream.streamerName}
-              initialViewerCount={stream.viewersCount}
-              auctionId={auction.id}
-            />
+            {currentUser.id === auction.creatorId && stream.status === 'LIVE' ? (
+              <LiveStreamBroadcaster streamId={stream.id} auctionId={auction.id} />
+            ) : (
+              <LiveStreamPlayer
+                streamId={stream.id}
+                streamTitle={stream.title}
+                streamerName={stream.streamerName}
+                initialViewerCount={stream.viewersCount}
+                auctionId={auction.id}
+              />
+            )}
           </div>
           <div className="lg:col-span-1 h-[360px] md:h-auto">
             <LiveChat roomId={stream.id} currentUser={currentUser} />

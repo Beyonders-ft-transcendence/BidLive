@@ -72,7 +72,7 @@ export default function LiveStreamPlayer({
           throw new Error(tokenRes.message || 'Token não fornecido pelo backend.');
         }
 
-        const roomUrl = tokenRes.url || 'wss://giovani-tippiest-overapprehensively.ngrok-free.dev';
+        const roomUrl = tokenRes.url || import.meta.env.VITE_LIVEKIT_URL || 'ws://localhost:7880';
         console.log(`[LiveKit] Conectando ao host ${roomUrl}...`);
         
         const room = new Room({
