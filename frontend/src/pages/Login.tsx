@@ -119,294 +119,33 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }, 600);
   };
 
-  // Listen to popup messaging communication for OAuth callback redirect payloads
-  useEffect(() => {
-    const handleOauthMessage = (event: MessageEvent) => {
-      // Validate origin can be run.app or localhost
-      const origin = event.origin;
-      if (!origin.endsWith('.run.app') && !origin.includes('localhost') && origin !== window.location.origin) {
-        return;
-      }
-
-      if (event.data?.type === 'OAUTH_GOOGLE_SUCCESS') {
-        const payload = event.data.payload;
-        setOauthLoading(null);
-        onLoginSuccess({
-          id: 'u-google-' + payload.id,
-          name: payload.name,
-          email: payload.email,
-          avatar: payload.avatar,
-          role: 'ADMIN', // Elevated admin permissions for test user
-          balance: 50000.00, // Premium budget points
-          status: 'ACTIVE',
-          bio: 'Usuário registrado via login oficial do Google.',
-          permissions: ['user.read', 'role.manage', 'permission.manage', 'auction.create', 'auction.update', 'auction.delete', 'auction.bid', 'auction.manage', 'report.manage', 'stream.host']
-        });
-      }
-
-      if (event.data?.type === 'OAUTH_42_SUCCESS') {
-        const payload = event.data.payload;
-        setOauthLoading(null);
-        onLoginSuccess({
-          id: 'u-42-' + payload.id,
-          name: payload.name,
-          email: payload.email,
-          avatar: payload.avatar,
-          role: 'USER',
-          balance: 42000.00, // 42 thematic budget points
-          status: 'ACTIVE',
-          bio: 'Estudante da 42 cadastrado com sucesso via Intra API.',
-          permissions: ['auction.read', 'auction.bid', 'auction.create']
-        });
-      }
-    };
-
-    window.addEventListener('message', handleOauthMessage);
-    return () => window.removeEventListener('message', handleOauthMessage);
-  }, [onLoginSuccess]);
-
-  // Handle Simulated Google Popup Flow
+  // Handle Real Google OAuth Flow
   const loginWithGoogle = () => {
     setError(null);
     setOauthLoading('google');
-
-    // Calculate dimensions to center popup
-    const width = 500;
-    const height = 620;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    const popup = window.open(
-      'about:blank',
-      'oauth_google_popup',
-      `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
-    );
-
-    if (!popup) {
-      setError('O Pop-up de login do Google foi bloqueado pelo seu navegador. Por favor, permita pop-ups.');
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      setError('Google Client ID não configurado no ambiente do Frontend. (VITE_GOOGLE_CLIENT_ID ausente)');
       setOauthLoading(null);
       return;
     }
-
-    // Direct writes structured, beautiful Google consent page to blank popup
-    popup.document.write(`
-      <html>
-        <head>
-          <title>Sign in with Google - BidLive Authorization</title>
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-          <style>
-            body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; }
-          </style>
-        </head>
-        <body class="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-          <div class="bg-white rounded-lg shadow-xl border border-gray-200 max-w-sm w-full p-8 text-center space-y-6">
-            
-            <!-- Google Logo G -->
-            <div class="flex justify-center">
-              <svg class="h-10 w-10" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.53-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l3.253-3.085C18.347 1.06 15.535 0 12.24 0c-6.63 0-12 5.37-12 12s5.37 12 12 12c6.92 0 11.52-4.81 11.52-11.72 0-.788-.08-1.39-.18-1.915H12.24z"/>
-              </svg>
-            </div>
-
-            <div class="space-y-2">
-              <h1 class="text-xl font-medium text-gray-800">Fazer login com o Google</h1>
-              <p class="text-xs text-gray-500">para prosseguir para o <span class="text-indigo-600 font-semibold">BidLive App Hub</span></p>
-            </div>
-
-            <!-- Pre-defined Google Accounts Selection -->
-            <div class="space-y-3 pt-2 text-left">
-              <span class="text-xs text-gray-600 font-medium block border-b pb-1.5">Escolha uma conta para logar:</span>
-              
-              <button 
-                onclick="selectAccount('Daniel Ndomba', 'ndondadaniel2020@gmail.com', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80')" 
-                class="w-full border border-gray-200 hover:bg-gray-50 p-3 rounded-lg flex items-center gap-3 transition-colors focus:outline-none"
-              >
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80" class="h-8 w-8 rounded-full object-cover">
-                <div>
-                  <span class="block text-xs font-bold text-gray-700">Daniel Ndomba</span>
-                  <span class="block text-[10px] text-gray-500">ndondadaniel2020@gmail.com</span>
-                </div>
-              </button>
-
-              <button 
-                onclick="selectAccount('Ana Silva', 'ana.silva@example.com', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80')" 
-                class="w-full border border-gray-200 hover:bg-gray-50 p-3 rounded-lg flex items-center gap-3 transition-colors focus:outline-none"
-              >
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80" class="h-8 w-8 rounded-full object-cover">
-                <div>
-                  <span class="block text-xs font-bold text-gray-700">Ana Silva</span>
-                  <span class="block text-[10px] text-gray-500">ana.silva@example.com</span>
-                </div>
-              </button>
-            </div>
-
-            <div class="text-left bg-gray-50 p-3 rounded text-[10px] text-gray-500 leading-normal">
-              Ao continuar, o Google compartilhará seu nome, endereço de e-mail, foto do perfil e preferências com o BidLive. Consulte o termo de privacidade.
-            </div>
-
-            <div class="text-[10px] text-gray-400 font-mono">
-              Redirect URI: <span id="redir-span"></span>
-            </div>
-
-          </div>
-
-          <script>
-            // Populate actual window origin inside UI
-            document.getElementById('redir-span').innerText = window.opener ? window.opener.location.origin + '/auth/callback' : '';
-
-            function selectAccount(name, email, avatar) {
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'OAUTH_GOOGLE_SUCCESS',
-                  payload: {
-                    id: 'goog-' + Date.now(),
-                    name: name,
-                    email: email,
-                    avatar: avatar
-                  }
-                }, '*');
-                window.close();
-              }
-            }
-          </script>
-        </body>
-      </html>
-    `);
-
-    // Monitor for close to reset loaders
-    const timer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(timer);
-        setOauthLoading(null);
-      }
-    }, 1000);
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/google/callback`);
+    const scopes = encodeURIComponent('email profile');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes}`;
+    window.location.href = authUrl;
   };
 
-  // Handle Simulated 42 Intra Popup Flow
-  const loginWith42 = () => {
+  // Handle Real 42 OAuth Flow
+  const loginWith42 = async () => {
     setError(null);
     setOauthLoading('42');
-
-    const width = 500;
-    const height = 620;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    const popup = window.open(
-      'about:blank',
-      'oauth_42_popup',
-      `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
-    );
-
-    if (!popup) {
-      setError('O Pop-up de login da 42 foi bloqueado pelo seu navegador. Por favor, permita pop-ups.');
+    const res = await apiService.get42AuthorizationUrl();
+    if (res.success && res.authorization_url) {
+      window.location.href = res.authorization_url;
+    } else {
+      setError(res.message || 'Não foi possível iniciar o login com 42.');
       setOauthLoading(null);
-      return;
     }
-
-    // Direct writes structured, beautiful 42 authorization page to blank popup
-    popup.document.write(`
-      <html>
-        <head>
-          <title>Authorize BidLive - 42 School Intra API</title>
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-          <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-          <style>
-            body { font-family: 'Space Grotesk', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-          </style>
-        </head>
-        <body class="flex flex-col items-center justify-center min-h-screen px-4 py-8">
-          <div class="bg-gray-900 rounded-xl shadow-2xl border border-gray-800 max-w-sm w-full p-8 text-center space-y-6">
-            
-            <!-- 42 BRAND LOGO -->
-            <div class="flex justify-center flex-col items-center">
-              <div class="h-16 w-16 bg-gradient-to-tr from-[#00babc] to-[#005e60] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl tracking-tighter shadow-xl">
-                42
-              </div>
-              <span class="block text-xs uppercase tracking-widest text-[#00babc] mt-2 font-bold font-mono">INTRA API GATEWAY</span>
-            </div>
-
-            <div class="space-y-2">
-              <h1 class="text-lg font-bold">Autorizar BidLive App</h1>
-              <p class="text-xs text-gray-400">O app <span class="text-[#00babc] font-bold">BidLive platform</span> deseja obter permissões de read-user na Intra.</p>
-            </div>
-
-            <!-- Permission Scope listing -->
-            <div class="border-t border-b border-gray-800 py-3.5 text-left space-y-2">
-              <span class="text-xs uppercase font-mono tracking-wider font-bold text-gray-400 block pb-1">Escopos Requeridos:</span>
-              <div class="flex items-center gap-2 text-xs text-gray-300">
-                <span class="text-[#00babc]">✔</span>
-                <span>Visualizar seu nome de login e apelido</span>
-              </div>
-              <div class="flex items-center gap-2 text-xs text-gray-300">
-                <span class="text-[#00babc]">✔</span>
-                <span>Verificar endereço de e-mail acadêmico</span>
-              </div>
-              <div class="flex items-center gap-2 text-xs text-gray-300">
-                <span class="text-[#00babc]">✔</span>
-                <span>Importar avatar de estudante e campus</span>
-              </div>
-            </div>
-
-            <!-- Simulated Selectors -->
-            <div class="space-y-2 text-left">
-              <span class="text-[11px] font-mono text-gray-500 block">Autorizar como Aluno do Campus:</span>
-              
-              <button 
-                onclick="authAsStudent('Gabriel Santos (gsantos)', 'gsantos@student.42.fr', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80')"
-                class="w-full bg-gray-850 hover:bg-gray-800 border border-gray-800 rounded-lg p-2.5 flex items-center gap-3 transition-all focus:outline-none"
-              >
-                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80" class="h-8 w-8 rounded-lg object-cover ring-1 ring-[#00babc]/40">
-                <div>
-                  <span class="block text-xs font-bold text-white">Gabriel Santos (gsantos)</span>
-                  <span class="block text-[10px] text-gray-400">gsantos@student.42sp.org.br</span>
-                </div>
-              </button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2">
-              <button onclick="window.close()" class="py-2 px-4 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 text-xs font-bold transition-all">
-                Recusar
-              </button>
-              <button onclick="authAsStudent('42 Student', 'student@42sp.org.br', 'https://api.dicebear.com/7.x/pixel-art/svg?seed=42')" class="py-2 px-4 rounded bg-[#00babc] text-white hover:bg-[#009c9e] text-xs font-bold transition-all shadow-md">
-                Autorizar
-              </button>
-            </div>
-
-            <div class="text-[9px] text-gray-500 font-mono">
-              CLIENT ID: 41_intra_auth_42000
-            </div>
-
-          </div>
-
-          <script>
-            function authAsStudent(name, email, avatar) {
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'OAUTH_42_SUCCESS',
-                  payload: {
-                    id: '42-' + Date.now(),
-                    name: name,
-                    email: email,
-                    avatar: avatar
-                  }
-                }, '*');
-                window.close();
-              }
-            }
-          </script>
-        </body>
-      </html>
-    `);
-
-    // Monitor for close to reset loaders
-    const timer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(timer);
-        setOauthLoading(null);
-      }
-    }, 1000);
   };
 
   return (
