@@ -18,7 +18,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<UserRole>('USER');
   
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,8 +57,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         }
       } else {
         // Sign Up Flow
-        const username = name.trim().toLowerCase().replace(/\s+/g, '_');
-        const res = await apiService.register(username, email, password);
+        const username = email.split('@')[0];
+        const res = await apiService.register(username, email, password, name);
         if (res.success) {
           // Auto-login after register
           const loginRes = await apiService.login(email, password);
@@ -521,21 +520,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
           </div>
 
-          {activeTab === 'signup' && (
-            <div className="space-y-1 text-left">
-              <label className="text-zinc-400 text-xs font-mono font-medium">Função de Usuário (Escopo Simulado)</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full h-10 px-3 bg-zinc-900 border border-zinc-800 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 text-xs appearance-none"
-              >
-                <option value="USER">Usuário Regular (Investidor padrão)</option>
-                <option value="MANAGER">Gestor de Leilões (Manager comercial)</option>
-                <option value="ADMIN">Administrador Geral (Admin operacional)</option>
-              </select>
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={isLoading || oauthLoading !== null}
@@ -549,7 +533,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             ) : activeTab === 'signin' ? (
               'Acessar Minha Conta'
             ) : (
-              'Completar Registro com Saldo'
+              'Completar Registro'
             )}
           </button>
 
