@@ -344,6 +344,45 @@ export const apiService = {
     };
   },
 
+  async handleOAuthCallback(endpoint: string, payload: any): Promise<{ success: boolean; message?: string; user?: User }> {
+    const res = await request<any>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    if (res.success && res.data) {
+      const access = res.data.access_token || res.data.access;
+      const refresh = res.data.refresh_token || res.data.refresh;
+      if (access) localStorage.setItem('bidlive_access', access);
+      if (refresh) localStorage.setItem('bidlive_refresh', refresh);
+
+      const profile = await this.getMe();
+      if (profile.success && profile.user) {
+        localStorage.setItem('bid_live_current_user', JSON.stringify(profile.user));
+        return { success: true, user: profile.user };
+      }
+
+      const userObj = mapUser(res.data.user || res.data);
+      if (userObj) {
+        localStorage.setItem('bid_live_current_user', JSON.stringify(userObj));
+        return { success: true, user: userObj };
+      }
+    }
+
+    return {
+      success: false,
+      message: res.message || 'Falha no login social.',
+    };
+  },
+
+  async get42AuthorizationUrl(): Promise<{ success: boolean; authorization_url?: string; state?: string; message?: string }> {
+    const res = await request<any>('/auth/42/');
+    if (res.success && res.data) {
+      return { success: true, authorization_url: res.data.authorization_url, state: res.data.state };
+    }
+    return { success: false, message: res.message || 'Erro ao iniciar auth 42.' };
+  },
+
   async register(username: string, email: string, password: string, full_name?: string): Promise<{ success: boolean; message?: string }> {
     const res = await request('/auth/register/', {
       method: 'POST',
