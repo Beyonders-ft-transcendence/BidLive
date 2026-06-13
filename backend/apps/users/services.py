@@ -10,6 +10,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -117,6 +118,9 @@ def create_user(
     )
     UserRole.objects.get_or_create(user=user, role=default_role)
     invalidate_user_permissions_cache(user=user)
+    
+    send_verification_email(user=user)
+    
     return user
 
 
@@ -320,6 +324,38 @@ def request_password_reset(*, email: str, request_origin: str = "") -> None:
     )
 
 
+def send_verification_email(*, user: User, request_origin: str = "") -> None:
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    frontend_url = getattr(settings, "FRONTEND_URL", "").rstrip("/")
+    query = urlencode({"uid": uid, "token": token})
+    verification_url = (
+        f"{frontend_url}/verify-user?{query}"
+        if frontend_url
+        else f"/verify-user?{query}"
+    )
+
+    context = {
+        "full_name": user.full_name,
+        "verification_url": verification_url,
+    }
+    html_content = render_to_string("emails/verification.html", context)
+
+    send_mail(
+        subject=f"{settings.APP_NAME}: Verificação de E-mail",
+        message=f"Acesse o link para verificar sua conta: {verification_url}",
+        from_email=None,
+        recipient_list=[user.email],
+        html_message=html_content,
+        fail_silently=False,
+    )
+    AnalyticsEvent.objects.create(
+        user=user,
+        event_type="auth.verification_email_sent",
+        metadata={"origin": request_origin},
+    )
+
+
 @transaction.atomic
 def reset_user_password(*, uid: str, token: str, new_password: str) -> None:
     user_id = force_str(urlsafe_base64_decode(uid))
@@ -330,3 +366,20 @@ def reset_user_password(*, uid: str, token: str, new_password: str) -> None:
     user.set_password(new_password)
     user.save(update_fields=["password", "updated_at"])
     AnalyticsEvent.objects.create(user=user, event_type="auth.password_reset_completed")
+
+
+@transaction.atomic
+def verify_user_email(*, uid: str, token: str) -> None:
+    try:
+        user_id = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=user_id, is_active=True)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        raise ValidationError({"token": ["Token de verificação inválido ou usuário não encontrado."]})
+
+    if not default_token_generator.check_token(user, token):
+        raise ValidationError({"token": ["Token de verificação inválido ou expirado."]})
+
+    if not user.is_verified:
+        user.is_verified = True
+        user.save(update_fields=["is_verified", "updated_at"])
+        AnalyticsEvent.objects.create(user=user, event_type="auth.email_verified")
