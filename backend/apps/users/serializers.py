@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from apps.users.models import Permission, Role, User
 
@@ -112,8 +113,21 @@ class ErrorResponseSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=50)
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message="Este e-mail ja esta em uso."
+            )
+        ]
+    )
+    username = serializers.CharField(
+        max_length=50,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message="Este username ja esta em uso."
+            )
+        ],
+    )
     full_name = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True, min_length=8)
 
