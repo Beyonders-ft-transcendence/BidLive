@@ -29,7 +29,7 @@ def test_seed_demo_data_creates_users_and_auctions():
     assert Notification.objects.filter(user__email__iendswith=f"@{DEMO_EMAIL_DOMAIN}").count() == 3
     assert Report.objects.filter(reporter__email__iendswith=f"@{DEMO_EMAIL_DOMAIN}").count() == 1
     analytics_qs = AnalyticsEvent.objects.filter(user__email__iendswith=f"@{DEMO_EMAIL_DOMAIN}")
-    assert analytics_qs.count() == 3
+    assert analytics_qs.count() == 7
 
 
 @pytest.mark.django_db
