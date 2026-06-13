@@ -23,6 +23,7 @@ import Dashboard from './pages/Dashboard';
 import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
 import VerifyUser from './pages/VerifyUser';
+import OAuthCallback from './pages/OAuthCallback';
 import { apiService, logout } from './services/api';
 
 export default function App() {
@@ -312,6 +313,8 @@ export default function App() {
 
   const selectedAuction = selectedAuctionId ? auctions.find((a) => a.id === selectedAuctionId) ?? null : null;
   const isVerifyUserRoute = window.location.pathname === '/verify-user';
+  const isOAuthCallbackRoute = window.location.pathname.startsWith('/auth/');
+  const oauthProviderMatch = window.location.pathname.match(/^\/auth\/(google|42)\/callback/);
 
   const goToLoginFromVerification = () => {
     window.history.replaceState(null, '', '/');
@@ -328,6 +331,15 @@ export default function App() {
 
   if (isVerifyUserRoute) {
     return <VerifyUser onBackToLogin={goToLoginFromVerification} />;
+  }
+
+  if (isOAuthCallbackRoute && oauthProviderMatch) {
+    const provider = oauthProviderMatch[1] as 'google' | '42';
+    return <OAuthCallback provider={provider} onLoginSuccess={(user) => {
+      // Remover a rota do histórico para não re-renderizar o callback
+      window.history.replaceState(null, '', '/');
+      handleLoginSuccess(user);
+    }} />;
   }
 
   if (!currentUser) {
