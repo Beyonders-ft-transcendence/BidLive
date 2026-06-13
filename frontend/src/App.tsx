@@ -22,6 +22,7 @@ import MyAuctions, { CreateAuctionInput } from './pages/MyAuctions';
 import Dashboard from './pages/Dashboard';
 import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
+import VerifyUser from './pages/VerifyUser';
 import { apiService, logout } from './services/api';
 
 export default function App() {
@@ -310,6 +311,12 @@ export default function App() {
   };
 
   const selectedAuction = selectedAuctionId ? auctions.find((a) => a.id === selectedAuctionId) ?? null : null;
+  const isVerifyUserRoute = window.location.pathname === '/verify-user';
+
+  const goToLoginFromVerification = () => {
+    window.history.replaceState(null, '', '/');
+    setCurrentPage('home');
+  };
 
   if (isBootstrapping) {
     return (
@@ -317,6 +324,10 @@ export default function App() {
         Conectando ao backend...
       </div>
     );
+  }
+
+  if (isVerifyUserRoute) {
+    return <VerifyUser onBackToLogin={goToLoginFromVerification} />;
   }
 
   if (!currentUser) {

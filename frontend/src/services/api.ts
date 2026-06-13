@@ -355,6 +355,17 @@ export const apiService = {
     };
   },
 
+  async verifyUser(uid: string, token: string): Promise<{ success: boolean; message?: string }> {
+    const res = await request('/auth/verify-user/', {
+      method: 'POST',
+      body: JSON.stringify({ uid, token }),
+    });
+    return {
+      success: res.success,
+      message: res.message || (res.success ? 'E-mail verificado com sucesso.' : 'Link de verificação inválido ou expirado.'),
+    };
+  },
+
   async getMe(): Promise<{ success: boolean; user?: User }> {
     const res = await request('/auth/me/');
     if (res.success && res.data) {
