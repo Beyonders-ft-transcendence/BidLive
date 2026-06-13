@@ -497,6 +497,17 @@ export const apiService = {
     return { success: false, streams: [] };
   },
 
+  async createStream(auctionId: string, title?: string): Promise<{ success: boolean; stream?: Stream; message?: string }> {
+    const res = await request<any>(`/auctions/${auctionId}/streams/`, {
+      method: 'POST',
+      body: JSON.stringify({ title: title || 'Nova Stream' }),
+    });
+    if (res.success && res.data) {
+      return { success: true, stream: mapStream(res.data) };
+    }
+    return { success: false, message: res.message };
+  },
+
   async startStream(auctionId: string, streamId: string): Promise<{ success: boolean; message?: string }> {
     const res = await request(`/auctions/${auctionId}/streams/${streamId}/start/`, { method: 'POST' });
     return { success: res.success, message: res.message };
