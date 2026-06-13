@@ -344,10 +344,10 @@ export const apiService = {
     };
   },
 
-  async register(username: string, email: string, password: string): Promise<{ success: boolean; message?: string }> {
+  async register(username: string, email: string, password: string, full_name?: string): Promise<{ success: boolean; message?: string }> {
     const res = await request('/auth/register/', {
       method: 'POST',
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ username, email, full_name, password }),
     });
     return {
       success: res.success,
