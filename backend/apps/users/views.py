@@ -29,6 +29,7 @@ from apps.users.serializers import (
     SwaggerOAuth2TokenResponseSerializer,
     UserMeResponseSerializer,
     UserSerializer,
+    VerifyUserSerializer,
 )
 from apps.users.services import (
     authenticate_user,
@@ -38,6 +39,7 @@ from apps.users.services import (
     refresh_user_tokens,
     request_password_reset,
     reset_user_password,
+    verify_user_email,
 )
 from apps.users.oauth_service import (
     authenticate_42_with_code,
@@ -688,6 +690,53 @@ class ResetPasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         reset_user_password(**serializer.validated_data)
         return success_response({}, message="Senha redefinida com sucesso.")
+
+
+class VerifyUserView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    throttle_classes = [AuthPasswordThrottle]
+    serializer_class = VerifyUserSerializer
+
+    @extend_schema(
+        tags=AUTH_TAGS,
+        summary="Verificar e-mail do usuário",
+        description="Verifica o e-mail do usuário utilizando o uid e o token recebidos por e-mail.",
+        auth=[],
+        request=VerifyUserSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=EmptySuccessResponseSerializer,
+                description="E-mail verificado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=AUTH_ERROR_RESPONSE,
+                description="Uid ou token inválidos.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Requisição de verificação de e-mail",
+                value={"uid": "MQ", "token": "c9o3yy-7a17cc18f4f6b0c0f18f705f8f0f7d3c"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Resposta de sucesso",
+                value={
+                    "success": True,
+                    "message": "E-mail verificado com sucesso.",
+                    "data": {},
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = VerifyUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        verify_user_email(**serializer.validated_data)
+        return success_response({}, message="E-mail verificado com sucesso.")
 
 
 class GoogleLoginView(APIView):
