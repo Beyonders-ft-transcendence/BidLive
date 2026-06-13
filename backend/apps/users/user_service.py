@@ -14,6 +14,7 @@ from apps.users.authorization_service import (
 from apps.users.constants import DEFAULT_SIGNUP_ROLE
 from apps.users.models import Role, User, UserRole, UserStatus
 from apps.users.selectors import get_user_roles
+from apps.users.services import send_verification_email
 
 
 @transaction.atomic
@@ -51,6 +52,9 @@ def create_managed_user(
         metadata={"roles": resolved_roles},
         ip_address=ip_address,
     )
+    
+    send_verification_email(user=user)
+    
     return user
 
 
