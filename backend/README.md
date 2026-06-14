@@ -89,7 +89,7 @@ docker run -d --name livekit \
 uv sync
 uv run python manage.py makemigrations
 uv run python manage.py migrate
-make seed
+uv run python manage.py seed
 uv run python manage.py runserver 0.0.0.0:8000
 uv run pytest -q
 uv run celery -A config worker -l info
