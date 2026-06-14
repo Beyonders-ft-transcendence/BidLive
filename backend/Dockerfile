@@ -11,11 +11,12 @@ RUN apk add --no-cache \
     libffi-dev \
     jpeg-dev \
     zlib-dev \
-    curl
+    curl \
+    make
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 
 RUN pip install --no-cache-dir uv
 
@@ -31,4 +32,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["uv", "run", "gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-c", "tools/gunicorn.conf.py"]
+CMD ["make", "dev"]
