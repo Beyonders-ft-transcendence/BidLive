@@ -38,13 +38,7 @@ const STATUS_OPTIONS: { value: string; label: string; icon: React.ReactNode }[] 
   { value: "SOLD", label: "Vendido", icon: <Tag size={14} /> },
 ];
 
-const CONDITION_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: "Todas" },
-  { value: "NEW", label: "Novo" },
-  { value: "USED", label: "Usado" },
-  { value: "REFURBISHED", label: "Recondicionado" },
-  { value: "DAMAGED", label: "Danificado" },
-];
+
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
   { value: "-created_at", label: "Mais Recentes" },
@@ -78,25 +72,7 @@ function getPrimaryImage(auction: Auction): string | null {
   return primary?.file?.url || images[0]?.file?.url || null;
 }
 
-function getConditionLabel(condition: string): string {
-  switch (condition) {
-    case "NEW": return "Novo";
-    case "USED": return "Usado";
-    case "REFURBISHED": return "Recondicionado";
-    case "DAMAGED": return "Danificado";
-    default: return condition;
-  }
-}
 
-function getConditionColor(condition: string): string {
-  switch (condition) {
-    case "NEW": return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    case "USED": return "bg-amber-50 text-amber-700 border-amber-200";
-    case "REFURBISHED": return "bg-blue-50 text-blue-700 border-blue-200";
-    case "DAMAGED": return "bg-red-50 text-red-700 border-red-200";
-    default: return "bg-gray-50 text-gray-600 border-gray-200";
-  }
-}
 
 // ─── Countdown Component ──────────────────────────────────────────────────────
 
@@ -104,11 +80,7 @@ function CountdownTimer({ endTime, status }: { endTime: string; status: string }
   const [timeLeft, setTimeLeft] = useState(getTimeLeft(endTime));
 
   useEffect(() => {
-    if (status !== "LIVE") return;
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(endTime));
-    }, 1000);
-    return () => clearInterval(interval);
+    // Automatic refresh removed as requested
   }, [endTime, status]);
 
   if (status !== "LIVE") return null;
@@ -179,18 +151,7 @@ function AuctionCard({ auction, viewMode }: { auction: Auction; viewMode: "grid"
           </button>
         </div>
 
-        {/* Condition Badge */}
-        {auction.item.condition_type && (
-          <div className="absolute bottom-3 left-3">
-            <span
-              className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${getConditionColor(
-                auction.item.condition_type
-              )}`}
-            >
-              {getConditionLabel(auction.item.condition_type)}
-            </span>
-          </div>
-        )}
+
 
         {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -250,7 +211,7 @@ function AuctionCard({ auction, viewMode }: { auction: Auction; viewMode: "grid"
 
   return (
     <Link
-      href={`/auction/${auction.id}`}
+      href={`/auctions/${auction.id}`}
       className={`group bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 ${
         viewMode === "list" ? "flex flex-row" : "flex flex-col"
       }`}
@@ -300,7 +261,7 @@ export default function ExplorePage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [selectedCondition, setSelectedCondition] = useState("");
+
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [ordering, setOrdering] = useState("-created_at");
@@ -381,8 +342,7 @@ export default function ExplorePage() {
     setSearch("");
     setDebouncedSearch("");
     setSelectedStatus("");
-    setSelectedCategory(null);
-    setSelectedCondition("");
+
     setMinPrice("");
     setMaxPrice("");
     setOrdering("-created_at");
@@ -393,7 +353,6 @@ export default function ExplorePage() {
     !!debouncedSearch ||
     !!selectedStatus ||
     selectedCategory !== null ||
-    !!selectedCondition ||
     !!minPrice ||
     !!maxPrice;
 
@@ -616,28 +575,7 @@ export default function ExplorePage() {
                   </div>
                 </div>
 
-                {/* Condition Filter */}
-                <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <ShieldCheck size={14} className="text-primary" />
-                    Condição
-                  </h3>
-                  <div className="space-y-1">
-                    {CONDITION_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setSelectedCondition(opt.value)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                          selectedCondition === opt.value
-                            ? "bg-primary/10 text-primary font-bold"
-                            : "text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+
               </div>
             </aside>
 
@@ -720,30 +658,7 @@ export default function ExplorePage() {
                       </div>
                     </div>
 
-                    {/* Condition (Mobile) */}
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
-                        Condição
-                      </h4>
-                      <div className="space-y-1">
-                        {CONDITION_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            onClick={() => {
-                              setSelectedCondition(opt.value);
-                              setSidebarOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                              selectedCondition === opt.value
-                                ? "bg-primary/10 text-primary font-bold"
-                                : "text-slate-600 hover:bg-slate-50"
-                            }`}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+
 
                     {/* Apply button */}
                     <button
