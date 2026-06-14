@@ -312,7 +312,7 @@ export default function ExplorePage() {
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
 
   // Debounce search
-  const searchTimer = useRef<ReturnType<typeof setTimeout>>();
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     searchTimer.current = setTimeout(() => setDebouncedSearch(search), 400);
     return () => clearTimeout(searchTimer.current);
