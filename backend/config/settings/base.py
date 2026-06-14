@@ -216,8 +216,8 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-JWT_ACCESS_MINUTES = env("JWT_ACCESS_MINUTES", default=15)
-JWT_REFRESH_DAYS = env("JWT_REFRESH_DAYS", default=7)
+JWT_ACCESS_MINUTES = env.int("JWT_ACCESS_MINUTES", default=15)
+JWT_REFRESH_DAYS   = env.int("JWT_REFRESH_DAYS", default=7)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=JWT_ACCESS_MINUTES),
@@ -261,6 +261,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.auctions.tasks.close_auction.close_expired_auctions",
         "schedule": timedelta(minutes=1),
     },
+    "healthcheck-ping": {
+        "task": "apps.domain.tasks.sample_heartbeat",
+        "schedule": 60.0,
+    },
 }
 
 AUCTION_IMAGE_ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"]
@@ -279,12 +283,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_BEAT_SCHEDULE = {
-    "healthcheck-ping": {
-        "task": "apps.domain.tasks.sample_heartbeat",
-        "schedule": 60.0,
-    }
-}
+
 
 LOGGING = {
     "version": 1,
