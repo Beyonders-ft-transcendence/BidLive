@@ -5,6 +5,7 @@ import Link from "next/link";
 import { User, ChevronDown, Globe, Moon, PlusCircle, Gavel, LogOut } from "lucide-react";
 import { useState } from "react";
 import icon from "@/assets/images/icon.png";
+import { useAuthStore } from "@/store/auth.store";
 
 const menuItems = [
   { label: "Home", href: "#home" },
@@ -15,9 +16,7 @@ const menuItems = [
 
 export default function Header() {
   const [openUserMenu, setOpenUserMenu] = useState(false);
-  
-  // Mock para simular usuário autenticado (mude para true para ver o menu de usuário)
-  const [isAuthenticated, setIsAuthenticated] = useState(true); 
+  const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
     <header className="sticky top-0 w-full z-50 font-sans antialiased">
@@ -60,7 +59,7 @@ export default function Header() {
                 >
                   {/* Avatar Placeholder */}
                   <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                    US
+                    {user?.first_name ? user.first_name.charAt(0).toUpperCase() : (user?.username?.charAt(0).toUpperCase() || "US")}
                   </div>
                   <ChevronDown size={14} className="text-gray-400" />
                 </button>
@@ -68,21 +67,17 @@ export default function Header() {
                 {openUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                     <div className="px-4 py-2 mb-1 border-b border-gray-100">
-                      <p className="text-sm font-bold text-gray-800">Usuário Teste</p>
-                      <p className="text-xs text-gray-500">user@bidlive.com</p>
+                      <p className="text-sm font-bold text-gray-800 line-clamp-1">{user?.first_name ? `${user.first_name} ${user.last_name || ""}` : user?.username || "Usuário"}</p>
+                      <p className="text-xs text-gray-500 line-clamp-1">{user?.email || ""}</p>
                     </div>
-                    <Link href="/leilao/criar" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-orange-50 transition-colors">
-                      <PlusCircle size={15} />
-                      Criar Leilão
-                    </Link>
-                    <Link href="/lances" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-orange-50 transition-colors">
-                      <Gavel size={15} />
-                      Meus Lances
+                    <Link href="/user" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-orange-50 transition-colors">
+                      <User size={15} />
+                      Meu Painel
                     </Link>
                     <hr className="my-1 border-gray-100" />
                     <button 
                       onClick={() => {
-                        setIsAuthenticated(false);
+                        logout();
                         setOpenUserMenu(false);
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
