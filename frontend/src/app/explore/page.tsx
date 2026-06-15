@@ -75,7 +75,7 @@ export default function ExploreUser() {
   }, []);
 
   const formatCurrency = (value: string | number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+    return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(Number(value));
   };
 
   const calculateTimeLeft = (endTime: string, status: string) => {

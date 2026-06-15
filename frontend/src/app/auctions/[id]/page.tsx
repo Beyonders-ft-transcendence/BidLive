@@ -114,9 +114,9 @@ export default function AuctionDetailPage() {
   };
 
   const formatCurrency = (value: string | number) =>
-    new Intl.NumberFormat("pt-BR", {
+    new Intl.NumberFormat("pt-AO", {
       style: "currency",
-      currency: "BRL",
+      currency: "AOA",
     }).format(Number(value));
 
   const calculateTimeLeft = (endTime: string, status: string) => {
@@ -476,7 +476,7 @@ export default function AuctionDetailPage() {
                         value={bidAmount}
                         onChange={(e) => setBidAmount(e.target.value)}
                         placeholder={formatCurrency(minBid)
-                          .replace("R$", "")
+                          .replace("Kz", "")
                           .trim()}
                         className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
                         required
