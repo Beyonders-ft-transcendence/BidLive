@@ -1,4 +1,5 @@
-﻿import { 
+"use client";
+import { 
   ChevronDown, 
   SlidersHorizontal, 
   Bookmark, 
@@ -15,6 +16,27 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { HTMLMotionProps, motion } from "framer-motion";
+
+interface ScrollAnimatedCardProps extends HTMLMotionProps<"div"> {
+  className?: string;
+  children: React.ReactNode;
+}
+
+function ScrollAnimatedCard({ className, children, ...props }: ScrollAnimatedCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function ExploreUser() {
   return (
@@ -23,7 +45,12 @@ export default function ExploreUser() {
         <Header />
       <div className="max-w-7xl  mx-auto">
         {/* Top Filter Bar */}
-        <div className="bg-white rounded-sm p-2.5 mt-8 max-w-4xl mx-auto flex flex-wrap items-center justify-between shadow-sm border border-gray-100 mb-8 mt-2">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="bg-white rounded-sm p-2.5 mt-8 max-w-4xl mx-auto flex flex-wrap items-center justify-between shadow-sm border border-gray-100 mb-8 mt-2"
+        >
           
           <div className="flex items-center flex-1 divide-x divide-gray-100 overflow-x-auto">
             {/* Filter 1 */}
@@ -59,13 +86,13 @@ export default function ExploreUser() {
               Buscar Lotes!
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Grid Container */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           
           {/* Normal Card 1 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 145.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -98,10 +125,10 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
           {/* Normal Card 2 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 49.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -134,10 +161,10 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
           {/* Featured Card (Spans 2 columns) */}
-          <div className="bg-white rounded-sm p-5 shadow-sm border border-gray-100 col-span-1 md:col-span-2 xl:col-span-2 flex flex-col xl:flex-row gap-6 hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-5 shadow-sm border border-gray-100 col-span-1 md:col-span-2 xl:col-span-2 flex flex-col xl:flex-row gap-6 hover:border-primary/30 transition-colors group">
             
             {/* Left: Images */}
             <div className="flex-1 flex flex-col gap-3">
@@ -205,10 +232,10 @@ export default function ExploreUser() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
           {/* Normal Card 3 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 47.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -241,10 +268,10 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
           {/* Normal Card 4 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 57.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -277,10 +304,10 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
           
           {/* Normal Card 5 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 36.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -313,10 +340,10 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
           {/* Normal Card 6 */}
-          <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 25.000</h3>
               <button className="text-gray-300 hover:text-red-500 transition-colors">
@@ -349,7 +376,7 @@ export default function ExploreUser() {
                 </span>
               </div>
             </div>
-          </div>
+          </ScrollAnimatedCard>
 
         </div>
       </div>
