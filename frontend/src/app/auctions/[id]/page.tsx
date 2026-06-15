@@ -109,8 +109,13 @@ export default function AuctionDetailPage() {
         const bRes = results[1];
         const sRes = hasToken ? results[2] : null;
 
-        if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data)
+        if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data) {
           setAuction(aRes.value.data);
+          // Se já terminou, para o polling
+          if (["SOLD", "ENDED", "CANCELLED"].includes(aRes.value.data.status)) {
+            clearInterval(interval);
+          }
+        }
         if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
           setBids(bRes.value.data.results);
         if (sRes && sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
@@ -130,7 +135,8 @@ export default function AuctionDetailPage() {
     if (auction) {
       const cPrice = Number(auction.item.current_price || auction.item.starting_price);
       const inc = Number(auction.item.minimum_increment || 1);
-      const newMinBid = cPrice + inc;
+      const hasBids = auction.bids_count && auction.bids_count > 0;
+      const newMinBid = hasBids ? cPrice + inc : Number(auction.item.starting_price);
       
       setBidAmount((prev) => {
         if (!prev || Number(prev) < newMinBid) {
@@ -139,7 +145,43 @@ export default function AuctionDetailPage() {
         return prev;
       });
     }
-  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment]);
+  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment, auction?.bids_count]);
+
+  const [buyingNow, setBuyingNow] = useState(false);
+
+  const handleBuyNow = async () => {
+    if (!auction) return;
+    
+    if (typeof window !== 'undefined' && !localStorage.getItem('bidlive.auth.access_token')) {
+      router.push('/signin');
+      return;
+    }
+
+    const confirmBuy = window.confirm(`Tem certeza que deseja arrematar este lote por ${formatCurrency(auction.item.buy_now_price || 0)}?`);
+    if (!confirmBuy) return;
+
+    setBuyingNow(true);
+    setError(null);
+    try {
+      const res = await auctionService.buyNow(id);
+      if (res.success && res.data) {
+        setAuction(res.data);
+        alert("Parabéns! Lote arrematado com sucesso.");
+      } else {
+        setError(res.message || "Erro ao efetuar compra imediata.");
+      }
+    } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        router.push('/signin');
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Erro de conexão. Não foi possível concluir a compra.");
+      }
+    } finally {
+      setBuyingNow(false);
+    }
+  };
 
   const handlePlaceBid = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -524,13 +566,24 @@ export default function AuctionDetailPage() {
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {auction.item.buy_now_price && (
-                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
-                            Comprar Agora
-                          </p>
-                          <p className="text-lg font-black text-primary">
-                            {formatCurrency(auction.item.buy_now_price)}
-                          </p>
+                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50 flex flex-col justify-between">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+                              Comprar Agora
+                            </p>
+                            <p className="text-lg font-black text-primary">
+                              {formatCurrency(auction.item.buy_now_price)}
+                            </p>
+                          </div>
+                          {!["SOLD", "ENDED", "CANCELLED"].includes(auction.status) && (
+                            <button
+                              onClick={handleBuyNow}
+                              disabled={buyingNow}
+                              className="mt-3 w-full bg-[#0C1B33] hover:bg-slate-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[10px] font-bold uppercase tracking-widest py-2 rounded-sm transition-colors"
+                            >
+                              {buyingNow ? "Processando..." : "Arrematar Lote"}
+                            </button>
+                          )}
                         </div>
                       )}
                       {auction.item.reserve_price && (
