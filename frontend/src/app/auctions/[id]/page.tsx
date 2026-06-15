@@ -83,6 +83,21 @@ export default function AuctionDetailPage() {
     return () => clearInterval(interval);
   }, [id]);
 
+  useEffect(() => {
+    if (auction) {
+      const cPrice = Number(auction.item.current_price || auction.item.starting_price);
+      const inc = Number(auction.item.minimum_increment || 1);
+      const newMinBid = cPrice + inc;
+      
+      setBidAmount((prev) => {
+        if (!prev || Number(prev) < newMinBid) {
+          return String(newMinBid);
+        }
+        return prev;
+      });
+    }
+  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment]);
+
   const handlePlaceBid = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bidAmount || !auction) return;
