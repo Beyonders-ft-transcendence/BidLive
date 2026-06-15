@@ -90,45 +90,84 @@ export default function AuctionDetailPage() {
 
     loadData();
 
-    const interval = setInterval(async () => {
-      if (!id) return;
-      try {
-        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
-        
-        const promises: Promise<any>[] = [
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ];
-        
-        if (hasToken) {
-          promises.push(auctionService.listStreams(id));
-        }
+    // ─── WEBSOCKET SETUP ───
+    let ws: WebSocket | null = null;
+    let isMounted = true;
+    let reconnectTimer: NodeJS.Timeout;
 
-        const results = await Promise.allSettled(promises);
-        const aRes = results[0];
-        const bRes = results[1];
-        const sRes = hasToken ? results[2] : null;
+    const connectWs = () => {
+      const token = typeof window !== "undefined" ? localStorage.getItem("bidlive.auth.access_token") : null;
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+      const wsBase = apiBase.replace("http", "ws").replace("/api", "/ws");
+      const wsUrl = `${wsBase}/auctions/${id}/${token ? `?token=${token}` : ""}`;
+      
+      ws = new WebSocket(wsUrl);
 
-        if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data) {
-          setAuction(aRes.value.data);
-          // Se já terminou, para o polling
-          if (["SOLD", "ENDED", "CANCELLED"].includes(aRes.value.data.status)) {
-            clearInterval(interval);
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.event === "new_bid") {
+            const bidData = data.payload;
+            setBids((prev) => {
+              // Evitar duplicados
+              if (prev.some((b) => b.id === bidData.bid_id)) return prev;
+              return [
+                {
+                  id: bidData.bid_id,
+                  amount: bidData.bid_amount,
+                  bidder: bidData.bidder,
+                  timestamp: bidData.timestamp,
+                  created_at: bidData.timestamp,
+                },
+                ...prev,
+              ];
+            });
+            setAuction((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                bids_count: (prev.bids_count || 0) + 1,
+                item: {
+                  ...prev.item,
+                  current_price: bidData.current_price,
+                },
+              };
+            });
           }
-        }
-        if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
-          setBids(bRes.value.data.results);
-        if (sRes && sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
-          const live = sRes.value.data.find((s: any) => s.status === "LIVE");
-          setActiveStream(live || null);
-          if (live) {
-            setViewerCount(live.viewer_count || 1);
-          }
-        }
-      } catch (e) {}
-    }, 5000);
 
-    return () => clearInterval(interval);
+          if (["buy_now", "auction_ended", "auction_sold", "auction_updated"].includes(data.event)) {
+            // Atualiza os dados finais via API para garantir integridade
+            auctionService.retrieve(id).then((res) => {
+              if (res.success && res.data) setAuction(res.data);
+            });
+          }
+
+          if (data.event === "auction_snapshot" && data.payload) {
+            // Opcional: Atualizar a contagem de conexões se necessário
+            // if (data.payload.active_connections !== undefined) {
+            //   setViewerCount(data.payload.active_connections);
+            // }
+          }
+        } catch (e) {
+          console.error("Erro ao processar mensagem do WebSocket", e);
+        }
+      };
+
+      ws.onclose = () => {
+        if (isMounted) {
+          reconnectTimer = setTimeout(connectWs, 3000);
+        }
+      };
+    };
+
+    connectWs();
+
+    return () => {
+      isMounted = false;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) ws.close();
+    };
   }, [id]);
 
   useEffect(() => {
