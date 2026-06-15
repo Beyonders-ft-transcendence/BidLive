@@ -27,7 +27,7 @@
     const [openIndex, setOpenIndex] = useState(0);
 
     return (
-        <section className="py-24 bg-white">
+        <section id="sobre" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-3 gap-12 lg:gap-14 items-start">
 

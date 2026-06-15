@@ -50,7 +50,7 @@ export default function Hero() {
   const slide = slides[current];
 
   return (
-    <section className="relative mt-4 h-[520px] lg:h-[600px] max-w-7xl mx-auto rounded-xl overflow-hidden">
+    <section id="home" className="relative mt-4 h-[520px] lg:h-[600px] max-w-7xl mx-auto rounded-xl overflow-hidden">
       
       {/* Background */}
       <div className="absolute inset-0">

@@ -125,7 +125,7 @@ export default function LiveAuctionsSection() {
   }, [auctions]);
 
   return (
-    <section className="py-24 bg-white border-t border-gray-100">
+    <section id="leiloes" className="py-24 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Header */}

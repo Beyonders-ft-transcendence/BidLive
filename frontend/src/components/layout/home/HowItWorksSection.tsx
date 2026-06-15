@@ -64,7 +64,7 @@ export default function HowItWorksSection() {
   const StepDetailIcon = step.icon;
 
   return (
-    <section className="py-24 bg-[#F4F5F7]">
+    <section id="como-funciona" className="py-24 bg-[#F4F5F7]">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Main Grid */}
