@@ -7,10 +7,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 env = environ.Env(
     DEBUG=(bool, False),
-    # CONN_MAX_AGE=0 is required for ASGI (uvicorn) to avoid connection pool exhaustion.
-    # With CONN_MAX_AGE > 0, each thread in the ASGI ThreadPoolExecutor keeps an idle
-    # connection alive, quickly hitting PostgreSQL's max_connections limit.
-    DATABASE_CONN_MAX_AGE=(int, 0),
+    DATABASE_CONN_MAX_AGE=(int, 60),
     DATABASE_ATOMIC_REQUESTS=(bool, True),
 )
 
@@ -31,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+	"daphne",
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "corsheaders",
@@ -99,8 +97,6 @@ DATABASES = {
 }
 DATABASES["default"]["CONN_MAX_AGE"] = env("DATABASE_CONN_MAX_AGE")
 DATABASES["default"]["ATOMIC_REQUESTS"] = env("DATABASE_ATOMIC_REQUESTS")
-# Detect and discard stale persistent connections before reuse.
-DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -161,11 +157,6 @@ FORTY_TWO_REDIRECT_URI = env(
 )
 FORTY_TWO_SCOPES = env("FORTY_TWO_SCOPES", default="public")
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
-LIVEKIT_URL = env("LIVEKIT_URL", default="http://livekit:7880")
-LIVEKIT_PUBLIC_URL = env("LIVEKIT_PUBLIC_URL", default="ws://localhost:7880")
-LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
-LIVEKIT_API_SECRET = env("LIVEKIT_API_SECRET", default="")
-LIVEKIT_TOKEN_TTL_MINUTES = env("LIVEKIT_TOKEN_TTL_MINUTES", default=60)
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -225,8 +216,8 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-JWT_ACCESS_MINUTES = env("JWT_ACCESS_MINUTES", default=15)
-JWT_REFRESH_DAYS = env("JWT_REFRESH_DAYS", default=7)
+JWT_ACCESS_MINUTES = env.int("JWT_ACCESS_MINUTES", default=15)
+JWT_REFRESH_DAYS   = env.int("JWT_REFRESH_DAYS", default=7)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=JWT_ACCESS_MINUTES),
@@ -270,6 +261,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.auctions.tasks.close_auction.close_expired_auctions",
         "schedule": timedelta(minutes=1),
     },
+    "healthcheck-ping": {
+        "task": "apps.domain.tasks.sample_heartbeat",
+        "schedule": 60.0,
+    },
 }
 
 AUCTION_IMAGE_ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"]
@@ -288,12 +283,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_BEAT_SCHEDULE = {
-    "healthcheck-ping": {
-        "task": "apps.domain.tasks.sample_heartbeat",
-        "schedule": 60.0,
-    }
-}
+
 
 LOGGING = {
     "version": 1,
@@ -314,12 +304,3 @@ LOGGING = {
         "level": "INFO",
     },
 }
-
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-EMAIL_HOST = env("EMAIL_HOST", default="")
-EMAIL_PORT = env("EMAIL_PORT", default=587, cast=int)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-EMAIL_HOST_USER = env("EMAIL_USER", default="")
-EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
-
