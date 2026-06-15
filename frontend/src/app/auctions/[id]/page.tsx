@@ -27,20 +27,26 @@ export default function AuctionDetailPage() {
     
     async function loadData() {
       try {
-        const [auctionRes, bidsRes] = await Promise.all([
+        const [auctionResult, bidsResult] = await Promise.allSettled([
           auctionService.retrieve(id),
           auctionService.listBids(id)
         ]);
         
-        if (auctionRes.success && auctionRes.data) {
-          setAuction(auctionRes.data);
+        if (auctionResult.status === 'fulfilled' && auctionResult.value?.success) {
+          setAuction(auctionResult.value.data || null);
+        } else {
+          console.error("Auction retrieve failed", auctionResult);
+          setError("Não foi possível carregar os detalhes do leilão principal.");
         }
-        if (bidsRes.success && bidsRes.data) {
-          setBids(bidsRes.data.results);
+
+        if (bidsResult.status === 'fulfilled' && bidsResult.value?.success) {
+          setBids(bidsResult.value.data?.results || []);
+        } else {
+          console.error("Bids retrieve failed", bidsResult);
         }
       } catch (err) {
-        console.error("Error loading auction", err);
-        setError("Não foi possível carregar os detalhes do leilão.");
+        console.error("Error loading auction data", err);
+        setError("Erro de conexão ao carregar os detalhes do leilão.");
       } finally {
         setLoading(false);
       }
@@ -50,13 +56,14 @@ export default function AuctionDetailPage() {
     
     // Polling for new bids every 5 seconds
     const interval = setInterval(async () => {
+      if (!id) return;
       try {
-        const [aRes, bRes] = await Promise.all([
+        const [aRes, bRes] = await Promise.allSettled([
           auctionService.retrieve(id),
           auctionService.listBids(id)
         ]);
-        if (aRes.success && aRes.data) setAuction(aRes.data);
-        if (bRes.success && bRes.data) setBids(bRes.data.results);
+        if (aRes.status === 'fulfilled' && aRes.value?.success && aRes.value.data) setAuction(aRes.value.data);
+        if (bRes.status === 'fulfilled' && bRes.value?.success && bRes.value.data) setBids(bRes.value.data.results);
       } catch (e) {
         console.error("Polling error", e);
       }
@@ -234,26 +241,63 @@ export default function AuctionDetailPage() {
                 )}
               </div>
               
-              <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-primary">
-                    <Shield size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Condição</p>
-                    <p className="text-sm font-bold text-[#0C1B33] capitalize">{auction.item.condition_type?.toLowerCase() || 'Não especificada'}</p>
-                  </div>
+              <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Condição</p>
+                  <p className="text-sm font-bold text-[#0C1B33] capitalize flex items-center gap-1.5">
+                    <Shield size={14} className="text-primary" /> {auction.item.condition_type?.toLowerCase() || 'Não especificada'}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-primary">
-                    <CheckCircle2 size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Vendedor</p>
-                    <p className="text-sm font-bold text-[#0C1B33]">Usuário #{auction.item.seller}</p>
-                  </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Vendedor</p>
+                  <p className="text-sm font-bold text-[#0C1B33] flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-primary" /> ID #{auction.item.seller}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Preço Inicial</p>
+                  <p className="text-sm font-bold text-[#0C1B33]">{formatCurrency(auction.item.starting_price)}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Incremento Mínimo</p>
+                  <p className="text-sm font-bold text-[#0C1B33]">{formatCurrency(auction.item.minimum_increment)}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Abertura</p>
+                  <p className="text-sm font-bold text-[#0C1B33]">{new Date(auction.start_time).toLocaleString('pt-BR')}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Fechamento</p>
+                  <p className="text-sm font-bold text-[#0C1B33]">{new Date(auction.end_time).toLocaleString('pt-BR')}</p>
                 </div>
               </div>
+              
+              {(auction.item.buy_now_price || auction.item.reserve_price || auction.rules) && (
+                <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-4">
+                  <h3 className="text-sm font-bold text-[#0C1B33]">Termos e Valores Adicionais</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                    {auction.item.buy_now_price && (
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Comprar Agora (Buy Now)</p>
+                        <p className="text-sm font-black text-primary">{formatCurrency(auction.item.buy_now_price)}</p>
+                      </div>
+                    )}
+                    {auction.item.reserve_price && (
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Preço de Reserva</p>
+                        <p className="text-sm font-bold text-[#0C1B33]">
+                          {auction.reserve_met ? <span className="text-green-600 flex items-center gap-1"><CheckCircle2 size={12}/> Atingido</span> : "Não Atingido"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {auction.rules && (
+                    <div className="bg-yellow-50 p-4 rounded-lg text-sm text-yellow-800">
+                      <strong>Regras Específicas:</strong> {JSON.stringify(auction.rules)}
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
 
