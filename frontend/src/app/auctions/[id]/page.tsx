@@ -263,6 +263,21 @@ export default function AuctionDetailPage() {
               )}
             </motion.div>
 
+            {/* Description Card */}
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white border border-gray-200 rounded-sm p-6 shadow-sm"
+            >
+              <h3 className="text-sm font-extrabold text-[#0C1B33] uppercase tracking-wider mb-3">Descrição</h3>
+              <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                {auction.item.description || (
+                  <span className="italic text-gray-400 font-medium">O vendedor não forneceu uma descrição detalhada para este item.</span>
+                )}
+              </div>
+            </motion.div>
+
             {/* Seller/Agency Info Card */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
@@ -411,15 +426,6 @@ export default function AuctionDetailPage() {
                 )}
               </div>
 
-              {/* Description Info */}
-              <div className="mb-8 border-t border-gray-100 pt-6">
-                <h3 className="text-sm font-extrabold text-[#0C1B33] uppercase tracking-wider mb-3">Descrição</h3>
-                <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {auction.item.description || (
-                    <span className="italic text-gray-400 font-medium">O vendedor não forneceu uma descrição detalhada para este item.</span>
-                  )}
-                </div>
-              </div>
 
               {/* Bidding History List */}
               <div className="mb-8 border-t border-gray-100 pt-6">
