@@ -258,7 +258,13 @@ export default function AuctionDetailPage() {
       } else if (err.response?.data) {
         const errorData = err.response.data;
         if (errorData.errors) {
-          setError(Object.values(errorData.errors).flat().join(" "));
+          const errList = Array.isArray(errorData.errors) ? errorData.errors : [errorData.errors];
+          const errStrings = errList.map((e: any) => {
+            if (typeof e === "string") return e;
+            if (typeof e === "object" && e !== null) return Object.values(e).flat().join(" ");
+            return String(e);
+          });
+          setError(errStrings.join(" "));
         } else {
           setError(errorData.message || "Valor inválido. Verifique o seu lance.");
         }
