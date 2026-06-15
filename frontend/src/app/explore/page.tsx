@@ -14,6 +14,7 @@
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 
 export default function ExploreUser() {
   return (
@@ -352,6 +353,7 @@ export default function ExploreUser() {
 
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
