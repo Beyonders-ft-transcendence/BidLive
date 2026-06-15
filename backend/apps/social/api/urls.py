@@ -4,7 +4,7 @@ from apps.social.api.views import BlockViewSet, FriendshipViewSet
 
 router = DefaultRouter()
 
-router.register("friendships", FriendshipViewSet, basename="friendships")
-router.register("users", BlockViewSet, basename="users")
+router.register("social/friendships", FriendshipViewSet, basename="friendships")
+router.register("social/users", BlockViewSet, basename="users")
 
 urlpatterns = router.urls
