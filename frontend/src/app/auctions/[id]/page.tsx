@@ -263,7 +263,7 @@ export default function AuctionDetailPage() {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-gray-100 shadow-lg p-6 lg:p-8 sticky top-6"
+              className="bg-white rounded-xl border border-gray-100 shadow-lg p-6 lg:p-8"
             >
               <div className="mb-2">
                 <span className="text-[11px] font-extrabold tracking-[1px] uppercase text-primary bg-primary/10 px-2 py-1 rounded-sm">
