@@ -346,14 +346,12 @@ export default function AuctionDetailPage() {
               </div>
 
               {/* Title & Price Column / Flex */}
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-                <div className="flex-1">
-                  <h1 className="text-2xl lg:text-3xl font-extrabold text-[#0C1B33] leading-tight">
-                    {auction.item.title}
-                  </h1>
-                </div>
-                <div className="text-left md:text-right shrink-0">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Lance Atual</p>
+              <div className="flex flex-col gap-3 mb-6">
+                <h1 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33] leading-tight">
+                  {auction.item.title}
+                </h1>
+                <div className="mt-1">
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-1">Lance Atual</p>
                   <p className="text-2xl lg:text-3xl font-black text-primary">
                     {formatCurrency(currentPrice)}
                   </p>
