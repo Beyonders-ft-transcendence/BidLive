@@ -144,7 +144,11 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
         if (typeof errorData.errors === "string") {
           errorMsg = errorData.errors;
         } else if (Array.isArray(errorData.errors)) {
-          errorMsg = errorData.errors.join(" ");
+          errorMsg = errorData.errors.map((e: any) => {
+            if (typeof e === "string") return e;
+            if (typeof e === "object" && e !== null) return Object.values(e).flat().join(" ");
+            return String(e);
+          }).join(" ");
         } else if (typeof errorData.errors === "object") {
           errorMsg = Object.values(errorData.errors).flat().join(" ");
         }
