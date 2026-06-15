@@ -106,6 +106,45 @@ class AuctionService {
     return response.data;
   }
 
+  // ============================================================================
+  // NESTED LIVE STREAM ENDPOINTS (UC07)
+  // ============================================================================
+
+  async listStreams(auctionId: number): Promise<ApiResponse<any[]>> {
+    const response = await api.get<ApiResponse<any[]>>(`/auctions/${auctionId}/streams/`);
+    return response.data;
+  }
+
+  async createStream(auctionId: number, payload: any): Promise<ApiResponse<any>> {
+    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/`, payload);
+    return response.data;
+  }
+
+  async startStream(auctionId: number, streamId: number, payload: { stream_key?: string; metadata?: any }): Promise<ApiResponse<any>> {
+    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/start/`, payload);
+    return response.data;
+  }
+
+  async endStream(auctionId: number, streamId: number, payload?: { reason?: string }): Promise<ApiResponse<any>> {
+    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/end/`, payload || {});
+    return response.data;
+  }
+
+  async regenerateStreamKey(auctionId: number, streamId: number): Promise<ApiResponse<any>> {
+    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/regenerate-key/`);
+    return response.data;
+  }
+
+  async listStreamViewers(auctionId: number, streamId: number): Promise<ApiResponse<{ count: number; results: any[] }>> {
+    const response = await api.get<ApiResponse<{ count: number; results: any[] }>>(`/auctions/${auctionId}/streams/${streamId}/viewers/`);
+    return response.data;
+  }
+
+  async getLiveKitToken(auctionId: number, streamId: number, payload: { role?: string; participant_name?: string; metadata?: any }): Promise<ApiResponse<any>> {
+    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/livekit-token/`, payload);
+    return response.data;
+  }
+
   async listCategories(): Promise<ApiResponse<AuctionCategory[]>> {
     const response = await api.get<ApiResponse<AuctionCategory[]>>('/categories/');
     return response.data;

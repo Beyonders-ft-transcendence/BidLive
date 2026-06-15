@@ -108,6 +108,7 @@ export interface Bid {
   created_at: string; // ISO 8601 datetime
 }
 
+
 // ============================================================================
 // PAYLOADS
 // ============================================================================
@@ -126,6 +127,7 @@ export interface AuctionCreatePayload {
   is_draft?: boolean;
   rules?: Record<string, any>;
   images?: File[];
+  image_urls?: string[];
 }
 
 export interface AuctionUpdatePayload {
@@ -137,6 +139,7 @@ export interface AuctionUpdatePayload {
   reserve_price?: number | string | null;
   rules?: Record<string, any>;
   images?: File[];
+  image_urls?: string[];
   primary_image_id?: number;
   publish?: boolean;
 }
@@ -148,6 +151,106 @@ export interface AuctionCancelPayload {
 export interface BidCreatePayload {
   amount: number | string;
   metadata?: Record<string, any>;
+}
+
+// ============================================================================
+// STREAM TYPES
+// ============================================================================
+
+export enum LiveStreamStatus {
+  DRAFT = "DRAFT",
+  READY = "READY",
+  LIVE = "LIVE",
+  ENDED = "ENDED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum LiveStreamVisibility {
+  PUBLIC = "PUBLIC",
+  UNLISTED = "UNLISTED",
+  PRIVATE = "PRIVATE",
+}
+
+export interface StreamViewer {
+  id: number;
+  viewer: {
+    id: number;
+    username: string;
+    full_name: string;
+  };
+  joined_at: string;
+  last_seen_at: string;
+}
+
+export interface LiveStream {
+  id: number;
+  auction: number;
+  auction_id: number;
+  streamer: {
+    id: number;
+    username: string;
+    full_name: string;
+  };
+  title: string;
+  description: string;
+  thumbnail: FileBrief | null;
+  stream_key: string;
+  status: LiveStreamStatus;
+  visibility: LiveStreamVisibility;
+  is_live: boolean;
+  viewer_count: number;
+  stream_meta: Record<string, any> | null;
+  started_at: string | null;
+  ended_at: string | null;
+  created_at: string;
+  updated_at: string;
+  viewers?: StreamViewer[];
+}
+
+export interface StreamCreatePayload {
+  title?: string;
+  description?: string;
+  thumbnail_url?: string;
+  visibility?: LiveStreamVisibility;
+  status?: LiveStreamStatus;
+  stream_meta?: Record<string, any>;
+}
+
+export interface StreamUpdatePayload {
+  title?: string;
+  description?: string;
+  thumbnail_url?: string;
+  visibility?: LiveStreamVisibility;
+  stream_meta?: Record<string, any>;
+}
+
+export interface StreamStartPayload {
+  stream_key?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface StreamEndPayload {
+  reason?: string;
+}
+
+export interface LiveKitTokenRequest {
+  role?: "viewer" | "broadcaster" | "moderator";
+  participant_name?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface LiveKitTokenResponse {
+  token: string;
+  room_name: string;
+  url: string;
+  identity: string;
+  name: string;
+  role: string;
+  can_publish: boolean;
+  can_subscribe: boolean;
+  expires_at: string;
+  stream_id: number;
+  auction_id: number;
 }
 
 // ============================================================================
@@ -166,3 +269,8 @@ export type AuctionDetailResponse = ApiResponse<Auction>;
 export type AuctionCategoryListResponse = ApiResponse<AuctionCategory[]>;
 export type BidListResponse = ApiResponse<PaginatedResponse<Bid>>;
 export type BidDetailResponse = ApiResponse<Bid>;
+export type StreamListResponse = ApiResponse<LiveStream[]>;
+export type StreamDetailResponse = ApiResponse<LiveStream>;
+export type LiveKitTokenResponseEnvelope = ApiResponse<LiveKitTokenResponse>;
+export type StreamViewerResponse = ApiResponse<{ count: number; results: StreamViewer[] }>;
+

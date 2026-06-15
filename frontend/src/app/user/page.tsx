@@ -18,11 +18,12 @@ import OverviewTab from "@/components/user/OverviewTab";
 import MyAuctionsTab from "@/components/user/MyAuctionsTab";
 import MyBidsTab from "@/components/user/MyBidsTab";
 import SettingsTab from "@/components/user/SettingsTab";
-import CreateAuctionModal from "@/components/user/CreateAuctionModal";
+import CreateAuctionTab from "@/components/user/CreateAuctionTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
 import Modal from "@/components/common/Modal";
+import StreamConsoleModal from "@/components/user/StreamConsoleModal";
 
 export default function UserPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function UserPage() {
   const logout = useAuthStore((s) => s.logout);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings" | "create-auction">("overview");
 
   // Dashboard state
   const [myAuctions, setMyAuctions] = useState<Auction[]>([]);
@@ -57,6 +58,10 @@ export default function UserPage() {
   const [cancelReason, setCancelReason] = useState("");
   const [approveAuctionId, setApproveAuctionId] = useState<number | null>(null);
   const [deleteAuctionId, setDeleteAuctionId] = useState<number | null>(null);
+  
+  // Streaming states
+  const [selectedStreamAuction, setSelectedStreamAuction] = useState<Auction | null>(null);
+  const [isStreamConsoleOpen, setIsStreamConsoleOpen] = useState(false);
 
   // Route protection
   useEffect(() => {
@@ -240,7 +245,7 @@ export default function UserPage() {
               myAuctions={myAuctions}
               loadingAll={loadingAll}
               allAuctions={allAuctions}
-              onCreateNewClick={() => setIsCreateModalOpen(true)}
+              onCreateNewClick={() => setActiveTab("create-auction")}
               onViewAllAuctionsClick={() => setActiveTab("my-auctions")}
               onViewAllBidsClick={() => setActiveTab("my-bids")}
             />
@@ -258,7 +263,11 @@ export default function UserPage() {
               onPublishClick={setApproveAuctionId}
               onCancelClick={setCancelAuctionId}
               onDeleteClick={setDeleteAuctionId}
-              onCreateNewClick={() => setIsCreateModalOpen(true)}
+              onCreateNewClick={() => setActiveTab("create-auction")}
+              onManageStreamClick={(auc) => {
+                setSelectedStreamAuction(auc);
+                setIsStreamConsoleOpen(true);
+              }}
             />
           )}
 
@@ -271,16 +280,20 @@ export default function UserPage() {
           )}
 
           {activeTab === "settings" && <SettingsTab user={user} />}
+
+          {activeTab === "create-auction" && (
+            <CreateAuctionTab
+              categories={categories}
+              onSuccess={() => {
+                fetchMyAuctions();
+                setActiveTab("my-auctions");
+              }}
+            />
+          )}
         </div>
       </main>
 
-      {/* CREATE AUCTION MODAL FORM */}
-      <CreateAuctionModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        categories={categories}
-        onSuccess={fetchMyAuctions}
-      />
+
 
       {/* DETAIL VIEW MODAL */}
       {selectedAuction && (
@@ -459,6 +472,16 @@ export default function UserPage() {
           </div>
         </div>
       )}
+
+      {/* STREAM CONSOLE MODAL */}
+      <StreamConsoleModal
+        isOpen={isStreamConsoleOpen}
+        onClose={() => {
+          setIsStreamConsoleOpen(false);
+          setSelectedStreamAuction(null);
+        }}
+        auction={selectedStreamAuction}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Ban, Trash2, CheckCircle, Gavel, PlusCircle } from "lucide-react";
+import { Eye, Ban, Trash2, CheckCircle, Gavel, PlusCircle, Video } from "lucide-react";
 import type { Auction } from "@/types/auction.types";
 import { AuctionStatus } from "@/types/auction.types";
 import { formatCurrency, auctionStatusColor, getAuctionStatusLabel } from "@/utils/auction";
@@ -18,6 +18,7 @@ interface MyAuctionsTabProps {
   onCancelClick: (id: number) => void;
   onDeleteClick: (id: number) => void;
   onCreateNewClick: () => void;
+  onManageStreamClick: (auction: Auction) => void;
 }
 
 export default function MyAuctionsTab({
@@ -32,6 +33,7 @@ export default function MyAuctionsTab({
   onCancelClick,
   onDeleteClick,
   onCreateNewClick,
+  onManageStreamClick,
 }: MyAuctionsTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none">
@@ -164,6 +166,16 @@ export default function MyAuctionsTab({
                           className="p-1.5 rounded-sm hover:bg-red-50 text-red-500 transition-colors cursor-pointer border border-gray-100 bg-white"
                         >
                           <Ban size={12} />
+                        </button>
+                      )}
+
+                      {(auc.status === AuctionStatus.LIVE || auc.status === AuctionStatus.SCHEDULED) && (
+                        <button
+                          onClick={() => onManageStreamClick(auc)}
+                          title="Transmitir Ao Vivo"
+                          className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-gray-100 bg-white"
+                        >
+                          <Video size={12} />
                         </button>
                       )}
                     </div>

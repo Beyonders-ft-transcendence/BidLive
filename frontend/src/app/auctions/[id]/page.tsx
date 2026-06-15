@@ -14,6 +14,7 @@ import {
   User,
   CalendarDays,
   TrendingUp,
+  Video,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -34,15 +35,19 @@ export default function AuctionDetailPage() {
   const [submittingBid, setSubmittingBid] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [activeStream, setActiveStream] = useState<any | null>(null);
+  const [isWatchingStream, setIsWatchingStream] = useState(false);
+  const [viewerCount, setViewerCount] = useState(0);
 
   useEffect(() => {
     if (!id) return;
 
     async function loadData() {
       try {
-        const [auctionResult, bidsResult] = await Promise.allSettled([
+        const [auctionResult, bidsResult, streamResult] = await Promise.allSettled([
           auctionService.retrieve(id),
           auctionService.listBids(id),
+          auctionService.listStreams(id),
         ]);
 
         if (
@@ -57,6 +62,15 @@ export default function AuctionDetailPage() {
         if (bidsResult.status === "fulfilled" && bidsResult.value?.success) {
           setBids(bidsResult.value.data?.results || []);
         }
+
+        if (streamResult.status === "fulfilled" && streamResult.value?.success && streamResult.value.data) {
+          const live = streamResult.value.data.find((s: any) => s.status === "LIVE");
+          setActiveStream(live || null);
+          if (live) {
+            setIsWatchingStream(true);
+            setViewerCount(live.viewer_count || 1);
+          }
+        }
       } catch (err) {
         setError("Erro de conexão ao carregar os detalhes do leilão.");
       } finally {
@@ -69,14 +83,22 @@ export default function AuctionDetailPage() {
     const interval = setInterval(async () => {
       if (!id) return;
       try {
-        const [aRes, bRes] = await Promise.allSettled([
+        const [aRes, bRes, sRes] = await Promise.allSettled([
           auctionService.retrieve(id),
           auctionService.listBids(id),
+          auctionService.listStreams(id),
         ]);
         if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data)
           setAuction(aRes.value.data);
         if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
           setBids(bRes.value.data.results);
+        if (sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
+          const live = sRes.value.data.find((s: any) => s.status === "LIVE");
+          setActiveStream(live || null);
+          if (live) {
+            setViewerCount(live.viewer_count || 1);
+          }
+        }
       } catch (e) {}
     }, 5000);
 
@@ -248,62 +270,139 @@ export default function AuctionDetailPage() {
           {/* ── LEFT COLUMN ── */}
           <div className="flex flex-col gap-6">
 
-            {/* Image Gallery */}
+            {/* Image Gallery / Live Stream Player */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden"
+              className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden flex flex-col"
             >
-              {/* Main image */}
-              <div className="relative aspect-video bg-gray-100">
-                {images.length > 0 ? (
-                  <img
-                    src={images[activeImage]?.file?.url}
-                    alt={auction.item.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                    <Gavel size={44} className="mb-2" />
-                    <span className="text-sm">Sem imagem</span>
-                  </div>
-                )}
-
-                {/* Status badges */}
-                <div className="absolute top-3 left-3 flex gap-2">
-                  <span className="bg-white/90 backdrop-blur-sm text-[#0C1B33] text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-sm">
-                    Lote #{auction.id}
-                  </span>
-                  {isLive && (
-                    <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      Ao Vivo
-                    </span>
-                  )}
+              {/* Tab Header if active stream exists */}
+              {activeStream && (
+                <div className="flex border-b border-gray-100 bg-gray-50/50">
+                  <button
+                    onClick={() => setIsWatchingStream(false)}
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${
+                      !isWatchingStream
+                        ? "text-primary bg-white border-b-2 border-primary"
+                        : "text-gray-400 hover:text-slate-700"
+                    }`}
+                  >
+                    Galeria de Fotos
+                  </button>
+                  <button
+                    onClick={() => setIsWatchingStream(true)}
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isWatchingStream
+                        ? "text-red-500 bg-white border-b-2 border-red-500"
+                        : "text-gray-400 hover:text-red-500"
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    Transmissão Ao Vivo (LIVE)
+                  </button>
                 </div>
-              </div>
+              )}
 
-              {/* Thumbnails */}
-              {images.length > 1 && (
-                <div className="flex gap-2 p-3 border-t border-gray-100 bg-gray-50 overflow-x-auto">
-                  {images.map((img, i) => (
-                    <button
-                      key={img.id}
-                      onClick={() => setActiveImage(i)}
-                      className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors ${
-                        activeImage === i
-                          ? "border-primary"
-                          : "border-transparent hover:border-gray-300"
-                      }`}
-                    >
+              {isWatchingStream && activeStream ? (
+                /* LIVE STREAM PLAYER */
+                <div className="relative aspect-video bg-slate-950 flex flex-col justify-between p-4 text-white">
+                  {/* Top bar info */}
+                  <div className="flex items-center justify-between z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
+                        <span className="w-1 h-1 bg-white rounded-full" />
+                        AO VIVO
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-300 truncate max-w-[200px]">
+                        {activeStream.title}
+                      </span>
+                    </div>
+
+                    <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
+                      {viewerCount} assistindo
+                    </div>
+                  </div>
+
+                  {/* Simulated Livestream Video Area */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950/20 via-slate-900 to-slate-950">
+                    {/* Visual stream capture animation / mock video */}
+                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 animate-pulse mb-3">
+                      <Video size={24} className="text-white" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">
+                      Transmitindo via LiveKit Ingress
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-mono mt-2 bg-black/30 px-3 py-1 rounded-sm border border-slate-800">
+                      ROOM: {activeStream.stream_meta?.livekit?.room_name || `room_auction_${id}`}
+                    </p>
+                  </div>
+
+                  {/* Bottom bar controls */}
+                  <div className="flex items-center justify-between z-10 w-full pt-2">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                      Streamer: @{activeStream.streamer?.username || "Vendedor"}
+                    </span>
+                    
+                    <span className="text-[9px] text-slate-500 font-mono">
+                      Protocol: WebRTC | Codec: H264
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                /* STANDARD IMAGE GALLERY */
+                <>
+                  <div className="relative aspect-video bg-gray-100">
+                    {images.length > 0 ? (
                       <img
-                        src={img.file.url}
-                        alt=""
+                        src={images[activeImage]?.file?.url}
+                        alt={auction.item.title}
                         className="w-full h-full object-cover"
                       />
-                    </button>
-                  ))}
-                </div>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                        <Gavel size={44} className="mb-2" />
+                        <span className="text-sm">Sem imagem</span>
+                      </div>
+                    )}
+
+                    {/* Status badges */}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className="bg-white/90 backdrop-blur-sm text-[#0C1B33] text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-sm">
+                        Lote #{auction.id}
+                      </span>
+                      {isLive && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          Ao Vivo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Thumbnails */}
+                  {images.length > 1 && (
+                    <div className="flex gap-2 p-3 border-t border-gray-100 bg-gray-50 overflow-x-auto">
+                      {images.map((img, i) => (
+                        <button
+                          key={img.id}
+                          onClick={() => setActiveImage(i)}
+                          className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${
+                            activeImage === i
+                              ? "border-primary"
+                              : "border-transparent hover:border-gray-300"
+                          }`}
+                        >
+                          <img
+                            src={img.file.url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </motion.div>
 

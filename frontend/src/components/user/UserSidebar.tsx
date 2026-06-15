@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, Settings } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp, Settings, PlusCircle } from "lucide-react";
 import type { User } from "@/types/auth.types";
 import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "my-auctions" | "my-bids" | "settings";
-  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "settings") => void;
+  activeTab: "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction";
+  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction") => void;
   user: User;
   onLogout: () => void;
 }
@@ -34,6 +34,7 @@ export default function UserSidebar({
   const sidebarItems = [
     { id: "overview", label: "Visão Geral", icon: <LayoutDashboard size={16} /> },
     { id: "my-auctions", label: "Meus Leilões", icon: <Gavel size={16} /> },
+    { id: "create-auction", label: "Criar Leilão", icon: <PlusCircle size={16} /> },
     { id: "my-bids", label: "Meus Lances", icon: <TrendingUp size={16} /> },
     { id: "settings", label: "Configurações", icon: <Settings size={16} /> },
   ] as const;
