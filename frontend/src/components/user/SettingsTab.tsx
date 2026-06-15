@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { User as UserIcon, Lock, Save } from "lucide-react";
+import { User as UserIcon, Lock, Save, Camera } from "lucide-react";
 import type { User } from "@/types/auth.types";
 import { useAuthStore } from "@/store/auth.store";
 import rbacService from "@/services/rbac.service";
@@ -14,6 +14,7 @@ import {
   type UpdateProfileInput,
   type ChangePasswordInput,
 } from "@/schema/user.schema";
+import { uploadImageToCloudinary } from "@/utils/cloudinary.utils";
 
 interface SettingsTabProps {
   user: User;
@@ -24,6 +25,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   const changePassword = useAuthStore((s) => s.changePassword);
 
   const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // Profile Form Hook
   const {
@@ -61,8 +64,47 @@ export default function SettingsTab({ user }: SettingsTabProps) {
       setProfileValue("full_name", user.full_name || "");
       setProfileValue("avatar_url", user.avatar_url || "");
       setProfileValue("bio", user.bio || "");
+      setAvatarPreview(user.avatar_url || null);
     }
   }, [user, setProfileValue]);
+
+  // Handle file selection and Cloudinary upload
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione um arquivo de imagem.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB.");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setUploadingAvatar(true);
+
+    try {
+      const uploadedUrl = await uploadImageToCloudinary(file);
+      if (uploadedUrl) {
+        setProfileValue("avatar_url", uploadedUrl);
+        setAvatarPreview(uploadedUrl);
+        toast.success("Foto de perfil carregada com sucesso!");
+      } else {
+        toast.error("Falha ao enviar imagem. Tente novamente.");
+        setAvatarPreview(user.avatar_url || null);
+      }
+    } catch (err) {
+      console.error("Erro no upload do avatar:", err);
+      toast.error("Ocorreu um erro ao enviar a imagem.");
+      setAvatarPreview(user.avatar_url || null);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   // Handle Profile Update submit
   const onProfileSubmit = async (data: UpdateProfileInput) => {
@@ -118,6 +160,58 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             Detalhes Pessoais
           </h3>
 
+          <div className="flex flex-col sm:flex-row items-center gap-5 pb-2">
+            <div className="relative w-20 h-20 shrink-0">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  className="w-full h-full rounded-full object-cover border-2 border-primary/20 shadow-sm"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-primary/10 text-primary border-2 border-primary/20 flex items-center justify-center font-bold text-xl uppercase">
+                  {user.full_name?.slice(0, 2).toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
+                </div>
+              )}
+
+              {uploadingAvatar && (
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1 items-center sm:items-start text-center sm:text-left">
+              <span className="text-xs font-bold text-gray-800">Foto de Perfil</span>
+              <span className="text-[10px] text-gray-400">Formatos aceitos: JPG, PNG. Máx: 5MB</span>
+              <div className="flex items-center gap-2 mt-2">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-sm text-[10px] font-bold uppercase hover:bg-gray-100 cursor-pointer transition select-none">
+                  <Camera className="w-3.5 h-3.5" />
+                  {uploadingAvatar ? "Enviando..." : "Alterar Foto"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                  />
+                </label>
+                {avatarPreview && avatarPreview !== user.avatar_url && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatarPreview(user.avatar_url || null);
+                      setProfileValue("avatar_url", user.avatar_url || "");
+                    }}
+                    className="px-3 py-1.5 text-red-500 hover:bg-red-50 rounded-sm text-[10px] font-bold uppercase border border-transparent transition"
+                  >
+                    Descartar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-gray-500 uppercase">Nome Completo</label>
@@ -142,22 +236,6 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                 disabled
                 className="w-full px-3 py-2 border border-gray-100 bg-gray-50 text-gray-400 rounded-sm text-xs outline-none cursor-not-allowed transition"
               />
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase">URL do Avatar</label>
-              <input
-                type="text"
-                {...registerProfile("avatar_url")}
-                placeholder="https://exemplo.com/avatar.jpg"
-                className={`w-full px-3 py-2 border rounded-sm text-xs outline-none transition ${
-                  profileErrors.avatar_url
-                    ? "border-red-500 focus:ring-1 focus:ring-red-500"
-                    : "border-gray-200 focus:ring-1 focus:ring-primary"
-                }`}
-              />
-              {profileErrors.avatar_url && (
-                <p className="text-[10px] text-red-500 font-semibold">{profileErrors.avatar_url.message}</p>
-              )}
             </div>
             <div className="space-y-1 sm:col-span-2">
               <label className="text-[10px] font-bold text-gray-500 uppercase">Biografia</label>
