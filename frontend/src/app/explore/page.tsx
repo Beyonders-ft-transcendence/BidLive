@@ -1,22 +1,18 @@
 "use client";
+import { useEffect, useState } from "react";
 import { 
   ChevronDown, 
   SlidersHorizontal, 
-  Bookmark, 
-  MapPin, 
   Gavel, 
   Clock, 
-  Maximize, 
-  Bed, 
-  Car,
   Image as ImageIcon,
-  Heart,
-  Bell
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { HTMLMotionProps, motion } from "framer-motion";
+import auctionService from "@/services/auction.service";
+import type { Auction } from "@/types/auction.types";
 
 interface ScrollAnimatedCardProps extends HTMLMotionProps<"div"> {
   className?: string;
@@ -38,22 +34,81 @@ function ScrollAnimatedCard({ className, children, ...props }: ScrollAnimatedCar
   );
 }
 
-export default function ExploreUser() {
+function SkeletonCard() {
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans antialiased">
-        
-        <Header />
-      <div className="max-w-7xl  mx-auto">
+    <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col animate-pulse">
+      <div className="flex justify-between items-start mb-3">
+        <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+      </div>
+      <div className="w-full h-48 bg-gray-200 rounded-sm mb-4"></div>
+      <div className="h-5 bg-gray-200 rounded w-full mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+        <div className="flex gap-2">
+          <div className="h-6 bg-gray-200 rounded w-12"></div>
+          <div className="h-6 bg-gray-200 rounded w-16"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ExploreUser() {
+  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadAuctions() {
+      try {
+        const res = await auctionService.list();
+        if (res.success && res.data) {
+          setAuctions(res.data.results);
+        }
+      } catch (error) {
+        console.error("Failed to load auctions", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadAuctions();
+  }, []);
+
+  const formatCurrency = (value: string | number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+  };
+
+  const calculateTimeLeft = (endTime: string, status: string) => {
+    if (status === "ENDED" || status === "SOLD") return "Encerrado";
+    if (status === "CANCELLED") return "Cancelado";
+    
+    const end = new Date(endTime).getTime();
+    const now = new Date().getTime();
+    const diff = end - now;
+
+    if (diff <= 0) return "Encerrado";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] font-sans antialiased flex flex-col">
+      <Header />
+      <div className="max-w-7xl mx-auto px-6 w-full flex-1 mb-16">
         {/* Top Filter Bar */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="bg-white rounded-sm p-2.5 mt-8 max-w-4xl mx-auto flex flex-wrap items-center justify-between shadow-sm border border-gray-100 mb-8 mt-2"
+          className="bg-white rounded-sm p-2.5 mt-8 max-w-4xl mx-auto flex flex-wrap items-center justify-between shadow-sm border border-gray-100 mb-8"
         >
-          
           <div className="flex items-center flex-1 divide-x divide-gray-100 overflow-x-auto">
-            {/* Filter 1 */}
             <div className="px-4 lg:px-8 py-2 flex flex-col cursor-pointer hover:bg-gray-50 rounded-sm transition-colors shrink-0">
               <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Categoria</span>
               <span className="text-sm font-bold text-[#0C1B33] flex items-center gap-2">
@@ -61,19 +116,10 @@ export default function ExploreUser() {
               </span>
             </div>
             
-            {/* Filter 2 */}
             <div className="px-4 lg:px-8 py-2 flex flex-col cursor-pointer hover:bg-gray-50 rounded-sm transition-colors shrink-0">
               <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Status</span>
               <span className="text-sm font-bold text-[#0C1B33] flex items-center gap-2">
-                Leilões Ao Vivo <ChevronDown size={14} className="text-gray-400" />
-              </span>
-            </div>
-            
-            {/* Filter 3 */}
-            <div className="px-4 lg:px-8 py-2 flex flex-col cursor-pointer hover:bg-gray-50 rounded-sm transition-colors shrink-0">
-              <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Valor Inicial</span>
-              <span className="text-sm font-bold text-[#0C1B33] flex items-center gap-2">
-                Qualquer Valor <ChevronDown size={14} className="text-gray-400" />
+                Todos <ChevronDown size={14} className="text-gray-400" />
               </span>
             </div>
           </div>
@@ -90,294 +136,61 @@ export default function ExploreUser() {
 
         {/* Grid Container */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          
-          {/* Normal Card 1 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 145.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> São Paulo, SP
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #102
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Toyota Hilux SRV 4x4 2.8 TDI Diesel CD Aut. Veículo impecável, único dono e revisado.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 12</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 02:15:30
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-
-          {/* Normal Card 2 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 49.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> Belo Horizonte, MG
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #084
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Honda Civic EXL 2.0 Flex 16V Aut. Excelente estado, com manual e chave reserva.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 8</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 04:30:00
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-
-          {/* Featured Card (Spans 2 columns) */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-5 shadow-sm border border-gray-100 col-span-1 md:col-span-2 xl:col-span-2 flex flex-col xl:flex-row gap-6 hover:border-primary/30 transition-colors group">
-            
-            {/* Left: Images */}
-            <div className="flex-1 flex flex-col gap-3">
-              <div className="w-full h-48 xl:h-[220px] bg-gray-100 rounded-sm relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                  <ImageIcon size={48} className="text-gray-300" />
-                  <div className="absolute top-3 left-3 bg-red-500 text-white px-2.5 py-1 rounded-sm text-xs font-bold flex items-center gap-1.5 shadow-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Ao Vivo
+          {loading ? (
+            <>
+              {[...Array(8)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </>
+          ) : auctions.length > 0 ? (
+            auctions.map((auction) => (
+              <ScrollAnimatedCard key={auction.id} className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">
+                    {formatCurrency(auction.item.current_price || auction.item.starting_price)}
+                  </h3>
+                </div>
+                
+                <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                  {auction.item.images && auction.item.images.length > 0 ? (
+                    <img src={auction.item.images[0].file.url} alt={auction.item.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon size={40} className="text-gray-300" />
+                  )}
+                  <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
+                    {auction.item.category_label || "Lote"} #{auction.id}
                   </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-1 h-20 bg-gray-100 rounded-sm flex items-center justify-center hover:bg-gray-200 cursor-pointer transition-colors">
-                  <ImageIcon size={24} className="text-gray-300" />
+                  {auction.status === "LIVE" && (
+                    <div className="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-sm text-xs font-bold flex items-center gap-1.5 shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Ao Vivo
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1 h-20 bg-gray-100 rounded-sm flex items-center justify-center hover:bg-gray-200 cursor-pointer transition-colors">
-                  <ImageIcon size={24} className="text-gray-300" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Right: Info */}
-            <div className="flex-1 flex flex-col pt-1">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-2xl xl:text-[28px] font-extrabold text-[#0C1B33]">R$ 1.250.000</h3>
-                <button className="text-red-500 hover:text-red-600 transition-colors">
-                  <Bookmark size={24} fill="currentColor" />
-                </button>
-              </div>
-              
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-6 font-medium">
-                <MapPin size={14} className="text-gray-400" /> Alphaville, Barueri - SP
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-2 gap-y-4 gap-x-2 mb-6 border-y border-gray-50 py-4">
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Área Total</p>
-                  <p className="text-sm font-bold text-[#0C1B33] flex items-center gap-1.5"><Maximize size={14} className="text-gray-400"/> 450 m²</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Quartos</p>
-                  <p className="text-sm font-bold text-[#0C1B33] flex items-center gap-1.5"><Bed size={14} className="text-gray-400"/> 4 Suítes</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Vagas</p>
-                  <p className="text-sm font-bold text-[#0C1B33] flex items-center gap-1.5"><Car size={14} className="text-gray-400"/> 6 Vagas</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Lances</p>
-                  <p className="text-sm font-bold text-[#0C1B33] flex items-center gap-1.5"><Gavel size={14} className="text-gray-400"/> 34 Lances</p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2">Visão Geral</p>
-                <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 font-medium">
-                  Casa de alto padrão em condomínio fechado, projeto arquitetônico moderno, acabamento premium. Piscina borda infinita, área gourmet completa e vista definitiva para a reserva ambiental.
+                
+                <h4 className="text-sm font-bold text-[#0C1B33] line-clamp-1 mb-1">{auction.item.title}</h4>
+                <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
+                  {auction.item.description || "Nenhuma descrição disponível."}
                 </p>
-              </div>
-
-              <div className="mt-auto flex items-center gap-3">
-                <button className="flex-1 bg-primary hover:bg-primary/90 text-white py-3.5 rounded-sm text-sm font-bold transition-colors shadow-md shadow-blue-500/10">
-                  Dar Lance Agora
-                </button>
-                <div className="bg-red-50 border border-red-100 px-4 py-3.5 rounded-sm flex items-center gap-2 text-sm font-bold text-red-600">
-                  <Clock size={16} /> 00:12:45
+                
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+                  <Link href={`/auctions/${auction.id}`} className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                    Detalhes
+                  </Link>
+                  <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
+                    <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> {auction.bids_count || 0}</span>
+                    <span className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border ${auction.status === "LIVE" ? "bg-red-50 border-red-100 text-red-600" : "bg-gray-50 border-gray-100"}`}>
+                      <Clock size={14} className={auction.status === "LIVE" ? "text-red-500" : "text-gray-400"} /> 
+                      {calculateTimeLeft(auction.end_time, auction.status)}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </ScrollAnimatedCard>
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center text-gray-500">
+              Nenhum leilão encontrado no momento.
             </div>
-          </ScrollAnimatedCard>
-
-          {/* Normal Card 3 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 47.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> Curitiba, PR
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #214
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Volkswagen Golf Highline 1.4 TSI Aut. Teto solar, bancos em couro, revisões na concessionária.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 5</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 1 dia
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-
-          {/* Normal Card 4 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 57.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> Rio de Janeiro, RJ
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #301
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Jeep Renegade Sport 1.8 Flex Aut. Único dono, IPVA pago, estado de zero.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 18</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 00:05:00
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-          
-          {/* Normal Card 5 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 36.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> Porto Alegre, RS
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #045
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Chevrolet Tracker 1.2 Turbo Premier. Completa, multimidia e câmera de ré.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 3</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 2 dias
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-
-          {/* Normal Card 6 */}
-          <ScrollAnimatedCard className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">R$ 25.000</h3>
-              <button className="text-gray-300 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
-              <MapPin size={14} className="text-gray-400" /> Florianópolis, SC
-            </div>
-            
-            <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <ImageIcon size={40} className="text-gray-300" />
-              <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                Lote #190
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-              Hyundai HB20 1.0 Comfort Plus. Excelente oportunidade para revenda ou uso particular.
-            </p>
-            
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                Dar Lance
-              </button>
-              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> 22</span>
-                <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-sm border border-gray-100">
-                  <Clock size={14} className="text-primary" /> 00:20:10
-                </span>
-              </div>
-            </div>
-          </ScrollAnimatedCard>
-
+          )}
         </div>
       </div>
       <Footer />
