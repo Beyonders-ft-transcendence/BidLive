@@ -101,10 +101,31 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
   }, [isOpen, auction, stream]);
 
   // Browser Media Capture Functions
+  const stopCamera = () => {
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+      setLocalStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
   const startCamera = async () => {
+    // Parar streams antigos antes de pedir novo (evita bloqueio de hardware)
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+
+    if (!cameraOn && !micOn) {
+      setLocalStream(null);
+      if (videoRef.current) videoRef.current.srcObject = null;
+      return;
+    }
+
     try {
       const constraints = {
-        video: cameraOn ? { width: 1280, height: 720 } : false,
+        video: cameraOn ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
         audio: micOn
       };
       const streamObj = await navigator.mediaDevices.getUserMedia(constraints);
@@ -114,14 +135,10 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
       }
     } catch (err) {
       console.error("Erro ao acessar câmera/microfone:", err);
-      toast.error("Não foi possível acessar a sua câmera ou microfone.");
-    }
-  };
-
-  const stopCamera = () => {
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-      setLocalStream(null);
+      toast.error("Câmara/Microfone bloqueados. Verifique as definições de privacidade do Windows ou se outra app a está a usar.");
+      // Desativar no estado para evitar loops
+      if (cameraOn) setCameraOn(false);
+      if (micOn) setMicOn(false);
     }
   };
 
