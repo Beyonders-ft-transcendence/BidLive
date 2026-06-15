@@ -34,10 +34,10 @@ return (
 
         {/* COLUNA 1 — Texto */}
         <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 50, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
         >
             <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-3 py-1.5 rounded mb-5">
             Sobre Nós
@@ -60,10 +60,10 @@ return (
 
         {/* COLUNA 2 — Imagem */}
         <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 1.1, rotate: -3 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
             className="relative rounded-xl overflow-hidden h-[340px] lg:h-[380px]"
         >
             <Image
@@ -76,16 +76,23 @@ return (
 
         {/* COLUNA 3 — Accordion */}
         <motion.div 
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            variants={{
+                visible: { transition: { staggerChildren: 0.2 } },
+                hidden: {}
+            }}
             className="flex flex-col gap-3"
         >
             {accordionItems.map((item, i) => {
             const isOpen = openIndex === i;
             return (
-                <div
+                <motion.div
+                variants={{
+                    hidden: { opacity: 0, x: 50 },
+                    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100 } }
+                }}
                 key={item.title}
                 onClick={() => setOpenIndex(i)}
                 className={`rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
@@ -120,7 +127,7 @@ return (
                     {item.content}
                     </p>
                 )}
-                </div>
+                </motion.div>
             );
             })}
         </motion.div>

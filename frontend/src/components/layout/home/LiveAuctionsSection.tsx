@@ -148,17 +148,24 @@ export default function LiveAuctionsSection() {
           
           {/* Left: 4 Overlay Cards (rounded-sm) */}
           <motion.div 
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.2 } },
+              hidden: {}
+            }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1"
           >
             {auctions.map((auc) => {
               const isPulsing = pulseId === auc.id;
 
               return (
-                <div
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 50, scale: 0.9 },
+                    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 120 } }
+                  }}
                   key={auc.id}
                   className="group relative overflow-hidden aspect-4/3 rounded-xl border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
                 >
@@ -236,17 +243,17 @@ export default function LiveAuctionsSection() {
                     </div>
 
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </motion.div>
 
           {/* Right: Premium Activity Sidebar (rounded-sm) */}
           <motion.div 
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 100 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.7, type: "spring", bounce: 0.3 }}
             className="w-full lg:w-[380px] shrink-0 flex flex-col"
           >
             <div className="bg-[#0C1B33] rounded-xl p-6 flex flex-col justify-between flex-1 text-white border border-slate-800 shadow-lg relative overflow-hidden">

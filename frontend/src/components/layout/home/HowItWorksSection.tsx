@@ -72,27 +72,41 @@ export default function HowItWorksSection() {
         <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-12 items-stretch w-full">
 
           {/* Left — Steps List */}
+          {/* Left — Steps List */}
           <motion.div 
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.15 } },
+              hidden: {}
+            }}
             className="flex flex-col gap-3 w-full lg:w-[380px] xl:w-[400px] shrink-0"
           >
             {/* Header */}
-            <div className="flex flex-col items-start mb-6">
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0, scale: 0.8 },
+                visible: { opacity: 1, scale: 1, transition: { type: "spring", bounce: 0.4 } }
+              }}
+              className="flex flex-col items-start mb-6"
+            >
               <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-4 py-1.5 rounded-full border border-primary/20 mb-4">
                 Como Funciona
               </span>
               <h2 className="text-3xl font-extrabold text-[#0C1B33] text-left leading-tight tracking-tight">
                 Participe de Leilões em<br />Apenas Alguns Passos
               </h2>
-            </div>
+            </motion.div>
             {steps.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === active;
               return (
-                <button
+                <motion.button
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.8 },
+                    visible: { opacity: 1, scale: 1, transition: { type: "spring", bounce: 0.4 } }
+                  }}
                   key={s.badge}
                   onClick={() => setActive(i)}
                   className={`flex items-center gap-4 px-5 py-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
@@ -121,18 +135,19 @@ export default function HowItWorksSection() {
                   >
                     {s.label}
                   </span>
-                </button>
+                </motion.button>
               );
             })}
           </motion.div>
 
           {/* Right — Detail Card */}
           <motion.div 
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, rotateY: -15, perspective: 1000 }}
+            whileInView={{ opacity: 1, rotateY: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px] w-full lg:w-[580px] xl:w-[740px] shrink-0"
+            style={{ transformStyle: "preserve-3d" }}
           >
             <AnimatePresence mode="wait">
               <motion.div 
