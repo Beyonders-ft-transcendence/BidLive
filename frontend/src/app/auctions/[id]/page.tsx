@@ -87,6 +87,12 @@ export default function AuctionDetailPage() {
     e.preventDefault();
     if (!bidAmount || !auction) return;
 
+    // Redirecionamento instantâneo se não houver token (usuário offline/não logado)
+    if (typeof window !== 'undefined' && !localStorage.getItem('bidlive.auth.access_token')) {
+      router.push('/signin');
+      return;
+    }
+
     setSubmittingBid(true);
     setError(null);
     try {
@@ -107,7 +113,19 @@ export default function AuctionDetailPage() {
         }
       }
     } catch (err: any) {
-      setError("Erro ao registrar lance. Verifique se você está logado.");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        // Se a API retornar erro de autenticação, redireciona de imediato para a tela de login
+        router.push('/signin');
+      } else if (err.response?.data) {
+        const errorData = err.response.data;
+        if (errorData.errors) {
+          setError(Object.values(errorData.errors).flat().join(" "));
+        } else {
+          setError(errorData.message || "Valor inválido. Verifique o seu lance.");
+        }
+      } else {
+        setError("Erro de conexão. Não foi possível registrar o lance.");
+      }
     } finally {
       setSubmittingBid(false);
     }
