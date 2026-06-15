@@ -293,7 +293,8 @@ export default function AuctionDetailPage() {
     auction.item.current_price || auction.item.starting_price
   );
   const minIncrement = Number(auction.item.minimum_increment || 1);
-  const minBid = currentPrice + minIncrement;
+  const hasBids = auction.bids_count && auction.bids_count > 0;
+  const minBid = hasBids ? currentPrice + minIncrement : Number(auction.item.starting_price);
   const isLive = auction.status === "LIVE";
   const images = auction.item.images || [];
 
