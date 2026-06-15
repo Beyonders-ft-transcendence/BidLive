@@ -1,9 +1,14 @@
 import pytest
+from datetime import timedelta
+ 
+from django.utils import timezone
 from rest_framework.test import APIClient
-
+ 
+from apps.auctions.models import Auction, AuctionItem, AuctionStatus
+from apps.chat.models import ChatRoom, Message, PrivateConversation, PrivateMessage
 from apps.social.models import Friendship, FriendshipStatus
 from apps.users.models import User
-
+ 
 
 # Fixtures base — users
 
@@ -93,3 +98,85 @@ def friendship_blocked(user, other_user):
         addressee=other_user,
         status=FriendshipStatus.BLOCKED,
     )
+
+
+# Private chat
+ 
+@pytest.fixture()
+def private_conversation(user, other_user):
+
+    uid1, uid2 = sorted([user.id, other_user.id])
+    return PrivateConversation.objects.create(user_one_id=uid1, user_two_id=uid2)
+ 
+ 
+@pytest.fixture()
+def private_message(private_conversation, user):
+    return PrivateMessage.objects.create(
+        conversation=private_conversation,
+        sender=user,
+        message="Olá, tudo bem?",
+        is_read=False,
+    )
+ 
+ 
+@pytest.fixture()
+def read_private_message(private_conversation, user):
+    return PrivateMessage.objects.create(
+        conversation=private_conversation,
+        sender=user,
+        message="Mensagem já lida",
+        is_read=True,
+    )
+ 
+
+# Auction chat
+ 
+@pytest.fixture()
+def auction_item(user):
+    return AuctionItem.objects.create(
+        seller=user,
+        title="Produto de teste",
+        starting_price="100.00",
+        current_price="100.00",
+        minimum_increment="1.00",
+    )
+ 
+ 
+@pytest.fixture()
+def auction(auction_item):
+    now = timezone.now()
+    return Auction.objects.create(
+        item=auction_item,
+        start_time=now,
+        end_time=now + timedelta(hours=2),
+        status=AuctionStatus.LIVE,
+    )
+ 
+ 
+@pytest.fixture()
+def chat_room(auction):
+    return ChatRoom.objects.create(
+        auction=auction,
+        name=f"Auction {auction.id} Chat",
+    )
+ 
+ 
+@pytest.fixture()
+def room_message(chat_room, user):
+    return Message.objects.create(
+        room=chat_room,
+        sender=user,
+        message="Lance interessante!",
+        is_deleted=False,
+    )
+ 
+ 
+@pytest.fixture()
+def deleted_room_message(chat_room, user):
+    return Message.objects.create(
+        room=chat_room,
+        sender=user,
+        message="Mensagem apagada",
+        is_deleted=True,
+    )
+ 
