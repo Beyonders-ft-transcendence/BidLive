@@ -155,6 +155,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
       <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm space-y-6">
         {/* Information update form */}
         <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-5">
+          <input type="hidden" {...registerProfile("avatar_url")} />
           <h3 className="text-xs font-black text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-50 pb-2">
             <UserIcon className="w-4 h-4 text-primary animate-pulse" />
             Detalhes Pessoais
