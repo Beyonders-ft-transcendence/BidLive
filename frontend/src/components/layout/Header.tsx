@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import icon from "@/assets/images/icon.png";
 import { useAuthStore } from "@/store/auth.store";
 import Avatar from "@/components/common/Avatar";
+import { UserRole } from "@/types/auth.types";
 
 const menuItems = [
   { label: "Home", href: "/#home", sectionId: "home" },
@@ -99,7 +100,7 @@ export default function Header() {
             {isAuthenticated && user ? (
               <Link
                 href={
-                  user.roles?.includes("SUPER_ADMIN") || user.roles?.includes("MONITOR")
+                  user.roles?.includes(UserRole.SUPER_ADMIN) || user.roles?.includes(UserRole.MONITOR)
                     ? "/backoffice/dashboard"
                     : "/user"
                 }
@@ -111,7 +112,7 @@ export default function Header() {
                     {user.full_name || user.username}
                   </span>
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                    {user.roles?.includes("SUPER_ADMIN") ? "Admin" : user.roles?.includes("MONITOR") ? "Moderador" : "Licitante"}
+                    {user.roles?.includes(UserRole.SUPER_ADMIN) ? "Admin" : user.roles?.includes(UserRole.MONITOR) ? "Moderador" : "Licitante"}
                   </span>
                 </div>
               </Link>
@@ -176,7 +177,7 @@ export default function Header() {
                 {isAuthenticated && user ? (
                   <Link
                     href={
-                      user.roles?.includes("SUPER_ADMIN") || user.roles?.includes("MONITOR")
+                      user.roles?.includes(UserRole.SUPER_ADMIN) || user.roles?.includes(UserRole.MONITOR)
                         ? "/backoffice/dashboard"
                         : "/user"
                     }
@@ -189,7 +190,7 @@ export default function Header() {
                         {user.full_name || user.username}
                       </span>
                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                        {user.roles?.includes("SUPER_ADMIN") ? "Admin" : user.roles?.includes("MONITOR") ? "Moderador" : "Portal do Usuário"}
+                        {user.roles?.includes(UserRole.SUPER_ADMIN) ? "Admin" : user.roles?.includes(UserRole.MONITOR) ? "Moderador" : "Portal do Usuário"}
                       </span>
                     </div>
                   </Link>
