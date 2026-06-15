@@ -44,11 +44,21 @@ export default function AuctionDetailPage() {
 
     async function loadData() {
       try {
-        const [auctionResult, bidsResult, streamResult] = await Promise.allSettled([
+        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
+        
+        const promises: Promise<any>[] = [
           auctionService.retrieve(id),
           auctionService.listBids(id),
-          auctionService.listStreams(id),
-        ]);
+        ];
+        
+        if (hasToken) {
+          promises.push(auctionService.listStreams(id));
+        }
+
+        const results = await Promise.allSettled(promises);
+        const auctionResult = results[0];
+        const bidsResult = results[1];
+        const streamResult = hasToken ? results[2] : null;
 
         if (
           auctionResult.status === "fulfilled" &&
@@ -63,7 +73,7 @@ export default function AuctionDetailPage() {
           setBids(bidsResult.value.data?.results || []);
         }
 
-        if (streamResult.status === "fulfilled" && streamResult.value?.success && streamResult.value.data) {
+        if (streamResult && streamResult.status === "fulfilled" && streamResult.value?.success && streamResult.value.data) {
           const live = streamResult.value.data.find((s: any) => s.status === "LIVE");
           setActiveStream(live || null);
           if (live) {
@@ -83,16 +93,27 @@ export default function AuctionDetailPage() {
     const interval = setInterval(async () => {
       if (!id) return;
       try {
-        const [aRes, bRes, sRes] = await Promise.allSettled([
+        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
+        
+        const promises: Promise<any>[] = [
           auctionService.retrieve(id),
           auctionService.listBids(id),
-          auctionService.listStreams(id),
-        ]);
+        ];
+        
+        if (hasToken) {
+          promises.push(auctionService.listStreams(id));
+        }
+
+        const results = await Promise.allSettled(promises);
+        const aRes = results[0];
+        const bRes = results[1];
+        const sRes = hasToken ? results[2] : null;
+
         if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data)
           setAuction(aRes.value.data);
         if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
           setBids(bRes.value.data.results);
-        if (sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
+        if (sRes && sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
           const live = sRes.value.data.find((s: any) => s.status === "LIVE");
           setActiveStream(live || null);
           if (live) {
