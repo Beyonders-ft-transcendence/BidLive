@@ -133,6 +133,30 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
     }
   }, [stream?.status, cameraOn, micOn, isOpen]);
 
+  // Error parser helper
+  const showBackendError = (err: any, fallbackMessage: string) => {
+    const errorData = err?.response?.data;
+    let errorMsg = fallbackMessage;
+    if (errorData) {
+      if (errorData.message) {
+        errorMsg = errorData.message;
+      } else if (errorData.errors) {
+        if (typeof errorData.errors === "string") {
+          errorMsg = errorData.errors;
+        } else if (Array.isArray(errorData.errors)) {
+          errorMsg = errorData.errors.join(" ");
+        } else if (typeof errorData.errors === "object") {
+          errorMsg = Object.values(errorData.errors).flat().join(" ");
+        }
+      } else if (typeof errorData === "object") {
+        errorMsg = Object.entries(errorData)
+          .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(" ") : val}`)
+          .join(" | ");
+      }
+    }
+    toast.error(errorMsg);
+  };
+
   // Handlers
   const handleCreateStream = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +176,7 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
         toast.error(res.message || "Falha ao criar sala de transmissão.");
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Erro ao criar transmissão.");
+      showBackendError(err, "Erro ao criar transmissão.");
     } finally {
       setCreating(false);
     }
@@ -171,7 +195,7 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
         toast.success("Você está AO VIVO!");
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Falha ao iniciar transmissão.");
+      showBackendError(err, "Falha ao iniciar transmissão.");
     }
   };
 
@@ -188,7 +212,7 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
         toast.success("Transmissão encerrada.");
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Falha ao encerrar transmissão.");
+      showBackendError(err, "Falha ao encerrar transmissão.");
     }
   };
 
@@ -204,8 +228,8 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
         loadStream();
         toast.success("Chave de transmissão rotacionada com sucesso!");
       }
-    } catch (err) {
-      toast.error("Erro ao regenerar a chave.");
+    } catch (err: any) {
+      showBackendError(err, "Erro ao regenerar a chave.");
     }
   };
 
