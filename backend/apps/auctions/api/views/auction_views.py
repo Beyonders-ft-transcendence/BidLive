@@ -4,7 +4,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from apps.auctions.filters import AuctionFilter
 from apps.auctions.models import Auction, AuctionStatus
@@ -63,8 +63,6 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     def get_required_permissions(self):
         action_map = {
-            "list": ["auction.read"],
-            "retrieve": ["auction.read"],
             "create": ["auction.create"],
             "partial_update": ["auction.update"],
             "destroy": ["auction.update"],
@@ -72,13 +70,19 @@ class AuctionViewSet(viewsets.GenericViewSet):
             "buy_now": ["auction.buy_now"],
             "watch": ["auction.watch"],
             "unwatch": ["auction.watch"],
-            "bids": ["auction.read"],
         }
         return action_map.get(self.action, [])
 
     @property
     def required_permissions(self):
         return self.get_required_permissions()
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        if self.action == "bids" and self.request.method.lower() == "get":
+            return [AllowAny()]
+        return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
         serializer_map = {
@@ -97,9 +101,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
             return Auction.objects.none()
         queryset = list_auctions()
         user = self.request.user
+        if not user.is_authenticated:
+            return queryset.exclude(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED])
         if user_has_permission(user=user, permission_name="auction.manage"):
             return queryset
-        return queryset.filter(Q(item__seller=user) | Q(status=AuctionStatus.LIVE))
+        return queryset.filter(Q(item__seller=user) | ~Q(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED]))
 
     def get_throttles(self):
         if self.action == "bids" and self.request.method.lower() == "post":
