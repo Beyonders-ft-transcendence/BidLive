@@ -35,6 +35,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       full_name: "",
+      avatar_url: "",
+      bio: "",
     },
   });
 
@@ -53,10 +55,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     },
   });
 
-  // Set default profile name
+  // Set default profile name, avatar and bio
   useEffect(() => {
     if (user) {
       setProfileValue("full_name", user.full_name || "");
+      setProfileValue("avatar_url", user.avatar_url || "");
+      setProfileValue("bio", user.bio || "");
     }
   }, [user, setProfileValue]);
 
@@ -65,6 +69,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     try {
       const res = await rbacService.updateUser(user.id, {
         full_name: data.full_name,
+        avatar_url: data.avatar_url || "",
+        bio: data.bio || "",
       });
       if (res.success && res.data) {
         await fetchMe();
@@ -136,6 +142,38 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                 disabled
                 className="w-full px-3 py-2 border border-gray-100 bg-gray-50 text-gray-400 rounded-sm text-xs outline-none cursor-not-allowed transition"
               />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase">URL do Avatar</label>
+              <input
+                type="text"
+                {...registerProfile("avatar_url")}
+                placeholder="https://exemplo.com/avatar.jpg"
+                className={`w-full px-3 py-2 border rounded-sm text-xs outline-none transition ${
+                  profileErrors.avatar_url
+                    ? "border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-gray-200 focus:ring-1 focus:ring-primary"
+                }`}
+              />
+              {profileErrors.avatar_url && (
+                <p className="text-[10px] text-red-500 font-semibold">{profileErrors.avatar_url.message}</p>
+              )}
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase">Biografia</label>
+              <textarea
+                rows={3}
+                {...registerProfile("bio")}
+                placeholder="Fale um pouco sobre si..."
+                className={`w-full px-3 py-2 border rounded-sm text-xs outline-none resize-none transition ${
+                  profileErrors.bio
+                    ? "border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-gray-200 focus:ring-1 focus:ring-primary"
+                }`}
+              />
+              {profileErrors.bio && (
+                <p className="text-[10px] text-red-500 font-semibold">{profileErrors.bio.message}</p>
+              )}
             </div>
           </div>
 

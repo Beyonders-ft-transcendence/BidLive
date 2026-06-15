@@ -5,6 +5,15 @@ export const updateProfileSchema = z.object({
     .string()
     .min(1, { message: "O nome completo é obrigatório." })
     .max(100, { message: "O nome completo não deve ultrapassar 100 caracteres." }),
+  avatar_url: z
+    .string()
+    .url({ message: "Insira uma URL de imagem válida." })
+    .or(z.literal(""))
+    .optional(),
+  bio: z
+    .string()
+    .max(500, { message: "A biografia não deve ultrapassar 500 caracteres." })
+    .optional(),
 });
 
 export const changePasswordSchema = z

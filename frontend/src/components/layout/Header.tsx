@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { User, Globe, Moon, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import icon from "@/assets/images/icon.png";
+import { useAuthStore } from "@/store/auth.store";
+import Avatar from "@/components/common/Avatar";
 
 const menuItems = [
   { label: "Home", href: "/#home", sectionId: "home" },
@@ -19,6 +21,9 @@ export default function Header() {
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState("home");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -91,19 +96,40 @@ export default function Header() {
               </button>
             </div>
      
-            <>
-              <Link href="/signin" className="hidden sm:block">
-                <button className="px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 hover:text-primary transition-colors">
-                  Entrar
-                </button>
+            {isAuthenticated && user ? (
+              <Link
+                href={
+                  user.roles?.includes("SUPER_ADMIN") || user.roles?.includes("MONITOR")
+                    ? "/backoffice/dashboard"
+                    : "/user"
+                }
+                className="flex items-center gap-2.5 pl-3 border-l border-gray-200 hover:opacity-95 transition-opacity"
+              >
+                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />
+                <div className="hidden md:flex flex-col text-left">
+                  <span className="text-xs font-bold text-gray-800 leading-tight">
+                    {user.full_name || user.username}
+                  </span>
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                    {user.roles?.includes("SUPER_ADMIN") ? "Admin" : user.roles?.includes("MONITOR") ? "Moderador" : "Licitante"}
+                  </span>
+                </div>
               </Link>
-              <Link href="/signup" className="hidden sm:block">
-                <button className="flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-sm transition-colors">
-                  <User size={15} />
-                  <span className="hidden md:inline">Criar Conta</span>
-                </button>
-              </Link>
-            </>
+            ) : (
+              <>
+                <Link href="/signin" className="hidden sm:block">
+                  <button className="px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 hover:text-primary transition-colors">
+                    Entrar
+                  </button>
+                </Link>
+                <Link href="/signup" className="hidden sm:block">
+                  <button className="flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-sm transition-colors">
+                    <User size={15} />
+                    <span className="hidden md:inline">Criar Conta</span>
+                  </button>
+                </Link>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <button 
@@ -147,17 +173,41 @@ export default function Header() {
                     <Moon size={18} /> Tema
                   </button>
                 </div>
-                <Link href="/signin" className="w-full" onClick={() => setIsMenuOpen(false)}>
-                  <button className="w-full px-5 py-3 text-sm font-semibold text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 hover:text-primary transition-colors">
-                    Entrar
-                  </button>
-                </Link>
-                <Link href="/signup" className="w-full" onClick={() => setIsMenuOpen(false)}>
-                  <button className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-sm transition-colors">
-                    <User size={15} />
-                    Criar Conta
-                  </button>
-                </Link>
+                {isAuthenticated && user ? (
+                  <Link
+                    href={
+                      user.roles?.includes("SUPER_ADMIN") || user.roles?.includes("MONITOR")
+                        ? "/backoffice/dashboard"
+                        : "/user"
+                    }
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-sm"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />
+                    <div className="flex flex-col text-left">
+                      <span className="text-sm font-bold text-gray-800 leading-tight">
+                        {user.full_name || user.username}
+                      </span>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                        {user.roles?.includes("SUPER_ADMIN") ? "Admin" : user.roles?.includes("MONITOR") ? "Moderador" : "Portal do Usuário"}
+                      </span>
+                    </div>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/signin" className="w-full" onClick={() => setIsMenuOpen(false)}>
+                      <button className="w-full px-5 py-3 text-sm font-semibold text-gray-700 border border-gray-200 rounded-sm hover:bg-gray-50 hover:text-primary transition-colors">
+                        Entrar
+                      </button>
+                    </Link>
+                    <Link href="/signup" className="w-full" onClick={() => setIsMenuOpen(false)}>
+                      <button className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-sm transition-colors">
+                        <User size={15} />
+                        Criar Conta
+                      </button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

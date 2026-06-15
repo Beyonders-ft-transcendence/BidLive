@@ -16,6 +16,7 @@ export interface UserManaged {
   is_verified: boolean;
   is_active: boolean;
   is_online?: boolean;
+  last_seen?: string;
   roles: string[]; // SlugRelatedField returning array of role names
   created_at: string;
   updated_at?: string;

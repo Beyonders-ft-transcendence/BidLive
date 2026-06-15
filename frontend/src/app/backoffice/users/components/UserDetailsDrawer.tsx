@@ -205,6 +205,12 @@ export default function UserDetailsDrawer({
               )}
             </button>
           </div>
+          {user.last_seen && (
+            <div className="col-span-2 mt-2 pt-2 border-t border-gray-100/60">
+              <span className="text-[8px] text-gray-400 font-bold block uppercase">Última vez visto (last_seen)</span>
+              <span className="text-gray-600 font-semibold">{formatDate(user.last_seen)}</span>
+            </div>
+          )}
         </div>
       </div>
 

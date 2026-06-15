@@ -63,16 +63,17 @@ export default function Users() {
   // Fetch Stats dynamically from API
   const fetchStats = useCallback(async () => {
     try {
-      const [totalRes, verifiedRes, bannedRes] = await Promise.all([
+      const [totalRes, verifiedRes, bannedRes, onlineRes] = await Promise.all([
         rbacService.listUsers({ page_size: 1 }),
         rbacService.listUsers({ is_verified: true, page_size: 1 }),
         rbacService.listUsers({ status: UserStatus.BANNED, page_size: 1 }),
+        rbacService.listUsers({ is_online: true, page_size: 1 }),
       ]);
 
       setStats({
         total: totalRes.data?.count || 0,
         verified: verifiedRes.data?.count || 0,
-        online: 0, // Placeholder/Fallback since is_online is calculated dynamically in websocket, or query online users if backend supports
+        online: onlineRes.data?.count || 0,
         banned: bannedRes.data?.count || 0,
       });
     } catch (err) {

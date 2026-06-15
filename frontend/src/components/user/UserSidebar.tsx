@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { LogOut, Gavel, LayoutDashboard, TrendingUp, Settings } from "lucide-react";
 import type { User } from "@/types/auth.types";
+import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
   activeTab: "overview" | "my-auctions" | "my-bids" | "settings";
@@ -78,9 +79,7 @@ export default function UserSidebar({
       {/* User profile brief card */}
       <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col gap-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 shrink-0">
-            {initials}
-          </div>
+          <Avatar name={user.full_name || user.username} src={user.avatar_url} size="lg" />
           <div className="flex flex-col text-left min-w-0">
             <span className="text-xs font-bold text-slate-800 truncate leading-tight">
               {user.full_name}
