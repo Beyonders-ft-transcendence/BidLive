@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import heroImage from "@/assets/images/hero-img.jpg";
 
 const slides = [
@@ -66,33 +67,60 @@ export default function Hero() {
 
       {/* Hero Card */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-[720px] px-6 lg:px-0 z-10">
-        <div
-          className={`bg-white rounded-xl shadow-2xl px-8 lg:px-10 py-8 lg:py-9 flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center transition-opacity duration-300 ${
-            animating ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          {/* Left: tagline + title */}
-          <div className="flex-[1.2] min-w-0">
-            <p className="text-[11px] font-bold tracking-[1.8px] uppercase text-primary mb-3">
-              {slide.tagline}
-            </p>
-            <h1 className="text-2xl lg:text-[28px] font-extrabold leading-tight text-[#0C1B33] tracking-tight">
-              {slide.title}
-            </h1>
-          </div>
+        <div className="bg-white rounded-xl shadow-2xl px-8 lg:px-10 py-8 lg:py-9 flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center overflow-hidden min-h-[200px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center w-full"
+            >
+              {/* Left: tagline + title */}
+              <div className="flex-[1.2] min-w-0">
+                <motion.p 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-[11px] font-bold tracking-[1.8px] uppercase text-primary mb-3"
+                >
+                  {slide.tagline}
+                </motion.p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl lg:text-[28px] font-extrabold leading-tight text-[#0C1B33] tracking-tight"
+                >
+                  {slide.title}
+                </motion.h1>
+              </div>
 
-          {/* Divider */}
-          <div className="hidden lg:block w-px self-stretch bg-gray-100" />
+              {/* Divider */}
+              <div className="hidden lg:block w-px self-stretch bg-gray-100" />
 
-          {/* Right: description + CTA */}
-          <div className="flex-1 flex flex-col gap-5 min-w-0">
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {slide.description}
-            </p>
-            <button className="self-start bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-[1px] uppercase px-6 py-3.5 rounded-lg transition-colors whitespace-nowrap">
-              {slide.cta}
-            </button>
-          </div>
+              {/* Right: description + CTA */}
+              <div className="flex-1 flex flex-col gap-5 min-w-0">
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  className="text-sm text-gray-500 leading-relaxed"
+                >
+                  {slide.description}
+                </motion.p>
+                <motion.button 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="self-start bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-[1px] uppercase px-6 py-3.5 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  {slide.cta}
+                </motion.button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 

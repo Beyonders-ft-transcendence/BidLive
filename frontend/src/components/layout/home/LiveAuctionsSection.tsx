@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Eye, Users, Clock, ArrowUpRight, Play, TrendingUp, Activity, Bell } from "lucide-react";
 import { formatCurrency } from "@/utils/auction";
+import { motion } from "framer-motion";
 
 const INITIAL_AUCTIONS = [
   {
@@ -125,7 +126,7 @@ export default function LiveAuctionsSection() {
   }, [auctions]);
 
   return (
-    <section id="leiloes" className="py-24 bg-white border-t border-gray-100">
+    <section id="leiloes" className="py-24 bg-white border-t border-gray-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Header */}
@@ -146,7 +147,13 @@ export default function LiveAuctionsSection() {
         <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-10 items-stretch w-full">
           
           {/* Left: 4 Overlay Cards (rounded-sm) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+          <motion.div 
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1"
+          >
             {auctions.map((auc) => {
               const isPulsing = pulseId === auc.id;
 
@@ -232,10 +239,16 @@ export default function LiveAuctionsSection() {
                 </div>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Right: Premium Activity Sidebar (rounded-sm) */}
-          <div className="w-full lg:w-[380px] shrink-0 flex flex-col">
+          <motion.div 
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full lg:w-[380px] shrink-0 flex flex-col"
+          >
             <div className="bg-[#0C1B33] rounded-xl p-6 flex flex-col justify-between flex-1 text-white border border-slate-800 shadow-lg relative overflow-hidden">
               
               {/* Header Widget */}
@@ -308,7 +321,7 @@ export default function LiveAuctionsSection() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>

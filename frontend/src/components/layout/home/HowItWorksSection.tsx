@@ -11,6 +11,7 @@ import step1Image from "@/assets/images/step1.png"
 import step2Image from "@/assets/images/step2.png"
 import step3Image from "@/assets/images/step3.png"
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 const steps = [
   {
@@ -64,14 +65,20 @@ export default function HowItWorksSection() {
   const StepDetailIcon = step.icon;
 
   return (
-    <section id="como-funciona" className="py-24 bg-[#F4F5F7]">
+    <section id="como-funciona" className="py-24 bg-[#F4F5F7] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Main Grid */}
         <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-12 items-stretch w-full">
 
           {/* Left — Steps List */}
-          <div className="flex flex-col gap-3 w-full lg:w-[380px] xl:w-[400px] shrink-0">
+          <motion.div 
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex flex-col gap-3 w-full lg:w-[380px] xl:w-[400px] shrink-0"
+          >
             {/* Header */}
             <div className="flex flex-col items-start mb-6">
               <span className="inline-block bg-primary/10 text-primary text-[11px] font-bold tracking-[1.6px] uppercase px-4 py-1.5 rounded-full border border-primary/20 mb-4">
@@ -117,60 +124,76 @@ export default function HowItWorksSection() {
                 </button>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Right — Detail Card */}
-          <div className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px] w-full lg:w-[580px] xl:w-[740px] shrink-0">
+          <motion.div 
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-white rounded-xl border border-gray-100 flex flex-col lg:flex-row overflow-hidden min-h-[340px] w-full lg:w-[580px] xl:w-[740px] shrink-0"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={active}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="flex flex-col lg:flex-row w-full"
+              >
+                {/* Illustration panel */}
+                <div className="lg:w-[320px] w-full h-64 lg:h-auto bg-primary/5 flex-shrink-0 relative overflow-hidden">
+                  <Image
+                    src={step.image}
+                    alt={step.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
 
-            {/* Illustration panel */}
-            <div className="lg:w-[320px] w-full h-64 lg:h-auto bg-primary/5 flex-shrink-0 relative overflow-hidden">
-              <Image
-                src={step.image}
-                alt={step.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            {/* Content */}
-            <div className="flex flex-col gap-4 p-7 lg:p-9 flex-1">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-1.5 w-fit">
-                <span className="text-[11px] font-extrabold tracking-[1.2px] uppercase text-primary">
-                  {step.badge}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33] leading-snug tracking-tight">
-                {step.title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {step.description}
-              </p>
-
-              {/* Features */}
-              <ul className="flex flex-col gap-2.5 mt-1">
-                {step.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
-                    </div>
-                    <span className="text-sm font-semibold text-[#0C1B33]">
-                      {feature}
+                {/* Content */}
+                <div className="flex flex-col gap-4 p-7 lg:p-9 flex-1">
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 bg-primary/10 rounded-lg px-3 py-1.5 w-fit">
+                    <span className="text-[11px] font-extrabold tracking-[1.2px] uppercase text-primary">
+                      {step.badge}
                     </span>
-                  </li>
-                ))}
-              </ul>
+                  </div>
 
-              {/* CTA */}
-              <button className="self-start mt-auto bg-primary hover:bg-primary/90 text-white text-[11px] font-bold tracking-[1.2px] uppercase px-6 py-3.5 rounded-lg transition-colors">
-                Saiba Mais
-              </button>
-            </div>
-          </div>
+                  {/* Title */}
+                  <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33] leading-snug tracking-tight">
+                    {step.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-gray-500 leading-relaxed">
+                    {step.description}
+                  </p>
+
+                  {/* Features */}
+                  <ul className="flex flex-col gap-2.5 mt-1">
+                    {step.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                          <CheckCircle2 size={12} className="text-white" strokeWidth={3} />
+                        </div>
+                        <span className="text-sm font-semibold text-[#0C1B33]">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <button className="self-start mt-auto bg-primary hover:bg-primary/90 text-white text-[11px] font-bold tracking-[1.2px] uppercase px-6 py-3.5 rounded-lg transition-colors">
+                    Saiba Mais
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
 
         </div>
       </div>
