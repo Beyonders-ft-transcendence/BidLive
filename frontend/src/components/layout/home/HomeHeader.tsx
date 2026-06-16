@@ -7,23 +7,42 @@ import type { AuctionCategory } from "@/types/auction.types";
 
 interface HomeHeaderProps {
   categoriesData?: AuctionCategory[];
-  selectedCategoryId: number | null;
-  setSelectedCategoryId: (id: number | null) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  onSubmitSearch: (e: React.FormEvent) => void;
-  setPage: (page: number) => void;
+  selectedCategoryId?: number | null;
+  setSelectedCategoryId?: (id: number | null) => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+  onSubmitSearch?: (e: React.FormEvent) => void;
+  setPage?: (page: number) => void;
 }
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomeHeader({
   categoriesData,
-  selectedCategoryId,
-  setSelectedCategoryId,
-  searchQuery,
-  setSearchQuery,
-  onSubmitSearch,
+  selectedCategoryId: externalCategoryId,
+  setSelectedCategoryId: externalSetCategoryId,
+  searchQuery: externalSearchQuery,
+  setSearchQuery: externalSetSearchQuery,
+  onSubmitSearch: externalOnSubmit,
   setPage
 }: HomeHeaderProps) {
+  const router = useRouter();
+  const [localCategory, setLocalCategory] = useState<number | null>(null);
+  const [localSearch, setLocalSearch] = useState("");
+
+  const selectedCategoryId = externalCategoryId !== undefined ? externalCategoryId : localCategory;
+  const setSelectedCategoryId = externalSetCategoryId || setLocalCategory;
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : localSearch;
+  const setSearchQuery = externalSetSearchQuery || setLocalSearch;
+
+  const onSubmitSearch = externalOnSubmit || ((e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedCategoryId) params.set("category", String(selectedCategoryId));
+    router.push(`/explore?${params.toString()}`);
+  });
   return (
     <>
       <TopBar />
@@ -35,7 +54,7 @@ export default function HomeHeader({
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onSubmitSearch={onSubmitSearch}
-          setPage={setPage}
+          setPage={setPage || (() => {})}
         />
         <Navbar />
       </div>
