@@ -6,7 +6,6 @@ import {
   FiHeart, 
   FiGlobe, 
   FiSearch, 
-  FiPhone, 
   FiMenu,
   FiHome,
   FiGrid,
@@ -19,6 +18,9 @@ import { FaCoins, FaGavel, FaBoxOpen } from "react-icons/fa";
 import { useAuctionsQuery, useFeaturedAuctionsQuery } from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Auction, AuctionCategory } from "@/types/auction.types";
+import Footer from "@/components/layout/Footer";
+import icon from "@/assets/images/icon.png"
+import Image from "next/image"
 
 function CountdownTimer({ endTime }: { endTime: string }) {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
@@ -148,7 +150,7 @@ export default function Home() {
   const endIndex = Math.min(page * pageSize, totalCount);
 
   return (
-    <div className="w-full bg-[#f8f9fa] min-h-screen pb-12 font-sans">
+    <div className="w-full bg-[#f8f9fa] min-h-screen font-sans">
       {/* TOP BAR */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto flex h-10 items-center justify-between px-4">
@@ -193,17 +195,12 @@ export default function Home() {
       <header className="bg-white border-b border-gray-100 shadow-sm relative z-20">
         <div className="max-w-7xl mx-auto flex h-24 items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary p-2.5 text-white shadow-lg shadow-primary/30">
-              <FaGavel size={26} />
-            </div>
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-gray-900">
-                BID<span className="text-primary">LIVE</span>
-              </h1>
+              <Image src={icon} alt="BidLive" width={120} height={36} className="h-9 w-auto object-contain" />
             </div>
           </div>
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-10">
-            <form onSubmit={handleSearchSubmit} className="flex w-full overflow-hidden rounded-xl border-2 border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all bg-white shadow-sm hover:border-gray-300">
+          <div className="hidden lg:flex max-w-xl w-full ml-auto">
+            <form onSubmit={handleSearchSubmit} className="flex w-full overflow-hidden rounded-sm border-2 border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all bg-white shadow-sm hover:border-gray-300">
               <select 
                 value={selectedCategoryId || ""} 
                 onChange={(e) => {
@@ -227,15 +224,6 @@ export default function Home() {
                 <FiSearch size={20} />
               </button>
             </form>
-          </div>
-          <div className="hidden lg:flex items-center gap-4">
-            <div className="rounded-full bg-primary/10 p-3.5">
-              <FiPhone size={22} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold tracking-wider text-gray-400 mb-0.5">SUPORTE 24/7</p>
-              <p className="font-black text-gray-900 text-sm">+244 900 000 000</p>
-            </div>
           </div>
         </div>
       </header>
@@ -273,7 +261,7 @@ export default function Home() {
       </nav>
 
       {/* NEW LAYOUT (BREADCRUMB + SIDEBAR + GRID) */}
-      <main className="max-w-7xl mx-auto px-4 mt-8">
+      <main className="max-w-7xl mx-auto px-4 mt-8 pb-12">
         
         {/* BREADCRUMB */}
         <div className="flex items-center gap-2.5 text-xs text-gray-500 mb-6 font-medium">
@@ -543,6 +531,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
