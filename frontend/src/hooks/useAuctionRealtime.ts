@@ -207,6 +207,17 @@ export function useAuctionRealtime(id: number) {
     };
   }, [id, queryClient]);
 
+  // Clean up auction queries from cache when navigating away (unmounting)
+  useEffect(() => {
+    return () => {
+      if (id && !isNaN(id)) {
+        queryClient.removeQueries({ queryKey: ["auction", id] });
+        queryClient.removeQueries({ queryKey: ["auctionBids", id] });
+        queryClient.removeQueries({ queryKey: ["auctionStreams", id] });
+      }
+    };
+  }, [id, queryClient]);
+
   useEffect(() => {
     if (auction) {
       const cPrice = Number(
