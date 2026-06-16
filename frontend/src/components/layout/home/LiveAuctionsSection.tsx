@@ -73,9 +73,26 @@ export default function LiveAuctionsSection() {
             className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1"
           >
             {loadingAuctions ? (
-              <div className="col-span-full py-12 text-center text-gray-500">A carregar leilões ao vivo...</div>
+              <div className="col-span-full flex flex-col items-center justify-center bg-slate-50 rounded-xl min-h-[400px] border border-slate-100">
+                <span className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4"></span>
+                <p className="text-sm font-medium text-slate-500">A carregar leilões ao vivo...</p>
+              </div>
             ) : auctions.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-gray-500">Nenhum leilão ao vivo neste momento.</div>
+              <div className="col-span-full flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded-xl py-16 px-6 text-center h-full min-h-[400px]">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-slate-100">
+                  <Clock size={24} className="text-slate-400" />
+                </div>
+                <h3 className="text-xl font-extrabold text-[#0C1B33] mb-2 tracking-tight">Pausa no Martelo</h3>
+                <p className="text-slate-500 text-sm max-w-sm mb-6 leading-relaxed">
+                  Não existem leilões a decorrer neste momento. Explore o nosso catálogo e prepare-se para as próximas disputas!
+                </p>
+                <Link href="/explore">
+                  <button className="bg-[#0C1B33] hover:bg-primary text-white font-bold text-xs tracking-[1px] uppercase px-8 py-3.5 rounded-sm transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    Explorar Catálogo
+                    <ArrowUpRight size={14} />
+                  </button>
+                </Link>
+              </div>
             ) : auctions.slice(0, 4).map((auc: any) => {
               const currentPrice = auc.item?.current_price || auc.item?.starting_price;
               const timeLeftStr = formatTime(calculateTimeLeft(auc.end_time));
@@ -186,9 +203,21 @@ export default function LiveAuctionsSection() {
                 </div>
 
                 {/* Simulated Live Bid Feed */}
-                <div className="space-y-4 relative min-h-[260px]">
-                  <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-slate-800 z-0"></div>
-                  {activities.map((act: any, index: number) => (
+                <div className="space-y-4 relative min-h-[260px] flex flex-col justify-center">
+                  {activities.length > 0 && <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-slate-800 z-0"></div>}
+                  
+                  {activities.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center text-center opacity-60 py-10">
+                      <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mb-3">
+                        <Activity size={20} className="text-slate-400" />
+                      </div>
+                      <p className="text-[13px] font-bold text-slate-300">Sem atividade recente</p>
+                      <p className="text-[11px] text-slate-500 mt-1 max-w-[200px]">
+                        Fique atento, os lances em tempo real aparecerão aqui.
+                      </p>
+                    </div>
+                  ) : (
+                    activities.map((act: any, index: number) => (
                     <Link key={act.id} href={`/auctions/${act.auction_id}`}>
                       <div
                         className={`relative z-10 flex gap-3.5 items-start transition-all duration-300 ${
@@ -218,7 +247,7 @@ export default function LiveAuctionsSection() {
                         </div>
                       </div>
                     </Link>
-                  ))}
+                  )))}
                 </div>
               </div>
 
