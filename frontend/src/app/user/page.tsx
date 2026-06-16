@@ -52,7 +52,6 @@ export default function UserPage() {
   const myAuctionsPageSize = 10;
 
   // Actions states
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
   const [cancelAuctionId, setCancelAuctionId] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState("");

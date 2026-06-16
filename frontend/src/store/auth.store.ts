@@ -75,9 +75,9 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
         if (responseData && typeof responseData === 'object') {
             if (typeof responseData.message === 'string') return responseData.message;
             if (typeof responseData.detail === 'string') return responseData.detail;
-            
+
             const errorSource = responseData.errors || responseData.message || responseData;
-            
+
             if (errorSource && typeof errorSource === 'object') {
                 const values = Object.values(errorSource).flat();
                 const firstError = values.find(v => typeof v === 'string');

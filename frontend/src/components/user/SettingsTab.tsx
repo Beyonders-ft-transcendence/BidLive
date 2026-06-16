@@ -114,7 +114,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         setAvatarPreview(user.avatar_url || null);
       }
     } catch (err) {
-      console.error("Erro no upload do avatar:", err);
+      console.error("Erro no upload do avatar:", err);  
       toast.error("Ocorreu um erro ao enviar a imagem.");
       setAvatarPreview(user.avatar_url || null);
     } finally {
