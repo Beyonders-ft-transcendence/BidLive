@@ -89,10 +89,26 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
     try {
       const uploadedUrl = await uploadImageToCloudinary(file);
+      console.log('Uploaded url', uploadedUrl)
       if (uploadedUrl) {
         setProfileValue("avatar_url", uploadedUrl);
         setAvatarPreview(uploadedUrl);
-        toast.success("Foto de perfil carregada com sucesso!");
+        
+        if (user?.id) {
+          try {
+            const res = await rbacService.updateUser(user.id, { avatar_url: uploadedUrl });
+            if (res.success) {
+              await fetchMe();
+              toast.success("Foto de perfil carregada e atualizada com sucesso!");
+            } else {
+              toast.error(res.message || "Falha ao salvar a imagem no servidor.");
+            }
+          } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Ocorreu um erro ao atualizar a foto no servidor.");
+          }
+        } else {
+          toast.success("Foto de perfil carregada com sucesso!");
+        }
       } else {
         toast.error("Falha ao enviar imagem. Tente novamente.");
         setAvatarPreview(user.avatar_url || null);
