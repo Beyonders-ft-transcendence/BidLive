@@ -125,11 +125,24 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   // Handle Profile Update submit
   const onProfileSubmit = async (data: UpdateProfileInput) => {
     try {
-      const res = await rbacService.updateUser(user.id, {
-        full_name: data.full_name,
-        avatar_url: data.avatar_url || "",
-        bio: data.bio || "",
-      });
+      const payload: any = {};
+      
+      if (data.full_name !== user.full_name) {
+        payload.full_name = data.full_name;
+      }
+      if (data.avatar_url && data.avatar_url !== user.avatar_url) {
+        payload.avatar_url = data.avatar_url;
+      }
+      if (data.bio !== user.bio && (data.bio !== "" || user.bio)) {
+        payload.bio = data.bio || "";
+      }
+
+      if (Object.keys(payload).length === 0) {
+        toast.success("Nenhuma alteração feita para salvar.");
+        return;
+      }
+
+      const res = await rbacService.updateUser(user.id, payload);
       if (res.success && res.data) {
         await fetchMe();
         toast.success("Os detalhes do seu perfil foram salvos!");
