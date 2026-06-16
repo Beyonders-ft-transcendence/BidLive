@@ -12,37 +12,13 @@ import {
   FiChevronLeft,
   FiChevronRight
 } from "react-icons/fi";
-import { FaCoins, FaGavel, FaStar, FaRegStar, FaCamera, FaCar, FaHome, FaBoxOpen } from "react-icons/fa";
+import { FaCoins, FaGavel, FaStar, FaRegStar, FaBoxOpen } from "react-icons/fa";
 
 const categories = [
   "Veículos e Peças", "Imóveis", "Eletrônicos e Celulares", "Obras de Arte",
   "Joias e Relógios", "Máquinas Industriais", "Equipamentos Agrícolas", "Móveis e Decoração",
   "Moda e Acessórios", "Artigos Colecionáveis", "Instrumentos Musicais", "Artigos Esportivos",
   "Lotes Diversos", "Outros"
-];
-
-const bestSellers = [
-  { id: 1, name: "Toyota Hilux 2021 4x4", price: "25.000.000 Kz", oldPrice: "30.000.000 Kz", rating: 5, icon: FaCar },
-  { id: 2, name: "Apartamento T3 - Talatona", price: "85.000.000 Kz", oldPrice: null, rating: 4, icon: FaHome },
-  { id: 3, name: "MacBook Pro M2 16GB", price: "1.200.000 Kz", oldPrice: "1.500.000 Kz", rating: 4, icon: FaBoxOpen },
-  { id: 4, name: "Rolex Submariner Date", price: "8.500.000 Kz", oldPrice: "10.000.000 Kz", rating: 5, icon: FaBoxOpen },
-];
-
-const products = [
-  { id: 1, name: "Toyota Land Cruiser Prado TXL 2020", price: "45.000.000 Kz", oldPrice: "52.000.000 Kz", discount: "-13%", rating: 5, badges: ["DESTAQUE"], hasTimer: true, icon: FaCar },
-  { id: 2, name: "Moradia T4 Condomínio Austin", price: "120.000.000 Kz", oldPrice: null, discount: null, rating: 5, badges: ["NOVO", "QUENTE"], hasTimer: true, icon: FaHome },
-  { id: 3, name: "iPhone 15 Pro Max 256GB", price: "850.000 Kz", oldPrice: "1.100.000 Kz", discount: "-22%", rating: 4, badges: ["OFERTA"], hasTimer: false, icon: FaBoxOpen },
-  { id: 4, name: "Gerador Caterpillar 500kVA", price: "12.000.000 Kz", oldPrice: "15.000.000 Kz", discount: "-20%", rating: 4, badges: [], hasTimer: true, icon: FaBoxOpen },
-  
-  { id: 5, name: "Lote de 10 Computadores Dell Optiplex", price: "2.500.000 Kz", oldPrice: "3.500.000 Kz", discount: "-28%", rating: 4, badges: ["LIQUIDAÇÃO"], hasTimer: false, icon: FaBoxOpen },
-  { id: 6, name: "Terreno 20x30m Benfica", price: "8.000.000 Kz", oldPrice: null, discount: null, rating: 3, badges: [], hasTimer: true, icon: FaHome },
-  { id: 7, name: "Camião Basculante Volvo FMX", price: "35.000.000 Kz", oldPrice: "42.000.000 Kz", discount: "-16%", rating: 4, badges: ["OFERTA"], hasTimer: false, icon: FaCar },
-  { id: 8, name: "Relógio Audemars Piguet Royal Oak", price: "18.000.000 Kz", oldPrice: null, discount: null, rating: 5, badges: ["PREMIUM"], hasTimer: true, icon: FaBoxOpen },
-  
-  { id: 9, name: "Escavadora Hidráulica CAT 320", price: "28.000.000 Kz", oldPrice: "35.000.000 Kz", discount: "-20%", rating: 4, badges: [], hasTimer: false, icon: FaCar },
-  { id: 10, name: "Mota Yamaha R1 2022", price: "9.500.000 Kz", oldPrice: "12.000.000 Kz", discount: "-20%", rating: 5, badges: ["NOVO"], hasTimer: true, icon: FaCar },
-  { id: 11, name: "Apartamento T2 Centralidade do Kilamba", price: "22.000.000 Kz", oldPrice: null, discount: null, rating: 4, badges: [], hasTimer: false, icon: FaHome },
-  { id: 12, name: "PlayStation 5 + 2 Comandos", price: "450.000 Kz", oldPrice: "600.000 Kz", discount: "-25%", rating: 5, badges: ["DESTAQUE"], hasTimer: true, icon: FaBoxOpen },
 ];
 
 function Rating({ value }: { value: number }) {
@@ -55,7 +31,55 @@ function Rating({ value }: { value: number }) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  // Buscar os dados da API em Server Component
+  let apiData: any[] = [];
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/auctions/", { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      // Handle both direct array and paginated response { count, results }
+      apiData = Array.isArray(data) ? data : (data.results || []);
+    }
+  } catch (error) {
+    console.error("Failed to fetch auctions:", error);
+  }
+
+  // Mapear os dados para o formato que a interface espera
+  const products = apiData.map((auction: any) => {
+    const item = auction.item || {};
+    const primaryImg = item.images?.find((img: any) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
+    
+    const badges = [];
+    if (auction.status === "LIVE") badges.push("DESTAQUE");
+    if (item.condition_type === "NEW") badges.push("NOVO");
+    
+    let discountStr = null;
+    if (item.buy_now_price && item.current_price) {
+      const current = parseFloat(item.current_price);
+      const buyNow = parseFloat(item.buy_now_price);
+      if (current < buyNow) {
+        discountStr = `-${Math.round((1 - current / buyNow) * 100)}%`;
+      }
+    }
+
+    return {
+      id: auction.id,
+      name: item.title || "Leilão sem título",
+      price: item.current_price ? `${parseFloat(item.current_price).toLocaleString('pt-AO')} Kz` : "0 Kz",
+      oldPrice: item.buy_now_price ? `${parseFloat(item.buy_now_price).toLocaleString('pt-AO')} Kz` : null,
+      discount: discountStr,
+      rating: 5, // Rating fixo pois não há na API
+      badges,
+      hasTimer: auction.status === "LIVE",
+      icon: FaBoxOpen,
+      imageUrl: primaryImg
+    };
+  });
+
+  // Pegar os 4 primeiros para os "Mais Vendidos / Lances em Destaque"
+  const bestSellers = products.slice(0, 4);
+
   return (
     <div className="w-full bg-[#f8f9fa] min-h-screen pb-12 font-sans">
       {/* TOP BAR */}
@@ -205,45 +229,48 @@ export default function Home() {
             </div>
 
             {/* BEST SELLERS */}
-            <div className="border border-gray-200 bg-white rounded-sm shadow-sm overflow-hidden hidden md:block">
-              <div className="flex justify-between items-center bg-primary text-white font-bold px-5 py-3.5 text-[13px] tracking-wide shadow-sm">
-                LANCES EM DESTAQUE
-                <div className="flex gap-2">
-                   <FiChevronLeft className="cursor-pointer hover:text-white/70 transition-colors" />
-                   <FiChevronRight className="cursor-pointer hover:text-white/70 transition-colors" />
+            {bestSellers.length > 0 && (
+              <div className="border border-gray-200 bg-white rounded-sm shadow-sm overflow-hidden hidden md:block">
+                <div className="flex justify-between items-center bg-primary text-white font-bold px-5 py-3.5 text-[13px] tracking-wide shadow-sm">
+                  LANCES EM DESTAQUE
+                  <div className="flex gap-2">
+                     <FiChevronLeft className="cursor-pointer hover:text-white/70 transition-colors" />
+                     <FiChevronRight className="cursor-pointer hover:text-white/70 transition-colors" />
+                  </div>
                 </div>
-              </div>
-              <div className="p-5 flex flex-col gap-6">
-                {bestSellers.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.id} className="flex gap-4 items-center group cursor-pointer">
-                      <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 group-hover:border-primary/50 transition-colors rounded-sm shadow-sm">
-                        <Icon size={24} className="text-gray-300 group-hover:text-primary/70 transition-colors" />
-                      </div>
-                      <div className="flex flex-col flex-1">
-                        <Rating value={item.rating} />
-                        <span className="text-[13px] text-gray-800 font-semibold leading-tight mt-1 mb-1 group-hover:text-primary transition-colors line-clamp-2">{item.name}</span>
-                        <div className="flex items-center gap-2 text-sm mt-0.5">
-                          <span className="text-primary font-black">{item.price}</span>
-                          {item.oldPrice && <span className="text-gray-400 line-through text-[11px] font-medium">{item.oldPrice}</span>}
+                <div className="p-5 flex flex-col gap-6">
+                  {bestSellers.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.id} className="flex gap-4 items-center group cursor-pointer">
+                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-0 group-hover:border-primary/50 transition-colors rounded-sm shadow-sm overflow-hidden">
+                          {item.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+                          ) : (
+                            <Icon size={24} className="text-gray-300 group-hover:text-primary/70 transition-colors" />
+                          )}
+                        </div>
+                        <div className="flex flex-col flex-1">
+                          <Rating value={item.rating} />
+                          <span className="text-[13px] text-gray-800 font-semibold leading-tight mt-1 mb-1 group-hover:text-primary transition-colors line-clamp-2">{item.name}</span>
+                          <div className="flex items-center gap-2 text-sm mt-0.5">
+                            <span className="text-primary font-black">{item.price}</span>
+                            {item.oldPrice && <span className="text-gray-400 line-through text-[11px] font-medium">{item.oldPrice}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
             
             {/* BANNER AD */}
             <div className="bg-[#46f1f9] text-center p-6 flex flex-col items-center justify-center rounded-sm shadow-sm min-h-[260px] relative overflow-hidden hidden md:flex cursor-pointer hover:opacity-95 transition-opacity group">
               <div className="relative z-10 transform group-hover:scale-105 transition-transform duration-500">
                 <h3 className="text-[28px] font-black text-gray-800 leading-none">ATÉ <br/><span className="text-primary bg-white px-3 py-1 inline-block mt-2 shadow-sm">50% DESC.</span></h3>
                 <p className="text-[11px] font-black text-gray-800 mt-4 tracking-widest bg-white/50 px-2 py-1 rounded-sm backdrop-blur-sm inline-block uppercase">Veículos Recuperados</p>
-              </div>
-              {/* Decorative elements to match the image's cyan banner style */}
-              <div className="absolute -bottom-10 -right-10 opacity-30 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                 <FaCar size={140} className="text-white" />
               </div>
             </div>
           </aside>
@@ -256,12 +283,6 @@ export default function Home() {
               <div className="max-w-xl relative z-10">
                 <h2 className="text-[32px] font-black text-gray-800 mb-4 tracking-tight leading-none uppercase">LEILÕES DE <span className="text-primary">VEÍCULOS & IMÓVEIS</span></h2>
                 <p className="text-[13px] text-gray-600 leading-relaxed font-medium">Participe dos melhores leilões de veículos recuperados, frotas empresariais e imóveis de desinvestimento. Faça o seu lance agora e garanta excelentes oportunidades de negócio com total segurança e transparência.</p>
-              </div>
-              <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 items-center justify-center z-10">
-                {/* Mock image placeholder */}
-                <div className="w-48 h-32 bg-gray-800/10 rounded-lg flex items-center justify-center transform rotate-2 hover:rotate-0 transition-transform duration-500 shadow-xl backdrop-blur-sm border border-white/20">
-                  <FaCar size={80} className="text-gray-800" />
-                </div>
               </div>
             </div>
 
@@ -294,6 +315,11 @@ export default function Home() {
 
             {/* PRODUCT GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.length === 0 && (
+                <div className="col-span-full py-10 text-center text-gray-500 font-medium border border-dashed border-gray-300 rounded-sm">
+                  Nenhum leilão disponível no momento.
+                </div>
+              )}
               {products.map((product) => {
                 const Icon = product.icon;
                 return (
@@ -310,8 +336,13 @@ export default function Home() {
                     </div>
 
                     {/* IMAGE CONTAINER */}
-                    <div className="h-44 flex items-center justify-center mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500">
-                      <Icon size={80} className="text-gray-200" />
+                    <div className="h-44 flex items-center justify-center mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
+                      {product.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                      ) : (
+                        <Icon size={80} className="text-gray-200" />
+                      )}
                       
                       {/* COUNTDOWN TIMER OVERLAY */}
                       {product.hasTimer && (
@@ -365,7 +396,7 @@ export default function Home() {
                  <button className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm"><FiList size={16} /></button>
               </div>
               <div className="text-[13px] text-gray-600 font-medium">
-                 A mostrar 1 a 12 de 12 (1 Página)
+                 A mostrar 1 a {products.length} de {products.length} (1 Página)
               </div>
             </div>
 
