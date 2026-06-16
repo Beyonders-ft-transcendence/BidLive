@@ -19,231 +19,29 @@ import {
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import auctionService from "@/services/auction.service";
-import ENV from "@/utils/env.utils";
-import type { Auction, Bid } from "@/types/auction.types";
 import { motion } from "framer-motion";
+import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
 
 export default function AuctionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params?.id);
 
-  const [auction, setAuction] = useState<Auction | null>(null);
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [bidAmount, setBidAmount] = useState("");
-  const [submittingBid, setSubmittingBid] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    auction,
+    bids,
+    loading,
+    error,
+    activeStream,
+    isWatchingStream,
+    viewerCount,
+    bidAmount,
+    setBidAmount,
+    submittingBid,
+    placeBid: handlePlaceBid,
+  } = useAuctionRealtime(id);
+
   const [activeImage, setActiveImage] = useState(0);
-  const [activeStream, setActiveStream] = useState<any | null>(null);
-  const [isWatchingStream, setIsWatchingStream] = useState(false);
-  const [viewerCount, setViewerCount] = useState(0);
-  const [ws, setWs] = useState<WebSocket | null>(null);
-
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadData() {
-      try {
-        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
-        
-        const promises: Promise<any>[] = [
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ];
-        
-        if (hasToken) {
-          promises.push(auctionService.listStreams(id));
-        }
-
-        const results = await Promise.allSettled(promises);
-        const auctionResult = results[0];
-        const bidsResult = results[1];
-        const streamResult = hasToken ? results[2] : null;
-
-        if (
-          auctionResult.status === "fulfilled" &&
-          auctionResult.value?.success
-        ) {
-          setAuction(auctionResult.value.data || null);
-        } else {
-          setError("Não foi possível carregar os detalhes do leilão.");
-        }
-
-        if (bidsResult.status === "fulfilled" && bidsResult.value?.success) {
-          setBids(bidsResult.value.data?.results || []);
-        }
-
-        if (streamResult && streamResult.status === "fulfilled" && streamResult.value?.success && streamResult.value.data) {
-          const live = streamResult.value.data.find((s: any) => s.status === "LIVE");
-          setActiveStream(live || null);
-          if (live) {
-            setIsWatchingStream(true);
-            setViewerCount(live.viewer_count || 1);
-          }
-        }
-      } catch (err) {
-        setError("Erro de conexão ao carregar os detalhes do leilão.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-
-    // Setup WebSocket for Real-time Updates and Bidding
-    let socket: WebSocket | null = null;
-    const token = typeof window !== "undefined" ? window.localStorage.getItem("bidlive.auth.access_token") : null;
-    
-    // Conecta usando a query de token para autenticação WS
-    const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/${id}/${token ? `?token=${token}` : ""}`;
-    
-    try {
-      socket = new WebSocket(wsUrl);
-      setWs(socket);
-
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.event === "auction_snapshot" && data.payload) {
-            setAuction(data.payload);
-            if (data.payload.active_connections !== undefined) {
-              setViewerCount(data.payload.active_connections);
-            }
-          } 
-          else if (data.event === "BID_CREATED" && data.payload) {
-            if (data.payload.bid) {
-              setBids((prev) => [data.payload.bid, ...prev]);
-            }
-            if (data.payload.auction) {
-              setAuction(data.payload.auction);
-            }
-          } 
-          else if (data.event === "TIMER_UPDATED" && data.payload) {
-            if (data.payload.auction) {
-              setAuction(data.payload.auction);
-            }
-          } 
-          else if ((data.event === "USER_JOINED" || data.event === "USER_LEFT") && data.payload) {
-            if (data.payload.active_connections !== undefined) {
-              setViewerCount(data.payload.active_connections);
-            }
-          } 
-          else if (data.event === "bid_accepted") {
-            setBidAmount("");
-            setSubmittingBid(false);
-          } 
-          else if (data.event === "bid_error") {
-            let errorMsg = "Erro ao processar o lance.";
-            if (data.payload?.errors && data.payload.errors.length > 0) {
-              // Extract first error object values
-              const firstErr = data.payload.errors[0];
-              if (typeof firstErr === "object") {
-                errorMsg = Object.values(firstErr).flat().join(" ");
-              } else if (typeof firstErr === "string") {
-                errorMsg = firstErr;
-              }
-            }
-            setError(errorMsg);
-            setSubmittingBid(false);
-          }
-        } catch (err) {
-          console.error("Erro ao processar mensagem do WebSocket:", err);
-        }
-      };
-
-      socket.onerror = (error) => {
-        console.error("WebSocket erro:", error);
-      };
-      
-      socket.onclose = () => {
-        setWs(null);
-      };
-    } catch (err) {
-      console.error("Erro ao inicializar WebSocket:", err);
-    }
-
-    return () => {
-      if (socket) {
-        socket.close();
-      }
-    };
-  }, [id]);
-
-  useEffect(() => {
-    if (auction) {
-      const cPrice = Number(auction.item.current_price || auction.item.starting_price);
-      const inc = Number(auction.item.minimum_increment || 1);
-      const newMinBid = cPrice + inc;
-      
-      setBidAmount((prev) => {
-        if (!prev || Number(prev) < newMinBid) {
-          return String(newMinBid);
-        }
-        return prev;
-      });
-    }
-  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment]);
-
-  const handlePlaceBid = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bidAmount || !auction) return;
-
-    // Redirecionamento instantâneo se não houver token (usuário offline/não logado)
-    if (typeof window !== 'undefined' && !localStorage.getItem('bidlive.auth.access_token')) {
-      router.push('/signin');
-      return;
-    }
-
-    setSubmittingBid(true);
-    setError(null);
-
-    // Se o WebSocket estiver conectado, enviamos via WS
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ action: "place_bid", amount: bidAmount }));
-      // O estado de submittingBid será revertido quando receber "bid_accepted" ou "bid_error" no onmessage.
-    } else {
-      // Fallback via HTTP caso a conexão WS caia
-      try {
-        const res = await auctionService.placeBid(id, { amount: bidAmount });
-        if (res.success && res.data) {
-          setBidAmount("");
-          // Note: Se o fallback http funcionar, a própria API já faz broadcast pro websocket que 
-          // eventualmente ainda funcione pra outros e não precisamos refetch se logo recuperar.
-          // Mas faremos um pequeno fetch pra segurança.
-          const [aRes, bRes] = await Promise.all([
-            auctionService.retrieve(id),
-            auctionService.listBids(id),
-          ]);
-          if (aRes.success && aRes.data) setAuction(aRes.data);
-          if (bRes.success && bRes.data) setBids(bRes.data.results);
-        } else {
-          if (res.errors) {
-            setError(Object.values(res.errors).flat().join(" "));
-          } else {
-            setError(res.message || "Erro ao registrar lance.");
-          }
-        }
-      } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          router.push('/signin');
-        } else if (err.response?.data) {
-          const errorData = err.response.data;
-          if (errorData.errors) {
-            setError(Object.values(errorData.errors).flat().join(" "));
-          } else {
-            setError(errorData.message || "Valor inválido. Verifique o seu lance.");
-          }
-        } else {
-          setError("Erro de conexão. Não foi possível registrar o lance.");
-        }
-      } finally {
-        setSubmittingBid(false);
-      }
-    }
-  };
 
   const formatCurrency = (value: string | number) =>
     new Intl.NumberFormat("pt-AO", {
