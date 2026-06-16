@@ -52,12 +52,33 @@ export default function AuctionDetailPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showBuyNowModal, setShowBuyNowModal] = useState(false);
 
+  const onSubmitBid = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!auction) return;
+
+    if (auction.item.buy_now_price && Number(bidAmount) >= Number(auction.item.buy_now_price)) {
+      setShowBuyNowModal(true);
+      return;
+    }
+
+    handlePlaceBid(e);
+  };
+
   const handlePresetBid = (increment: number) => {
     setErrorMsg(null);
     setSuccessMsg(null);
     if (!auction) return;
     const currentPriceVal = Number(auction.item.current_price || auction.item.starting_price);
-    const amount = String(currentPriceVal + increment);
+    const amountVal = currentPriceVal + increment;
+    
+    if (auction.item.buy_now_price && amountVal >= Number(auction.item.buy_now_price)) {
+      setShowBuyNowModal(true);
+      return;
+    }
+    
+    const amount = String(amountVal);
     handlePlaceBid(amount);
   };
 
@@ -524,7 +545,7 @@ export default function AuctionDetailPage() {
                         </div>
                       </div>
 
-                      <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
+                      <form onSubmit={onSubmitBid} className="flex flex-col gap-3">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                           Valor do Lance Customizado
                         </label>
