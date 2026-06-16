@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { 
-  FiUser, 
-  FiHeart, 
-  FiGlobe, 
-  FiSearch, 
-  FiMenu,
   FiHome,
   FiGrid,
   FiList,
@@ -14,13 +9,12 @@ import {
   FiChevronLeft,
   FiChevronRight
 } from "react-icons/fi";
-import { FaCoins, FaGavel, FaBoxOpen } from "react-icons/fa";
+import { FaBoxOpen } from "react-icons/fa";
 import { useAuctionsQuery, useFeaturedAuctionsQuery } from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Auction, AuctionCategory } from "@/types/auction.types";
 import Footer from "@/components/layout/Footer";
-import icon from "@/assets/images/icon.png"
-import Image from "next/image"
+import HomeHeader from "@/components/layout/home/HomeHeader";
 
 function CountdownTimer({ endTime }: { endTime: string }) {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
@@ -151,114 +145,16 @@ export default function Home() {
 
   return (
     <div className="w-full bg-[#f8f9fa] min-h-screen font-sans">
-      {/* TOP BAR */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto flex h-10 items-center justify-between px-4">
-          <div className="flex items-center gap-3 text-xs text-gray-600">
-            <span className="rounded bg-primary px-2 py-1 text-white font-medium shadow-sm">
-              AO VIVO
-            </span>
-            <p className="font-medium">
-              Acompanhe os melhores leilões em tempo real.
-            </p>
-          </div>
-          <ul className="flex items-center gap-6 text-xs text-gray-600 font-medium">
-            <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-              <FiUser size={14} />
-              <span>Minha Conta</span>
-            </li>
-            <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-              <FiHeart size={14} />
-              <span>Favoritos</span>
-            </li>
-            <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-              <FiGlobe size={14} />
-              <select className="bg-transparent outline-none cursor-pointer text-gray-600 hover:text-primary transition-colors">
-                <option value="pt">Português</option>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-              </select>
-            </li>
-            <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-              <FaCoins size={14} />
-              <select className="bg-transparent outline-none cursor-pointer text-gray-600 hover:text-primary transition-colors">
-                <option value="aoa">Kz (AOA)</option>
-                <option value="usd">USD ($)</option>
-                <option value="eur">EUR (€)</option>
-              </select>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* MAIN HEADER */}
-      <header className="bg-white border-b border-gray-100 shadow-sm relative z-20">
-        <div className="max-w-7xl mx-auto flex h-24 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <Image src={icon} alt="BidLive" width={120} height={36} className="h-9 w-auto object-contain" />
-            </div>
-          </div>
-          <div className="hidden lg:flex max-w-xl w-full ml-auto">
-            <form onSubmit={handleSearchSubmit} className="flex w-full overflow-hidden rounded-sm border-2 border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all bg-white shadow-sm hover:border-gray-300">
-              <select 
-                value={selectedCategoryId || ""} 
-                onChange={(e) => {
-                  setSelectedCategoryId(e.target.value ? Number(e.target.value) : null);
-                  setPage(1);
-                }}
-                className="bg-gray-50 border-r-2 border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
-              >
-                <option value="">Todas Categorias</option>
-                {categoriesData?.map((cat: AuctionCategory) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              <input
-                placeholder="Pesquisar leilões..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-5 py-3 text-sm outline-none text-gray-800 placeholder-gray-400 font-medium"
-              />
-              <button type="submit" className="bg-primary px-8 text-white hover:bg-primary-light transition-colors flex items-center justify-center">
-                <FiSearch size={20} />
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
-
-      {/* NAVBAR */}
-      <nav className="bg-gray-900 text-white shadow-xl relative z-10">
-        <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-8 h-full">
-            <button className="flex items-center gap-2 text-white lg:hidden hover:text-primary transition-colors">
-              <FiMenu size={24} />
-            </button>
-            <ul className="hidden lg:flex items-center h-full">
-              <li className="flex items-center h-full border-b-[3px] border-primary px-6 text-sm font-bold text-white cursor-pointer bg-gray-800/50">
-                Início
-              </li>
-              <li className="flex items-center h-full px-6 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all cursor-pointer">
-                Leilões
-              </li>
-              <li className="flex items-center h-full px-6 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all cursor-pointer">
-                Categorias
-              </li>
-              <li className="flex items-center h-full px-6 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all cursor-pointer">
-                Como Funciona
-              </li>
-              <li className="flex items-center h-full px-6 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all cursor-pointer">
-                Contacto
-              </li>
-            </ul>
-          </div>
-          <button className="flex h-full items-center gap-3 bg-primary px-8 text-sm font-bold text-white hover:bg-primary-light transition-all shadow-lg hover:shadow-primary/40 active:scale-95">
-            <FaGavel size={18} />
-            Meus Lances
-          </button>
-        </div>
-      </nav>
+      {/* HEADER SECTION */}
+      <HomeHeader
+        categoriesData={categoriesData}
+        selectedCategoryId={selectedCategoryId}
+        setSelectedCategoryId={setSelectedCategoryId}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSubmitSearch={handleSearchSubmit}
+        setPage={setPage}
+      />
 
       {/* NEW LAYOUT (BREADCRUMB + SIDEBAR + GRID) */}
       <main className="max-w-7xl mx-auto px-4 mt-8 pb-12">
