@@ -545,12 +545,12 @@ export default function AuctionDetailPage() {
                         </div>
                       </div>
 
-                      <form onSubmit={onSubmitBid} className="flex flex-col gap-3">
+                      <form onSubmit={onSubmitBid} className="flex flex-col gap-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                           Valor do Lance Customizado
                         </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
+                        <div className="relative flex items-center">
+                          <span className="absolute left-3.5 text-xs font-bold text-gray-400 select-none">
                             Kz
                           </span>
                           <input
@@ -562,9 +562,25 @@ export default function AuctionDetailPage() {
                             placeholder={formatCurrency(minBid)
                               .replace("AOA", "")
                               .trim()}
-                            className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
+                            className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-24 py-3.5 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
                             required
                           />
+                          <div className="absolute right-1.5 top-1.5 flex gap-1.5">
+                            <button
+                              type="submit"
+                              disabled={submittingBid}
+                              className="h-8 px-4 bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            >
+                              {submittingBid ? (
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <>
+                                  <Gavel className="h-3.5 w-3.5" />
+                                  Ofertar
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
                         <p className="text-[10px] text-gray-400">
                           Lance mínimo:{" "}
@@ -572,32 +588,14 @@ export default function AuctionDetailPage() {
                             {formatCurrency(minBid)}
                           </span>
                         </p>
-                        <button
-                          type="submit"
-                          disabled={submittingBid}
-                          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          {submittingBid ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              Confirmar Lance
-                              <ArrowUpRight size={15} />
-                            </>
-                          )}
-                        </button>
-                        <p className="text-[10px] text-gray-300 text-center leading-relaxed">
-                          Ao dar um lance, você concorda com nossos termos de
-                          compromisso de compra.
-                        </p>
                       </form>
 
                       {/* Buy Now Option */}
                       {auction.item.buy_now_price && (
-                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-2">
+                        <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4 mt-2">
                           <div className="text-left">
                             <span className="text-[10px] text-gray-400 font-mono block">Arremate Imediato:</span>
-                            <span className="text-gray-950 text-xs font-bold leading-normal block">
+                            <span className="text-[#0C1B33] text-xs font-bold leading-normal block">
                               Adquira o lote agora sem disputas
                             </span>
                           </div>
@@ -605,7 +603,7 @@ export default function AuctionDetailPage() {
                             type="button"
                             onClick={() => setShowBuyNowModal(true)}
                             disabled={submittingBuyNow}
-                            className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50 shrink-0"
                           >
                             <ShoppingBag className="h-4 w-4" />
                             {submittingBuyNow ? (
