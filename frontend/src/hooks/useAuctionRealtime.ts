@@ -123,8 +123,10 @@ export function useAuctionRealtime(id: number) {
         }
       };
 
-      socket.onerror = (error) => {
-        console.error("WebSocket erro:", error);
+      socket.onerror = (event) => {
+        if (socket.readyState !== WebSocket.CLOSED && socket.readyState !== WebSocket.CLOSING) {
+          console.error("Erro na conexão WebSocket:", event);
+        }
       };
 
       socket.onclose = () => {
@@ -136,6 +138,8 @@ export function useAuctionRealtime(id: number) {
 
     return () => {
       if (ws.current) {
+        ws.current.onclose = null;
+        ws.current.onerror = null;
         ws.current.close();
       }
     };
