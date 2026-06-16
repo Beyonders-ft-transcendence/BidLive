@@ -171,3 +171,19 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
         if client and client[0]:
             return str(client[0])
         return ""
+
+class GlobalAuctionConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.group_name = "global_auctions"
+        await self.accept()
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+
+    async def disconnect(self, close_code):
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def auction_event(self, event):
+        try:
+            await self.send_json({"event": event.get("event"), "payload": event.get("payload")})
+        except RuntimeError:
+            pass
