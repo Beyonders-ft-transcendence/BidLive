@@ -102,10 +102,16 @@ class AuctionViewSet(viewsets.GenericViewSet):
         queryset = list_auctions()
         user = self.request.user
         if not user.is_authenticated:
-            return queryset.exclude(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED])
-        if user_has_permission(user=user, permission_name="auction.manage"):
-            return queryset
-        return queryset.filter(Q(item__seller=user) | ~Q(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED]))
+            queryset = queryset.exclude(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED])
+        elif not user_has_permission(user=user, permission_name="auction.manage"):
+            queryset = queryset.filter(Q(item__seller=user) | ~Q(status__in=[AuctionStatus.DRAFT, AuctionStatus.CANCELLED]))
+
+        if self.action == "list":
+            status_param = self.request.query_params.get("status")
+            if status_param != AuctionStatus.DRAFT:
+                queryset = queryset.exclude(status=AuctionStatus.DRAFT)
+
+        return queryset
 
     def get_throttles(self):
         if self.action == "bids" and self.request.method.lower() == "post":
