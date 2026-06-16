@@ -41,3 +41,21 @@ class BidCreateSerializer(serializers.Serializer):
         if value <= 0:
             raise serializers.ValidationError("Bid must be > 0.")
         return value
+
+class ActivitySerializer(serializers.ModelSerializer):
+    bidder = BidderSummarySerializer(read_only=True)
+    auction_title = serializers.CharField(source="auction.item.title", read_only=True)
+    
+    class Meta:
+        model = Bid
+        fields = (
+            "id",
+            "auction_id",
+            "auction_title",
+            "bidder",
+            "amount",
+            "is_buy_now",
+            "created_at",
+        )
+        read_only_fields = fields
+

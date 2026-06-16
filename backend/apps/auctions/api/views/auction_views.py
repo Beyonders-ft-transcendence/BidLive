@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from apps.auctions.filters import AuctionFilter
-from apps.auctions.models import Auction, AuctionStatus
+from apps.auctions.models import Auction, AuctionStatus, Bid
 from apps.auctions.permissions import IsAuctionOwnerOrManager
 from apps.auctions.selectors import list_auctions, list_bids_for_auction
 from apps.auctions.serializers import (
@@ -19,6 +19,7 @@ from apps.auctions.serializers import (
     AuctionUpdateSerializer,
     BidCreateSerializer,
     BidSerializer,
+    ActivitySerializer,
 )
 from apps.auctions.services import (
     buy_now,
@@ -78,7 +79,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return self.get_required_permissions()
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve", "featured"]:
+        if self.action in ["list", "retrieve", "featured", "activities"]:
             return [AllowAny()]
         if self.action == "bids" and self.request.method.lower() == "get":
             return [AllowAny()]
@@ -139,6 +140,19 @@ class AuctionViewSet(viewsets.GenericViewSet):
         serializer = AuctionListSerializer(page or queryset, many=True)
         if page is not None:
             return self.get_paginated_response(serializer.data)
+        return success_response(serializer.data)
+
+    @extend_schema(
+        tags=AUCTION_TAGS,
+        methods=["GET"],
+        summary="Listar atividades globais",
+        description="Returns latest 10 bids across all auctions.",
+        responses={200: ActivitySerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="activities")
+    def activities(self, request):
+        queryset = Bid.objects.select_related("bidder", "auction__item").order_by("-created_at")[:10]
+        serializer = ActivitySerializer(queryset, many=True)
         return success_response(serializer.data)
 
     def retrieve(self, request, pk=None):
