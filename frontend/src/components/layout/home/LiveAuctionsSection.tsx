@@ -10,9 +10,12 @@ import { useAuctionsQuery, useAuctionActivitiesQuery } from "@/hooks/useAuction"
 
 export default function LiveAuctionsSection() {
   const { data: auctionsData, isLoading: loadingAuctions } = useAuctionsQuery({ status: "LIVE", limit: 4 });
+  const { data: allAuctionsData } = useAuctionsQuery({ limit: 1 });
   const { data: activities = [] } = useAuctionActivitiesQuery();
 
   const auctions = auctionsData?.results || [];
+  const activeAuctionsCount = auctionsData?.count || 0;
+  const totalAuctionsCount = allAuctionsData?.count || 0;
 
   const formatTime = (seconds: number) => {
     if (seconds <= 0) return "00m 00s";
@@ -223,12 +226,12 @@ export default function LiveAuctionsSection() {
               <div className="pt-6 border-t border-slate-800 mt-6 lg:mt-0">
                 <div className="bg-slate-900/50 p-4 rounded-sm border border-slate-800 mb-4 flex items-center justify-between">
                   <div>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Total Disputas</span>
-                    <span className="text-lg font-black text-white">237 lotes</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Total Cadastrados</span>
+                    <span className="text-lg font-black text-white">{totalAuctionsCount} lotes</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Ativos Hoje</span>
-                    <span className="text-lg font-black text-primary">12 ativos</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Ativos Agora</span>
+                    <span className="text-lg font-black text-primary">{activeAuctionsCount} ativos</span>
                   </div>
                 </div>
 
