@@ -2,8 +2,21 @@
 
 import { FiUser, FiHeart, FiGlobe } from "react-icons/fi";
 import { FaCoins } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function TopBar() {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const handleProtectedClick = (path: string) => {
+    if (!isAuthenticated) {
+      router.push("/signin");
+    } else {
+      router.push(path);
+    }
+  };
+
   return (
     <div className="border-b border-gray-200 bg-white">
       <div className="max-w-7xl mx-auto flex h-10 items-center justify-between px-4">
@@ -16,11 +29,17 @@ export default function TopBar() {
           </p>
         </div>
         <ul className="flex items-center gap-4 md:gap-6 text-xs text-gray-600 font-medium ml-auto sm:ml-0">
-          <li className="hidden sm:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+          <li 
+            onClick={() => handleProtectedClick("/user")}
+            className="hidden sm:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+          >
             <FiUser size={14} />
             <span>Minha Conta</span>
           </li>
-          <li className="hidden sm:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+          <li 
+            onClick={() => handleProtectedClick("/user/favorites")}
+            className="hidden sm:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+          >
             <FiHeart size={14} />
             <span>Favoritos</span>
           </li>

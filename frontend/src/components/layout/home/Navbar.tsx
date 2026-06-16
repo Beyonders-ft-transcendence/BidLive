@@ -3,7 +3,8 @@
 import { FiMenu } from "react-icons/fi";
 import { FaGavel } from "react-icons/fa";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
 
 const menuItems = [
   { label: "Home", href: "/#home", sectionId: "home" },
@@ -15,6 +16,17 @@ const menuItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const handleBidsClick = () => {
+    if (!isAuthenticated) {
+      router.push("/signin");
+    } else {
+      router.push("/user/bids"); // Assumindo que lances ficaria em /user/bids
+    }
+  };
+
   return (
     <nav className="bg-gray-900 text-white shadow-xl relative z-10">
       <div className="max-w-7xl mx-auto flex h-11 md:h-12 items-center justify-between px-4">
@@ -37,7 +49,10 @@ export default function Navbar() {
             })}
           </ul>
         </div>
-        <button className="flex h-full items-center gap-2 md:gap-3 bg-primary px-4 md:px-6 text-xs md:text-sm font-bold text-white hover:bg-primary-light transition-all shadow-lg hover:shadow-primary/40 active:scale-95">
+        <button 
+          onClick={handleBidsClick}
+          className="flex h-full items-center gap-2 md:gap-3 bg-primary px-4 md:px-6 text-xs md:text-sm font-bold text-white hover:bg-primary-light transition-all shadow-lg hover:shadow-primary/40 active:scale-95"
+        >
           <FaGavel size={16} className="md:w-[18px] md:h-[18px]" />
           <span className="hidden sm:inline">Meus Lances</span>
         </button>
