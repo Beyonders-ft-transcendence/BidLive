@@ -120,7 +120,7 @@ export function useAuctionRealtime(id: number) {
               created_at: data.payload.timestamp,
             };
 
-            queryClient.setQueryData(["auctionBids", id], (prev: any) => {
+            queryClient.setQueriesData({ queryKey: ["auctionBids", id] }, (prev: any) => {
               if (!prev) return { results: [newBid] };
               const results = prev.results || [];
               if (results.some((b: any) => b.id === newBid.id)) return prev;
