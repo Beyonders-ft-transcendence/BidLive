@@ -70,7 +70,7 @@ export default function LiveAuctionsSection() {
           <motion.div 
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, amount: 0.1 }}
             variants={{
               visible: { transition: { staggerChildren: 0.2 } },
               hidden: {}
@@ -103,13 +103,13 @@ export default function LiveAuctionsSection() {
               const timeLeftStr = formatTime(calculateTimeLeft(auc.end_time));
 
               return (
-                <Link key={auc.id} href={`/auctions/${auc.id}`}>
+                <Link key={auc.id} href={`/auctions/${auc.id}`} className="block h-full w-full">
                   <motion.div
                     variants={{
                       hidden: { opacity: 0, y: 50, scale: 0.9 },
                       visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 120 } }
                     }}
-                    className="group relative overflow-hidden aspect-4/3 rounded-xl border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
+                    className="group relative overflow-hidden h-full min-h-[240px] md:min-h-[280px] rounded-xl border border-gray-100 shadow-sm cursor-pointer flex flex-col justify-between"
                   >
                     {/* Full Background Image */}
                     <img
@@ -188,15 +188,15 @@ export default function LiveAuctionsSection() {
           <motion.div 
             initial={{ opacity: 0, y: 100 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.7, type: "spring", bounce: 0.3 }}
-            className="w-full lg:w-[380px] shrink-0 flex flex-col"
+            className="w-full lg:w-[380px] shrink-0 flex flex-col lg:h-0 lg:min-h-full"
           >
-            <div className="bg-[#0C1B33] rounded-xl p-6 flex flex-col justify-between flex-1 text-white border border-slate-800 shadow-lg relative overflow-hidden">
+            <div className="bg-[#0C1B33] rounded-xl p-6 flex flex-col justify-between h-full text-white border border-slate-800 shadow-lg relative overflow-hidden">
               
               {/* Header Widget */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col h-full overflow-hidden">
+                <div className="flex justify-between items-center mb-6 shrink-0">
                   <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2 text-white">
                     <Activity size={15} className="text-primary animate-pulse" />
                     Monitor de Ofertas
@@ -208,11 +208,11 @@ export default function LiveAuctionsSection() {
                 </div>
 
                 {/* Simulated Live Bid Feed */}
-                <div className="space-y-4 relative min-h-[260px] flex flex-col justify-center">
+                <div className="space-y-4 relative flex-1 overflow-y-auto pr-2 flex flex-col justify-start">
                   {activities.length > 0 && <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-slate-800 z-0"></div>}
                   
                   {activities.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center text-center opacity-60 py-10">
+                    <div className="flex flex-col items-center justify-center text-center opacity-60 py-10 my-auto">
                       <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mb-3">
                         <Activity size={20} className="text-slate-400" />
                       </div>
@@ -257,7 +257,7 @@ export default function LiveAuctionsSection() {
               </div>
 
               {/* Sidebar Action Footer */}
-              <div className="pt-6 border-t border-slate-800 mt-6 lg:mt-0">
+              <div className="pt-6 border-t border-slate-800 mt-6 shrink-0">
                 <div className="bg-slate-900/50 p-4 rounded-sm border border-slate-800 mb-4 flex items-center justify-between">
                   <div>
                     <span className="text-[9px] font-bold text-slate-400 uppercase block">Total Cadastrados</span>
