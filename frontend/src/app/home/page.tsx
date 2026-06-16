@@ -108,8 +108,8 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 mt-8 pb-12">
         
         {/* BREADCRUMB */}
-        <div className="flex items-center gap-2.5 text-xs text-gray-500 mb-6 font-medium">
-          <div className="flex items-center text-primary bg-primary/10 px-3.5 py-1.5 rounded-sm cursor-pointer hover:bg-primary hover:text-white transition-colors shadow-sm"
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-[11px] sm:text-xs text-gray-500 mb-4 sm:mb-6 font-medium">
+          <div className="flex items-center justify-center text-primary bg-primary/10 px-3 sm:px-3.5 py-1.5 rounded-sm cursor-pointer hover:bg-primary hover:text-white transition-colors shadow-sm"
                onClick={() => {
                  setSelectedCategoryId(null);
                  setSearchQuery("");
@@ -117,11 +117,11 @@ export default function Home() {
                  setOrdering("");
                  setPage(1);
                }}>
-            <FiHome size={14} className="mr-2" />
+            <FiHome size={14} className="sm:mr-2" />
             <span className="hidden sm:inline">Início</span>
           </div>
-          <span className="text-gray-300 mx-1">&gt;</span>
-          <span className="text-gray-700 bg-white px-4 py-1.5 rounded-sm border border-gray-200 shadow-sm">Todos os Leilões</span>
+          <span className="text-gray-300 mx-0.5 sm:mx-1">&gt;</span>
+          <span className="text-gray-700 bg-white px-3 sm:px-4 py-1.5 rounded-sm border border-gray-200 shadow-sm truncate max-w-[200px] sm:max-w-none">Todos os Leilões</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-7">
