@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Users, Gavel, Package } from "lucide-react";
 
-import auctionService from "@/services/auction.service";
-import rbacService from "@/services/rbac.service";
+import { useAuctionsQuery } from "@/hooks/useAuction";
+import { useUsersQuery } from "@/hooks/useRbac";
 import type { Auction } from "@/types/auction.types";
 import { formatCurrency } from "@/utils/auction";
 
@@ -14,45 +14,20 @@ import PopularLots from "./components/PopularLots";
 import RecentAuctionsTable from "./components/RecentAuctionsTable";
 
 export default function Dashboard() {
-    const [recentAuctions, setRecentAuctions] = useState<Auction[]>([]);
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        activeAuctions: 0,
-        totalAuctions: 0,
-        revenue: 45000000, // Calculated/Fallback metric
-    });
-    const [loading, setLoading] = useState(true);
+    const { data: usersData, isLoading: loadingUsers } = useUsersQuery({ page_size: 1 });
+    const { data: activeAuctionsData, isLoading: loadingActive } = useAuctionsQuery({ status: "LIVE", page_size: 1 });
+    const { data: recentAuctionsData, isLoading: loadingRecent } = useAuctionsQuery({ page_size: 5 });
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            setLoading(true);
-            try {
-                const [usersRes, activeRes, totalRes, listRes] = await Promise.all([
-                    rbacService.listUsers({ page_size: 1 }),
-                    auctionService.list({ status: "LIVE", page_size: 1 }),
-                    auctionService.list({ page_size: 5 }),
-                    auctionService.list({ page_size: 5 }) // List of recent auctions
-                ]);
+    const loading = loadingUsers || loadingActive || loadingRecent;
 
-                setStats({
-                    totalUsers: usersRes.data?.count || 0,
-                    activeAuctions: activeRes.data?.count || 0,
-                    totalAuctions: totalRes.data?.count || 0,
-                    revenue: 45850000, // Dynamic base + simulated success
-                });
+    const stats = useMemo(() => ({
+        totalUsers: usersData?.count || 0,
+        activeAuctions: activeAuctionsData?.count || 0,
+        totalAuctions: recentAuctionsData?.count || 0,
+        revenue: 45850000,
+    }), [usersData, activeAuctionsData, recentAuctionsData]);
 
-                if (listRes.success && listRes.data) {
-                    setRecentAuctions(listRes.data.results);
-                }
-            } catch (err) {
-                console.error("Erro ao obter dados do dashboard:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardData();
-    }, []);
+    const recentAuctions = recentAuctionsData?.results || [];
 
     return (
         <div className="flex flex-col select-none gap-6 pb-6">

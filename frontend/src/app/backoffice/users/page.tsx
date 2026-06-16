@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import Avatar from "@/components/common/Avatar";
@@ -10,7 +11,14 @@ import StatsGrid, { type StatItem } from "@/components/common/StatsGrid";
 import UserDetailsDrawer from "./components/UserDetailsDrawer";
 import CreateUserModal from "./components/CreateUserModal";
 import { statusColor } from "@/utils/user";
-import rbacService from "@/services/rbac.service";
+import {
+  useUsersQuery,
+  useUserQuery,
+  useCreateUserMutation,
+  useBanUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} from "@/hooks/useRbac";
 import { type UserManaged } from "@/types/rbac.types";
 import { UserStatus } from "@/types/auth.types";
 import {
@@ -27,24 +35,15 @@ import {
 } from "lucide-react";
 
 export default function Users() {
-  const [users, setUsers] = useState<UserManaged[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<UserManaged | null>(null);
+  const queryClient = useQueryClient();
+
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
 
   // Pagination & Count State
-  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
-
-  // Stats Counts
-  const [stats, setStats] = useState({
-    total: 0,
-    verified: 0,
-    online: 0,
-    banned: 0,
-  });
 
   // Filters state
   const [search, setSearch] = useState("");
@@ -60,79 +59,56 @@ export default function Users() {
     alert(`${message}\nDetalhes: ${apiMsg}`);
   };
 
-  // Fetch Stats dynamically from API
-  const fetchStats = useCallback(async () => {
-    try {
-      const [totalRes, verifiedRes, bannedRes, onlineRes] = await Promise.all([
-        rbacService.listUsers({ page_size: 1 }),
-        rbacService.listUsers({ is_verified: true, page_size: 1 }),
-        rbacService.listUsers({ status: UserStatus.BANNED, page_size: 1 }),
-        rbacService.listUsers({ is_online: true, page_size: 1 }),
-      ]);
+  // Fetch Stats dynamically from API via parallel queries
+  const { data: totalUsersRes } = useUsersQuery({ page_size: 1 });
+  const { data: verifiedUsersRes } = useUsersQuery({ is_verified: true, page_size: 1 });
+  const { data: bannedUsersRes } = useUsersQuery({ status: UserStatus.BANNED, page_size: 1 });
+  const { data: onlineUsersRes } = useUsersQuery({ is_online: true, page_size: 1 });
 
-      setStats({
-        total: totalRes.data?.count || 0,
-        verified: verifiedRes.data?.count || 0,
-        online: onlineRes.data?.count || 0,
-        banned: bannedRes.data?.count || 0,
-      });
-    } catch (err) {
-      showError("Erro ao obter estatísticas da API.", err);
-    }
-  }, []);
+  const stats = useMemo(() => ({
+    total: totalUsersRes?.count || 0,
+    verified: verifiedUsersRes?.count || 0,
+    online: onlineUsersRes?.count || 0,
+    banned: bannedUsersRes?.count || 0,
+  }), [totalUsersRes, verifiedUsersRes, onlineUsersRes, bannedUsersRes]);
 
   // Fetch Users based on filters and pagination
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, any> = {
-        page: currentPage,
-        page_size: pageSize,
-        search: search || undefined,
-        status: statusFilter || undefined,
-      };
+  const listParams = useMemo(() => {
+    const params: Record<string, any> = {
+      page: currentPage,
+      page_size: pageSize,
+      search: search || undefined,
+      status: statusFilter || undefined,
+    };
 
-      if (verificationFilter === "Verificado") {
-        params.is_verified = "true";
-      } else if (verificationFilter === "Pendente") {
-        params.is_verified = "false";
-      }
-
-      if (roleFilter) {
-        params.role = roleFilter;
-      }
-
-      const res = await rbacService.listUsers(params);
-      if (res.success && res.data) {
-        setUsers(res.data.results);
-        setTotalCount(res.data.count);
-      }
-    } catch (err) {
-      showError("Erro ao carregar utilizadores.", err);
-    } finally {
-      setLoading(false);
+    if (verificationFilter === "Verificado") {
+      params.is_verified = "true";
+    } else if (verificationFilter === "Pendente") {
+      params.is_verified = "false";
     }
+
+    if (roleFilter) {
+      params.role = roleFilter;
+    }
+    return params;
   }, [currentPage, search, statusFilter, verificationFilter, roleFilter]);
 
-  // Initial and reactive load
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  const { data: usersListData, isLoading: loading } = useUsersQuery(listParams);
+  const users = usersListData?.results || [];
+  const totalCount = usersListData?.count || 0;
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+  const { data: selectedUserData } = useUserQuery(selectedUserId || 0);
+  const selectedUser = selectedUserData || null;
+
+  // Mutations
+  const createUserMutation = useCreateUserMutation();
+  const banUserMutation = useBanUserMutation();
+  const updateUserMutation = useUpdateUserMutation();
+  const deleteUserMutation = useDeleteUserMutation();
 
   // View detailed user details drawer
-  const handleViewDetails = async (user: UserManaged) => {
-    try {
-      const res = await rbacService.retrieveUser(user.id);
-      if (res.success && res.data) {
-        setSelectedUser(res.data);
-      }
-    } catch (err) {
-      showError("Erro ao detalhar utilizador.", err);
-    }
+  const handleViewDetails = (user: UserManaged) => {
+    setSelectedUserId(user.id);
   };
 
   // Creation handler
@@ -154,11 +130,7 @@ export default function Users() {
         role_names: [formData.role],
       };
 
-      const res = await rbacService.createUser(payload);
-      if (res.success) {
-        fetchUsers();
-        fetchStats();
-      }
+      await createUserMutation.mutateAsync(payload);
     } catch (err) {
       showError("Erro ao registrar utilizador na API.", err);
     }
@@ -167,18 +139,7 @@ export default function Users() {
 
   const handleToggleStatus = async (userId: number, newStatus: UserStatus) => {
     try {
-      const res = await rbacService.banUser(userId, { status: newStatus });
-      if (res.success) {
-        fetchUsers();
-        fetchStats();
-        // If drawer is open, refresh detail drawer state
-        if (selectedUser && selectedUser.id === userId) {
-          const detailRes = await rbacService.retrieveUser(userId);
-          if (detailRes.success && detailRes.data) {
-            setSelectedUser(detailRes.data);
-          }
-        }
-      }
+      await banUserMutation.mutateAsync({ id: userId, payload: { status: newStatus } });
     } catch (err) {
       showError("Erro ao alterar status do utilizador.", err);
     }
@@ -188,19 +149,12 @@ export default function Users() {
     const targetUser = users.find(u => u.id === userId);
     if (!targetUser) return;
     try {
-      const res = await rbacService.updateUser(userId, {
-        is_verified: !targetUser.is_verified,
+      await updateUserMutation.mutateAsync({
+        id: userId,
+        payload: {
+          is_verified: !targetUser.is_verified,
+        },
       });
-      if (res.success) {
-        fetchUsers();
-        fetchStats();
-        if (selectedUser && selectedUser.id === userId) {
-          const detailRes = await rbacService.retrieveUser(userId);
-          if (detailRes.success && detailRes.data) {
-            setSelectedUser(detailRes.data);
-          }
-        }
-      }
     } catch (err) {
       showError("Erro ao alterar verificação do utilizador.", err);
     }
@@ -210,18 +164,12 @@ export default function Users() {
     const targetUser = users.find(u => u.id === userId);
     if (!targetUser) return;
     try {
-      const res = await rbacService.updateUser(userId, {
-        is_active: !targetUser.is_active,
+      await updateUserMutation.mutateAsync({
+        id: userId,
+        payload: {
+          is_active: !targetUser.is_active,
+        },
       });
-      if (res.success) {
-        fetchUsers();
-        if (selectedUser && selectedUser.id === userId) {
-          const detailRes = await rbacService.retrieveUser(userId);
-          if (detailRes.success && detailRes.data) {
-            setSelectedUser(detailRes.data);
-          }
-        }
-      }
     } catch (err) {
       showError("Erro ao alterar atividade do utilizador.", err);
     }
@@ -230,13 +178,9 @@ export default function Users() {
   const handleDeleteUser = async () => {
     if (!deleteUserId) return;
     try {
-      const res = await rbacService.deleteUser(deleteUserId);
-      if (res.success) {
-        fetchUsers();
-        fetchStats();
-        if (selectedUser && selectedUser.id === deleteUserId) {
-          setSelectedUser(null);
-        }
+      await deleteUserMutation.mutateAsync(deleteUserId);
+      if (selectedUserId === deleteUserId) {
+        setSelectedUserId(null);
       }
     } catch (err) {
       showError("Erro ao excluir utilizador.", err);
@@ -337,7 +281,7 @@ export default function Users() {
 
   return (
     <div className="flex flex-col gap-5 p-1 select-none">
-      
+
       {/* HEADER SECTION */}
       <ActionCard
         title="Gestão de Usuários"
@@ -444,7 +388,7 @@ export default function Users() {
                       >
                         <Eye size={12} />
                       </button>
-                      
+
                       {user.status !== UserStatus.SUSPENDED ? (
                         <button
                           onClick={() => handleToggleStatus(user.id, UserStatus.SUSPENDED)}
@@ -482,7 +426,7 @@ export default function Users() {
       {/* DETAIL SIDE PANEL */}
       <UserDetailsDrawer
         user={selectedUser}
-        onClose={() => setSelectedUser(null)}
+        onClose={() => setSelectedUserId(null)}
         onToggleStatus={handleToggleStatus}
         onToggleVerification={handleToggleVerification}
         onToggleActive={handleToggleActive}

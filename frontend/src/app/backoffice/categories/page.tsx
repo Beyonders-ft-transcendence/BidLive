@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import TableSection from "@/components/common/TableSection";
-import categoryService from "@/services/category.service";
+import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Category } from "@/types/category.types";
 import {
   Folder,
@@ -13,29 +13,11 @@ import {
 } from "lucide-react";
 
 export default function Categories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: categoriesData, isLoading: loading } = useCategoriesQuery();
+  const categories = categoriesData || [];
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const res = await categoryService.list();
-      if (res.success && res.data) {
-        setCategories(res.data);
-      }
-    } catch (err) {
-      console.error("Erro ao obter categorias do backend:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((cat) => {

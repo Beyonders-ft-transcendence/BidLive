@@ -1,14 +1,19 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState } from "react";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import ConfirmModal from "@/components/common/ConfirmModal";
 import TableSection from "@/components/common/TableSection";
-import auctionService from "@/services/auction.service";
-import categoryService from "@/services/category.service";
-import type { Auction, AuctionCategory } from "@/types/auction.types";
+import {
+  useAuctionsQuery,
+  useAuctionQuery,
+  useUpdateAuctionMutation,
+  useCancelAuctionMutation,
+  useDeleteAuctionMutation,
+} from "@/hooks/useAuction";
 import { AuctionStatus } from "@/types/auction.types";
+import { useCategoriesQuery } from "@/hooks/useCategory";
 import { auctionStatusColor, getAuctionStatusLabel, formatCurrency } from "@/utils/auction";
 import {
   Eye,
@@ -19,17 +24,12 @@ import {
   AlertTriangle,
   Gavel,
   Calendar,
-  DollarSign
 } from "lucide-react";
 
 export default function Auctions() {
-  const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [categories, setCategories] = useState<AuctionCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
+  const [selectedAuctionId, setSelectedAuctionId] = useState<number | null>(null);
   
   // Pagination & Counts
-  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
 
@@ -45,72 +45,44 @@ export default function Auctions() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Load categories on mount
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await categoryService.list();
-        if (res.success && res.data) {
-          setCategories(res.data);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar categorias:", err);
-      }
-    };
-    loadCategories();
-  }, []);
+  // Load categories
+  const { data: categoriesData } = useCategoriesQuery();
+  const categories = categoriesData || [];
 
   // Fetch Auctions
-  const fetchAuctions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, any> = {
-        page: currentPage,
-        page_size: pageSize,
-        search: search || undefined,
-        status: statusFilter || undefined,
-        category_id: categoryFilter || undefined,
-      };
+  const auctionsParams = useMemo(() => ({
+    page: currentPage,
+    page_size: pageSize,
+    search: search || undefined,
+    status: statusFilter || undefined,
+    category_id: categoryFilter || undefined,
+  }), [currentPage, pageSize, search, statusFilter, categoryFilter]);
 
-      const res = await auctionService.list(params);
-      if (res.success && res.data) {
-        setAuctions(res.data.results);
-        setTotalCount(res.data.count);
-      }
-    } catch (err) {
-      console.error("Erro ao carregar leilões da API:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, search, statusFilter, categoryFilter]);
+  const { data: auctionsListData, isLoading: loading } = useAuctionsQuery(auctionsParams);
+  const auctions = auctionsListData?.results || [];
+  const totalCount = auctionsListData?.count || 0;
 
-  useEffect(() => {
-    fetchAuctions();
-  }, [fetchAuctions]);
+  const { data: selectedAuctionData } = useAuctionQuery(selectedAuctionId || 0);
+  const selectedAuction = selectedAuctionData || null;
+
+  // Mutations
+  const updateAuctionMutation = useUpdateAuctionMutation();
+  const cancelAuctionMutation = useCancelAuctionMutation();
+  const deleteAuctionMutation = useDeleteAuctionMutation();
 
   // View details modal
-  const handleViewDetails = async (auctionId: number) => {
-    try {
-      const res = await auctionService.retrieve(auctionId);
-      if (res.success && res.data) {
-        setSelectedAuction(res.data);
-      }
-    } catch (err) {
-      console.error("Erro ao obter detalhes do leilão:", err);
-    }
+  const handleViewDetails = (auctionId: number) => {
+    setSelectedAuctionId(auctionId);
   };
 
   // Publish / Approve Auction
   const handleApproveAuction = async () => {
     if (!approveAuctionId) return;
     try {
-      const res = await auctionService.update(approveAuctionId, { publish: true });
-      if (res.success) {
-        fetchAuctions();
-        if (selectedAuction && selectedAuction.id === approveAuctionId) {
-          setSelectedAuction(res.data || null);
-        }
-      }
+      await updateAuctionMutation.mutateAsync({
+        id: approveAuctionId,
+        payload: { publish: true },
+      });
     } catch (err) {
       console.error("Erro ao aprovar leilão:", err);
     }
@@ -121,13 +93,10 @@ export default function Auctions() {
   const handleCancelAuction = async () => {
     if (!cancelAuctionId) return;
     try {
-      const res = await auctionService.cancel(cancelAuctionId, { reason: cancelReason });
-      if (res.success) {
-        fetchAuctions();
-        if (selectedAuction && selectedAuction.id === cancelAuctionId) {
-          setSelectedAuction(res.data || null);
-        }
-      }
+      await cancelAuctionMutation.mutateAsync({
+        id: cancelAuctionId,
+        payload: { reason: cancelReason },
+      });
     } catch (err) {
       console.error("Erro ao cancelar leilão:", err);
     }
@@ -139,12 +108,9 @@ export default function Auctions() {
   const handleDeleteAuction = async () => {
     if (!deleteAuctionId) return;
     try {
-      const res = await auctionService.delete(deleteAuctionId);
-      if (res.success) {
-        fetchAuctions();
-        if (selectedAuction && selectedAuction.id === deleteAuctionId) {
-          setSelectedAuction(null);
-        }
+      await deleteAuctionMutation.mutateAsync(deleteAuctionId);
+      if (selectedAuctionId === deleteAuctionId) {
+        setSelectedAuctionId(null);
       }
     } catch (err) {
       console.error("Erro ao excluir leilão:", err);
@@ -218,7 +184,7 @@ export default function Auctions() {
 
   return (
     <div className="flex flex-col gap-5 p-1 select-none">
-      
+
       {/* HEADER SECTION */}
       <ActionCard
         title="Gestão de Leilões"
@@ -349,7 +315,7 @@ export default function Auctions() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-sm max-w-xl w-full p-6 shadow-xl relative animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
             <button
-              onClick={() => setSelectedAuction(null)}
+              onClick={() => setSelectedAuctionId(null)}
               className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
             >
               <X size={18} />
@@ -446,7 +412,7 @@ export default function Auctions() {
 
             <div className="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-4">
               <button
-                onClick={() => setSelectedAuction(null)}
+                onClick={() => setSelectedAuctionId(null)}
                 className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 border border-gray-200 rounded-sm uppercase tracking-wider"
               >
                 Fechar
