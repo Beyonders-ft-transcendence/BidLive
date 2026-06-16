@@ -34,6 +34,7 @@ export default function AuctionDetailPage() {
     error,
     activeStream,
     isWatchingStream,
+    setIsWatchingStream,
     viewerCount,
     bidAmount,
     setBidAmount,
@@ -156,21 +157,19 @@ export default function AuctionDetailPage() {
                 <div className="flex border-b border-gray-100 bg-gray-50/50">
                   <button
                     onClick={() => setIsWatchingStream(false)}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${
-                      !isWatchingStream
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream
                         ? "text-primary bg-white border-b-2 border-primary"
                         : "text-gray-400 hover:text-slate-700"
-                    }`}
+                      }`}
                   >
                     Galeria de Fotos
                   </button>
                   <button
                     onClick={() => setIsWatchingStream(true)}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
-                      isWatchingStream
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream
                         ? "text-red-500 bg-white border-b-2 border-red-500"
                         : "text-gray-400 hover:text-red-500"
-                    }`}
+                      }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                     Transmissão Ao Vivo (LIVE)
@@ -218,7 +217,7 @@ export default function AuctionDetailPage() {
                     <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                       Streamer: @{activeStream.streamer?.username || "Vendedor"}
                     </span>
-                    
+
                     <span className="text-[9px] text-slate-500 font-mono">
                       Protocol: WebRTC | Codec: H264
                     </span>
@@ -262,11 +261,10 @@ export default function AuctionDetailPage() {
                         <button
                           key={img.id}
                           onClick={() => setActiveImage(i)}
-                          className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${
-                            activeImage === i
+                          className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${activeImage === i
                               ? "border-primary"
                               : "border-transparent hover:border-gray-300"
-                          }`}
+                            }`}
                         >
                           <img
                             src={img.file.url}
@@ -370,50 +368,50 @@ export default function AuctionDetailPage() {
               {(auction.item.buy_now_price ||
                 auction.item.reserve_price ||
                 auction.rules) && (
-                <>
-                  <div className="border-t border-gray-100" />
-                  <div className="p-6 lg:p-8">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
-                      Valores Adicionais
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {auction.item.buy_now_price && (
-                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
-                            Comprar Agora
-                          </p>
-                          <p className="text-lg font-black text-primary">
-                            {formatCurrency(auction.item.buy_now_price)}
-                          </p>
-                        </div>
-                      )}
-                      {auction.item.reserve_price && (
-                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
-                            Preço de Reserva
-                          </p>
-                          <p className="text-sm font-semibold text-[#0C1B33] flex items-center gap-1">
-                            {auction.reserve_met ? (
-                              <>
-                                <CheckCircle2 size={13} className="text-green-500" />
-                                <span className="text-green-600">Atingido</span>
-                              </>
-                            ) : (
-                              "Não Atingido"
-                            )}
-                          </p>
+                  <>
+                    <div className="border-t border-gray-100" />
+                    <div className="p-6 lg:p-8">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
+                        Valores Adicionais
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {auction.item.buy_now_price && (
+                          <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
+                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+                              Comprar Agora
+                            </p>
+                            <p className="text-lg font-black text-primary">
+                              {formatCurrency(auction.item.buy_now_price)}
+                            </p>
+                          </div>
+                        )}
+                        {auction.item.reserve_price && (
+                          <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
+                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+                              Preço de Reserva
+                            </p>
+                            <p className="text-sm font-semibold text-[#0C1B33] flex items-center gap-1">
+                              {auction.reserve_met ? (
+                                <>
+                                  <CheckCircle2 size={13} className="text-green-500" />
+                                  <span className="text-green-600">Atingido</span>
+                                </>
+                              ) : (
+                                "Não Atingido"
+                              )}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      {auction.rules && (
+                        <div className="mt-4 bg-amber-50 border border-amber-100 rounded-sm p-4 text-xs text-amber-700">
+                          <strong>Regras Específicas:</strong>{" "}
+                          {JSON.stringify(auction.rules)}
                         </div>
                       )}
                     </div>
-                    {auction.rules && (
-                      <div className="mt-4 bg-amber-50 border border-amber-100 rounded-sm p-4 text-xs text-amber-700">
-                        <strong>Regras Específicas:</strong>{" "}
-                        {JSON.stringify(auction.rules)}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                  </>
+                )}
             </motion.div>
           </div>
 
@@ -443,9 +441,8 @@ export default function AuctionDetailPage() {
                     Lance Atual
                   </p>
                   <p
-                    className={`text-3xl font-black tracking-tight ${
-                      isLive ? "text-primary" : "text-[#0C1B33]"
-                    }`}
+                    className={`text-3xl font-black tracking-tight ${isLive ? "text-primary" : "text-[#0C1B33]"
+                      }`}
                   >
                     {formatCurrency(currentPrice)}
                   </p>
@@ -455,9 +452,8 @@ export default function AuctionDetailPage() {
                     Tempo Restante
                   </p>
                   <p
-                    className={`text-sm font-bold flex items-center justify-end gap-1 ${
-                      isLive ? "text-red-500" : "text-gray-400"
-                    }`}
+                    className={`text-sm font-bold flex items-center justify-end gap-1 ${isLive ? "text-red-500" : "text-gray-400"
+                      }`}
                   >
                     <Clock size={13} />
                     {calculateTimeLeft(auction.end_time, auction.status)}
@@ -521,8 +517,8 @@ export default function AuctionDetailPage() {
                       {auction.status === "SOLD"
                         ? "Vendido"
                         : auction.status === "ENDED"
-                        ? "Encerrado"
-                        : "Inativo"}
+                          ? "Encerrado"
+                          : "Inativo"}
                       .
                     </p>
                   </div>
@@ -561,11 +557,10 @@ export default function AuctionDetailPage() {
                       <div className="flex items-center gap-3">
                         {/* Avatar initial */}
                         <div
-                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold shrink-0 ${
-                            i === 0
+                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold shrink-0 ${i === 0
                               ? "bg-primary/10 text-primary"
                               : "bg-gray-100 text-gray-400"
-                          }`}
+                            }`}
                         >
                           {bid.bidder
                             ? bid.bidder.username.charAt(0).toUpperCase()
@@ -584,9 +579,8 @@ export default function AuctionDetailPage() {
                         </div>
                       </div>
                       <span
-                        className={`text-sm font-black ${
-                          i === 0 ? "text-primary" : "text-[#0C1B33]"
-                        }`}
+                        className={`text-sm font-black ${i === 0 ? "text-primary" : "text-[#0C1B33]"
+                          }`}
                       >
                         {formatCurrency(bid.amount)}
                       </span>

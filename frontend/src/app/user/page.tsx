@@ -6,6 +6,8 @@ import Header from "@/components/layout/Header";
 import { useAuthStore } from "@/store/auth.store";
 import auctionService from "@/services/auction.service";
 import categoryService from "@/services/category.service";
+import { useAuctionsQuery } from "@/hooks/useAuction";
+import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Auction } from "@/types/auction.types";
 import { AuctionStatus, ItemCondition } from "@/types/auction.types";
 import { Category } from "@/types/category.types";
@@ -37,18 +39,12 @@ export default function UserPage() {
   // Navigation tab state
   const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings" | "create-auction">("overview");
 
-  // Dashboard state
-  const [myAuctions, setMyAuctions] = useState<Auction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [allAuctions, setAllAuctions] = useState<Auction[]>([]);
-
-  // Loading states
-  const [loadingAuctions, setLoadingAuctions] = useState(true);
-  const [loadingAll, setLoadingAll] = useState(true);
+  // Load categories using React Query
+  const { data: categoriesData } = useCategoriesQuery();
+  const categories = categoriesData || [];
 
   // Table pagination and filters
   const [myAuctionsPage, setMyAuctionsPage] = useState(1);
-  const [myAuctionsTotal, setMyAuctionsTotal] = useState(0);
   const myAuctionsPageSize = 10;
 
   // Actions states
@@ -69,65 +65,41 @@ export default function UserPage() {
     }
   }, [status, isAuthenticated, router]);
 
-  // Load categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await categoryService.list();
-        if (res.success && res.data) {
-          setCategories(res.data);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar categorias:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
-
   // Fetch User's Created Auctions
-  const fetchMyAuctions = useCallback(async () => {
-    if (!user) return;
-    setLoadingAuctions(true);
-    try {
-      const params: Record<string, any> = {
-        seller_id: user.id,
-        page: myAuctionsPage,
-        page_size: myAuctionsPageSize,
-      };
-      const res = await auctionService.list(params);
-      if (res.success && res.data) {
-        setMyAuctions(res.data.results);
-        setMyAuctionsTotal(res.data.count);
-      }
-    } catch (err) {
-      console.error("Erro ao carregar leilões criados:", err);
-    } finally {
-      setLoadingAuctions(false);
-    }
+  const myAuctionsParams = useMemo(() => {
+    if (!user) return null;
+    return {
+      seller_id: user.id,
+      page: myAuctionsPage,
+      page_size: myAuctionsPageSize,
+    };
   }, [user, myAuctionsPage]);
 
-  // Fetch all auctions for global metric calculations (winning/bids lists)
-  const fetchAllAuctions = useCallback(async () => {
-    setLoadingAll(true);
-    try {
-      const res = await auctionService.list({ page_size: 100 });
-      if (res.success && res.data) {
-        setAllAuctions(res.data.results);
-      }
-    } catch (err) {
-      console.error("Erro ao carregar leilões gerais:", err);
-    } finally {
-      setLoadingAll(false);
-    }
-  }, []);
+  const {
+    data: myAuctionsData,
+    isLoading: loadingAuctions,
+    refetch: refetchMyAuctions,
+  } = useAuctionsQuery(myAuctionsParams || undefined);
 
-  // Sync dashboard data
-  useEffect(() => {
-    if (user) {
-      fetchMyAuctions();
-      fetchAllAuctions();
-    }
-  }, [user, fetchMyAuctions, fetchAllAuctions]);
+  const myAuctions = myAuctionsData?.results || [];
+  const myAuctionsTotal = myAuctionsData?.count || 0;
+
+  // Fetch all auctions for global metric calculations (winning/bids lists)
+  const {
+    data: allAuctionsData,
+    isLoading: loadingAll,
+    refetch: refetchAllAuctions,
+  } = useAuctionsQuery({ page_size: 100 });
+
+  const allAuctions = allAuctionsData?.results || [];
+
+  const fetchMyAuctions = useCallback(() => {
+    refetchMyAuctions();
+  }, [refetchMyAuctions]);
+
+  const fetchAllAuctions = useCallback(() => {
+    refetchAllAuctions();
+  }, [refetchAllAuctions]);
 
   // Calculate Metrics
   const metrics = useMemo(() => {

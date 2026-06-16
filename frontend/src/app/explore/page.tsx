@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { 
   ChevronDown, 
   SlidersHorizontal, 
@@ -8,10 +7,10 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
-import Header from "@/components/layout/Header"
-import Footer from "@/components/layout/Footer"
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { HTMLMotionProps, motion } from "framer-motion";
-import auctionService from "@/services/auction.service";
+import { useAuctionsQuery } from "@/hooks/useAuction";
 import type { Auction } from "@/types/auction.types";
 
 interface ScrollAnimatedCardProps extends HTMLMotionProps<"div"> {
@@ -55,24 +54,8 @@ function SkeletonCard() {
 }
 
 export default function ExploreUser() {
-  const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadAuctions() {
-      try {
-        const res = await auctionService.list();
-        if (res.success && res.data) {
-          setAuctions(res.data.results);
-        }
-      } catch (error) {
-        console.error("Failed to load auctions", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadAuctions();
-  }, []);
+  const { data: auctionsData, isLoading: loading } = useAuctionsQuery();
+  const auctions: Auction[] = auctionsData?.results || [];
 
   const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(Number(value));

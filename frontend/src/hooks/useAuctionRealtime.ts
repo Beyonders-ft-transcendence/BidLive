@@ -1,85 +1,59 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import ENV from "@/utils/env.utils";
 import auctionService from "@/services/auction.service";
 import type { Auction, Bid } from "@/types/auction.types";
+import {
+  useAuctionQuery,
+  useAuctionBidsQuery,
+  useAuctionStreamsQuery,
+} from "./useAuction";
 
 export function useAuctionRealtime(id: number) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const [auction, setAuction] = useState<Auction | null>(null);
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [activeStream, setActiveStream] = useState<any | null>(null);
   const [isWatchingStream, setIsWatchingStream] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
 
   const [bidAmount, setBidAmount] = useState("");
   const [submittingBid, setSubmittingBid] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const ws = useRef<WebSocket | null>(null);
 
+  const hasToken =
+    typeof window !== "undefined" &&
+    !!window.localStorage.getItem("bidlive.auth.access_token");
+
+  // React Query Queries
+  const { data: auction, isLoading: loadingAuction, error: auctionQueryError } = useAuctionQuery(id);
+  const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(id);
+  const { data: streamsData } = useAuctionStreamsQuery(id, hasToken);
+
+  const bids = bidsData?.results || [];
+  const activeStream = streamsData?.find((s: any) => s.status === "LIVE") || null;
+
+  const loading = loadingAuction || loadingBids;
+
+  // Initialize stream view state
   useEffect(() => {
-    if (!id) return;
-
-    async function loadData() {
-      try {
-        const hasToken =
-          typeof window !== "undefined" &&
-          !!window.localStorage.getItem("bidlive.auth.access_token");
-
-        const promises: Promise<any>[] = [
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ];
-
-        if (hasToken) {
-          promises.push(auctionService.listStreams(id));
-        }
-
-        const results = await Promise.allSettled(promises);
-        const auctionResult = results[0];
-        const bidsResult = results[1];
-        const streamResult = hasToken ? results[2] : null;
-
-        if (
-          auctionResult.status === "fulfilled" &&
-          auctionResult.value?.success
-        ) {
-          setAuction(auctionResult.value.data || null);
-        } else {
-          setError("Não foi possível carregar os detalhes do leilão.");
-        }
-
-        if (bidsResult.status === "fulfilled" && bidsResult.value?.success) {
-          setBids(bidsResult.value.data?.results || []);
-        }
-
-        if (
-          streamResult &&
-          streamResult.status === "fulfilled" &&
-          streamResult.value?.success &&
-          streamResult.value.data
-        ) {
-          const live = streamResult.value.data.find(
-            (s: any) => s.status === "LIVE"
-          );
-          setActiveStream(live || null);
-          if (live) {
-            setIsWatchingStream(true);
-            setViewerCount(live.viewer_count || 1);
-          }
-        }
-      } catch (err) {
-        setError("Erro de conexão ao carregar os detalhes do leilão.");
-      } finally {
-        setLoading(false);
-      }
+    if (activeStream) {
+      setIsWatchingStream(true);
+      setViewerCount(activeStream.viewer_count || 1);
     }
+  }, [activeStream]);
 
-    loadData();
+  // Handle errors
+  useEffect(() => {
+    if (auctionQueryError) {
+      setError("Não foi possível carregar os detalhes do leilão.");
+    }
+  }, [auctionQueryError]);
+
+  useEffect(() => {
+    if (!id || isNaN(id)) return;
 
     // Setup WebSocket for Real-time Updates and Bidding
     const token =
@@ -100,20 +74,26 @@ export function useAuctionRealtime(id: number) {
           const data = JSON.parse(event.data);
 
           if (data.event === "auction_snapshot" && data.payload) {
-            setAuction(data.payload);
+            queryClient.setQueryData(["auction", id], data.payload);
             if (data.payload.active_connections !== undefined) {
               setViewerCount(data.payload.active_connections);
             }
           } else if (data.event === "BID_CREATED" && data.payload) {
             if (data.payload.bid) {
-              setBids((prev) => [data.payload.bid, ...prev]);
+              queryClient.setQueryData(["auctionBids", id], (prev: any) => {
+                if (!prev) return { results: [data.payload.bid] };
+                return {
+                  ...prev,
+                  results: [data.payload.bid, ...(prev.results || [])],
+                };
+              });
             }
             if (data.payload.auction) {
-              setAuction(data.payload.auction);
+              queryClient.setQueryData(["auction", id], data.payload.auction);
             }
           } else if (data.event === "TIMER_UPDATED" && data.payload) {
             if (data.payload.auction) {
-              setAuction(data.payload.auction);
+              queryClient.setQueryData(["auction", id], data.payload.auction);
             }
           } else if (
             (data.event === "USER_JOINED" || data.event === "USER_LEFT") &&
@@ -159,7 +139,7 @@ export function useAuctionRealtime(id: number) {
         ws.current.close();
       }
     };
-  }, [id]);
+  }, [id, queryClient]);
 
   useEffect(() => {
     if (auction) {
@@ -208,12 +188,8 @@ export function useAuctionRealtime(id: number) {
           const res = await auctionService.placeBid(id, { amount: bidAmount });
           if (res.success && res.data) {
             setBidAmount("");
-            const [aRes, bRes] = await Promise.all([
-              auctionService.retrieve(id),
-              auctionService.listBids(id),
-            ]);
-            if (aRes.success && aRes.data) setAuction(aRes.data);
-            if (bRes.success && bRes.data) setBids(bRes.data.results);
+            queryClient.invalidateQueries({ queryKey: ["auction", id] });
+            queryClient.invalidateQueries({ queryKey: ["auctionBids", id] });
           } else {
             if (res.errors) {
               setError(Object.values(res.errors).flat().join(" "));
@@ -241,7 +217,7 @@ export function useAuctionRealtime(id: number) {
         }
       }
     },
-    [bidAmount, auction, id, router]
+    [bidAmount, auction, id, router, queryClient]
   );
 
   return {
@@ -251,6 +227,7 @@ export function useAuctionRealtime(id: number) {
     error,
     activeStream,
     isWatchingStream,
+    setIsWatchingStream,
     viewerCount,
     bidAmount,
     setBidAmount,
