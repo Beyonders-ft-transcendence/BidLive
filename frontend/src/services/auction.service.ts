@@ -45,6 +45,11 @@ class AuctionService {
     return response.data;
   }
 
+  async listActivities(): Promise<ApiResponse<any[]>> {
+    const response = await api.get<ApiResponse<any[]>>('/auctions/activities/');
+    return response.data;
+  }
+
   async retrieve(id: number): Promise<ApiResponse<Auction>> {
     const response = await api.get<ApiResponse<Auction>>(`/auctions/${id}/`);
     return response.data;

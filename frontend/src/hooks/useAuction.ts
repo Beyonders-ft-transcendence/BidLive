@@ -29,6 +29,18 @@ export function useFeaturedAuctionsQuery(params?: Record<string, any>) {
   });
 }
 
+export function useAuctionActivitiesQuery() {
+  return useQuery({
+    queryKey: ["auctionActivities"],
+    queryFn: async () => {
+      const res = await auctionService.listActivities();
+      if (!res.success) throw new Error(res.message || "Falha ao carregar atividades.");
+      return res.data;
+    },
+    refetchInterval: 5000, // Polling to get real-time feed updates
+  });
+}
+
 export function useAuctionQuery(id: number) {
   return useQuery({
     queryKey: ["auction", id],
