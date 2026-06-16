@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ENV from "@/utils/env.utils";
 import auctionService from "@/services/auction.service";
-import type { Auction, Bid } from "@/types/auction.types";
 import {
   useAuctionQuery,
   useAuctionBidsQuery,
@@ -74,27 +73,92 @@ export function useAuctionRealtime(id: number) {
           const data = JSON.parse(event.data);
 
           if (data.event === "auction_snapshot" && data.payload) {
-            queryClient.setQueryData(["auction", id], data.payload);
+            queryClient.setQueryData(["auction", id], (prev: any) => {
+              if (!prev) {
+                return {
+                  id: data.payload.auction_id,
+                  status: data.payload.status,
+                  start_time: data.payload.start_time,
+                  end_time: data.payload.end_time,
+                  reserve_met: data.payload.reserve_met,
+                  item: {
+                    id: data.payload.auction_id,
+                    current_price: data.payload.current_price,
+                    starting_price: data.payload.current_price,
+                  }
+                };
+              }
+              return {
+                ...prev,
+                status: data.payload.status !== undefined ? data.payload.status : prev.status,
+                start_time: data.payload.start_time !== undefined ? data.payload.start_time : prev.start_time,
+                end_time: data.payload.end_time !== undefined ? data.payload.end_time : prev.end_time,
+                reserve_met: data.payload.reserve_met !== undefined ? data.payload.reserve_met : prev.reserve_met,
+                winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
+                item: prev.item ? {
+                  ...prev.item,
+                  current_price: data.payload.current_price !== undefined ? data.payload.current_price : prev.item.current_price,
+                } : {
+                  current_price: data.payload.current_price,
+                  starting_price: data.payload.current_price,
+                },
+              };
+            });
             if (data.payload.active_connections !== undefined) {
               setViewerCount(data.payload.active_connections);
             }
           } else if (data.event === "BID_CREATED" && data.payload) {
-            if (data.payload.bid) {
-              queryClient.setQueryData(["auctionBids", id], (prev: any) => {
-                if (!prev) return { results: [data.payload.bid] };
-                return {
-                  ...prev,
-                  results: [data.payload.bid, ...(prev.results || [])],
-                };
-              });
-            }
-            if (data.payload.auction) {
-              queryClient.setQueryData(["auction", id], data.payload.auction);
-            }
-          } else if (data.event === "TIMER_UPDATED" && data.payload) {
-            if (data.payload.auction) {
-              queryClient.setQueryData(["auction", id], data.payload.auction);
-            }
+            const newBid = {
+              id: data.payload.bid_id,
+              auction: data.payload.auction_id,
+              auction_id: data.payload.auction_id,
+              bidder: data.payload.bidder,
+              bidder_id: data.payload.bidder ? data.payload.bidder.id : 0,
+              amount: data.payload.bid_amount,
+              is_buy_now: !!data.payload.is_buy_now,
+              ip_address: "",
+              metadata: data.payload.metadata || null,
+              timestamp: data.payload.timestamp,
+              created_at: data.payload.timestamp,
+            };
+
+            queryClient.setQueryData(["auctionBids", id], (prev: any) => {
+              if (!prev) return { results: [newBid] };
+              const results = prev.results || [];
+              if (results.some((b: any) => b.id === newBid.id)) return prev;
+              return {
+                ...prev,
+                results: [newBid, ...results],
+              };
+            });
+
+            queryClient.setQueryData(["auction", id], (prev: any) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                item: prev.item ? {
+                  ...prev.item,
+                  current_price: data.payload.current_price || prev.item.current_price,
+                } : undefined,
+              };
+            });
+          } else if (
+            (data.event === "TIMER_UPDATED" ||
+              data.event === "AUCTION_STARTED" ||
+              data.event === "AUCTION_ENDED" ||
+              data.event === "AUCTION_CANCELLED" ||
+              data.event === "AUCTION_UPDATED") &&
+            data.payload
+          ) {
+            queryClient.setQueryData(["auction", id], (prev: any) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                status: data.payload.status || prev.status,
+                end_time: data.payload.end_time || prev.end_time,
+                winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
+              };
+            });
           } else if (
             (data.event === "USER_JOINED" || data.event === "USER_LEFT") &&
             data.payload
