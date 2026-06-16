@@ -12,6 +12,8 @@ class AuctionFilter(django_filters.FilterSet):
     starts_after = django_filters.IsoDateTimeFilter(field_name="start_time", lookup_expr="gte")
     ends_before = django_filters.IsoDateTimeFilter(field_name="end_time", lookup_expr="lte")
 
+    is_featured = django_filters.BooleanFilter(field_name="is_featured")
+
     class Meta:
         model = Auction
-        fields = ["status", "seller_id", "category_id"]
+        fields = ["status", "seller_id", "category_id", "is_featured"]

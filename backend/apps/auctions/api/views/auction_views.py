@@ -78,7 +78,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return self.get_required_permissions()
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve", "featured"]:
             return [AllowAny()]
         if self.action == "bids" and self.request.method.lower() == "get":
             return [AllowAny()]
@@ -121,6 +121,20 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = AuctionListSerializer(page or queryset, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return success_response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="featured")
+    def featured(self, request):
+        queryset = self.filter_queryset(self.get_queryset().filter(is_featured=True))
+        if not queryset.exists():
+            queryset = self.filter_queryset(self.get_queryset().filter(status=AuctionStatus.LIVE)[:4])
+        if not queryset.exists():
+            queryset = self.filter_queryset(self.get_queryset()[:4])
+        
         page = self.paginate_queryset(queryset)
         serializer = AuctionListSerializer(page or queryset, many=True)
         if page is not None:
