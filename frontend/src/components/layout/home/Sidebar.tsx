@@ -19,7 +19,7 @@ export default function Sidebar({
   bestSellers,
 }: SidebarProps) {
   return (
-    <aside className="w-full lg:w-[260px] flex-shrink-0 flex flex-col gap-7">
+    <aside className="w-full lg:w-[260px] flex-shrink-0 flex flex-col gap-5 lg:gap-7">
       {/* CATEGORIES */}
       <div className="border border-gray-200 bg-white rounded-sm shadow-sm overflow-hidden">
         <div className="bg-primary text-white font-bold px-5 py-3.5 text-[13px] tracking-wide shadow-sm">

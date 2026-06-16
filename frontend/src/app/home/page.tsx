@@ -139,10 +139,10 @@ export default function Home() {
           <div className="flex-1 flex flex-col gap-6">
             
             {/* TOP BANNER */}
-            <div className="bg-[#e9e8e3] p-10 flex items-center justify-between rounded-sm shadow-sm relative overflow-hidden min-h-[200px]">
-              <div className="max-w-xl relative z-10">
-                <h2 className="text-[32px] font-black text-gray-800 mb-4 tracking-tight leading-none uppercase">LEILÕES DE <span className="text-primary">VEÍCULOS & IMÓVEIS</span></h2>
-                <p className="text-[13px] text-gray-600 leading-relaxed font-medium">Participe dos melhores leilões de veículos recuperados, frotas empresariais e imóveis de desinvestimento. Faça o seu lance agora e garanta excelentes oportunidades de negócio com total segurança e transparência.</p>
+            <div className="bg-[#e9e8e3] p-6 md:p-10 flex items-center justify-between rounded-sm shadow-sm relative overflow-hidden min-h-[160px] md:min-h-[200px]">
+              <div className="max-w-xl relative z-10 text-center sm:text-left">
+                <h2 className="text-2xl md:text-[32px] font-black text-gray-800 mb-3 md:mb-4 tracking-tight leading-none uppercase">LEILÕES DE <span className="text-primary block sm:inline mt-1 sm:mt-0">VEÍCULOS & IMÓVEIS</span></h2>
+                <p className="text-xs md:text-[13px] text-gray-600 leading-relaxed font-medium">Participe dos melhores leilões de veículos recuperados, frotas empresariais e imóveis de desinvestimento. Faça o seu lance agora e garanta excelentes oportunidades de negócio com total segurança e transparência.</p>
               </div>
             </div>
 
