@@ -156,14 +156,14 @@ export default function Home() {
             />
 
             {/* PRODUCT GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {auctionsLoading ? (
                 Array.from({ length: 8 }).map((_, idx) => (
-                  <div key={idx} className="border border-gray-200 bg-white p-5 rounded-sm animate-pulse h-[340px] flex flex-col justify-between">
-                    <div className="h-40 bg-gray-100 rounded-sm w-full mb-4"></div>
-                    <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-100 rounded w-1/2"></div>
-                    <div className="h-8 bg-gray-100 rounded w-full mt-4"></div>
+                  <div key={idx} className="border border-gray-200 bg-white p-3 sm:p-5 rounded-sm animate-pulse h-[280px] sm:h-[340px] flex flex-col justify-between">
+                    <div className="h-32 sm:h-40 bg-gray-100 rounded-sm w-full mb-3 sm:mb-4"></div>
+                    <div className="h-3 sm:h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 sm:h-4 bg-gray-100 rounded w-1/2"></div>
+                    <div className="h-6 sm:h-8 bg-gray-100 rounded w-full mt-3 sm:mt-4"></div>
                   </div>
                 ))
               ) : products.length === 0 ? (
@@ -174,40 +174,40 @@ export default function Home() {
                 products.map((product) => {
                   const Icon = product.icon;
                   return (
-                    <div key={product.id} className="border border-gray-200 bg-white p-5 relative flex flex-col group hover:shadow-xl transition-all duration-300 hover:border-primary/50 rounded-sm cursor-pointer h-full">
+                    <div key={product.id} className="border border-gray-200 bg-white p-3 sm:p-5 relative flex flex-col group hover:shadow-xl transition-all duration-300 hover:border-primary/50 rounded-sm cursor-pointer h-full">
                       
                       {/* STATUS & EXTRA BADGES */}
-                      <div className="absolute top-5 left-5 flex flex-col gap-1.5 z-10">
+                      <div className="absolute top-3 left-3 sm:top-5 sm:left-5 flex flex-col gap-1 sm:gap-1.5 z-10">
                         {product.status === "LIVE" && (
-                          <span className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider flex items-center gap-1.5">
+                          <span className="bg-red-600 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider flex items-center gap-1 sm:gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                             AO VIVO
                           </span>
                         )}
                         {product.status === "SCHEDULED" && (
-                          <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                          <span className="bg-blue-600 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
                             EM BREVE
                           </span>
                         )}
                         {(product.status === "ENDED" || product.status === "SOLD") && (
-                          <span className="bg-gray-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                          <span className="bg-gray-500 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
                             FINALIZADO
                           </span>
                         )}
                         {product.badges.includes("NOVO") && (
-                          <span className="bg-[#00b2f0] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                          <span className="bg-[#00b2f0] text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
                             NOVO
                           </span>
                         )}
                       </div>
 
                       {/* IMAGE CONTAINER */}
-                      <div className="h-44 flex items-center justify-center mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
+                      <div className="h-32 sm:h-44 flex items-center justify-center mb-3 sm:mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
                         {product.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
                         ) : (
-                          <Icon size={80} className="text-gray-200" />
+                          <Icon className="text-gray-200 w-12 h-12 sm:w-20 sm:h-20" />
                         )}
                         
                         {/* COUNTDOWN TIMER OVERLAY FOR LIVE AUCTIONS */}
@@ -218,12 +218,12 @@ export default function Home() {
 
                       {/* PRODUCT DETAILS */}
                       <div className="flex flex-col flex-1 justify-end">
-                        <h3 className="text-[14px] text-gray-800 font-semibold line-clamp-2 min-h-[40px] mb-4 group-hover:text-primary transition-colors leading-snug">{product.name}</h3>
+                        <h3 className="text-xs sm:text-[14px] text-gray-800 font-semibold line-clamp-2 min-h-[32px] sm:min-h-[40px] mb-2 sm:mb-4 group-hover:text-primary transition-colors leading-snug">{product.name}</h3>
                         
-                        <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-3">
-                          <div className="flex flex-col">
-                            <span className="text-primary font-black text-lg leading-none">{product.price}</span>
-                            {product.oldPrice && <span className="text-gray-400 line-through text-[11px] mt-1.5 font-medium">{product.oldPrice}</span>}
+                        <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-2 sm:pt-3">
+                          <div className="flex flex-col w-full">
+                            <span className="text-primary font-black text-sm sm:text-lg leading-none">{product.price}</span>
+                            {product.oldPrice && <span className="text-gray-400 line-through text-[9px] sm:text-[11px] mt-1 sm:mt-1.5 font-medium">{product.oldPrice}</span>}
                           </div>
                         </div>
                       </div>
