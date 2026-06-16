@@ -66,24 +66,37 @@ interface AuthActions {
 
 export type AuthStore = AuthState & AuthActions
 
-const getErrorMessage = (error: unknown, fallback: string) => {
+const getErrorMessage = (error: unknown, fallback: string): string => {
     if (isAxiosError(error)) {
-        const responseData = error.response?.data as
-            | { message?: string; detail?: string; errors?: Record<string, string[]> }
-            | undefined
+        const responseData = error.response?.data as any;
 
-        const fieldErrors = responseData?.errors
-            ? Object.values(responseData.errors).flat().find(Boolean)
-            : undefined
+        if (typeof responseData === 'string') return responseData;
 
-        return responseData?.message ?? responseData?.detail ?? fieldErrors ?? error.message ?? fallback
+        if (responseData && typeof responseData === 'object') {
+            if (typeof responseData.message === 'string') return responseData.message;
+            if (typeof responseData.detail === 'string') return responseData.detail;
+            
+            const errorSource = responseData.errors || responseData.message || responseData;
+            
+            if (errorSource && typeof errorSource === 'object') {
+                const values = Object.values(errorSource).flat();
+                const firstError = values.find(v => typeof v === 'string');
+                if (firstError) return firstError as string;
+            }
+        }
+
+        return error.message ?? fallback;
     }
 
     if (error instanceof Error) {
-        return error.message || fallback
+        return error.message || fallback;
     }
 
-    return fallback
+    if (typeof error === 'string') {
+        return error;
+    }
+
+    return fallback;
 }
 
 // ─── Initial State ───────────────────────────────────────────────────────────
