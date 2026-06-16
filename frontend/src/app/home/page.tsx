@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { 
   FiUser, 
   FiHeart, 
@@ -12,73 +15,137 @@ import {
   FiChevronLeft,
   FiChevronRight
 } from "react-icons/fi";
-import { FaCoins, FaGavel, FaStar, FaRegStar, FaBoxOpen } from "react-icons/fa";
+import { FaCoins, FaGavel, FaBoxOpen } from "react-icons/fa";
+import { useAuctionsQuery, useFeaturedAuctionsQuery } from "@/hooks/useAuction";
+import { useCategoriesQuery } from "@/hooks/useCategory";
+import type { Auction, AuctionCategory } from "@/types/auction.types";
 
-const categories = [
-  "Veículos e Peças", "Imóveis", "Eletrônicos e Celulares", "Obras de Arte",
-  "Joias e Relógios", "Máquinas Industriais", "Equipamentos Agrícolas", "Móveis e Decoração",
-  "Moda e Acessórios", "Artigos Colecionáveis", "Instrumentos Musicais", "Artigos Esportivos",
-  "Lotes Diversos", "Outros"
-];
+function CountdownTimer({ endTime }: { endTime: string }) {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 
-function Rating({ value }: { value: number }) {
+  useEffect(() => {
+    const calculateTime = () => {
+      const difference = +new Date(endTime) - +new Date();
+      if (difference <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    };
+
+    // Use a timeout to avoid calling setState synchronously within the effect body
+    const timeout = setTimeout(() => {
+      setTimeLeft(calculateTime());
+    }, 0);
+
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTime());
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [endTime]);
+
+  if (!timeLeft) return null;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
   return (
-    <div className="flex text-yellow-400 text-[11px] mt-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        star <= value ? <FaStar key={star} /> : <FaRegStar key={star} className="text-gray-300" />
-      ))}
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-full justify-center">
+      <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
+        <span className="text-sm font-bold leading-none mt-1">{pad(timeLeft.days)}</span>
+        <span className="text-[7px] text-gray-300 mt-1 tracking-wider">DIAS</span>
+      </div>
+      <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
+        <span className="text-sm font-bold leading-none mt-1">{pad(timeLeft.hours)}</span>
+        <span className="text-[7px] text-gray-300 mt-1 tracking-wider">HORAS</span>
+      </div>
+      <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
+        <span className="text-sm font-bold leading-none mt-1">{pad(timeLeft.minutes)}</span>
+        <span className="text-[7px] text-gray-300 mt-1 tracking-wider">MIN</span>
+      </div>
+      <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
+        <span className="text-sm font-bold leading-none mt-1">{pad(timeLeft.seconds)}</span>
+        <span className="text-[7px] text-gray-300 mt-1 tracking-wider">SEG</span>
+      </div>
     </div>
   );
 }
 
-export default async function Home() {
-  // Buscar os dados da API em Server Component
-  let apiData: any[] = [];
-  try {
-    const res = await fetch("http://127.0.0.1:8000/api/auctions/", { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      // Handle both direct array and paginated response { count, results }
-      apiData = Array.isArray(data) ? data : (data.results || []);
-    }
-  } catch (error) {
-    console.error("Failed to fetch auctions:", error);
-  }
+export default function Home() {
+  // Estados para filtros e paginação
+  const [searchQuery, setSearchQuery] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [ordering, setOrdering] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(16);
 
-  // Mapear os dados para o formato que a interface espera
-  const products = apiData.map((auction: any) => {
+  // Queries react-query
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery();
+  const { data: featuredData } = useFeaturedAuctionsQuery();
+  const { data: auctionsData, isLoading: auctionsLoading } = useAuctionsQuery({
+    search: appliedSearch || undefined,
+    category_id: selectedCategoryId || undefined,
+    ordering: ordering || undefined,
+    page: page,
+    page_size: pageSize,
+  });
+
+  // Mapear leilões em destaque (bestSellers)
+  const bestSellers = (featuredData?.results || []).slice(0, 4).map((auction: Auction) => {
     const item = auction.item || {};
-    const primaryImg = item.images?.find((img: any) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
+    const primaryImg = item.images?.find((img) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
     
-    const badges = [];
-    if (auction.status === "LIVE") badges.push("DESTAQUE");
+    return {
+      id: auction.id,
+      name: item.title || "Leilão sem título",
+      price: item.current_price ? `${parseFloat(item.current_price).toLocaleString('pt-AO')} Kz` : "0 Kz",
+      oldPrice: item.buy_now_price ? `${parseFloat(item.buy_now_price).toLocaleString('pt-AO')} Kz` : null,
+      imageUrl: primaryImg,
+      icon: FaBoxOpen,
+    };
+  });
+
+  // Mapear leilões da listagem principal
+  const products = (auctionsData?.results || []).map((auction: Auction) => {
+    const item = auction.item || {};
+    const primaryImg = item.images?.find((img) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
+    
+    const badges: string[] = [];
     if (item.condition_type === "NEW") badges.push("NOVO");
-    
-    let discountStr = null;
-    if (item.buy_now_price && item.current_price) {
-      const current = parseFloat(item.current_price);
-      const buyNow = parseFloat(item.buy_now_price);
-      if (current < buyNow) {
-        discountStr = `-${Math.round((1 - current / buyNow) * 100)}%`;
-      }
-    }
 
     return {
       id: auction.id,
       name: item.title || "Leilão sem título",
       price: item.current_price ? `${parseFloat(item.current_price).toLocaleString('pt-AO')} Kz` : "0 Kz",
       oldPrice: item.buy_now_price ? `${parseFloat(item.buy_now_price).toLocaleString('pt-AO')} Kz` : null,
-      discount: discountStr,
-      rating: 5, // Rating fixo pois não há na API
       badges,
       hasTimer: auction.status === "LIVE",
+      endTime: auction.end_time,
       icon: FaBoxOpen,
-      imageUrl: primaryImg
+      imageUrl: primaryImg,
+      status: auction.status,
     };
   });
 
-  // Pegar os 4 primeiros para os "Mais Vendidos / Lances em Destaque"
-  const bestSellers = products.slice(0, 4);
+  // Lógica de pesquisa
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAppliedSearch(searchQuery);
+    setPage(1);
+  };
+
+  // Cálculo de Paginação
+  const totalCount = auctionsData?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const startIndex = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endIndex = Math.min(page * pageSize, totalCount);
 
   return (
     <div className="w-full bg-[#f8f9fa] min-h-screen pb-12 font-sans">
@@ -136,21 +203,30 @@ export default async function Home() {
             </div>
           </div>
           <div className="hidden lg:flex flex-1 max-w-2xl mx-10">
-            <div className="flex w-full overflow-hidden rounded-xl border-2 border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all bg-white shadow-sm hover:border-gray-300">
-              <select className="bg-gray-50 border-r-2 border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors">
-                <option>Todas Categorias</option>
-                <option>Veículos</option>
-                <option>Imóveis</option>
-                <option>Eletrônicos</option>
+            <form onSubmit={handleSearchSubmit} className="flex w-full overflow-hidden rounded-xl border-2 border-gray-200 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all bg-white shadow-sm hover:border-gray-300">
+              <select 
+                value={selectedCategoryId || ""} 
+                onChange={(e) => {
+                  setSelectedCategoryId(e.target.value ? Number(e.target.value) : null);
+                  setPage(1);
+                }}
+                className="bg-gray-50 border-r-2 border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <option value="">Todas Categorias</option>
+                {categoriesData?.map((cat: AuctionCategory) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
               <input
                 placeholder="Pesquisar leilões..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 px-5 py-3 text-sm outline-none text-gray-800 placeholder-gray-400 font-medium"
               />
-              <button className="bg-primary px-8 text-white hover:bg-primary-light transition-colors flex items-center justify-center">
+              <button type="submit" className="bg-primary px-8 text-white hover:bg-primary-light transition-colors flex items-center justify-center">
                 <FiSearch size={20} />
               </button>
-            </div>
+            </form>
           </div>
           <div className="hidden lg:flex items-center gap-4">
             <div className="rounded-full bg-primary/10 p-3.5">
@@ -201,7 +277,14 @@ export default async function Home() {
         
         {/* BREADCRUMB */}
         <div className="flex items-center gap-2.5 text-xs text-gray-500 mb-6 font-medium">
-          <div className="flex items-center text-primary bg-primary/10 px-3.5 py-1.5 rounded-sm cursor-pointer hover:bg-primary hover:text-white transition-colors shadow-sm">
+          <div className="flex items-center text-primary bg-primary/10 px-3.5 py-1.5 rounded-sm cursor-pointer hover:bg-primary hover:text-white transition-colors shadow-sm"
+               onClick={() => {
+                 setSelectedCategoryId(null);
+                 setSearchQuery("");
+                 setAppliedSearch("");
+                 setOrdering("");
+                 setPage(1);
+               }}>
             <FiHome size={14} className="mr-2" />
             <span className="hidden sm:inline">Início</span>
           </div>
@@ -219,27 +302,42 @@ export default async function Home() {
                 CATEGORIAS
               </div>
               <ul className="flex flex-col text-[13px] text-gray-600">
-                {categories.map((cat, idx) => (
-                  <li key={idx} className="flex justify-between items-center px-5 py-3.5 border-b border-gray-100 hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors group">
-                    {cat} 
-                    <span className="text-gray-400 group-hover:text-primary transition-colors border border-gray-200 group-hover:border-primary/30 rounded-sm p-0.5 shadow-sm bg-white"><FiPlus size={10} /></span>
-                  </li>
-                ))}
+                {categoriesLoading ? (
+                  <div className="px-5 py-4 text-gray-400 animate-pulse">A carregar categorias...</div>
+                ) : categoriesData && categoriesData.length > 0 ? (
+                  categoriesData.map((cat: AuctionCategory) => (
+                    <li 
+                      key={cat.id} 
+                      onClick={() => {
+                        setSelectedCategoryId(cat.id === selectedCategoryId ? null : cat.id);
+                        setPage(1);
+                      }}
+                      className={`flex justify-between items-center px-5 py-3.5 border-b border-gray-100 hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors group ${selectedCategoryId === cat.id ? 'text-primary bg-primary/5 font-bold' : ''}`}
+                    >
+                      {cat.name} 
+                      <span className={`text-gray-400 group-hover:text-primary transition-colors border border-gray-200 group-hover:border-primary/30 rounded-sm p-0.5 shadow-sm bg-white ${selectedCategoryId === cat.id ? 'text-primary border-primary/30' : ''}`}><FiPlus size={10} /></span>
+                    </li>
+                  ))
+                ) : (
+                  <div className="px-5 py-4 text-gray-400">Nenhuma categoria encontrada</div>
+                )}
               </ul>
             </div>
 
-            {/* BEST SELLERS */}
-            {bestSellers.length > 0 && (
-              <div className="border border-gray-200 bg-white rounded-sm shadow-sm overflow-hidden hidden md:block">
-                <div className="flex justify-between items-center bg-primary text-white font-bold px-5 py-3.5 text-[13px] tracking-wide shadow-sm">
-                  LANCES EM DESTAQUE
-                  <div className="flex gap-2">
-                     <FiChevronLeft className="cursor-pointer hover:text-white/70 transition-colors" />
-                     <FiChevronRight className="cursor-pointer hover:text-white/70 transition-colors" />
-                  </div>
+            {/* BEST SELLERS / LANCES EM DESTAQUE */}
+            <div className="border border-gray-200 bg-white rounded-sm shadow-sm overflow-hidden hidden md:block">
+              <div className="flex justify-between items-center bg-primary text-white font-bold px-5 py-3.5 text-[13px] tracking-wide shadow-sm">
+                LANCES EM DESTAQUE
+                <div className="flex gap-2">
+                   <FiChevronLeft className="cursor-pointer hover:text-white/70 transition-colors" />
+                   <FiChevronRight className="cursor-pointer hover:text-white/70 transition-colors" />
                 </div>
-                <div className="p-5 flex flex-col gap-6">
-                  {bestSellers.map((item) => {
+              </div>
+              <div className="p-5 flex flex-col gap-6">
+                {bestSellers.length === 0 ? (
+                  <div className="text-gray-400 text-xs">Nenhum leilão em destaque</div>
+                ) : (
+                  bestSellers.map((item) => {
                     const Icon = item.icon;
                     return (
                       <div key={item.id} className="flex gap-4 items-center group cursor-pointer">
@@ -252,8 +350,7 @@ export default async function Home() {
                           )}
                         </div>
                         <div className="flex flex-col flex-1">
-                          <Rating value={item.rating} />
-                          <span className="text-[13px] text-gray-800 font-semibold leading-tight mt-1 mb-1 group-hover:text-primary transition-colors line-clamp-2">{item.name}</span>
+                          <span className="text-[13px] text-gray-800 font-semibold leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">{item.name}</span>
                           <div className="flex items-center gap-2 text-sm mt-0.5">
                             <span className="text-primary font-black">{item.price}</span>
                             {item.oldPrice && <span className="text-gray-400 line-through text-[11px] font-medium">{item.oldPrice}</span>}
@@ -261,10 +358,10 @@ export default async function Home() {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
+                  })
+                )}
               </div>
-            )}
+            </div>
             
             {/* BANNER AD */}
             <div className="bg-[#46f1f9] text-center p-6 flex flex-col items-center justify-center rounded-sm shadow-sm min-h-[260px] relative overflow-hidden hidden md:flex cursor-pointer hover:opacity-95 transition-opacity group">
@@ -295,19 +392,33 @@ export default async function Home() {
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-[13px] text-gray-600 font-medium">
                  <div className="flex items-center gap-2.5">
                    <span>Ordenar por:</span>
-                   <select className="border border-gray-300 p-2 px-3 outline-none rounded-sm bg-gray-50 cursor-pointer hover:border-gray-400 focus:border-primary transition-colors min-w-[120px]">
-                     <option>Padrão</option>
-                     <option>Preço (Menor)</option>
-                     <option>Preço (Maior)</option>
-                     <option>A Terminar em Breve</option>
+                   <select 
+                     value={ordering}
+                     onChange={(e) => {
+                       setOrdering(e.target.value);
+                       setPage(1);
+                     }}
+                     className="border border-gray-300 p-2 px-3 outline-none rounded-sm bg-gray-50 cursor-pointer hover:border-gray-400 focus:border-primary transition-colors min-w-[120px]"
+                   >
+                     <option value="">Padrão</option>
+                     <option value="item__current_price">Preço (Menor)</option>
+                     <option value="-item__current_price">Preço (Maior)</option>
+                     <option value="end_time">A Terminar em Breve</option>
                    </select>
                  </div>
                  <div className="flex items-center gap-2.5">
                    <span>Mostrar:</span>
-                   <select className="border border-gray-300 p-2 px-3 outline-none rounded-sm bg-gray-50 cursor-pointer hover:border-gray-400 focus:border-primary transition-colors">
-                     <option>16</option>
-                     <option>32</option>
-                     <option>64</option>
+                   <select 
+                     value={pageSize}
+                     onChange={(e) => {
+                       setPageSize(Number(e.target.value));
+                       setPage(1);
+                     }}
+                     className="border border-gray-300 p-2 px-3 outline-none rounded-sm bg-gray-50 cursor-pointer hover:border-gray-400 focus:border-primary transition-colors"
+                   >
+                     <option value={16}>16</option>
+                     <option value={32}>32</option>
+                     <option value={64}>64</option>
                    </select>
                  </div>
               </div>
@@ -315,88 +426,117 @@ export default async function Home() {
 
             {/* PRODUCT GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.length === 0 && (
-                <div className="col-span-full py-10 text-center text-gray-500 font-medium border border-dashed border-gray-300 rounded-sm">
+              {auctionsLoading ? (
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <div key={idx} className="border border-gray-200 bg-white p-5 rounded-sm animate-pulse h-[340px] flex flex-col justify-between">
+                    <div className="h-40 bg-gray-100 rounded-sm w-full mb-4"></div>
+                    <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-100 rounded w-1/2"></div>
+                    <div className="h-8 bg-gray-100 rounded w-full mt-4"></div>
+                  </div>
+                ))
+              ) : products.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-gray-500 font-medium border border-dashed border-gray-300 bg-white rounded-sm">
                   Nenhum leilão disponível no momento.
                 </div>
-              )}
-              {products.map((product) => {
-                const Icon = product.icon;
-                return (
-                  <div key={product.id} className="border border-gray-200 bg-white p-5 relative flex flex-col group hover:shadow-xl transition-all duration-300 hover:border-primary/50 rounded-sm cursor-pointer h-full">
-                    
-                    {/* BADGES */}
-                    <div className="absolute top-5 left-5 flex flex-col gap-1.5 z-10">
-                      {product.badges.includes("DESTAQUE") && <span className="bg-[#f06e38] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">DESTAQUE</span>}
-                      {product.badges.includes("OFERTA") && <span className="bg-[#f06e38] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">OFERTA</span>}
-                      {product.badges.includes("LIQUIDAÇÃO") && <span className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">LIQUIDAÇÃO</span>}
-                      {product.badges.includes("NOVO") && <span className="bg-[#00b2f0] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">NOVO</span>}
-                      {product.badges.includes("QUENTE") && <span className="bg-yellow-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">QUENTE</span>}
-                      {product.badges.includes("PREMIUM") && <span className="bg-purple-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">PREMIUM</span>}
-                    </div>
-
-                    {/* IMAGE CONTAINER */}
-                    <div className="h-44 flex items-center justify-center mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
-                      {product.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
-                      ) : (
-                        <Icon size={80} className="text-gray-200" />
-                      )}
+              ) : (
+                products.map((product) => {
+                  const Icon = product.icon;
+                  return (
+                    <div key={product.id} className="border border-gray-200 bg-white p-5 relative flex flex-col group hover:shadow-xl transition-all duration-300 hover:border-primary/50 rounded-sm cursor-pointer h-full">
                       
-                      {/* COUNTDOWN TIMER OVERLAY */}
-                      {product.hasTimer && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-full justify-center">
-                          <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
-                            <span className="text-sm font-bold leading-none mt-1">01</span>
-                            <span className="text-[7px] text-gray-300 mt-1 tracking-wider">DIAS</span>
-                          </div>
-                          <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
-                            <span className="text-sm font-bold leading-none mt-1">07</span>
-                            <span className="text-[7px] text-gray-300 mt-1 tracking-wider">HORAS</span>
-                          </div>
-                          <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
-                            <span className="text-sm font-bold leading-none mt-1">26</span>
-                            <span className="text-[7px] text-gray-300 mt-1 tracking-wider">MIN</span>
-                          </div>
-                          <div className="bg-gray-800/80 backdrop-blur-sm text-white flex flex-col items-center justify-center w-10 h-12 rounded-sm shadow-lg border border-gray-600/50">
-                            <span className="text-sm font-bold leading-none mt-1">13</span>
-                            <span className="text-[7px] text-gray-300 mt-1 tracking-wider">SEG</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* PRODUCT DETAILS */}
-                    <div className="flex flex-col flex-1 justify-end">
-                      <h3 className="text-[14px] text-gray-800 font-semibold line-clamp-2 min-h-[40px] mb-2 group-hover:text-primary transition-colors leading-snug">{product.name}</h3>
-                      <div className="mb-4">
-                        <Rating value={product.rating} />
-                      </div>
-                      
-                      <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-3">
-                        <div className="flex flex-col">
-                          <span className="text-primary font-black text-lg leading-none">{product.price}</span>
-                          {product.oldPrice && <span className="text-gray-400 line-through text-[11px] mt-1.5 font-medium">{product.oldPrice}</span>}
-                        </div>
-                        {product.discount && (
-                          <span className="bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-sm">{product.discount}</span>
+                      {/* STATUS & EXTRA BADGES */}
+                      <div className="absolute top-5 left-5 flex flex-col gap-1.5 z-10">
+                        {product.status === "LIVE" && (
+                          <span className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                            AO VIVO
+                          </span>
+                        )}
+                        {product.status === "SCHEDULED" && (
+                          <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            EM BREVE
+                          </span>
+                        )}
+                        {(product.status === "ENDED" || product.status === "SOLD") && (
+                          <span className="bg-gray-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            FINALIZADO
+                          </span>
+                        )}
+                        {product.badges.includes("NOVO") && (
+                          <span className="bg-[#00b2f0] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            NOVO
+                          </span>
                         )}
                       </div>
+
+                      {/* IMAGE CONTAINER */}
+                      <div className="h-44 flex items-center justify-center mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
+                        {product.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                        ) : (
+                          <Icon size={80} className="text-gray-200" />
+                        )}
+                        
+                        {/* COUNTDOWN TIMER OVERLAY FOR LIVE AUCTIONS */}
+                        {product.hasTimer && product.endTime && (
+                          <CountdownTimer endTime={product.endTime} />
+                        )}
+                      </div>
+
+                      {/* PRODUCT DETAILS */}
+                      <div className="flex flex-col flex-1 justify-end">
+                        <h3 className="text-[14px] text-gray-800 font-semibold line-clamp-2 min-h-[40px] mb-4 group-hover:text-primary transition-colors leading-snug">{product.name}</h3>
+                        
+                        <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-3">
+                          <div className="flex flex-col">
+                            <span className="text-primary font-black text-lg leading-none">{product.price}</span>
+                            {product.oldPrice && <span className="text-gray-400 line-through text-[11px] mt-1.5 font-medium">{product.oldPrice}</span>}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
-            {/* TOOLBAR BOTTOM */}
+            {/* TOOLBAR BOTTOM & PAGINATION */}
             <div className="flex flex-col sm:flex-row items-center justify-between border border-gray-200 p-3.5 bg-white mt-2 rounded-sm shadow-sm gap-4">
               <div className="flex gap-2">
-                 <button className="bg-primary text-white p-2.5 rounded-sm shadow-sm hover:bg-primary-light transition-colors"><FiGrid size={16} /></button>
-                 <button className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm"><FiList size={16} /></button>
+                 <button 
+                   onClick={() => setPage(p => Math.max(1, p - 1))}
+                   disabled={page === 1}
+                   className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <FiChevronLeft size={16} />
+                 </button>
+                 
+                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                   <button
+                     key={p}
+                     onClick={() => setPage(p)}
+                     className={`px-3 py-1.5 text-sm font-semibold rounded-sm transition-colors border ${
+                       page === p 
+                         ? 'bg-primary border-primary text-white shadow-sm' 
+                         : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
+                     }`}
+                   >
+                     {p}
+                   </button>
+                 ))}
+
+                 <button 
+                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                   disabled={page === totalPages}
+                   className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <FiChevronRight size={16} />
+                 </button>
               </div>
               <div className="text-[13px] text-gray-600 font-medium">
-                 A mostrar 1 a {products.length} de {products.length} (1 Página)
+                 A mostrar {startIndex} a {endIndex} de {totalCount} ({totalPages} {totalPages === 1 ? 'Página' : 'Páginas'})
               </div>
             </div>
 

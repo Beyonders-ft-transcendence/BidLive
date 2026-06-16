@@ -40,6 +40,11 @@ class AuctionService {
     return response.data;
   }
 
+  async listFeatured(params?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Auction>>> {
+    const response = await api.get<ApiResponse<PaginatedResponse<Auction>>>('/auctions/featured/', { params });
+    return response.data;
+  }
+
   async retrieve(id: number): Promise<ApiResponse<Auction>> {
     const response = await api.get<ApiResponse<Auction>>(`/auctions/${id}/`);
     return response.data;

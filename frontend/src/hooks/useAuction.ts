@@ -18,6 +18,17 @@ export function useAuctionsQuery(params?: Record<string, any>) {
   });
 }
 
+export function useFeaturedAuctionsQuery(params?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["featuredAuctions", params],
+    queryFn: async () => {
+      const res = await auctionService.listFeatured(params);
+      if (!res.success) throw new Error(res.message || "Falha ao carregar leilões em destaque.");
+      return res.data;
+    },
+  });
+}
+
 export function useAuctionQuery(id: number) {
   return useQuery({
     queryKey: ["auction", id],
