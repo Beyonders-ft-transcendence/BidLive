@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/layout/Header";
 import { useAuthStore } from "@/store/auth.store";
-import auctionService from "@/services/auction.service";
-import categoryService from "@/services/category.service";
-import { useAuctionsQuery } from "@/hooks/useAuction";
+import {
+  useAuctionsQuery,
+  useUpdateAuctionMutation,
+  useCancelAuctionMutation,
+  useDeleteAuctionMutation,
+} from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Auction } from "@/types/auction.types";
 import { AuctionStatus, ItemCondition } from "@/types/auction.types";
@@ -75,10 +79,16 @@ export default function UserPage() {
     };
   }, [user, myAuctionsPage]);
 
+  const queryClient = useQueryClient();
+
+  // Mutations
+  const updateAuctionMutation = useUpdateAuctionMutation();
+  const cancelAuctionMutation = useCancelAuctionMutation();
+  const deleteAuctionMutation = useDeleteAuctionMutation();
+
   const {
     data: myAuctionsData,
     isLoading: loadingAuctions,
-    refetch: refetchMyAuctions,
   } = useAuctionsQuery(myAuctionsParams || undefined);
 
   const myAuctions = myAuctionsData?.results || [];
@@ -88,18 +98,17 @@ export default function UserPage() {
   const {
     data: allAuctionsData,
     isLoading: loadingAll,
-    refetch: refetchAllAuctions,
   } = useAuctionsQuery({ page_size: 100 });
 
   const allAuctions = allAuctionsData?.results || [];
 
-  const fetchMyAuctions = useCallback(() => {
-    refetchMyAuctions();
-  }, [refetchMyAuctions]);
+  const fetchMyAuctions = () => {
+    queryClient.invalidateQueries({ queryKey: ["auctions"] });
+  };
 
-  const fetchAllAuctions = useCallback(() => {
-    refetchAllAuctions();
-  }, [refetchAllAuctions]);
+  const fetchAllAuctions = () => {
+    queryClient.invalidateQueries({ queryKey: ["auctions"] });
+  };
 
   // Calculate Metrics
   const metrics = useMemo(() => {
@@ -135,11 +144,10 @@ export default function UserPage() {
   const handleApproveAuction = async () => {
     if (!approveAuctionId) return;
     try {
-      const res = await auctionService.update(approveAuctionId, { publish: true });
-      if (res.success) {
-        fetchMyAuctions();
-        fetchAllAuctions();
-      }
+      await updateAuctionMutation.mutateAsync({
+        id: approveAuctionId,
+        payload: { publish: true },
+      });
     } catch (err) {
       console.error("Erro ao publicar leilão:", err);
     }
@@ -150,11 +158,10 @@ export default function UserPage() {
   const handleCancelAuction = async () => {
     if (!cancelAuctionId) return;
     try {
-      const res = await auctionService.cancel(cancelAuctionId, { reason: cancelReason });
-      if (res.success) {
-        fetchMyAuctions();
-        fetchAllAuctions();
-      }
+      await cancelAuctionMutation.mutateAsync({
+        id: cancelAuctionId,
+        payload: { reason: cancelReason },
+      });
     } catch (err) {
       console.error("Erro ao cancelar leilão:", err);
     }
@@ -166,11 +173,7 @@ export default function UserPage() {
   const handleDeleteAuction = async () => {
     if (!deleteAuctionId) return;
     try {
-      const res = await auctionService.delete(deleteAuctionId);
-      if (res.success) {
-        fetchMyAuctions();
-        fetchAllAuctions();
-      }
+      await deleteAuctionMutation.mutateAsync(deleteAuctionId);
     } catch (err) {
       console.error("Erro ao excluir leilão:", err);
     }
