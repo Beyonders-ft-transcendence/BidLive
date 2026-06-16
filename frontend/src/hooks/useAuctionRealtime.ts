@@ -7,6 +7,7 @@ import {
   useAuctionBidsQuery,
   useAuctionStreamsQuery,
   usePlaceBidMutation,
+  useBuyNowMutation,
 } from "./useAuction";
 
 export function useAuctionRealtime(id: number) {
@@ -32,6 +33,7 @@ export function useAuctionRealtime(id: number) {
   const { data: streamsData } = useAuctionStreamsQuery(id, hasToken);
 
   const placeBidMutation = usePlaceBidMutation();
+  const buyNowMutation = useBuyNowMutation();
 
   const bids = bidsData?.results || [];
   const activeStream = streamsData?.find((s: any) => s.status === "LIVE") || null;
@@ -231,9 +233,17 @@ export function useAuctionRealtime(id: number) {
   ]);
 
   const placeBid = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!bidAmount || !auction) return;
+    async (amountOrEvent?: string | React.FormEvent) => {
+      let amount = bidAmount;
+      if (amountOrEvent) {
+        if (typeof amountOrEvent === "string") {
+          amount = amountOrEvent;
+        } else {
+          amountOrEvent.preventDefault();
+        }
+      }
+
+      if (!amount || !auction) return;
 
       if (
         typeof window !== "undefined" &&
@@ -248,12 +258,12 @@ export function useAuctionRealtime(id: number) {
 
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(
-          JSON.stringify({ action: "place_bid", amount: bidAmount })
+          JSON.stringify({ action: "place_bid", amount })
         );
       } else {
         // Fallback HTTP using placeBidMutation
         try {
-          const res = await placeBidMutation.mutateAsync({ id, payload: { amount: bidAmount } });
+          const res = await placeBidMutation.mutateAsync({ id, payload: { amount } });
           if (res.success) {
             setBidAmount("");
           } else {
@@ -286,6 +296,28 @@ export function useAuctionRealtime(id: number) {
     [bidAmount, auction, id, router, placeBidMutation]
   );
 
+  const buyNow = useCallback(
+    async () => {
+      if (
+        typeof window !== "undefined" &&
+        !localStorage.getItem("bidlive.auth.access_token")
+      ) {
+        router.push("/signin");
+        return { success: false, message: "Não autenticado" };
+      }
+      try {
+        const res = await buyNowMutation.mutateAsync(id);
+        return res;
+      } catch (err: any) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          router.push("/signin");
+        }
+        return { success: false, message: err.message || "Erro ao realizar compra imediata." };
+      }
+    },
+    [id, router, buyNowMutation]
+  );
+
   return {
     auction,
     bids,
@@ -299,5 +331,7 @@ export function useAuctionRealtime(id: number) {
     setBidAmount,
     submittingBid: submittingBid || placeBidMutation.isPending,
     placeBid,
+    buyNow,
+    submittingBuyNow: buyNowMutation.isPending,
   };
 }

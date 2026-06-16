@@ -15,6 +15,7 @@ import {
   CalendarDays,
   TrendingUp,
   Video,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -40,9 +41,37 @@ export default function AuctionDetailPage() {
     setBidAmount,
     submittingBid,
     placeBid: handlePlaceBid,
+    buyNow,
+    submittingBuyNow,
   } = useAuctionRealtime(id);
 
   const [activeImage, setActiveImage] = useState(0);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showBuyNowModal, setShowBuyNowModal] = useState(false);
+
+  const handlePresetBid = (increment: number) => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!auction) return;
+    const currentPriceVal = Number(auction.item.current_price || auction.item.starting_price);
+    const amount = String(currentPriceVal + increment);
+    handlePlaceBid(amount);
+  };
+
+  const handleBuyNowSubmit = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    const res = await buyNow();
+    if (res.success) {
+      setSuccessMsg(res.message || "Compra imediata realizada com sucesso!");
+      setTimeout(() => setSuccessMsg(null), 5000);
+    } else {
+      setErrorMsg(res.message || "Falha ao realizar compra imediata.");
+      setTimeout(() => setErrorMsg(null), 5000);
+    }
+    setShowBuyNowModal(false);
+  };
 
   const formatCurrency = (value: string | number) =>
     new Intl.NumberFormat("pt-AO", {
@@ -133,10 +162,18 @@ export default function AuctionDetailPage() {
         </div>
 
         {/* Error Banner */}
-        {error && (
+        {(error || errorMsg) && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            {error}
+            {error || errorMsg}
+          </div>
+        )}
+
+        {/* Success Banner */}
+        {successMsg && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
+            <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+            {successMsg}
           </div>
         )}
 
@@ -464,52 +501,98 @@ export default function AuctionDetailPage() {
               {/* Bid form or closed state */}
               <div className="px-6 py-5">
                 {isLive ? (
-                  <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      Valor do Lance
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
-                        R$
+                  <div className="flex flex-col gap-4">
+                    {/* Quick increment presets */}
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-gray-400 font-mono font-medium block">
+                        Incremento rápido (+ sob lance atual):
                       </span>
-                      <input
-                        type="number"
-                        min={minBid}
-                        step={minIncrement}
-                        value={bidAmount}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        placeholder={formatCurrency(minBid)
-                          .replace("Kz", "")
-                          .trim()}
-                        className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
-                        required
-                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
+                          <button
+                            type="button"
+                            key={inc}
+                            onClick={() => handlePresetBid(inc)}
+                            className="py-2.5 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-primary rounded-sm transition-all border border-gray-200 flex items-center justify-center gap-1 cursor-pointer"
+                          >
+                            +{formatCurrency(inc).replace("AOA", "").trim()}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-[10px] text-gray-400">
-                      Lance mínimo:{" "}
-                      <span className="font-semibold text-[#0C1B33]">
-                        {formatCurrency(minBid)}
-                      </span>
-                    </p>
-                    <button
-                      type="submit"
-                      disabled={submittingBid}
-                      className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      {submittingBid ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          Confirmar Lance
-                          <ArrowUpRight size={15} />
-                        </>
-                      )}
-                    </button>
-                    <p className="text-[10px] text-gray-300 text-center leading-relaxed">
-                      Ao dar um lance, você concorda com nossos termos de
-                      compromisso de compra.
-                    </p>
-                  </form>
+
+                    <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                        Valor do Lance Customizado
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
+                          Kz
+                        </span>
+                        <input
+                          type="number"
+                          min={minBid}
+                          step={minIncrement}
+                          value={bidAmount}
+                          onChange={(e) => setBidAmount(e.target.value)}
+                          placeholder={formatCurrency(minBid)
+                            .replace("AOA", "")
+                            .trim()}
+                          className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
+                          required
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-400">
+                        Lance mínimo:{" "}
+                        <span className="font-semibold text-[#0C1B33]">
+                          {formatCurrency(minBid)}
+                        </span>
+                      </p>
+                      <button
+                        type="submit"
+                        disabled={submittingBid}
+                        className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        {submittingBid ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            Confirmar Lance
+                            <ArrowUpRight size={15} />
+                          </>
+                        )}
+                      </button>
+                      <p className="text-[10px] text-gray-300 text-center leading-relaxed">
+                        Ao dar um lance, você concorda com nossos termos de
+                        compromisso de compra.
+                      </p>
+                    </form>
+
+                    {/* Buy Now Option */}
+                    {auction.item.buy_now_price && (
+                      <div className="pt-4 border-t border-gray-100 flex flex-col gap-2">
+                        <div className="text-left">
+                          <span className="text-[10px] text-gray-400 font-mono block">Arremate Imediato:</span>
+                          <span className="text-gray-950 text-xs font-bold leading-normal block">
+                            Adquira o lote agora sem disputas
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowBuyNowModal(true)}
+                          disabled={submittingBuyNow}
+                          className="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                        >
+                          <ShoppingBag className="h-4 w-4" />
+                          {submittingBuyNow ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            `Comprar por ${formatCurrency(auction.item.buy_now_price)}`
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-5">
                     <p className="text-sm font-semibold text-gray-400">
@@ -605,6 +688,50 @@ export default function AuctionDetailPage() {
       </main>
 
       <Footer />
+
+      {showBuyNowModal && auction.item.buy_now_price && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-gray-200 rounded-sm w-full max-w-md p-6 space-y-6 shadow-2xl relative z-10 text-center animate-in zoom-in-95 duration-150">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm bg-indigo-50 text-indigo-600 border border-indigo-100">
+              <ShoppingBag className="h-6 w-6" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-[#0C1B33] text-lg font-bold tracking-tight">Confirmar Compra Imediata?</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">
+                Você está optando pelo arremate direto do lote{" "}
+                <span className="text-[#0C1B33] font-semibold">{auction.item.title}</span> pelo preço fixado de{" "}
+                <span className="text-primary font-mono font-bold">
+                  {formatCurrency(auction.item.buy_now_price)}
+                </span>
+                .
+              </p>
+            </div>
+
+            <div className="p-4 bg-gray-50 border border-gray-100 rounded-sm text-left text-xs text-gray-500 leading-normal">
+              O valor total será debitado instantaneamente e a propriedade faturada sob o
+              seu usuário.
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowBuyNowModal(false)}
+                className="flex-1 py-2.5 text-xs font-semibold hover:bg-gray-50 text-gray-500 border border-gray-200 rounded-sm transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleBuyNowSubmit}
+                className="flex-1 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm transition-colors shadow-md cursor-pointer"
+              >
+                Confirmar Compra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
