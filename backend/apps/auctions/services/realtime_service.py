@@ -182,6 +182,19 @@ def publish_auction_event(*, auction_id: int, event_type: str, payload: dict) ->
         },
     )
 
+def publish_global_event(*, event_type: str, payload: dict) -> None:
+    channel_layer = get_channel_layer()
+    if channel_layer is None:
+        return
+    async_to_sync(channel_layer.group_send)(
+        "global_auctions",
+        {
+            "type": "auction.event",
+            "event": event_type,
+            "payload": _normalize_payload(payload),
+        },
+    )
+
 
 def publish_auction_snapshot(*, auction_id: int, snapshot: dict, ttl: int = 60, broadcast: bool = False) -> dict:
     normalized = _normalize_payload(snapshot)
