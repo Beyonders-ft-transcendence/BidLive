@@ -59,6 +59,7 @@ interface AuthActions {
     // ── Internal / utility ───────────────────────────────────────────────────
     hydrateFromStorage: () => void
     setUser: (user: User) => void
+    updateUser: (user: Partial<User>) => void
     setTokens: (accessToken: string, refreshToken: string) => void
     clearError: () => void
     reset: () => void
@@ -161,6 +162,15 @@ export const useAuthStore = create<AuthStore>()(
                     authService.setStoredUser(user)
                     set((s) => {
                         s.user = user
+                    })
+                },
+
+                updateUser(partialUser) {
+                    set((s) => {
+                        if (s.user) {
+                            s.user = { ...s.user, ...partialUser }
+                            authService.setStoredUser(s.user)
+                        }
                     })
                 },
 

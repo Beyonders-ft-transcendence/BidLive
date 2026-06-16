@@ -21,7 +21,7 @@ interface SettingsTabProps {
 }
 
 export default function SettingsTab({ user }: SettingsTabProps) {
-  const fetchMe = useAuthStore((s) => s.fetchMe);
+  const updateUser = useAuthStore((s) => s.updateUser);
   const changePassword = useAuthStore((s) => s.changePassword);
 
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -98,7 +98,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
           try {
             const res = await rbacService.updateUser(user.id, { avatar_url: uploadedUrl });
             if (res.success) {
-              await fetchMe();
+              updateUser({ avatar_url: uploadedUrl });
               toast.success("Foto de perfil carregada e atualizada com sucesso!");
             } else {
               toast.error(res.message || "Falha ao salvar a imagem no servidor.");
@@ -144,7 +144,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
       const res = await rbacService.updateUser(user.id, payload);
       if (res.success && res.data) {
-        await fetchMe();
+        updateUser(payload);
         toast.success("Os detalhes do seu perfil foram salvos!");
       } else {
         toast.error(res.message || "Falha ao atualizar perfil.");
