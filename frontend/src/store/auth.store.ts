@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import authService from '@/services/auth.service'
 import { isAxiosError } from 'axios'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
@@ -131,7 +132,8 @@ const getInitialState = (): AuthState => {
 export const useAuthStore = create<AuthStore>()(
     devtools(
         subscribeWithSelector(
-            immer((set, get) => ({
+            persist(
+                immer((set, get) => ({
                 ...getInitialState(),
 
                 // ── Helpers ─────────────────────────────────────────────────────────
@@ -543,6 +545,28 @@ export const useAuthStore = create<AuthStore>()(
                     }
                 },
             })),
+            {
+                name: 'bidlive-auth',
+                storage: createJSONStorage(() =>
+                    typeof window !== 'undefined'
+                        ? window.localStorage
+                        : {
+                              getItem: () => null,
+                              setItem: () => {},
+                              removeItem: () => {},
+                          }
+                ),
+                partialize: (s: AuthStore) => ({
+                    user: s.user,
+                    accessToken: s.accessToken,
+                    refreshToken: s.refreshToken,
+                    status: s.status,
+                    isAuthenticated: s.isAuthenticated,
+                    isLoading: false,
+                    error: null,
+                }),
+            }
+        ),
         ),
         { name: 'AuthStore' },
     ),

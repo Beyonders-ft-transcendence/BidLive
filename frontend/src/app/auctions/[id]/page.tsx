@@ -50,7 +50,6 @@ export default function AuctionDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showBuyNowModal, setShowBuyNowModal] = useState(false);
 
   const onSubmitBid = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +58,7 @@ export default function AuctionDetailPage() {
     if (!auction) return;
 
     if (auction.item.buy_now_price && Number(bidAmount) >= Number(auction.item.buy_now_price)) {
-      setShowBuyNowModal(true);
+      handleBuyNowSubmit();
       return;
     }
 
@@ -74,7 +73,7 @@ export default function AuctionDetailPage() {
     const amountVal = currentPriceVal + increment;
     
     if (auction.item.buy_now_price && amountVal >= Number(auction.item.buy_now_price)) {
-      setShowBuyNowModal(true);
+      handleBuyNowSubmit();
       return;
     }
     
@@ -93,7 +92,6 @@ export default function AuctionDetailPage() {
       setErrorMsg(res.message || "Falha ao realizar compra imediata.");
       setTimeout(() => setErrorMsg(null), 5000);
     }
-    setShowBuyNowModal(false);
   };
 
   const formatCurrency = (value: string | number) =>
@@ -601,7 +599,7 @@ export default function AuctionDetailPage() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => setShowBuyNowModal(true)}
+                            onClick={handleBuyNowSubmit}
                             disabled={submittingBuyNow}
                             className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50 shrink-0"
                           >
@@ -726,51 +724,6 @@ export default function AuctionDetailPage() {
         </div>
       </main>
 
-      <Footer />
-
-      {showBuyNowModal && auction.item.buy_now_price && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white border border-gray-200 rounded-sm w-full max-w-md p-6 space-y-6 shadow-2xl relative z-10 text-center animate-in zoom-in-95 duration-150">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-sm bg-indigo-50 text-indigo-600 border border-indigo-100">
-              <ShoppingBag className="h-6 w-6" />
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-[#0C1B33] text-lg font-bold tracking-tight">Confirmar Compra Imediata?</h3>
-              <p className="text-gray-500 text-xs leading-relaxed">
-                Você está optando pelo arremate direto do lote{" "}
-                <span className="text-[#0C1B33] font-semibold">{auction.item.title}</span> pelo preço fixado de{" "}
-                <span className="text-primary font-mono font-bold">
-                  {formatCurrency(auction.item.buy_now_price)}
-                </span>
-                .
-              </p>
-            </div>
-
-            <div className="p-4 bg-gray-50 border border-gray-100 rounded-sm text-left text-xs text-gray-500 leading-normal">
-              O valor total será debitado instantaneamente e a propriedade faturada sob o
-              seu usuário.
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowBuyNowModal(false)}
-                className="flex-1 py-2.5 text-xs font-semibold hover:bg-gray-50 text-gray-500 border border-gray-200 rounded-sm transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleBuyNowSubmit}
-                className="flex-1 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm transition-colors shadow-md cursor-pointer"
-              >
-                Confirmar Compra
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

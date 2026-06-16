@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ENV from "@/utils/env.utils";
+import { useAuthStore } from "@/store/auth.store";
 import {
   useAuctionQuery,
   useAuctionBidsQuery,
@@ -13,6 +14,8 @@ import {
 export function useAuctionRealtime(id: number) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   const [isWatchingStream, setIsWatchingStream] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
@@ -23,14 +26,10 @@ export function useAuctionRealtime(id: number) {
 
   const ws = useRef<WebSocket | null>(null);
 
-  const hasToken =
-    typeof window !== "undefined" &&
-    !!window.localStorage.getItem("bidlive.auth.access_token");
-
   // React Query Queries
   const { data: auction, isLoading: loadingAuction, error: auctionQueryError } = useAuctionQuery(id);
   const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(id);
-  const { data: streamsData } = useAuctionStreamsQuery(id, hasToken);
+  const { data: streamsData } = useAuctionStreamsQuery(id, isAuthenticated);
 
   const placeBidMutation = usePlaceBidMutation();
   const buyNowMutation = useBuyNowMutation();
@@ -57,10 +56,7 @@ export function useAuctionRealtime(id: number) {
     if (!id || isNaN(id)) return;
 
     // Setup WebSocket for Real-time Updates and Bidding
-    const token =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem("bidlive.auth.access_token")
-        : null;
+    const token = accessToken;
 
     const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/${id}/${
       token ? `?token=${token}` : ""
@@ -245,10 +241,7 @@ export function useAuctionRealtime(id: number) {
 
       if (!amount || !auction) return;
 
-      if (
-        typeof window !== "undefined" &&
-        !localStorage.getItem("bidlive.auth.access_token")
-      ) {
+      if (!isAuthenticated) {
         router.push("/signin");
         return;
       }
@@ -298,10 +291,7 @@ export function useAuctionRealtime(id: number) {
 
   const buyNow = useCallback(
     async () => {
-      if (
-        typeof window !== "undefined" &&
-        !localStorage.getItem("bidlive.auth.access_token")
-      ) {
+      if (!isAuthenticated) {
         router.push("/signin");
         return { success: false, message: "Não autenticado" };
       }
@@ -315,7 +305,7 @@ export function useAuctionRealtime(id: number) {
         return { success: false, message: err.message || "Erro ao realizar compra imediata." };
       }
     },
-    [id, router, buyNowMutation]
+    [id, router, buyNowMutation, isAuthenticated]
   );
 
   return {
