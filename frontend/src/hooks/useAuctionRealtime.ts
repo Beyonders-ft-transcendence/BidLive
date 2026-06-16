@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ENV from "@/utils/env.utils";
-import auctionService from "@/services/auction.service";
 import {
   useAuctionQuery,
   useAuctionBidsQuery,
   useAuctionStreamsQuery,
+  usePlaceBidMutation,
 } from "./useAuction";
 
 export function useAuctionRealtime(id: number) {
@@ -31,25 +31,25 @@ export function useAuctionRealtime(id: number) {
   const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(id);
   const { data: streamsData } = useAuctionStreamsQuery(id, hasToken);
 
+  const placeBidMutation = usePlaceBidMutation();
+
   const bids = bidsData?.results || [];
   const activeStream = streamsData?.find((s: any) => s.status === "LIVE") || null;
 
   const loading = loadingAuction || loadingBids;
 
+  const displayedError = error || (auctionQueryError ? "Não foi possível carregar os detalhes do leilão." : null);
+
+  const [hasInitializedStream, setHasInitializedStream] = useState(false);
+
   // Initialize stream view state
   useEffect(() => {
-    if (activeStream) {
+    if (activeStream && !hasInitializedStream) {
       setIsWatchingStream(true);
       setViewerCount(activeStream.viewer_count || 1);
+      setHasInitializedStream(true);
     }
-  }, [activeStream]);
-
-  // Handle errors
-  useEffect(() => {
-    if (auctionQueryError) {
-      setError("Não foi possível carregar os detalhes do leilão.");
-    }
-  }, [auctionQueryError]);
+  }, [activeStream, hasInitializedStream]);
 
   useEffect(() => {
     if (!id || isNaN(id)) return;
@@ -251,13 +251,11 @@ export function useAuctionRealtime(id: number) {
           JSON.stringify({ action: "place_bid", amount: bidAmount })
         );
       } else {
-        // Fallback HTTP
+        // Fallback HTTP using placeBidMutation
         try {
-          const res = await auctionService.placeBid(id, { amount: bidAmount });
-          if (res.success && res.data) {
+          const res = await placeBidMutation.mutateAsync({ id, payload: { amount: bidAmount } });
+          if (res.success) {
             setBidAmount("");
-            queryClient.invalidateQueries({ queryKey: ["auction", id] });
-            queryClient.invalidateQueries({ queryKey: ["auctionBids", id] });
           } else {
             if (res.errors) {
               setError(Object.values(res.errors).flat().join(" "));
@@ -285,21 +283,21 @@ export function useAuctionRealtime(id: number) {
         }
       }
     },
-    [bidAmount, auction, id, router, queryClient]
+    [bidAmount, auction, id, router, placeBidMutation]
   );
 
   return {
     auction,
     bids,
     loading,
-    error,
+    error: displayedError,
     activeStream,
     isWatchingStream,
     setIsWatchingStream,
     viewerCount,
     bidAmount,
     setBidAmount,
-    submittingBid,
+    submittingBid: submittingBid || placeBidMutation.isPending,
     placeBid,
   };
 }
