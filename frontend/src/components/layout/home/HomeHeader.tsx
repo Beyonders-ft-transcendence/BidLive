@@ -27,16 +27,18 @@ export default function HomeHeader({
   return (
     <>
       <TopBar />
-      <MainHeader 
-        categoriesData={categoriesData}
-        selectedCategoryId={selectedCategoryId}
-        setSelectedCategoryId={setSelectedCategoryId}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onSubmitSearch={onSubmitSearch}
-        setPage={setPage}
-      />
-      <Navbar />
+      <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <MainHeader 
+          categoriesData={categoriesData}
+          selectedCategoryId={selectedCategoryId}
+          setSelectedCategoryId={setSelectedCategoryId}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onSubmitSearch={onSubmitSearch}
+          setPage={setPage}
+        />
+        <Navbar />
+      </div>
     </>
   );
 }
