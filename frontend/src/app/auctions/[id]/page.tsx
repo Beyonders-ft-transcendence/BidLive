@@ -23,6 +23,7 @@ import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
 import { useAuthStore } from "@/store/auth.store";
+import HomeHeader from "@/components/layout/home/HomeHeader";
 
 export default function AuctionDetailPage() {
   const params = useParams();
@@ -48,158 +49,17 @@ export default function AuctionDetailPage() {
   } = useAuctionRealtime(id);
 
   const [activeImage, setActiveImage] = useState(0);
-  const [activeStream, setActiveStream] = useState<any | null>(null);
-  const [isWatchingStream, setIsWatchingStream] = useState(false);
-  const [viewerCount, setViewerCount] = useState(0);
 
-  useEffect(() => {
-    if (!id) return;
 
-    async function loadData() {
-      try {
-        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
-        
-        const promises: Promise<any>[] = [
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ];
-        
-        if (hasToken) {
-          promises.push(auctionService.listStreams(id));
-        }
 
-        const results = await Promise.allSettled(promises);
-        const auctionResult = results[0];
-        const bidsResult = results[1];
-        const streamResult = hasToken ? results[2] : null;
+  const handlePresetBid = (inc: number) => {
+    if (!auction) return;
+    const cPrice = Number(auction.item.current_price || auction.item.starting_price || 0);
+    setBidAmount(String(cPrice + inc));
+  };
 
-        if (
-          auctionResult.status === "fulfilled" &&
-          auctionResult.value?.success
-        ) {
-          setAuction(auctionResult.value.data || null);
-        } else {
-          setError("Não foi possível carregar os detalhes do leilão.");
-        }
-
-        if (bidsResult.status === "fulfilled" && bidsResult.value?.success) {
-          setBids(bidsResult.value.data?.results || []);
-        }
-
-        if (streamResult && streamResult.status === "fulfilled" && streamResult.value?.success && streamResult.value.data) {
-          const live = streamResult.value.data.find((s: any) => s.status === "LIVE");
-          setActiveStream(live || null);
-          if (live) {
-            setIsWatchingStream(true);
-            setViewerCount(live.viewer_count || 1);
-          }
-        }
-      } catch (err) {
-        setError("Erro de conexão ao carregar os detalhes do leilão.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-
-    const interval = setInterval(async () => {
-      if (!id) return;
-      try {
-        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
-        
-        const promises: Promise<any>[] = [
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ];
-        
-        if (hasToken) {
-          promises.push(auctionService.listStreams(id));
-        }
-
-        const results = await Promise.allSettled(promises);
-        const aRes = results[0];
-        const bRes = results[1];
-        const sRes = hasToken ? results[2] : null;
-
-        if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data)
-          setAuction(aRes.value.data);
-        if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
-          setBids(bRes.value.data.results);
-        if (sRes && sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
-          const live = sRes.value.data.find((s: any) => s.status === "LIVE");
-          setActiveStream(live || null);
-          if (live) {
-            setViewerCount(live.viewer_count || 1);
-          }
-        }
-      } catch (e) {}
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [id]);
-
-  useEffect(() => {
-    if (auction) {
-      const cPrice = Number(auction.item.current_price || auction.item.starting_price);
-      const inc = Number(auction.item.minimum_increment || 1);
-      const newMinBid = cPrice + inc;
-      
-      setBidAmount((prev) => {
-        if (!prev || Number(prev) < newMinBid) {
-          return String(newMinBid);
-        }
-        return prev;
-      });
-    }
-  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment]);
-
-  const handlePlaceBid = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bidAmount || !auction) return;
-
-    // Redirecionamento instantâneo se não houver token (usuário offline/não logado)
-    if (typeof window !== 'undefined' && !localStorage.getItem('bidlive.auth.access_token')) {
-      router.push('/signin');
-      return;
-    }
-
-    setSubmittingBid(true);
-    setError(null);
-    try {
-      const res = await auctionService.placeBid(id, { amount: bidAmount });
-      if (res.success && res.data) {
-        setBidAmount("");
-        const [aRes, bRes] = await Promise.all([
-          auctionService.retrieve(id),
-          auctionService.listBids(id),
-        ]);
-        if (aRes.success && aRes.data) setAuction(aRes.data);
-        if (bRes.success && bRes.data) setBids(bRes.data.results);
-      } else {
-        if (res.errors) {
-          setError(Object.values(res.errors).flat().join(" "));
-        } else {
-          setError(res.message || "Erro ao registrar lance.");
-        }
-      }
-    } catch (err: any) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        // Se a API retornar erro de autenticação, redireciona de imediato para a tela de login
-        router.push('/signin');
-      } else if (err.response?.data) {
-        const errorData = err.response.data;
-        if (errorData.errors) {
-          setError(Object.values(errorData.errors).flat().join(" "));
-        } else {
-          setError(errorData.message || "Valor inválido. Verifique o seu lance.");
-        }
-      } else {
-        setError("Erro de conexão. Não foi possível registrar o lance.");
-      }
-    } finally {
-      setSubmittingBid(false);
-    }
+  const handleBuyNowSubmit = async () => {
+    await buyNow();
   };
 
   const formatCurrency = (value: string | number) =>
@@ -272,7 +132,7 @@ export default function AuctionDetailPage() {
   /* ─── Page ─── */
   return (
     <div className="min-h-screen bg-[#F4F6F9] font-sans antialiased flex flex-col">
-      <Header />
+      <HomeHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
 
@@ -292,18 +152,10 @@ export default function AuctionDetailPage() {
         </div>
 
         {/* Error Banner */}
-        {(error || errorMsg) && (
+        {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            {error || errorMsg}
-          </div>
-        )}
-
-        {/* Success Banner */}
-        {successMsg && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
-            <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
-            {successMsg}
+            {error}
           </div>
         )}
 
@@ -652,7 +504,7 @@ export default function AuctionDetailPage() {
                         </div>
                       </div>
 
-                      <form onSubmit={onSubmitBid} className="flex flex-col gap-2">
+                      <form onSubmit={handlePlaceBid} className="flex flex-col gap-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                           Valor do Lance Customizado
                         </label>

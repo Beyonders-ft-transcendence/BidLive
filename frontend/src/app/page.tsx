@@ -1,4 +1,4 @@
-import Header from "@/components/layout/Header";
+import HomeHeader from "@/components/layout/home/HomeHeader";
 import Hero from "@/components/layout/home/Hero";
 import AboutSection from "@/components/layout/home/About";
 import HowItWorksSection from "@/components/layout/home/HowItWorksSection";
@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 export default function Home() {
   return (
     <main>
-      <Header />
+      <HomeHeader />
       <Hero />
       <AboutSection />
       <HowItWorksSection />

@@ -1,181 +1,277 @@
 "use client";
-import { 
-  ChevronDown, 
-  SlidersHorizontal, 
-  Gavel, 
-  Clock, 
-  Image as ImageIcon,
-} from "lucide-react";
+
+import { useState } from "react";
 import Link from "next/link";
-import Header from "@/components/layout/Header";
+import { 
+  FiHome,
+  FiChevronLeft,
+  FiChevronRight
+} from "react-icons/fi";
+import { FaBoxOpen } from "react-icons/fa";
 import Footer from "@/components/layout/Footer";
-import { HTMLMotionProps, motion } from "framer-motion";
-import { useAuctionsQuery } from "@/hooks/useAuction";
 import type { Auction } from "@/types/auction.types";
+import Sidebar from "@/components/layout/home/Sidebar";
+import { useCategoriesQuery } from "@/hooks/useCategory";
+import HomeHeader from "@/components/layout/home/HomeHeader";
+import ToolbarTop from "@/components/layout/home/ToolbarTop";
+import CountdownTimer from "@/components/common/CountdownTimer";
+import { useAuctionsQuery, useFeaturedAuctionsQuery } from "@/hooks/useAuction";
 
-interface ScrollAnimatedCardProps extends HTMLMotionProps<"div"> {
-  className?: string;
-  children: React.ReactNode;
-}
 
-function ScrollAnimatedCard({ className, children, ...props }: ScrollAnimatedCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9, filter: "blur(5px)" }}
-      whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
-}
+export default function Home() {
+  // Estados para filtros e paginação
+  const [searchQuery, setSearchQuery] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [ordering, setOrdering] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(16);
 
-function SkeletonCard() {
-  return (
-    <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col animate-pulse">
-      <div className="flex justify-between items-start mb-3">
-        <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-      </div>
-      <div className="w-full h-48 bg-gray-200 rounded-sm mb-4"></div>
-      <div className="h-5 bg-gray-200 rounded w-full mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="flex gap-2">
-          <div className="h-6 bg-gray-200 rounded w-12"></div>
-          <div className="h-6 bg-gray-200 rounded w-16"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+  // Queries react-query
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery();
+  const { data: featuredData } = useFeaturedAuctionsQuery();
+  const { data: auctionsData, isLoading: auctionsLoading } = useAuctionsQuery({
+    search: appliedSearch || undefined,
+    category_id: selectedCategoryId || undefined,
+    ordering: ordering || undefined,
+    page: page,
+    page_size: pageSize,
+  });
 
-export default function ExploreUser() {
-  const { data: auctionsData, isLoading: loading } = useAuctionsQuery();
-  const auctions: Auction[] = auctionsData?.results || [];
-
-  const formatCurrency = (value: string | number) => {
-    return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(Number(value));
-  };
-
-  const calculateTimeLeft = (endTime: string, status: string) => {
-    if (status === "ENDED" || status === "SOLD") return "Encerrado";
-    if (status === "CANCELLED") return "Cancelado";
+  // Mapear leilões em destaque (bestSellers)
+  const bestSellers = (featuredData?.results || []).slice(0, 4).map((auction: Auction) => {
+    const item = auction.item || {};
+    const primaryImg = item.images?.find((img) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
     
-    const end = new Date(endTime).getTime();
-    const now = new Date().getTime();
-    const diff = end - now;
+    return {
+      id: auction.id,
+      name: item.title || "Leilão sem título",
+      price: item.current_price ? `${parseFloat(item.current_price).toLocaleString('pt-AO')} Kz` : "0 Kz",
+      oldPrice: item.buy_now_price ? `${parseFloat(item.buy_now_price).toLocaleString('pt-AO')} Kz` : null,
+      imageUrl: primaryImg,
+      icon: FaBoxOpen,
+    };
+  });
 
-    if (diff <= 0) return "Encerrado";
+  // Mapear leilões da listagem principal
+  const products = (auctionsData?.results || []).map((auction: Auction) => {
+    const item = auction.item || {};
+    const primaryImg = item.images?.find((img) => img.is_primary)?.file?.url || item.images?.[0]?.file?.url || null;
+    
+    const badges: string[] = [];
+    if (item.condition_type === "NEW") badges.push("NOVO");
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return {
+      id: auction.id,
+      name: item.title || "Leilão sem título",
+      price: item.current_price ? `${parseFloat(item.current_price).toLocaleString('pt-AO')} Kz` : "0 Kz",
+      oldPrice: item.buy_now_price ? `${parseFloat(item.buy_now_price).toLocaleString('pt-AO')} Kz` : null,
+      badges,
+      hasTimer: auction.status === "LIVE",
+      endTime: auction.end_time,
+      icon: FaBoxOpen,
+      imageUrl: primaryImg,
+      status: auction.status,
+    };
+  });
 
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
+  // Lógica de pesquisa
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAppliedSearch(searchQuery);
+    setPage(1);
   };
 
-  return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans antialiased flex flex-col">
-      <Header />
-      <div className="max-w-7xl mx-auto px-6 w-full flex-1 mb-16">
-        {/* Top Filter Bar */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="bg-white rounded-sm p-2.5 mt-8 max-w-4xl mx-auto flex flex-wrap items-center justify-between shadow-sm border border-gray-100 mb-8"
-        >
-          <div className="flex items-center flex-1 divide-x divide-gray-100 overflow-x-auto">
-            <div className="px-4 lg:px-8 py-2 flex flex-col cursor-pointer hover:bg-gray-50 rounded-sm transition-colors shrink-0">
-              <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Categoria</span>
-              <span className="text-sm font-bold text-[#0C1B33] flex items-center gap-2">
-                Todas as Categorias <ChevronDown size={14} className="text-gray-400" />
-              </span>
-            </div>
-            
-            <div className="px-4 lg:px-8 py-2 flex flex-col cursor-pointer hover:bg-gray-50 rounded-sm transition-colors shrink-0">
-              <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Status</span>
-              <span className="text-sm font-bold text-[#0C1B33] flex items-center gap-2">
-                Todos <ChevronDown size={14} className="text-gray-400" />
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 pr-2 pl-4 mt-4 lg:mt-0">
-            <button className="p-3 border border-gray-200 rounded-sm text-gray-500 hover:bg-gray-50 hover:text-[#0C1B33] transition-colors">
-              <SlidersHorizontal size={18} />
-            </button>
-            <button className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-sm text-sm font-bold transition-colors shadow-md shadow-blue-500/10">
-              Buscar Lotes!
-            </button>
-          </div>
-        </motion.div>
+  // Cálculo de Paginação
+  const totalCount = auctionsData?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const startIndex = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endIndex = Math.min(page * pageSize, totalCount);
 
-        {/* Grid Container */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          {loading ? (
-            <>
-              {[...Array(8)].map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </>
-          ) : auctions.length > 0 ? (
-            auctions.map((auction) => (
-              <ScrollAnimatedCard key={auction.id} className="bg-white rounded-sm p-4 shadow-sm border border-gray-100 flex flex-col hover:border-primary/30 transition-colors group">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl lg:text-2xl font-extrabold text-[#0C1B33]">
-                    {formatCurrency(auction.item.current_price || auction.item.starting_price)}
-                  </h3>
-                </div>
-                
-                <div className="w-full h-48 bg-gray-100 rounded-sm mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                  {auction.item.images && auction.item.images.length > 0 ? (
-                    <img src={auction.item.images[0].file.url} alt={auction.item.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <ImageIcon size={40} className="text-gray-300" />
-                  )}
-                  <div className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 rounded-sm text-xs font-bold text-[#0C1B33] backdrop-blur-sm shadow-sm">
-                    {auction.item.category_label || "Lote"} #{auction.id}
-                  </div>
-                  {auction.status === "LIVE" && (
-                    <div className="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-sm text-xs font-bold flex items-center gap-1.5 shadow-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Ao Vivo
-                    </div>
-                  )}
-                </div>
-                
-                <h4 className="text-sm font-bold text-[#0C1B33] line-clamp-1 mb-1">{auction.item.title}</h4>
-                <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-medium">
-                  {auction.item.description || "Nenhuma descrição disponível."}
-                </p>
-                
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-                  <Link href={`/auctions/${auction.id}`} className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                    Detalhes
-                  </Link>
-                  <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
-                    <span className="flex items-center gap-1.5"><Gavel size={14} className="text-gray-400" /> {auction.bids_count || 0}</span>
-                    <span className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border ${auction.status === "LIVE" ? "bg-red-50 border-red-100 text-red-600" : "bg-gray-50 border-gray-100"}`}>
-                      <Clock size={14} className={auction.status === "LIVE" ? "text-red-500" : "text-gray-400"} /> 
-                      {calculateTimeLeft(auction.end_time, auction.status)}
-                    </span>
-                  </div>
-                </div>
-              </ScrollAnimatedCard>
-            ))
-          ) : (
-            <div className="col-span-full py-12 text-center text-gray-500">
-              Nenhum leilão encontrado no momento.
-            </div>
-          )}
+  return (
+    <div className="w-full bg-[#f8f9fa] min-h-screen font-sans">
+      {/* HEADER SECTION */}
+      <HomeHeader
+        categoriesData={categoriesData}
+        selectedCategoryId={selectedCategoryId}
+        setSelectedCategoryId={setSelectedCategoryId}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSubmitSearch={handleSearchSubmit}
+        setPage={setPage}
+      />
+
+      {/* NEW LAYOUT (BREADCRUMB + SIDEBAR + GRID) */}
+      <main className="max-w-7xl mx-auto px-4 mt-8 pb-12">
+        
+        {/* BREADCRUMB */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-[11px] sm:text-xs text-gray-500 mb-4 sm:mb-6 font-medium">
+          <div className="flex items-center justify-center text-primary bg-primary/10 px-3 sm:px-3.5 py-1.5 rounded-sm cursor-pointer hover:bg-primary hover:text-white transition-colors shadow-sm"
+               onClick={() => {
+                 setSelectedCategoryId(null);
+                 setSearchQuery("");
+                 setAppliedSearch("");
+                 setOrdering("");
+                 setPage(1);
+               }}>
+            <FiHome size={14} className="sm:mr-2" />
+            <span className="hidden sm:inline">Início</span>
+          </div>
+          <span className="text-gray-300 mx-0.5 sm:mx-1">&gt;</span>
+          <span className="text-gray-700 bg-white px-3 sm:px-4 py-1.5 rounded-sm border border-gray-200 shadow-sm truncate max-w-[200px] sm:max-w-none">Todos os Leilões</span>
         </div>
-      </div>
+
+        <div className="flex flex-col lg:flex-row gap-7">
+          {/* LEFT SIDEBAR */}
+          <Sidebar
+            categoriesData={categoriesData}
+            categoriesLoading={categoriesLoading}
+            selectedCategoryId={selectedCategoryId}
+            setSelectedCategoryId={setSelectedCategoryId}
+            setPage={setPage}
+            bestSellers={bestSellers}
+          />
+
+          {/* MAIN CONTENT */}
+          <div className="flex-1 flex flex-col gap-6">
+            
+            {/* TOP BANNER */}
+            <div className="bg-[#e9e8e3] p-6 md:p-10 flex items-center justify-between rounded-sm shadow-sm relative overflow-hidden min-h-[160px] md:min-h-[200px]">
+              <div className="max-w-xl relative z-10 text-center sm:text-left">
+                <h2 className="text-2xl md:text-[32px] font-black text-gray-800 mb-3 md:mb-4 tracking-tight leading-none uppercase">LEILÕES DE <span className="text-primary block sm:inline mt-1 sm:mt-0">VEÍCULOS & IMÓVEIS</span></h2>
+                <p className="text-xs md:text-[13px] text-gray-600 leading-relaxed font-medium">Participe dos melhores leilões de veículos recuperados, frotas empresariais e imóveis de desinvestimento. Faça o seu lance agora e garanta excelentes oportunidades de negócio com total segurança e transparência.</p>
+              </div>
+            </div>
+
+            {/* TOOLBAR TOP */}
+            <ToolbarTop 
+              ordering={ordering} 
+              setOrdering={setOrdering} 
+              pageSize={pageSize} 
+              setPageSize={setPageSize} 
+              setPage={setPage} 
+            />
+
+            {/* PRODUCT GRID */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+              {auctionsLoading ? (
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <div key={idx} className="border border-gray-200 bg-white p-3 sm:p-5 rounded-sm animate-pulse h-[280px] sm:h-[340px] flex flex-col justify-between">
+                    <div className="h-32 sm:h-40 bg-gray-100 rounded-sm w-full mb-3 sm:mb-4"></div>
+                    <div className="h-3 sm:h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 sm:h-4 bg-gray-100 rounded w-1/2"></div>
+                    <div className="h-6 sm:h-8 bg-gray-100 rounded w-full mt-3 sm:mt-4"></div>
+                  </div>
+                ))
+              ) : products.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-gray-500 font-medium border border-dashed border-gray-300 bg-white rounded-sm">
+                  Nenhum leilão disponível no momento.
+                </div>
+              ) : (
+                products.map((product) => {
+                  const Icon = product.icon;
+                  return (
+                    <Link href={`/auctions/${product.id}`} key={product.id} className="border border-gray-200 bg-white p-3 sm:p-5 relative flex flex-col group hover:shadow-xl transition-all duration-300 hover:border-primary/50 rounded-sm cursor-pointer h-full">
+                      
+                      {/* STATUS & EXTRA BADGES */}
+                      <div className="absolute top-3 left-3 sm:top-5 sm:left-5 flex flex-col gap-1 sm:gap-1.5 z-10">
+                        {product.status === "LIVE" && (
+                          <span className="bg-red-600 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider flex items-center gap-1 sm:gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                            AO VIVO
+                          </span>
+                        )}
+                        {product.status === "SCHEDULED" && (
+                          <span className="bg-blue-600 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            EM BREVE
+                          </span>
+                        )}
+                        {(product.status === "ENDED" || product.status === "SOLD") && (
+                          <span className="bg-gray-500 text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            FINALIZADO
+                          </span>
+                        )}
+                        {product.badges.includes("NOVO") && (
+                          <span className="bg-[#00b2f0] text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-sm shadow-sm tracking-wider">
+                            NOVO
+                          </span>
+                        )}
+                      </div>
+
+                      {/* IMAGE CONTAINER */}
+                      <div className="h-32 sm:h-44 flex items-center justify-center mb-3 sm:mb-6 relative bg-white group-hover:scale-105 transition-transform duration-500 overflow-hidden rounded-sm">
+                        {product.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                        ) : (
+                          <Icon className="text-gray-200 w-12 h-12 sm:w-20 sm:h-20" />
+                        )}
+                        
+                        {/* COUNTDOWN TIMER OVERLAY FOR LIVE AUCTIONS */}
+                        {product.hasTimer && product.endTime && (
+                          <CountdownTimer endTime={product.endTime} />
+                        )}
+                      </div>
+
+                      {/* PRODUCT DETAILS */}
+                      <div className="flex flex-col flex-1 justify-end">
+                        <h3 className="text-xs sm:text-[14px] text-gray-800 font-semibold line-clamp-2 min-h-[32px] sm:min-h-[40px] mb-2 sm:mb-4 group-hover:text-primary transition-colors leading-snug">{product.name}</h3>
+                        
+                        <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-2 sm:pt-3">
+                          <div className="flex flex-col w-full">
+                            <span className="text-primary font-black text-sm sm:text-lg leading-none">{product.price}</span>
+                            {product.oldPrice && <span className="text-gray-400 line-through text-[9px] sm:text-[11px] mt-1 sm:mt-1.5 font-medium">{product.oldPrice}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+
+            {/* TOOLBAR BOTTOM & PAGINATION */}
+            <div className="flex flex-col sm:flex-row items-center justify-between border border-gray-200 p-3.5 bg-white mt-2 rounded-sm shadow-sm gap-4">
+              <div className="flex gap-2">
+                 <button 
+                   onClick={() => setPage(p => Math.max(1, p - 1))}
+                   disabled={page === 1}
+                   className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <FiChevronLeft size={16} />
+                 </button>
+                 
+                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                   <button
+                     key={p}
+                     onClick={() => setPage(p)}
+                     className={`px-3 py-1.5 text-sm font-semibold rounded-sm transition-colors border ${
+                       page === p 
+                         ? 'bg-primary border-primary text-white shadow-sm' 
+                         : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
+                     }`}
+                   >
+                     {p}
+                   </button>
+                 ))}
+
+                 <button 
+                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                   disabled={page === totalPages}
+                   className="bg-gray-50 border border-gray-200 text-gray-500 p-2.5 rounded-sm hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <FiChevronRight size={16} />
+                 </button>
+              </div>
+              <div className="text-[13px] text-gray-600 font-medium">
+                 A mostrar {startIndex} a {endIndex} de {totalCount} ({totalPages} {totalPages === 1 ? 'Página' : 'Páginas'})
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );
