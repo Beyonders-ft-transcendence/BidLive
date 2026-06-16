@@ -7,11 +7,16 @@ import { motion } from "framer-motion";
 
 import Link from "next/link";
 import { useAuctionsQuery, useAuctionActivitiesQuery } from "@/hooks/useAuction";
+import { useGlobalAuctionRealtime } from "@/hooks/useAuctionRealtime";
+import Image from "next/image";
 
 export default function LiveAuctionsSection() {
   const { data: auctionsData, isLoading: loadingAuctions } = useAuctionsQuery({ status: "LIVE", limit: 4 });
   const { data: allAuctionsData } = useAuctionsQuery({ limit: 1 });
   const { data: activities = [] } = useAuctionActivitiesQuery();
+
+  // Connect to the global websocket for real-time bid updates
+  useGlobalAuctionRealtime();
 
   const auctions = auctionsData?.results || [];
   const activeAuctionsCount = auctionsData?.count || 0;

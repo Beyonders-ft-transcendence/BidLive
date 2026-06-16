@@ -328,3 +328,49 @@ export function useAuctionRealtime(id: number) {
     submittingBuyNow: buyNowMutation.isPending,
   };
 }
+
+export function useGlobalAuctionRealtime() {
+  const queryClient = useQueryClient();
+  const ws = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/global/`;
+
+    try {
+      const socket = new WebSocket(wsUrl);
+      ws.current = socket;
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.event === "GLOBAL_BID_CREATED" && data.payload) {
+            queryClient.setQueryData(["auctionActivities"], (oldData: any) => {
+              const currentActivities = oldData || [];
+              // Add new activity at the beginning and keep only top 10
+              return [data.payload, ...currentActivities].slice(0, 10);
+            });
+          }
+        } catch (err) {
+          console.error("Failed to parse global websocket message", err);
+        }
+      };
+
+      socket.onclose = () => {
+        console.log("Global WebSocket disconnected.");
+      };
+
+      socket.onerror = (err) => {
+        console.error("Global WebSocket error:", err);
+      };
+    } catch (err) {
+      console.error("Failed to connect to Global WebSocket", err);
+    }
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, [queryClient]);
+}

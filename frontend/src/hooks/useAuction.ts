@@ -37,7 +37,6 @@ export function useAuctionActivitiesQuery() {
       if (!res.success) throw new Error(res.message || "Falha ao carregar atividades.");
       return res.data;
     },
-    refetchInterval: 5000, // Polling to get real-time feed updates
   });
 }
 
