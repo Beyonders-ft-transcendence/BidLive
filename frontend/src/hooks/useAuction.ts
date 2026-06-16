@@ -132,3 +132,42 @@ export function useBuyNowMutation() {
     },
   });
 }
+
+export function useCreateStreamMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ auctionId, payload }: { auctionId: number; payload: any }) =>
+      auctionService.createStream(auctionId, payload),
+    onSuccess: (res, { auctionId }) => {
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ["auctionStreams", auctionId] });
+      }
+    },
+  });
+}
+
+export function useStartStreamMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ auctionId, streamId, payload }: { auctionId: number; streamId: number; payload: { stream_key?: string; metadata?: any } }) =>
+      auctionService.startStream(auctionId, streamId, payload),
+    onSuccess: (res, { auctionId }) => {
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ["auctionStreams", auctionId] });
+      }
+    },
+  });
+}
+
+export function useEndStreamMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ auctionId, streamId, payload }: { auctionId: number; streamId: number; payload?: { reason?: string } }) =>
+      auctionService.endStream(auctionId, streamId, payload),
+    onSuccess: (res, { auctionId }) => {
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ["auctionStreams", auctionId] });
+      }
+    },
+  });
+}

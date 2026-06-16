@@ -11,10 +11,16 @@ import {
   useUpdateAuctionMutation,
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
+  useAuctionBidsQuery,
+  useAuctionStreamsQuery,
+  useCreateStreamMutation,
+  useStartStreamMutation,
+  useEndStreamMutation,
 } from "@/hooks/useAuction";
 import { AuctionStatus } from "@/types/auction.types";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { auctionStatusColor, getAuctionStatusLabel, formatCurrency } from "@/utils/auction";
+import ENV from "@/utils/env.utils";
 import {
   Eye,
   Ban,
@@ -24,6 +30,10 @@ import {
   AlertTriangle,
   Gavel,
   Calendar,
+  Video,
+  PlayCircle,
+  PowerOff,
+  Award,
 } from "lucide-react";
 
 export default function Auctions() {
@@ -65,6 +75,24 @@ export default function Auctions() {
   const { data: selectedAuctionData } = useAuctionQuery(selectedAuctionId || 0);
   const selectedAuction = selectedAuctionData || null;
 
+  // Additional Queries for selected auction details
+  const { data: bidsData } = useAuctionBidsQuery(selectedAuctionId || 0);
+  const { data: streamsData } = useAuctionStreamsQuery(selectedAuctionId || 0, !!selectedAuctionId);
+
+  const selectedAuctionBids = bidsData?.results || [];
+  const selectedAuctionStreams = streamsData || [];
+  const activeStream = selectedAuctionStreams.find((s: any) => s.status === "LIVE" || s.status === "READY" || s.status === "SCHEDULED") || null;
+
+  // Stream Mutations
+  const createStreamMutation = useCreateStreamMutation();
+  const startStreamMutation = useStartStreamMutation();
+  const endStreamMutation = useEndStreamMutation();
+
+  // Detail Modal Gallery and Stream states
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [streamLoading, setStreamLoading] = useState(false);
+  const [streamError, setStreamError] = useState<string | null>(null);
+
   // Mutations
   const updateAuctionMutation = useUpdateAuctionMutation();
   const cancelAuctionMutation = useCancelAuctionMutation();
@@ -73,6 +101,8 @@ export default function Auctions() {
   // View details modal
   const handleViewDetails = (auctionId: number) => {
     setSelectedAuctionId(auctionId);
+    setActiveImageIdx(0);
+    setStreamError(null);
   };
 
   // Publish / Approve Auction
@@ -116,6 +146,66 @@ export default function Auctions() {
       console.error("Erro ao excluir leilão:", err);
     }
     setDeleteAuctionId(null);
+  };
+
+  // Stream Handlers
+  const handleCreateStream = async () => {
+    if (!selectedAuctionId || !selectedAuction) return;
+    setStreamLoading(true);
+    setStreamError(null);
+    try {
+      const res = await createStreamMutation.mutateAsync({
+        auctionId: selectedAuctionId,
+        payload: { title: `Live: ${selectedAuction.item?.title || 'Leilão'}` }
+      });
+      if (!res.success) {
+        setStreamError(res.message || "Erro ao criar stream");
+      }
+    } catch (err) {
+      setStreamError("Falha na rede ao criar stream");
+    } finally {
+      setStreamLoading(false);
+    }
+  };
+
+  const handleStartStream = async (streamId: number) => {
+    if (!selectedAuctionId) return;
+    setStreamLoading(true);
+    setStreamError(null);
+    try {
+      const res = await startStreamMutation.mutateAsync({
+        auctionId: selectedAuctionId,
+        streamId,
+        payload: {}
+      });
+      if (!res.success) {
+        setStreamError(res.message || "Erro ao iniciar stream");
+      }
+    } catch (err) {
+      setStreamError("Falha na rede ao iniciar stream");
+    } finally {
+      setStreamLoading(false);
+    }
+  };
+
+  const handleEndStream = async (streamId: number) => {
+    if (!selectedAuctionId) return;
+    setStreamLoading(true);
+    setStreamError(null);
+    try {
+      const res = await endStreamMutation.mutateAsync({
+        auctionId: selectedAuctionId,
+        streamId,
+        payload: {}
+      });
+      if (!res.success) {
+        setStreamError(res.message || "Erro ao encerrar stream");
+      }
+    } catch (err) {
+      setStreamError("Falha na rede ao encerrar stream");
+    } finally {
+      setStreamLoading(false);
+    }
   };
 
   // Format date helper
@@ -327,6 +417,39 @@ export default function Auctions() {
             </h3>
 
             <div className="space-y-6">
+              {/* Image Gallery */}
+              {selectedAuction.item?.images && selectedAuction.item.images.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="relative aspect-video w-full rounded-sm overflow-hidden bg-gray-950 border border-gray-100 shadow-sm">
+                    <img
+                      src={selectedAuction.item.images[activeImageIdx]?.file?.url || "/placeholder.png"}
+                      alt={selectedAuction.item.title}
+                      className="h-full w-full object-cover transition-all"
+                    />
+                  </div>
+                  {selectedAuction.item.images.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {selectedAuction.item.images.map((img: any, idx: number) => (
+                        <button
+                          key={img.id || idx}
+                          onClick={() => setActiveImageIdx(idx)}
+                          className={`relative aspect-video w-16 shrink-0 rounded-sm overflow-hidden bg-gray-950 transition-all border ${
+                            activeImageIdx === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <img src={img?.file?.url} alt="Thumbnail" className="h-full w-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-video w-full rounded-sm overflow-hidden bg-gray-50 border border-gray-100 flex flex-col items-center justify-center text-gray-400 text-xs gap-1.5">
+                  <Eye size={24} className="text-gray-300" />
+                  Sem imagens cadastradas para este lote
+                </div>
+              )}
+
               {/* Product Info */}
               <div>
                 <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider font-mono">Título do Item</span>
@@ -359,7 +482,7 @@ export default function Auctions() {
               </div>
 
               {/* Pricing Info */}
-              <div className="grid grid-cols-2 gap-4 border-t border-gray-100 pt-4 bg-primary/5 p-4 rounded-sm border border-primary/10">
+              <div className="grid grid-cols-2 gap-4 pt-4 bg-primary/5 p-4 rounded-sm border border-primary/10">
                 <div>
                   <span className="text-[8px] font-bold text-primary/70 uppercase tracking-wider block">Preço Inicial</span>
                   <span className="text-xs font-black text-gray-900">{formatCurrency(selectedAuction.item?.starting_price || 0)}</span>
@@ -396,9 +519,148 @@ export default function Auctions() {
                 </div>
               </div>
 
+              {/* Live Stream Section */}
+              {(selectedAuction.status === AuctionStatus.LIVE || selectedAuction.status === AuctionStatus.SCHEDULED) && (
+                <div className="border-t border-gray-100 pt-4">
+                  <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Transmissão ao Vivo (Live Stream)</span>
+                  {streamError && (
+                    <div className="mb-3 text-[10px] text-red-600 bg-red-50 p-2 rounded-sm border border-red-100">
+                      {streamError}
+                    </div>
+                  )}
+                  {!activeStream ? (
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-sm flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <h5 className="text-[10px] font-bold text-gray-950">Nenhuma transmissão associada</h5>
+                        <p className="text-[9px] text-gray-500">Crie uma stream para transmitir ao vivo via LiveKit.</p>
+                      </div>
+                      <button
+                        onClick={handleCreateStream}
+                        disabled={streamLoading}
+                        className="px-3 py-1.5 bg-primary text-white text-[10px] font-bold rounded-sm uppercase tracking-wider hover:bg-primary/95 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <Video size={12} />
+                        Criar Stream
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-100 p-4 rounded-sm space-y-4">
+                      <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full ${activeStream.status === "LIVE" ? "bg-red-500 animate-pulse" : "bg-gray-400"}`} />
+                          <span className="text-[10px] font-bold text-gray-800">Status: <span className="uppercase font-mono">{activeStream.status}</span></span>
+                        </div>
+                        <div className="flex gap-2">
+                          {(activeStream.status === "SCHEDULED" || activeStream.status === "READY" || activeStream.status === "DRAFT") && (
+                            <button
+                              onClick={() => handleStartStream(activeStream.id)}
+                              disabled={streamLoading}
+                              className="px-3 py-1 bg-green-600 text-white text-[10px] font-bold rounded-sm uppercase tracking-wider hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                            >
+                              <PlayCircle size={12} />
+                              Iniciar
+                            </button>
+                          )}
+                          {activeStream.status === "LIVE" && (
+                            <button
+                              onClick={() => handleEndStream(activeStream.id)}
+                              disabled={streamLoading}
+                              className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold rounded-sm uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                            >
+                              <PowerOff size={12} />
+                              Encerrar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {/* OBS Credentials */}
+                      <div className="space-y-2 text-[9px]">
+                        <div>
+                          <span className="text-gray-400 font-bold block">Servidor de Stream (URL):</span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <input
+                              type="text"
+                              readOnly
+                              value={ENV.LIVEKIT_URL || "rtc.livekit.cloud"}
+                              className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded-sm font-mono text-[9px] outline-none"
+                            />
+                            <button
+                              onClick={() => navigator.clipboard.writeText(ENV.LIVEKIT_URL || "rtc.livekit.cloud")}
+                              className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-sm font-bold uppercase"
+                            >
+                              Copiar
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 font-bold block">Chave de Stream (Stream Key):</span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <input
+                              type="password"
+                              readOnly
+                              value={activeStream.stream_key || ""}
+                              id="obs-stream-key"
+                              className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded-sm font-mono text-[9px] outline-none"
+                            />
+                            <button
+                              onClick={() => {
+                                const input = document.getElementById("obs-stream-key") as HTMLInputElement;
+                                if (input) {
+                                  input.type = input.type === "password" ? "text" : "password";
+                                }
+                              }}
+                              className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-sm font-bold uppercase"
+                            >
+                              Mostrar
+                            </button>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(activeStream.stream_key || "")}
+                              className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-sm font-bold uppercase"
+                            >
+                              Copiar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Bid History Section */}
+              <div className="border-t border-gray-100 pt-4">
+                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                  <Award size={10} className="text-primary" />
+                  Histórico de Lances
+                </span>
+                {selectedAuctionBids.length === 0 ? (
+                  <div className="bg-gray-50 border border-gray-100 p-4 rounded-sm text-center text-[10px] text-gray-400">
+                    Nenhum lance ofertado neste lote até o momento.
+                  </div>
+                ) : (
+                  <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-sm divide-y divide-gray-100">
+                    {selectedAuctionBids.map((bid: any) => (
+                      <div key={bid.id} className="flex justify-between items-center p-2.5 text-[10px] hover:bg-gray-50 transition-colors">
+                        <div className="space-y-0.5">
+                          <span className="font-bold text-gray-800">
+                            {bid.bidder ? bid.bidder.username : `Usuário #${bid.bidder_id}`}
+                          </span>
+                          <span className="text-[8px] text-gray-400 block font-mono">
+                            {formatDateSimple(bid.timestamp || bid.created_at)}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-primary">
+                          {formatCurrency(bid.amount)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Cancellation notes if exists */}
               {selectedAuction.status === AuctionStatus.CANCELLED && (
-                <div className="bg-red-50 border border-red-100 p-4 rounded-sm flex gap-3 text-red-700">
+                <div className="bg-red-50 border border-red-100 p-4 rounded-sm flex gap-3 text-red-700 border-t pt-4">
                   <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                   <div>
                     <span className="text-[8px] font-bold uppercase tracking-wider block">Motivo de Cancelamento</span>
