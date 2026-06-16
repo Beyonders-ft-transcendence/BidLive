@@ -43,6 +43,8 @@ __all__ = [
     "AuctionBuyNowSerializer",
     "BidSerializer",
     "BidCreateSerializer",
+    "BidderSummarySerializer",
+    "ActivitySerializer",
     "StreamViewerSerializer",
     "StreamListSerializer",
     "StreamDetailSerializer",
