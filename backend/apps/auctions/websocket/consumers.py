@@ -157,7 +157,10 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({"event": "bid_accepted", "payload": {"auction_id": self.auction_id}})
 
     async def auction_event(self, event):
-        await self.send_json({"event": event.get("event"), "payload": event.get("payload")})
+        try:
+            await self.send_json({"event": event.get("event"), "payload": event.get("payload")})
+        except RuntimeError:
+            pass
 
     def _client_ip(self) -> str:
         headers = {key.lower(): value for key, value in self.scope.get("headers", [])}
