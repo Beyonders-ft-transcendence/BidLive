@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import ActionCard from "@/components/common/ActionCard";
 import TableFilters from "@/components/common/TableFilters";
 import TableSection from "@/components/common/TableSection";
-import auctionService from "@/services/auction.service";
+import { useAuctionsQuery, useAuctionBidsQuery } from "@/hooks/useAuction";
 import type { Auction, Bid } from "@/types/auction.types";
 import { formatCurrency, getAuctionStatusLabel, auctionStatusColor } from "@/utils/auction";
 import {
@@ -20,14 +20,8 @@ import {
 } from "lucide-react";
 
 export default function Bids() {
-  const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [loadingAuctions, setLoadingAuctions] = useState(true);
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
 
-  // Bids state
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [loadingBids, setLoadingBids] = useState(false);
-  const [totalBidsCount, setTotalBidsCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
@@ -35,57 +29,30 @@ export default function Bids() {
   const [auctionSearch, setAuctionSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch Auctions on search or mount
-  const fetchAuctions = useCallback(async () => {
-    setLoadingAuctions(true);
-    try {
-      const res = await auctionService.list({
-        search: auctionSearch || undefined,
-        page_size: 50, // Grab first 50 matching auctions to display in selection pane
-      });
-      if (res.success && res.data) {
-        setAuctions(res.data.results);
-      }
-    } catch (err) {
-      console.error("Erro ao carregar leilões para lances:", err);
-    } finally {
-      setLoadingAuctions(false);
-    }
-  }, [auctionSearch]);
+  // Fetch Auctions via React Query
+  const { data: auctionsData, isLoading: loadingAuctions } = useAuctionsQuery({
+    search: auctionSearch || undefined,
+    page_size: 50,
+  });
+  const auctions = auctionsData?.results || [];
 
-  useEffect(() => {
-    fetchAuctions();
-  }, [fetchAuctions]);
+  // Fetch Bids via React Query
+  const bidsParams = useMemo(() => ({
+    page: currentPage,
+    page_size: pageSize,
+  }), [currentPage, pageSize]);
 
-  // Fetch bids for selected auction
-  const fetchBidsForSelected = useCallback(async () => {
-    if (!selectedAuction) return;
-    setLoadingBids(true);
-    try {
-      const res = await auctionService.listBids(selectedAuction.id, {
-        page: currentPage,
-        page_size: pageSize,
-      });
-      if (res.success && res.data) {
-        setBids(res.data.results);
-        setTotalBidsCount(res.data.count);
-      }
-    } catch (err) {
-      console.error("Erro ao obter histórico de lances:", err);
-    } finally {
-      setLoadingBids(false);
-    }
-  }, [selectedAuction, currentPage]);
-
-  useEffect(() => {
-    fetchBidsForSelected();
-  }, [fetchBidsForSelected]);
+  const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(
+    selectedAuction?.id || 0,
+    bidsParams
+  );
+  const bids = bidsData?.results || [];
+  const totalBidsCount = bidsData?.count || 0;
 
   // Handle selecting an auction
   const handleSelectAuction = (auction: Auction) => {
     setSelectedAuction(auction);
     setCurrentPage(1);
-    setBids([]);
   };
 
   // Helper date formatter

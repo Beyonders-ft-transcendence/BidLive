@@ -21,7 +21,7 @@ interface SettingsTabProps {
 }
 
 export default function SettingsTab({ user }: SettingsTabProps) {
-  const fetchMe = useAuthStore((s) => s.fetchMe);
+  const updateUser = useAuthStore((s) => s.updateUser);
   const changePassword = useAuthStore((s) => s.changePassword);
 
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -89,16 +89,32 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
     try {
       const uploadedUrl = await uploadImageToCloudinary(file);
+      console.log('Uploaded url', uploadedUrl)
       if (uploadedUrl) {
         setProfileValue("avatar_url", uploadedUrl);
         setAvatarPreview(uploadedUrl);
-        toast.success("Foto de perfil carregada com sucesso!");
+        
+        if (user?.id) {
+          try {
+            const res = await rbacService.updateUser(user.id, { avatar_url: uploadedUrl });
+            if (res.success) {
+              updateUser({ avatar_url: uploadedUrl });
+              toast.success("Foto de perfil carregada e atualizada com sucesso!");
+            } else {
+              toast.error(res.message || "Falha ao salvar a imagem no servidor.");
+            }
+          } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Ocorreu um erro ao atualizar a foto no servidor.");
+          }
+        } else {
+          toast.success("Foto de perfil carregada com sucesso!");
+        }
       } else {
         toast.error("Falha ao enviar imagem. Tente novamente.");
         setAvatarPreview(user.avatar_url || null);
       }
     } catch (err) {
-      console.error("Erro no upload do avatar:", err);
+      console.error("Erro no upload do avatar:", err);  
       toast.error("Ocorreu um erro ao enviar a imagem.");
       setAvatarPreview(user.avatar_url || null);
     } finally {
@@ -109,13 +125,26 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   // Handle Profile Update submit
   const onProfileSubmit = async (data: UpdateProfileInput) => {
     try {
-      const res = await rbacService.updateUser(user.id, {
-        full_name: data.full_name,
-        avatar_url: data.avatar_url || "",
-        bio: data.bio || "",
-      });
+      const payload: any = {};
+      
+      if (data.full_name !== user.full_name) {
+        payload.full_name = data.full_name;
+      }
+      if (data.avatar_url && data.avatar_url !== user.avatar_url) {
+        payload.avatar_url = data.avatar_url;
+      }
+      if (data.bio !== user.bio && (data.bio !== "" || user.bio)) {
+        payload.bio = data.bio || "";
+      }
+
+      if (Object.keys(payload).length === 0) {
+        toast.success("Nenhuma alteração feita para salvar.");
+        return;
+      }
+
+      const res = await rbacService.updateUser(user.id, payload);
       if (res.success && res.data) {
-        await fetchMe();
+        updateUser(payload);
         toast.success("Os detalhes do seu perfil foram salvos!");
       } else {
         toast.error(res.message || "Falha ao atualizar perfil.");

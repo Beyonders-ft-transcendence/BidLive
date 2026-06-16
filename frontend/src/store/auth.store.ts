@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import authService from '@/services/auth.service'
 import { isAxiosError } from 'axios'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
@@ -59,6 +60,7 @@ interface AuthActions {
     // ── Internal / utility ───────────────────────────────────────────────────
     hydrateFromStorage: () => void
     setUser: (user: User) => void
+    updateUser: (user: Partial<User>) => void
     setTokens: (accessToken: string, refreshToken: string) => void
     clearError: () => void
     reset: () => void
@@ -66,24 +68,37 @@ interface AuthActions {
 
 export type AuthStore = AuthState & AuthActions
 
-const getErrorMessage = (error: unknown, fallback: string) => {
+const getErrorMessage = (error: unknown, fallback: string): string => {
     if (isAxiosError(error)) {
-        const responseData = error.response?.data as
-            | { message?: string; detail?: string; errors?: Record<string, string[]> }
-            | undefined
+        const responseData = error.response?.data as any;
 
-        const fieldErrors = responseData?.errors
-            ? Object.values(responseData.errors).flat().find(Boolean)
-            : undefined
+        if (typeof responseData === 'string') return responseData;
 
-        return responseData?.message ?? responseData?.detail ?? fieldErrors ?? error.message ?? fallback
+        if (responseData && typeof responseData === 'object') {
+            if (typeof responseData.message === 'string') return responseData.message;
+            if (typeof responseData.detail === 'string') return responseData.detail;
+
+            const errorSource = responseData.errors || responseData.message || responseData;
+
+            if (errorSource && typeof errorSource === 'object') {
+                const values = Object.values(errorSource).flat();
+                const firstError = values.find(v => typeof v === 'string');
+                if (firstError) return firstError as string;
+            }
+        }
+
+        return error.message ?? fallback;
     }
 
     if (error instanceof Error) {
-        return error.message || fallback
+        return error.message || fallback;
     }
 
-    return fallback
+    if (typeof error === 'string') {
+        return error;
+    }
+
+    return fallback;
 }
 
 // ─── Initial State ───────────────────────────────────────────────────────────
@@ -117,7 +132,8 @@ const getInitialState = (): AuthState => {
 export const useAuthStore = create<AuthStore>()(
     devtools(
         subscribeWithSelector(
-            immer((set, get) => ({
+            persist(
+                immer((set, get) => ({
                 ...getInitialState(),
 
                 // ── Helpers ─────────────────────────────────────────────────────────
@@ -148,6 +164,15 @@ export const useAuthStore = create<AuthStore>()(
                     authService.setStoredUser(user)
                     set((s) => {
                         s.user = user
+                    })
+                },
+
+                updateUser(partialUser) {
+                    set((s) => {
+                        if (s.user) {
+                            s.user = { ...s.user, ...partialUser }
+                            authService.setStoredUser(s.user)
+                        }
                     })
                 },
 
@@ -520,6 +545,28 @@ export const useAuthStore = create<AuthStore>()(
                     }
                 },
             })),
+            {
+                name: 'bidlive-auth',
+                storage: createJSONStorage(() =>
+                    typeof window !== 'undefined'
+                        ? window.localStorage
+                        : {
+                              getItem: () => null,
+                              setItem: () => {},
+                              removeItem: () => {},
+                          }
+                ),
+                partialize: (s: AuthStore) => ({
+                    user: s.user,
+                    accessToken: s.accessToken,
+                    refreshToken: s.refreshToken,
+                    status: s.status,
+                    isAuthenticated: s.isAuthenticated,
+                    isLoading: false,
+                    error: null,
+                }),
+            }
+        ),
         ),
         { name: 'AuthStore' },
     ),

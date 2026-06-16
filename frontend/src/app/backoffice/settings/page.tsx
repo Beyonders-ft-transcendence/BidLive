@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import ActionCard from "@/components/common/ActionCard";
 import { useAuthStore } from "@/store/auth.store";
-import rbacService from "@/services/rbac.service";
+import { useUpdateUserMutation } from "@/hooks/useRbac";
 import {
   User as UserIcon,
   Lock,
@@ -22,6 +22,8 @@ export default function Settings() {
   const setUser = useAuthStore((s) => s.setUser);
   const changePassword = useAuthStore((s) => s.changePassword);
   const fetchMe = useAuthStore((s) => s.fetchMe);
+
+  const updateProfileMutation = useUpdateUserMutation();
 
   const [activeTab, setActiveTab] = useState<"profile" | "platform">("profile");
   
@@ -55,8 +57,11 @@ export default function Settings() {
     if (!user) return;
 
     try {
-      const res = await rbacService.updateUser(user.id, {
-        full_name: fullName,
+      const res = await updateProfileMutation.mutateAsync({
+        id: user.id,
+        payload: {
+          full_name: fullName,
+        },
       });
       if (res.success && res.data) {
         await fetchMe();

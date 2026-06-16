@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
-import { Image as ImageIcon, Upload, X, Save, AlertCircle, Calendar } from "lucide-react";
-import type { Category } from "@/types/category.types";
 import { ItemCondition } from "@/types/auction.types";
-import auctionService from "@/services/auction.service";
-import { createAuctionSchema, type CreateAuctionInput } from "@/schema/auction.schema";
+import type { Category } from "@/types/category.types";
+import { useCreateAuctionMutation } from "@/hooks/useAuction";
 import { uploadImageToCloudinary } from "@/utils/cloudinary.utils";
+import { createAuctionSchema, type CreateAuctionInput } from "@/schema/auction.schema";
+import { Image as ImageIcon, Upload, X, Save, AlertCircle, Calendar } from "lucide-react";
 
 interface CreateAuctionTabProps {
   categories: Category[];
@@ -22,6 +22,8 @@ interface SelectedFile {
 }
 
 export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctionTabProps) {
+  const createAuctionMutation = useCreateAuctionMutation();
+
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [step, setStep] = useState(1);
@@ -130,7 +132,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
         image_urls: urls,
       };
 
-      const res = await auctionService.create(payload);
+      const res = await createAuctionMutation.mutateAsync(payload);
       if (res.success) {
         toast.success("Lote criado e salvo como rascunho!");
         reset();

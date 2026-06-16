@@ -197,7 +197,7 @@ export default function SignUp() {
                             {/* API Errors */}
                             {apiError && (
                                 <div className="text-xs text-red-500 font-medium pt-1">
-                                    {apiError}
+                                    {typeof apiError === 'string' ? apiError : JSON.stringify(apiError)}
                                 </div>
                             )}
 

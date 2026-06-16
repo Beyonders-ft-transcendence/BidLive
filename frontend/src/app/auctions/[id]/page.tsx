@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -15,25 +15,38 @@ import {
   CalendarDays,
   TrendingUp,
   Video,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import auctionService from "@/services/auction.service";
-import type { Auction, Bid } from "@/types/auction.types";
 import { motion } from "framer-motion";
+import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function AuctionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params?.id);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const [auction, setAuction] = useState<Auction | null>(null);
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [bidAmount, setBidAmount] = useState("");
-  const [submittingBid, setSubmittingBid] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    auction,
+    bids,
+    loading,
+    error,
+    activeStream,
+    isWatchingStream,
+    setIsWatchingStream,
+    viewerCount,
+    bidAmount,
+    setBidAmount,
+    submittingBid,
+    placeBid: handlePlaceBid,
+    buyNow,
+    submittingBuyNow,
+  } = useAuctionRealtime(id);
+
   const [activeImage, setActiveImage] = useState(0);
   const [activeStream, setActiveStream] = useState<any | null>(null);
   const [isWatchingStream, setIsWatchingStream] = useState(false);
@@ -90,92 +103,47 @@ export default function AuctionDetailPage() {
 
     loadData();
 
-    // ─── WEBSOCKET SETUP ───
-    let ws: WebSocket | null = null;
-    let isMounted = true;
-    let reconnectTimer: NodeJS.Timeout;
-
-    const connectWs = () => {
-      const token = typeof window !== "undefined" ? localStorage.getItem("bidlive.auth.access_token") : null;
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-      const wsBase = apiBase.replace("http", "ws").replace("/api", "/ws");
-      const wsUrl = `${wsBase}/auctions/${id}/${token ? `?token=${token}` : ""}`;
-      
-      ws = new WebSocket(wsUrl);
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          if (data.event === "new_bid") {
-            const bidData = data.payload;
-            setBids((prev) => {
-              // Evitar duplicados
-              if (prev.some((b) => b.id === bidData.bid_id)) return prev;
-              return [
-                {
-                  id: bidData.bid_id,
-                  amount: bidData.bid_amount,
-                  bidder: bidData.bidder,
-                  timestamp: bidData.timestamp,
-                  created_at: bidData.timestamp,
-                },
-                ...prev,
-              ];
-            });
-            setAuction((prev) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                bids_count: (prev.bids_count || 0) + 1,
-                item: {
-                  ...prev.item,
-                  current_price: bidData.current_price,
-                },
-              };
-            });
-          }
-
-          if (["buy_now", "auction_ended", "auction_sold", "auction_updated"].includes(data.event)) {
-            // Atualiza os dados finais via API para garantir integridade
-            auctionService.retrieve(id).then((res) => {
-              if (res.success && res.data) setAuction(res.data);
-            });
-          }
-
-          if (data.event === "auction_snapshot" && data.payload) {
-            // Opcional: Atualizar a contagem de conexões se necessário
-            // if (data.payload.active_connections !== undefined) {
-            //   setViewerCount(data.payload.active_connections);
-            // }
-          }
-        } catch (e) {
-          console.error("Erro ao processar mensagem do WebSocket", e);
+    const interval = setInterval(async () => {
+      if (!id) return;
+      try {
+        const hasToken = typeof window !== "undefined" && !!window.localStorage.getItem("bidlive.auth.access_token");
+        
+        const promises: Promise<any>[] = [
+          auctionService.retrieve(id),
+          auctionService.listBids(id),
+        ];
+        
+        if (hasToken) {
+          promises.push(auctionService.listStreams(id));
         }
-      };
 
-      ws.onclose = () => {
-        if (isMounted) {
-          reconnectTimer = setTimeout(connectWs, 3000);
+        const results = await Promise.allSettled(promises);
+        const aRes = results[0];
+        const bRes = results[1];
+        const sRes = hasToken ? results[2] : null;
+
+        if (aRes.status === "fulfilled" && aRes.value?.success && aRes.value.data)
+          setAuction(aRes.value.data);
+        if (bRes.status === "fulfilled" && bRes.value?.success && bRes.value.data)
+          setBids(bRes.value.data.results);
+        if (sRes && sRes.status === "fulfilled" && sRes.value?.success && sRes.value.data) {
+          const live = sRes.value.data.find((s: any) => s.status === "LIVE");
+          setActiveStream(live || null);
+          if (live) {
+            setViewerCount(live.viewer_count || 1);
+          }
         }
-      };
-    };
+      } catch (e) {}
+    }, 5000);
 
-    connectWs();
-
-    return () => {
-      isMounted = false;
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      if (ws) ws.close();
-    };
+    return () => clearInterval(interval);
   }, [id]);
 
   useEffect(() => {
     if (auction) {
       const cPrice = Number(auction.item.current_price || auction.item.starting_price);
       const inc = Number(auction.item.minimum_increment || 1);
-      const hasBids = auction.bids_count && auction.bids_count > 0;
-      const newMinBid = hasBids ? cPrice + inc : Number(auction.item.starting_price);
+      const newMinBid = cPrice + inc;
       
       setBidAmount((prev) => {
         if (!prev || Number(prev) < newMinBid) {
@@ -184,43 +152,7 @@ export default function AuctionDetailPage() {
         return prev;
       });
     }
-  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment, auction?.bids_count]);
-
-  const [buyingNow, setBuyingNow] = useState(false);
-
-  const handleBuyNow = async () => {
-    if (!auction) return;
-    
-    if (typeof window !== 'undefined' && !localStorage.getItem('bidlive.auth.access_token')) {
-      router.push('/signin');
-      return;
-    }
-
-    const confirmBuy = window.confirm(`Tem certeza que deseja arrematar este lote por ${formatCurrency(auction.item.buy_now_price || 0)}?`);
-    if (!confirmBuy) return;
-
-    setBuyingNow(true);
-    setError(null);
-    try {
-      const res = await auctionService.buyNow(id);
-      if (res.success && res.data) {
-        setAuction(res.data);
-        alert("Parabéns! Lote arrematado com sucesso.");
-      } else {
-        setError(res.message || "Erro ao efetuar compra imediata.");
-      }
-    } catch (err: any) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        router.push('/signin');
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Erro de conexão. Não foi possível concluir a compra.");
-      }
-    } finally {
-      setBuyingNow(false);
-    }
-  };
+  }, [auction?.item?.current_price, auction?.item?.starting_price, auction?.item?.minimum_increment]);
 
   const handlePlaceBid = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,13 +190,7 @@ export default function AuctionDetailPage() {
       } else if (err.response?.data) {
         const errorData = err.response.data;
         if (errorData.errors) {
-          const errList = Array.isArray(errorData.errors) ? errorData.errors : [errorData.errors];
-          const errStrings = errList.map((e: any) => {
-            if (typeof e === "string") return e;
-            if (typeof e === "object" && e !== null) return Object.values(e).flat().join(" ");
-            return String(e);
-          });
-          setError(errStrings.join(" "));
+          setError(Object.values(errorData.errors).flat().join(" "));
         } else {
           setError(errorData.message || "Valor inválido. Verifique o seu lance.");
         }
@@ -366,10 +292,18 @@ export default function AuctionDetailPage() {
         </div>
 
         {/* Error Banner */}
-        {error && (
+        {(error || errorMsg) && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            {error}
+            {error || errorMsg}
+          </div>
+        )}
+
+        {/* Success Banner */}
+        {successMsg && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-sm flex items-start gap-3 text-sm">
+            <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+            {successMsg}
           </div>
         )}
 
@@ -390,21 +324,19 @@ export default function AuctionDetailPage() {
                 <div className="flex border-b border-gray-100 bg-gray-50/50">
                   <button
                     onClick={() => setIsWatchingStream(false)}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${
-                      !isWatchingStream
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream
                         ? "text-primary bg-white border-b-2 border-primary"
                         : "text-gray-400 hover:text-slate-700"
-                    }`}
+                      }`}
                   >
                     Galeria de Fotos
                   </button>
                   <button
                     onClick={() => setIsWatchingStream(true)}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
-                      isWatchingStream
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream
                         ? "text-red-500 bg-white border-b-2 border-red-500"
                         : "text-gray-400 hover:text-red-500"
-                    }`}
+                      }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                     Transmissão Ao Vivo (LIVE)
@@ -452,7 +384,7 @@ export default function AuctionDetailPage() {
                     <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                       Streamer: @{activeStream.streamer?.username || "Vendedor"}
                     </span>
-                    
+
                     <span className="text-[9px] text-slate-500 font-mono">
                       Protocol: WebRTC | Codec: H264
                     </span>
@@ -496,11 +428,10 @@ export default function AuctionDetailPage() {
                         <button
                           key={img.id}
                           onClick={() => setActiveImage(i)}
-                          className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${
-                            activeImage === i
+                          className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${activeImage === i
                               ? "border-primary"
                               : "border-transparent hover:border-gray-300"
-                          }`}
+                            }`}
                         >
                           <img
                             src={img.file.url}
@@ -612,24 +543,13 @@ export default function AuctionDetailPage() {
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {auction.item.buy_now_price && (
-                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50 flex flex-col justify-between">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
-                              Comprar Agora
-                            </p>
-                            <p className="text-lg font-black text-primary">
-                              {formatCurrency(auction.item.buy_now_price)}
-                            </p>
-                          </div>
-                          {!["SOLD", "ENDED", "CANCELLED"].includes(auction.status) && (
-                            <button
-                              onClick={handleBuyNow}
-                              disabled={buyingNow}
-                              className="mt-3 w-full bg-[#0C1B33] hover:bg-slate-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[10px] font-bold uppercase tracking-widest py-2 rounded-sm transition-colors"
-                            >
-                              {buyingNow ? "Processando..." : "Arrematar Lote"}
-                            </button>
-                          )}
+                        <div className="border border-gray-100 rounded-sm p-4 bg-gray-50">
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+                            Comprar Agora
+                          </p>
+                          <p className="text-lg font-black text-primary">
+                            {formatCurrency(auction.item.buy_now_price)}
+                          </p>
                         </div>
                       )}
                       {auction.item.reserve_price && (
@@ -688,9 +608,8 @@ export default function AuctionDetailPage() {
                     Lance Atual
                   </p>
                   <p
-                    className={`text-3xl font-black tracking-tight ${
-                      isLive ? "text-primary" : "text-[#0C1B33]"
-                    }`}
+                    className={`text-3xl font-black tracking-tight ${isLive ? "text-primary" : "text-[#0C1B33]"
+                      }`}
                   >
                     {formatCurrency(currentPrice)}
                   </p>
@@ -700,9 +619,8 @@ export default function AuctionDetailPage() {
                     Tempo Restante
                   </p>
                   <p
-                    className={`text-sm font-bold flex items-center justify-end gap-1 ${
-                      isLive ? "text-red-500" : "text-gray-400"
-                    }`}
+                    className={`text-sm font-bold flex items-center justify-end gap-1 ${isLive ? "text-red-500" : "text-gray-400"
+                      }`}
                   >
                     <Clock size={13} />
                     {calculateTimeLeft(auction.end_time, auction.status)}
@@ -713,52 +631,114 @@ export default function AuctionDetailPage() {
               {/* Bid form or closed state */}
               <div className="px-6 py-5">
                 {isLive ? (
-                  <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      Valor do Lance
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
-                        R$
-                      </span>
-                      <input
-                        type="number"
-                        min={minBid}
-                        step={minIncrement}
-                        value={bidAmount}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        placeholder={formatCurrency(minBid)
-                          .replace("Kz", "")
-                          .trim()}
-                        className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
-                        required
-                      />
-                    </div>
-                    <p className="text-[10px] text-gray-400">
-                      Lance mínimo:{" "}
-                      <span className="font-semibold text-[#0C1B33]">
-                        {formatCurrency(minBid)}
-                      </span>
-                    </p>
-                    <button
-                      type="submit"
-                      disabled={submittingBid}
-                      className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      {submittingBid ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          Confirmar Lance
-                          <ArrowUpRight size={15} />
-                        </>
+                  isAuthenticated ? (
+                    <div className="flex flex-col gap-4">
+                      {/* Quick increment presets */}
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] text-gray-400 font-mono font-medium block">
+                          Incremento rápido (+ sob lance atual):
+                        </span>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
+                            <button
+                              type="button"
+                              key={inc}
+                              onClick={() => handlePresetBid(inc)}
+                              className="py-2.5 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-primary rounded-sm transition-all border border-gray-200 flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              +{formatCurrency(inc).replace("AOA", "").trim()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <form onSubmit={onSubmitBid} className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                          Valor do Lance Customizado
+                        </label>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-3.5 text-xs font-bold text-gray-400 select-none">
+                            Kz
+                          </span>
+                          <input
+                            type="number"
+                            min={minBid}
+                            step={minIncrement}
+                            value={bidAmount}
+                            onChange={(e) => setBidAmount(e.target.value)}
+                            placeholder={formatCurrency(minBid)
+                              .replace("AOA", "")
+                              .trim()}
+                            className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-24 py-3.5 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
+                            required
+                          />
+                          <div className="absolute right-1.5 top-1.5 flex gap-1.5">
+                            <button
+                              type="submit"
+                              disabled={submittingBid}
+                              className="h-8 px-4 bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            >
+                              {submittingBid ? (
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <>
+                                  <Gavel className="h-3.5 w-3.5" />
+                                  Ofertar
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          Lance mínimo:{" "}
+                          <span className="font-semibold text-[#0C1B33]">
+                            {formatCurrency(minBid)}
+                          </span>
+                        </p>
+                      </form>
+
+                      {/* Buy Now Option */}
+                      {auction.item.buy_now_price && (
+                        <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4 mt-2">
+                          <div className="text-left">
+                            <span className="text-[10px] text-gray-400 font-mono block">Arremate Imediato:</span>
+                            <span className="text-[#0C1B33] text-xs font-bold leading-normal block">
+                              Adquira o lote agora sem disputas
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleBuyNowSubmit}
+                            disabled={submittingBuyNow}
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50 shrink-0"
+                          >
+                            <ShoppingBag className="h-4 w-4" />
+                            {submittingBuyNow ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              `Comprar por ${formatCurrency(auction.item.buy_now_price)}`
+                            )}
+                          </button>
+                        </div>
                       )}
-                    </button>
-                    <p className="text-[10px] text-gray-300 text-center leading-relaxed">
-                      Ao dar um lance, você concorda com nossos termos de
-                      compromisso de compra.
-                    </p>
-                  </form>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-6 flex flex-col items-center gap-3">
+                      <User size={28} className="text-gray-300" />
+                      <p className="text-sm font-semibold text-[#0C1B33]">
+                        Faça login para participar
+                      </p>
+                      <p className="text-xs text-gray-400 max-w-[240px]">
+                        Você precisa estar autenticado para dar lances ou arrematar este lote.
+                      </p>
+                      <Link
+                        href="/signin"
+                        className="mt-2 bg-primary text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors"
+                      >
+                        Fazer Login
+                      </Link>
+                    </div>
+                  )
                 ) : (
                   <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-5">
                     <p className="text-sm font-semibold text-gray-400">
@@ -766,8 +746,8 @@ export default function AuctionDetailPage() {
                       {auction.status === "SOLD"
                         ? "Vendido"
                         : auction.status === "ENDED"
-                        ? "Encerrado"
-                        : "Inativo"}
+                          ? "Encerrado"
+                          : "Inativo"}
                       .
                     </p>
                   </div>
@@ -806,11 +786,10 @@ export default function AuctionDetailPage() {
                       <div className="flex items-center gap-3">
                         {/* Avatar initial */}
                         <div
-                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold shrink-0 ${
-                            i === 0
+                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold shrink-0 ${i === 0
                               ? "bg-primary/10 text-primary"
                               : "bg-gray-100 text-gray-400"
-                          }`}
+                            }`}
                         >
                           {bid.bidder
                             ? bid.bidder.username.charAt(0).toUpperCase()
@@ -829,9 +808,8 @@ export default function AuctionDetailPage() {
                         </div>
                       </div>
                       <span
-                        className={`text-sm font-black ${
-                          i === 0 ? "text-primary" : "text-[#0C1B33]"
-                        }`}
+                        className={`text-sm font-black ${i === 0 ? "text-primary" : "text-[#0C1B33]"
+                          }`}
                       >
                         {formatCurrency(bid.amount)}
                       </span>
@@ -855,7 +833,6 @@ export default function AuctionDetailPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }
