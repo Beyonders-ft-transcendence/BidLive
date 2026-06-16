@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/layout/Header";
+import HomeHeader from "@/components/layout/home/HomeHeader";
 import { useAuthStore } from "@/store/auth.store";
 import {
   useAuctionsQuery,
@@ -25,6 +26,7 @@ import MyAuctionsTab from "@/components/user/MyAuctionsTab";
 import MyBidsTab from "@/components/user/MyBidsTab";
 import SettingsTab from "@/components/user/SettingsTab";
 import CreateAuctionTab from "@/components/user/CreateAuctionTab";
+import ChatTab from "@/components/user/ChatTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
@@ -41,7 +43,7 @@ export default function UserPage() {
   const logout = useAuthStore((s) => s.logout);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings" | "create-auction">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat">("overview");
 
   // Load categories using React Query
   const { data: categoriesData } = useCategoriesQuery();
@@ -197,7 +199,7 @@ export default function UserPage() {
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-800 font-sans flex flex-col">
       {/* Sticky Top Header */}
-      <Header />
+      <HomeHeader />
 
       {/* Main Container */}
       <main className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 flex flex-col md:flex-row gap-6 flex-1 select-none">
@@ -254,6 +256,8 @@ export default function UserPage() {
           )}
 
           {activeTab === "settings" && <SettingsTab user={user} />}
+
+          {activeTab === "chat" && <ChatTab />}
 
           {activeTab === "create-auction" && (
             <CreateAuctionTab

@@ -39,7 +39,7 @@ export default function OverviewTab({
       {/* Welcome header card */}
       <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+            <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Bem-vindo, {user.full_name}!</h2>
             <p className="text-xs text-gray-400 mt-1 font-normal">Controle aqui seus lances, leilões ativos e preferências do portal.</p>
           </div>
