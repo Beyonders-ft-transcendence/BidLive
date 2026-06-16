@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -581,7 +581,7 @@ export default function AuctionDetailPage() {
                           type="button"
                           onClick={() => setShowBuyNowModal(true)}
                           disabled={submittingBuyNow}
-                          className="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                          className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
                         >
                           <ShoppingBag className="h-4 w-4" />
                           {submittingBuyNow ? (
