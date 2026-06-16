@@ -108,7 +108,8 @@ class AuctionViewSet(viewsets.GenericViewSet):
 
         if self.action == "list":
             status_param = self.request.query_params.get("status")
-            if status_param != AuctionStatus.DRAFT:
+            seller_param = self.request.query_params.get("seller_id")
+            if status_param != AuctionStatus.DRAFT and not seller_param:
                 queryset = queryset.exclude(status=AuctionStatus.DRAFT)
 
         return queryset
