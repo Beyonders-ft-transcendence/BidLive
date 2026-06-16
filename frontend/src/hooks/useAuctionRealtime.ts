@@ -267,8 +267,10 @@ export function useAuctionRealtime(id: number) {
             }
           }
         } catch (err: any) {
-          if (err.response?.status === 401 || err.response?.status === 403) {
+          if (err.response?.status === 401) {
             router.push("/signin");
+          } else if (err.response?.status === 403) {
+            setError(err.response?.data?.message || "Permissão negada. Faça logout e login novamente.");
           } else if (err.response?.data) {
             const errorData = err.response.data;
             if (errorData.errors) {
@@ -299,10 +301,11 @@ export function useAuctionRealtime(id: number) {
         const res = await buyNowMutation.mutateAsync(id);
         return res;
       } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
+        if (err.response?.status === 401) {
           router.push("/signin");
         }
-        return { success: false, message: err.message || "Erro ao realizar compra imediata." };
+        const msg = err.response?.data?.message || err.message || "Erro ao realizar compra imediata.";
+        return { success: false, message: msg };
       }
     },
     [id, router, buyNowMutation, isAuthenticated]

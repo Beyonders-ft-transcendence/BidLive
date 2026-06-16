@@ -35,7 +35,7 @@ api.interceptors.response.use(
         const originalRequest = error.config
         if (
             error.response &&
-            error.response.status === 401 &&
+            (error.response.status === 401 || error.response.status === 403) &&
             !originalRequest._retry
         ) {
             originalRequest._retry = true
@@ -50,8 +50,10 @@ api.interceptors.response.use(
                         // Retry with the new token (interceptor will add it)
                         return api(originalRequest)
                     } catch {
-                        // Refresh failed — reset session
-                        state.reset()
+                        // Refresh failed — reset session only on 401
+                        if (error.response.status === 401) {
+                            state.reset()
+                        }
                     }
                 }
             }
