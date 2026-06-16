@@ -22,11 +22,13 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function AuctionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params?.id);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const {
     auction,
@@ -501,98 +503,116 @@ export default function AuctionDetailPage() {
               {/* Bid form or closed state */}
               <div className="px-6 py-5">
                 {isLive ? (
-                  <div className="flex flex-col gap-4">
-                    {/* Quick increment presets */}
-                    <div className="space-y-1.5">
-                      <span className="text-[9px] text-gray-400 font-mono font-medium block">
-                        Incremento rápido (+ sob lance atual):
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
-                          <button
-                            type="button"
-                            key={inc}
-                            onClick={() => handlePresetBid(inc)}
-                            className="py-2.5 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-primary rounded-sm transition-all border border-gray-200 flex items-center justify-center gap-1 cursor-pointer"
-                          >
-                            +{formatCurrency(inc).replace("AOA", "").trim()}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                        Valor do Lance Customizado
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
-                          Kz
+                  isAuthenticated ? (
+                    <div className="flex flex-col gap-4">
+                      {/* Quick increment presets */}
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] text-gray-400 font-mono font-medium block">
+                          Incremento rápido (+ sob lance atual):
                         </span>
-                        <input
-                          type="number"
-                          min={minBid}
-                          step={minIncrement}
-                          value={bidAmount}
-                          onChange={(e) => setBidAmount(e.target.value)}
-                          placeholder={formatCurrency(minBid)
-                            .replace("AOA", "")
-                            .trim()}
-                          className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
-                          required
-                        />
-                      </div>
-                      <p className="text-[10px] text-gray-400">
-                        Lance mínimo:{" "}
-                        <span className="font-semibold text-[#0C1B33]">
-                          {formatCurrency(minBid)}
-                        </span>
-                      </p>
-                      <button
-                        type="submit"
-                        disabled={submittingBid}
-                        className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
-                      >
-                        {submittingBid ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            Confirmar Lance
-                            <ArrowUpRight size={15} />
-                          </>
-                        )}
-                      </button>
-                      <p className="text-[10px] text-gray-300 text-center leading-relaxed">
-                        Ao dar um lance, você concorda com nossos termos de
-                        compromisso de compra.
-                      </p>
-                    </form>
-
-                    {/* Buy Now Option */}
-                    {auction.item.buy_now_price && (
-                      <div className="pt-4 border-t border-gray-100 flex flex-col gap-2">
-                        <div className="text-left">
-                          <span className="text-[10px] text-gray-400 font-mono block">Arremate Imediato:</span>
-                          <span className="text-gray-950 text-xs font-bold leading-normal block">
-                            Adquira o lote agora sem disputas
-                          </span>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
+                            <button
+                              type="button"
+                              key={inc}
+                              onClick={() => handlePresetBid(inc)}
+                              className="py-2.5 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-primary rounded-sm transition-all border border-gray-200 flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              +{formatCurrency(inc).replace("AOA", "").trim()}
+                            </button>
+                          ))}
                         </div>
+                      </div>
+
+                      <form onSubmit={handlePlaceBid} className="flex flex-col gap-3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                          Valor do Lance Customizado
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
+                            Kz
+                          </span>
+                          <input
+                            type="number"
+                            min={minBid}
+                            step={minIncrement}
+                            value={bidAmount}
+                            onChange={(e) => setBidAmount(e.target.value)}
+                            placeholder={formatCurrency(minBid)
+                              .replace("AOA", "")
+                              .trim()}
+                            className="w-full border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none rounded-sm pl-10 pr-4 py-3 text-sm font-semibold text-[#0C1B33] bg-white transition-colors"
+                            required
+                          />
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          Lance mínimo:{" "}
+                          <span className="font-semibold text-[#0C1B33]">
+                            {formatCurrency(minBid)}
+                          </span>
+                        </p>
                         <button
-                          type="button"
-                          onClick={() => setShowBuyNowModal(true)}
-                          disabled={submittingBuyNow}
-                          className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                          type="submit"
+                          disabled={submittingBid}
+                          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest py-3.5 rounded-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
                         >
-                          <ShoppingBag className="h-4 w-4" />
-                          {submittingBuyNow ? (
+                          {submittingBid ? (
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                           ) : (
-                            `Comprar por ${formatCurrency(auction.item.buy_now_price)}`
+                            <>
+                              Confirmar Lance
+                              <ArrowUpRight size={15} />
+                            </>
                           )}
                         </button>
-                      </div>
-                    )}
-                  </div>
+                        <p className="text-[10px] text-gray-300 text-center leading-relaxed">
+                          Ao dar um lance, você concorda com nossos termos de
+                          compromisso de compra.
+                        </p>
+                      </form>
+
+                      {/* Buy Now Option */}
+                      {auction.item.buy_now_price && (
+                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-2">
+                          <div className="text-left">
+                            <span className="text-[10px] text-gray-400 font-mono block">Arremate Imediato:</span>
+                            <span className="text-gray-950 text-xs font-bold leading-normal block">
+                              Adquira o lote agora sem disputas
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowBuyNowModal(true)}
+                            disabled={submittingBuyNow}
+                            className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                          >
+                            <ShoppingBag className="h-4 w-4" />
+                            {submittingBuyNow ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              `Comprar por ${formatCurrency(auction.item.buy_now_price)}`
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-6 flex flex-col items-center gap-3">
+                      <User size={28} className="text-gray-300" />
+                      <p className="text-sm font-semibold text-[#0C1B33]">
+                        Faça login para participar
+                      </p>
+                      <p className="text-xs text-gray-400 max-w-[240px]">
+                        Você precisa estar autenticado para dar lances ou arrematar este lote.
+                      </p>
+                      <Link
+                        href="/signin"
+                        className="mt-2 bg-primary text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors"
+                      >
+                        Fazer Login
+                      </Link>
+                    </div>
+                  )
                 ) : (
                   <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-5">
                     <p className="text-sm font-semibold text-gray-400">
