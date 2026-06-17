@@ -310,11 +310,18 @@ def request_password_reset(*, email: str, request_origin: str = "") -> None:
         else f"/reset-password?{query}"
     )
 
+    context = {
+        "full_name": user.full_name,
+        "reset_url": reset_url,
+    }
+    html_content = render_to_string("emails/reset_password.html", context)
+
     send_mail(
-        subject=f"{settings.APP_NAME}: redefinicao de senha",
+        subject=f"{settings.APP_NAME}: Redefinição de senha",
         message=f"Use este link para redefinir sua senha: {reset_url}",
         from_email=None,
         recipient_list=[user.email],
+        html_message=html_content,
         fail_silently=False,
     )
     AnalyticsEvent.objects.create(
