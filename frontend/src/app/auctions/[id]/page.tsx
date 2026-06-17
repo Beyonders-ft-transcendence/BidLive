@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Video,
   ShoppingBag,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -24,12 +25,14 @@ import { motion } from "framer-motion";
 import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
 import { useAuthStore } from "@/store/auth.store";
 import HomeHeader from "@/components/layout/home/HomeHeader";
+import chatService from "@/services/chat.service";
 
 export default function AuctionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params?.id);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const currentUser = useAuthStore((s) => s.user);
 
   const {
     auction,
@@ -49,6 +52,26 @@ export default function AuctionDetailPage() {
   } = useAuctionRealtime(id);
 
   const [activeImage, setActiveImage] = useState(0);
+  const [isContacting, setIsContacting] = useState(false);
+
+  const handleContactSeller = async () => {
+    if (!auction?.item?.seller) return;
+    setIsContacting(true);
+    try {
+      const messageText = `Olá! Sou o vencedor do leilão do item "${auction.item.title}". Gostaria de combinar a entrega.`;
+      const res = await chatService.sendPrivateMessage(auction.item.seller, messageText);
+      if (res.success) {
+        router.push(`/user?tab=chat&recipient=${auction.item.seller}`);
+      } else {
+        // use local/realtime error handling if needed, or window.alert/console.error
+        console.error(res.message);
+      }
+    } catch (err: any) {
+      console.error("Erro ao contactar o vendedor:", err);
+    } finally {
+      setIsContacting(false);
+    }
+  };
 
 
 
@@ -592,7 +615,7 @@ export default function AuctionDetailPage() {
                     </div>
                   )
                 ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-5">
+                  <div className="bg-gray-50 border border-gray-200 rounded-sm text-center py-5 flex flex-col items-center gap-3">
                     <p className="text-sm font-semibold text-gray-400">
                       Este leilão está{" "}
                       {auction.status === "SOLD"
@@ -602,6 +625,22 @@ export default function AuctionDetailPage() {
                           : "Inativo"}
                       .
                     </p>
+                    {isAuthenticated && currentUser && auction.winner === currentUser.id && (
+                      <button
+                        onClick={handleContactSeller}
+                        disabled={isContacting}
+                        className="mt-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        {isContacting ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            Contactar Vendedor
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

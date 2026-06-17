@@ -45,6 +45,20 @@ export default function UserPage() {
   // Navigation tab state
   const [activeTab, setActiveTab] = useState<"overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat">("overview");
 
+  // Synchronize active tab from URL query parameter 'tab'
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (
+        tab &&
+        ["overview", "my-auctions", "my-bids", "settings", "create-auction", "chat"].includes(tab)
+      ) {
+        setActiveTab(tab as any);
+      }
+    }
+  }, []);
+
   // Load categories using React Query
   const { data: categoriesData } = useCategoriesQuery();
   const categories = categoriesData || [];

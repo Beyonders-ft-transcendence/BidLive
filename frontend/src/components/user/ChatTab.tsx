@@ -51,6 +51,26 @@ export default function ChatTab() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Automatically select conversation if a 'recipient' query param is present
+  useEffect(() => {
+    if (typeof window !== "undefined" && conversations.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const recipientId = params.get("recipient");
+      if (recipientId) {
+        const rId = Number(recipientId);
+        const found = conversations.find(
+          (c) => c.user_one.id === rId || c.user_two.id === rId
+        );
+        if (found) {
+          setSelectedConv(found);
+          // Clean the recipient param from URL to allow navigating to other chats
+          const newUrl = window.location.pathname + `?tab=chat`;
+          window.history.replaceState({ path: newUrl }, "", newUrl);
+        }
+      }
+    }
+  }, [conversations]);
+
   // Mark as read when selected conversation changes or new messages arrive
   useEffect(() => {
     if (selectedConv?.id) {
