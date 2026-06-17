@@ -29,10 +29,10 @@ const statusData = [
 
 export default function PlatformStatusChart() {
     return (
-        <div className="lg:col-span-8 bg-white rounded-md border border-slate-200 p-6 shadow-md flex flex-col justify-between">
+        <div className="lg:col-span-8 bg-[#0B0F19] rounded-xl border border-slate-800 p-6 shadow-lg flex flex-col justify-between">
             <div>
                 <div className="flex justify-between items-center mb-5">
-                    <span className="text-sm font-bold text-slate-900">Status da Plataforma</span>
+                    <span className="text-sm font-bold text-white">Status da Plataforma</span>
                 </div>
             </div>
 
@@ -40,15 +40,15 @@ export default function PlatformStatusChart() {
             <div className="h-60 mt-1 text-[10px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={statusData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} />
-                        <Tooltip cursor={{ fill: 'transparent' }} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1E293B" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10 }} />
+                        <Tooltip cursor={{ fill: '#1E293B', opacity: 0.4 }} contentStyle={{ backgroundColor: '#151C2C', borderColor: '#1E293B', color: '#fff', borderRadius: '8px' }} />
                         <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={16}>
                             {statusData.map((entry, index) => (
                                 <Cell
                                     key={`cell-${index}`}
-                                    fill={index === 5 ? "#1B59F8" : "#E2EAFE"}
+                                    fill={index === 5 ? "#1B59F8" : "#1E293B"}
                                 />
                             ))}
                         </Bar>
