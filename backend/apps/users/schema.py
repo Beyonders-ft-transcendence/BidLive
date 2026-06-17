@@ -4,18 +4,13 @@ from drf_spectacular.extensions import OpenApiAuthenticationExtension
 class JWTAndSwaggerOAuth2Scheme(OpenApiAuthenticationExtension):
     target_class = "rest_framework_simplejwt.authentication.JWTAuthentication"
     priority = 1
-    name = ["jwtAuth", "SwaggerOAuth2"]
+    name = ["SwaggerOAuth2"]
 
     def get_security_requirement(self, auto_schema):
-        return [{"jwtAuth": []}, {"SwaggerOAuth2": []}]
+        return [{"SwaggerOAuth2": []}]
 
     def get_security_definition(self, auto_schema):
         return [
-            {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT",
-            },
             {
                 "type": "oauth2",
                 "description": (
