@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  /* ==========================
+     LIGHT THEME
+     ========================== */
+
+  --background: #ffffff;
+  --foreground: #111827;
+
+  --card: #ffffff;
+  --card-foreground: #111827;
+
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  --primary: #be00ff;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f5f7fa;
+  --secondary-foreground: #374151;
+
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+
+  --accent: #f7ebff;
+  --accent-foreground: #7b00c9;
+
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #be00ff;
+
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Auction Status */
+
+  --live: #ef4444;
+  --winning: #22c55e;
+  --outbid: #f97316;
+
+  /* Charts */
+
+  --chart-1: #be00ff;
+  --chart-2: #8b5cf6;
+  --chart-3: #6366f1;
+  --chart-4: #06b6d4;
+  --chart-5: #22c55e;
+
+  /* Sidebar */
+
+  --sidebar: #fafafa;
+  --sidebar-foreground: #111827;
+  --sidebar-border: #e5e7eb;
+}
+
+.dark {
+  /* ==========================
+     DARK THEME
+     ========================== */
+
+  --background: #0f1117;
+  --foreground: #ffffff;
+
+  --card: #171a23;
+  --card-foreground: #ffffff;
+
+  --popover: #171a23;
+  --popover-foreground: #ffffff;
+
+  --primary: #be00ff;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e2230;
+  --secondary-foreground: #d1d5db;
+
+  --muted: #232836;
+  --muted-foreground: #9ca3af;
+
+  --accent: #2b1140;
+  --accent-foreground: #d98cff;
+
+  --border: #2a3142;
+  --input: #2a3142;
+  --ring: #be00ff;
+
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Auction Status */
+
+  --live: #ff4d4f;
+  --winning: #22c55e;
+  --outbid: #f97316;
+
+  /* Charts */
+
+  --chart-1: #be00ff;
+  --chart-2: #a855f7;
+  --chart-3: #8b5cf6;
+  --chart-4: #06b6d4;
+  --chart-5: #22c55e;
+
+  /* Sidebar */
+
+  --sidebar: #131722;
+  --sidebar-foreground: #ffffff;
+  --sidebar-border: #2a3142;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+
+  --color-live: var(--live);
+  --color-winning: var(--winning);
+  --color-outbid: var(--outbid);
+}
