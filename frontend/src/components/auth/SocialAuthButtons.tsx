@@ -20,7 +20,7 @@ export default function SocialAuthButtons({ onFortyTwoClick, onGoogleClick, mode
                 variant="outline"
                 fullWidth
                 onClick={onGoogleClick}
-                className="text-xs font-semibold py-2.5"
+                className="text-xs font-semibold py-2.5 !bg-[#0B0F19] !border-slate-700 !text-slate-300 hover:!bg-slate-800 hover:!text-white"
                 icon={<GoogleIcon />}
             >
                 {googleLabel}
@@ -30,9 +30,9 @@ export default function SocialAuthButtons({ onFortyTwoClick, onGoogleClick, mode
                 variant="outline"
                 fullWidth
                 onClick={onFortyTwoClick}
-                className="text-xs font-semibold py-2.5"
+                className="text-xs font-semibold py-2.5 !bg-[#0B0F19] !border-slate-700 !text-slate-300 hover:!bg-slate-800 hover:!text-white"
                 icon={
-                    <svg className="h-4 w-4 text-gray-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className="h-4 w-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                     </svg>
