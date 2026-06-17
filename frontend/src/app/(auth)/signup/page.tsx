@@ -104,30 +104,34 @@ export default function SignUp() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4 md:p-8 font-sans antialiased">
-            <div className="w-full max-w-[1050px] bg-white shadow-xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-0 md:min-h-[620px]">
+        <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center p-4 md:p-8 font-sans antialiased">
+            <div className="w-full max-w-[1050px] bg-[#151C2C] border border-slate-800 shadow-2xl rounded-sm overflow-hidden grid md:grid-cols-12 min-h-0 md:min-h-[620px]">
                 {/* Left Side (Blue Dashboard Visual - Signup mode) */}
                 <AuthSidebar mode="signup" />
 
                 {/* Right Side (Auth Form) */}
-                <div className="col-span-12 md:col-span-7 bg-white p-6 sm:p-10 md:p-12 flex flex-col justify-between min-h-0 md:min-h-[550px]">
+                <div className="col-span-12 md:col-span-7 bg-[#151C2C] p-6 sm:p-10 md:p-12 flex flex-col justify-between min-h-0 md:min-h-[550px]">
                     {/* Top spacer for layout alignment */}
                     <div className="hidden md:block"></div>
 
                     {/* Form Wrap */}
                     <div className="max-w-[370px] w-full mx-auto py-4">
-                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Criar sua conta</h2>
-                        <p className="text-xs text-gray-400 mt-1 font-normal">Cadastre-se para começar a licitar em tempo real</p>
+                        <h2 className="text-2xl font-bold text-white tracking-tight">Criar sua conta</h2>
+                        <p className="text-xs text-slate-400 mt-1 font-normal">Cadastre-se para começar a licitar em tempo real</p>
 
                         {/* Social credentials (step 1 only) */}
                         {step === 1 && (
                             <>
-                                <SocialAuthButtons mode="signup" onFortyTwoClick={handle42Login} />
-                                <Divider>Ou com e-mail</Divider>
+                                <div className="opacity-90 hover:opacity-100 transition-opacity">
+                                    <SocialAuthButtons mode="signup" onFortyTwoClick={handle42Login} />
+                                </div>
+                                <div className="opacity-80">
+                                    <Divider>Ou com e-mail</Divider>
+                                </div>
                             </>
                         )}
 
-                        <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4 mt-4">
+                        <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4 mt-4 [&_input]:bg-[#0B0F19] [&_input]:border-slate-700 [&_input]:text-white [&_input]:placeholder-slate-500 [&_svg]:text-slate-400">
                             {step === 1 ? (
                                 <div className="space-y-4">
                                     <Input
@@ -166,7 +170,7 @@ export default function SignUp() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none flex items-center"
+                                                className="text-slate-400 hover:text-white cursor-pointer focus:outline-none flex items-center"
                                                 aria-label="Mostrar senha"
                                             >
                                                 {showPassword ? <Lineicons icon={EyeStroke} size={16} /> : <Lineicons icon={EyeOutlined} size={16} />}
@@ -183,7 +187,7 @@ export default function SignUp() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none flex items-center"
+                                                className="text-slate-400 hover:text-white cursor-pointer focus:outline-none flex items-center"
                                                 aria-label="Mostrar confirmação de senha"
                                             >
                                                 {showConfirmPassword ? <Lineicons icon={EyeStroke} size={16} /> : <Lineicons icon={EyeOutlined} size={16} />}
@@ -196,7 +200,7 @@ export default function SignUp() {
 
                             {/* API Errors */}
                             {apiError && (
-                                <div className="text-xs text-red-500 font-medium pt-1">
+                                <div className="text-xs text-red-400 font-medium pt-1">
                                     {typeof apiError === 'string' ? apiError : JSON.stringify(apiError)}
                                 </div>
                             )}
@@ -211,7 +215,7 @@ export default function SignUp() {
                                         variant="primary"
                                         onClick={nextStep}
                                         fullWidth
-                                        className="font-semibold shadow-md shadow-blue-500/10"
+                                        className="font-semibold shadow-lg shadow-blue-500/20"
                                     >
                                         Continuar
                                     </Button>
@@ -221,7 +225,7 @@ export default function SignUp() {
                                             type="button"
                                             variant="outline"
                                             onClick={previousStep}
-                                            className="flex-1 font-semibold"
+                                            className="flex-1 font-semibold !bg-[#0B0F19] !border-slate-700 !text-slate-300 hover:!bg-slate-800 hover:!text-white"
                                         >
                                             Voltar
                                         </Button>
@@ -229,7 +233,7 @@ export default function SignUp() {
                                             type="submit"
                                             variant="primary"
                                             loading={isLoading}
-                                            className="flex-1 font-semibold shadow-md shadow-blue-500/10"
+                                            className="flex-1 font-semibold shadow-lg shadow-blue-500/20"
                                         >
                                             Criar Conta
                                         </Button>
@@ -239,16 +243,18 @@ export default function SignUp() {
                         </form>
 
                         {/* Bottom register link */}
-                        <p className="text-center text-xs text-gray-500 mt-6 select-none">
+                        <p className="text-center text-xs text-slate-400 mt-6 select-none">
                             Já tem uma conta?{" "}
-                            <Link href="/signin" className="text-gray-900 font-bold hover:underline">
+                            <Link href="/signin" className="text-white font-bold hover:underline">
                                 Faça login
                             </Link>
                         </p>
                     </div>
 
                     {/* Footer Policy and Copyright */}
-                    <AuthFooter />
+                    <div className="opacity-70 hover:opacity-100 transition-opacity">
+                        <AuthFooter />
+                    </div>
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
     const isSignIn = mode === "signin";
 
     return (
-        <div className="hidden md:flex md:col-span-5 bg-primary p-8 md:p-10 text-white flex-col justify-between relative overflow-hidden">
+        <div className="hidden md:flex md:col-span-5 bg-linear-to-b from-[#0a0f18] to-[#0f172a] border-r border-slate-800 p-8 md:p-10 text-white flex-col justify-between relative overflow-hidden">
             {/* Top Right Dot Grid Pattern */}
             <div className="absolute top-8 right-8 opacity-20 text-white select-none pointer-events-none">
                 <svg className="w-12 h-12" viewBox="0 0 48 48">
@@ -245,14 +245,14 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
 
             {/* Bottom Content */}
             <div className="z-10 text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
+                <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-none text-white">
                     {mode === "forgot-password"
                         ? "Recupere o seu Acesso"
                         : isSignIn
                         ? "Rápido, Simples e Seguro"
                         : "Junte-se à Comunidade"}
                 </h3>
-                <p className="text-xs md:text-[13px] text-blue-100 mt-3 font-light leading-relaxed max-w-[290px]">
+                <p className="text-xs md:text-[13px] text-slate-400 mt-3 font-light leading-relaxed max-w-[290px]">
                     {mode === "forgot-password"
                         ? "Não se preocupe! Insira o seu e-mail para receber as instruções e recuperar o acesso às suas licitações e leilões ativos."
                         : isSignIn
@@ -261,9 +261,9 @@ export default function AuthSidebar({ mode = "signin" }: AuthSidebarProps) {
                 </p>
                 {/* Carousel indicators */}
                 <div className="flex justify-center md:justify-start gap-1.5 mt-5">
-                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signin" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
-                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signup" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
-                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "forgot-password" ? "w-5 bg-white" : "w-1 bg-white/40"}`}></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signin" ? "w-5 bg-primary" : "w-1 bg-slate-600"}`}></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "signup" ? "w-5 bg-primary" : "w-1 bg-slate-600"}`}></span>
+                    <span className={`h-1 rounded-full transition-all duration-300 ${mode === "forgot-password" ? "w-5 bg-primary" : "w-1 bg-slate-600"}`}></span>
                 </div>
             </div>
         </div>
