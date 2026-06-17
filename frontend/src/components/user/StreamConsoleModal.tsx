@@ -31,8 +31,8 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
 
   // Web Broadcaster state
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [cameraOn, setCameraOn] = useState(true);
-  const [micOn, setMicOn] = useState(true);
+  const [cameraOn, setCameraOn] = useState(false);
+  const [micOn, setMicOn] = useState(false);
   const [broadcasting, setBroadcasting] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -133,9 +133,17 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
       if (videoRef.current) {
         videoRef.current.srcObject = streamObj;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao acessar câmera/microfone:", err);
-      toast.error("Câmara/Microfone bloqueados. Verifique as definições de privacidade do Windows ou se outra app a está a usar.");
+      let errorMsg = "Não foi possível aceder à câmara/microfone.";
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        errorMsg = "Permissão de câmara/microfone negada pelo navegador. Verifique as definições de privacidade.";
+      } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+        errorMsg = "Nenhuma câmara ou microfone foi detetado no sistema.";
+      } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+        errorMsg = "A câmara ou microfone já está a ser utilizado por outra aplicação.";
+      }
+      toast.error(errorMsg);
       // Desativar no estado para evitar loops
       if (cameraOn) setCameraOn(false);
       if (micOn) setMicOn(false);

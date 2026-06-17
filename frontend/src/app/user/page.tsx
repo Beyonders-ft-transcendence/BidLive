@@ -1,32 +1,30 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import Header from "@/components/layout/Header";
-import HomeHeader from "@/components/layout/home/HomeHeader";
 import { useAuthStore } from "@/store/auth.store";
+import { useState, useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import HomeHeader from "@/components/layout/home/HomeHeader";
 import {
   useAuctionsQuery,
   useUpdateAuctionMutation,
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
 } from "@/hooks/useAuction";
-import { useCategoriesQuery } from "@/hooks/useCategory";
 import type { Auction } from "@/types/auction.types";
-import { AuctionStatus, ItemCondition } from "@/types/auction.types";
-import { Category } from "@/types/category.types";
-import { formatCurrency, getAuctionStatusLabel, auctionStatusColor } from "@/utils/auction";
+import { AuctionStatus } from "@/types/auction.types";
+import { useCategoriesQuery } from "@/hooks/useCategory";
 import { Calendar, AlertCircle, Gavel } from "lucide-react";
+import { formatCurrency, getAuctionStatusLabel, auctionStatusColor } from "@/utils/auction";
 
 // Subcomponents
-import UserSidebar from "@/components/user/UserSidebar";
-import OverviewTab from "@/components/user/OverviewTab";
-import MyAuctionsTab from "@/components/user/MyAuctionsTab";
-import MyBidsTab from "@/components/user/MyBidsTab";
-import SettingsTab from "@/components/user/SettingsTab";
-import CreateAuctionTab from "@/components/user/CreateAuctionTab";
 import ChatTab from "@/components/user/ChatTab";
+import MyBidsTab from "@/components/user/MyBidsTab";
+import OverviewTab from "@/components/user/OverviewTab";
+import UserSidebar from "@/components/user/UserSidebar";
+import SettingsTab from "@/components/user/SettingsTab";
+import MyAuctionsTab from "@/components/user/MyAuctionsTab";
+import CreateAuctionTab from "@/components/user/CreateAuctionTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
