@@ -2,6 +2,89 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* ==========================
+   FONTS
+   ========================== */
+@font-face {
+  font-family: 'Sohne';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/TestSohne-Buch-BF663d89cd32e6a.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/TestSohne-BuchKursiv-BF663d89cd3e887.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/TestSohne-Kraftig-BF663d89cd37e26.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/TestSohne-KraftigKursiv-BF663d89cd2bd4b.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/TestSohne-Halbfett-BF663d89cd2d67b.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/TestSohne-HalbfettKursiv-BF663d89cd41624.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/TestSohne-Fett-BF663d89cca89ff.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/TestSohne-FettKursiv-BF663d89cc64878.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/TestSohneMono-Buch-BF663d89cbcec64.otf") format("opentype");
+}
+
+@font-face {
+  font-family: 'Sohne Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/TestSohneMono-Fett-BF663d89cc6a8e8.otf") format("opentype");
+}
+
 :root {
   /* ==========================
      LIGHT THEME
@@ -152,4 +235,7 @@
   --color-live: var(--live);
   --color-winning: var(--winning);
   --color-outbid: var(--outbid);
+
+  --font-sans: "Sohne", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Sohne Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
