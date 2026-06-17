@@ -304,3 +304,10 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+# LiveKit Streaming Settings
+LIVEKIT_URL = env("LIVEKIT_URL", default="")
+LIVEKIT_PUBLIC_URL = env("LIVEKIT_PUBLIC_URL", default="")
+LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
+LIVEKIT_API_SECRET = env("LIVEKIT_API_SECRET", default="")
+
