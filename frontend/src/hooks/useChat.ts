@@ -99,92 +99,110 @@ export function usePrivateChatRealtime(
   useEffect(() => {
     if (!recipientId || !accessToken) return;
 
-    const token = accessToken;
-    const wsUrl = `${ENV.WS_BASE_URL}/ws/chat/private/${recipientId}/?token=${token}`;
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let isClosedIntentional = false;
 
-    const socket = new WebSocket(wsUrl);
-    ws.current = socket;
+    const connect = () => {
+      if (isClosedIntentional) return;
 
-    socket.onopen = () => {
-      console.log(`[WS PrivateChat] Connected to recipient ${recipientId}`);
-      // Mark as read when entering room
-      if (conversationId) {
-        socket.send(JSON.stringify({ type: "chat.read" }));
-      }
-    };
+      const wsUrl = `${ENV.WS_BASE_URL}/ws/chat/private/${recipientId}/?token=${accessToken}`;
+      console.log(`[WS PrivateChat] Connecting to recipient ${recipientId}...`);
+      socket = new WebSocket(wsUrl);
+      ws.current = socket;
 
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === "chat.message") {
-          const newMessage: PrivateMessage = {
-            id: data.message_id,
-            conversation: conversationId || 0, // Fallback if not set
-            sender: {
-              id: data.sender_id,
-              username: data.sender_username,
-              full_name: data.sender_username,
-              avatar_url: data.sender_avatar,
-              is_online: true,
-            },
-            message: data.message,
-            is_read: data.sender_id === currentUser?.id, // read if we sent it
-            created_at: data.created_at,
-          };
-
-          // Append to message history in query client cache
-          if (conversationId) {
-            queryClient.setQueryData(
-              ["privateMessages", conversationId],
-              (old: PrivateMessage[] | undefined) => {
-                if (!old) return [newMessage];
-                if (old.some((m) => m.id === newMessage.id)) return old;
-                return [...old, newMessage];
-              }
-            );
-          }
-
-          // Trigger read update if we are the recipient of this new message and active in the conversation
-          if (data.sender_id !== currentUser?.id && conversationId) {
-            socket.send(JSON.stringify({ type: "chat.read" }));
-          }
-
-          // Invalidate conversations list for sidebar preview
-          queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
-          setIsTyping(false);
-        } else if (data.type === "chat.typing") {
-          if (data.user_id !== currentUser?.id) {
-            setIsTyping(data.is_typing);
-          }
-        } else if (data.type === "chat.read") {
-          // If the other user read our messages, update local cache
-          if (data.reader_id !== currentUser?.id && conversationId) {
-            queryClient.setQueryData(
-              ["privateMessages", conversationId],
-              (old: PrivateMessage[] | undefined) => {
-                if (!old) return old;
-                return old.map((m) => ({ ...m, is_read: true }));
-              }
-            );
-            queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
-          }
+      socket.onopen = () => {
+        console.log(`[WS PrivateChat] Connected to recipient ${recipientId}`);
+        // Mark as read when entering room
+        if (conversationId) {
+          socket?.send(JSON.stringify({ type: "chat.read" }));
         }
-      } catch (err) {
-        console.error("[WS PrivateChat] Error parsing message:", err);
-      }
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log(`[WS PrivateChat] Received message event:`, data);
+
+          if (data.type === "chat.message") {
+            const newMessage: PrivateMessage = {
+              id: data.message_id,
+              conversation: conversationId || 0, // Fallback if not set
+              sender: {
+                id: data.sender_id,
+                username: data.sender_username,
+                full_name: data.sender_username,
+                avatar_url: data.sender_avatar,
+                is_online: true,
+              },
+              message: data.message,
+              is_read: data.sender_id === currentUser?.id, // read if we sent it
+              created_at: data.created_at,
+            };
+
+            // Append to message history in query client cache
+            if (conversationId) {
+              queryClient.setQueryData(
+                ["privateMessages", conversationId],
+                (old: PrivateMessage[] | undefined) => {
+                  if (!old) return [newMessage];
+                  if (old.some((m) => m.id === newMessage.id)) return old;
+                  return [...old, newMessage];
+                }
+              );
+            }
+
+            // Trigger read update if we are the recipient of this new message and active in the conversation
+            if (data.sender_id !== currentUser?.id && conversationId) {
+              socket?.send(JSON.stringify({ type: "chat.read" }));
+            }
+
+            // Invalidate conversations list for sidebar preview
+            queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
+            setIsTyping(false);
+          } else if (data.type === "chat.typing") {
+            if (data.user_id !== currentUser?.id) {
+              setIsTyping(data.is_typing);
+            }
+          } else if (data.type === "chat.read") {
+            // If the other user read our messages, update local cache
+            if (data.reader_id !== currentUser?.id && conversationId) {
+              queryClient.setQueryData(
+                ["privateMessages", conversationId],
+                (old: PrivateMessage[] | undefined) => {
+                  if (!old) return old;
+                  return old.map((m) => ({ ...m, is_read: true }));
+                }
+              );
+              queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
+            }
+          }
+        } catch (err) {
+          console.error("[WS PrivateChat] Error parsing message:", err);
+        }
+      };
+
+      socket.onclose = (e) => {
+        console.log(`[WS PrivateChat] Disconnected from recipient ${recipientId}. Code: ${e.code}`);
+        if (!isClosedIntentional) {
+          // Attempt reconnect after 3 seconds
+          reconnectTimeout = setTimeout(() => {
+            connect();
+          }, 3000);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error("[WS PrivateChat] WebSocket error:", error);
+      };
     };
 
-    socket.onclose = () => {
-      console.log(`[WS PrivateChat] Disconnected from recipient ${recipientId}`);
-    };
-
-    socket.onerror = (error) => {
-      console.error("[WS PrivateChat] WebSocket error:", error);
-    };
+    connect();
 
     return () => {
-      socket.close();
+      isClosedIntentional = true;
+      if (socket) socket.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
   }, [recipientId, conversationId, accessToken, currentUser?.id, queryClient]);
 

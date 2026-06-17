@@ -249,7 +249,7 @@ export default function ChatTab() {
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30">
               {loadingMessages ? (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
                   <Loader2 size={20} className="animate-spin text-primary" />
@@ -268,30 +268,44 @@ export default function ChatTab() {
                   return (
                     <div
                       key={msg.id}
-                      className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                      className={`flex gap-3 items-end ${isMe ? "justify-end" : "justify-start"}`}
                     >
-                      <div className="max-w-[70%] flex flex-col">
-                        <div
-                          className={`p-3 rounded-2xl text-xs font-medium leading-relaxed ${
-                            isMe
-                              ? "bg-primary text-white rounded-br-none shadow-xs"
-                              : "bg-white text-slate-800 border border-gray-150 rounded-bl-none shadow-xs"
-                          }`}
-                        >
-                          <p>{msg.message}</p>
+                      {!isMe && (
+                        <div className="shrink-0 mb-4">
+                          <Avatar
+                            name={msg.sender.full_name || msg.sender.username}
+                            src={msg.sender.avatar_url || undefined}
+                            size="sm"
+                          />
                         </div>
-                        <span
-                          className={`text-[8px] font-bold text-slate-400 mt-1 flex items-center gap-1 px-1 ${
-                            isMe ? "justify-end" : "justify-start"
+                      )}
+                      
+                      <div className={`max-w-[70%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                        <div
+                          className={`relative p-3 px-4 rounded-2xl text-xs font-semibold leading-relaxed shadow-xs transition-all duration-200 hover:shadow-sm ${
+                            isMe
+                              ? "bg-primary text-white rounded-br-none"
+                              : "bg-white text-slate-800 border border-slate-150 rounded-bl-none"
                           }`}
                         >
+                          {/* Chat bubble tail using a rotated square */}
+                          <div className={`absolute bottom-0 w-2 h-2 rotate-45 ${
+                            isMe 
+                              ? "right-[-3px] bg-primary" 
+                              : "left-[-3px] bg-white border-b border-l border-slate-150"
+                          }`} />
+
+                          <p className="relative z-10 whitespace-pre-wrap wrap-break-word">{msg.message}</p>
+                        </div>
+                        
+                        <span className="text-[9px] font-bold text-slate-450 mt-1 flex items-center gap-1.5 px-1.5">
                           {new Date(msg.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                           {isMe && (
-                            <span className={msg.is_read ? "text-green-500" : "text-slate-300"}>
-                              ✓{msg.is_read && "✓"}
+                            <span className={msg.is_read ? "text-blue-500 font-black" : "text-slate-350"}>
+                              {msg.is_read ? "Lida" : "Enviada"}
                             </span>
                           )}
                         </span>
@@ -303,11 +317,19 @@ export default function ChatTab() {
 
               {/* Typing indicator */}
               {isPartnerTyping && (
-                <div className="flex justify-start">
-                  <div className="flex items-center gap-1 bg-white border border-gray-150 p-2.5 rounded-2xl rounded-bl-none shadow-xs">
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <div className="flex gap-3 items-end justify-start">
+                  <div className="shrink-0">
+                    <Avatar
+                      name={recipient?.full_name || recipient?.username || ""}
+                      src={recipient?.avatar_url || undefined}
+                      size="sm"
+                    />
+                  </div>
+                  <div className="relative p-3 px-4 bg-white border border-slate-150 rounded-2xl rounded-bl-none shadow-xs flex items-center gap-1">
+                    <div className="absolute bottom-0 w-2 h-2 rotate-45 left-[-3px] bg-white border-b border-l border-slate-150" />
+                    <span className="w-1.5 h-1.5 bg-slate-450 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-slate-450 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-slate-450 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                   </div>
                 </div>
               )}
