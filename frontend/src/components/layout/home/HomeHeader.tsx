@@ -46,7 +46,7 @@ export default function HomeHeader({
   return (
     <>
       <TopBar />
-      <div className="sticky top-0 z-50 bg-white shadow-sm">
+      <div className="sticky top-0 z-50 bg-[#0B0F19] shadow-md border-b border-slate-800">
         <MainHeader 
           categoriesData={categoriesData}
           selectedCategoryId={selectedCategoryId}

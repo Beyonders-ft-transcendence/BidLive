@@ -18,9 +18,9 @@ export default function TopBar() {
   };
 
   return (
-    <div className="border-b border-gray-200 bg-white">
+    <div className="border-b border-slate-800 bg-[#0B0F19]">
       <div className="max-w-7xl mx-auto flex h-10 items-center justify-between px-4">
-        <div className="hidden sm:flex items-center gap-3 text-xs text-gray-600">
+        <div className="hidden sm:flex items-center gap-3 text-xs text-slate-400">
           <span className="rounded bg-primary px-2 py-1 text-white font-medium shadow-sm">
             AO VIVO
           </span>
@@ -28,7 +28,7 @@ export default function TopBar() {
             Acompanhe os melhores leilões em tempo real.
           </p>
         </div>
-        <ul className="flex items-center gap-4 md:gap-6 text-xs text-gray-600 font-medium ml-auto sm:ml-0">
+        <ul className="flex items-center gap-4 md:gap-6 text-xs text-slate-400 font-medium ml-auto sm:ml-0">
           <li 
             onClick={() => handleProtectedClick("/user")}
             className="hidden sm:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
@@ -45,7 +45,7 @@ export default function TopBar() {
           </li>
           <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
             <FiGlobe size={14} />
-            <select className="bg-transparent outline-none cursor-pointer text-gray-600 hover:text-primary transition-colors">
+            <select className="bg-transparent outline-none cursor-pointer text-slate-400 hover:text-primary transition-colors [&>option]:bg-[#0B0F19]">
               <option value="pt">Português</option>
               <option value="en">English</option>
               <option value="ar">العربية</option>
@@ -53,7 +53,7 @@ export default function TopBar() {
           </li>
           <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
             <FaCoins size={14} />
-            <select className="bg-transparent outline-none cursor-pointer text-gray-600 hover:text-primary transition-colors">
+            <select className="bg-transparent outline-none cursor-pointer text-slate-400 hover:text-primary transition-colors [&>option]:bg-[#0B0F19]">
               <option value="aoa">Kz (AOA)</option>
               <option value="usd">USD ($)</option>
               <option value="eur">EUR (€)</option>
