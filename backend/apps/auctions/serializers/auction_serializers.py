@@ -51,7 +51,7 @@ class AuctionListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Auction
-        fields = ("id", "item", "start_time", "end_time", "status", "winner", "created_at")
+        fields = ("id", "item", "start_time", "end_time", "status", "winner", "is_featured", "created_at")
 
 
 class AuctionDetailSerializer(serializers.ModelSerializer):
@@ -75,6 +75,7 @@ class AuctionDetailSerializer(serializers.ModelSerializer):
             "buy_now_at",
             "buy_now_by",
             "reserve_met",
+            "is_featured",
             "rules",
             "created_at",
         )

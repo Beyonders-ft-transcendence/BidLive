@@ -121,6 +121,7 @@ class Auction(TimeStampedModel):
         related_name="buy_now_auctions",
     )
     reserve_met = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     rules = models.JSONField(null=True, blank=True)
 
     objects = AuctionManager()

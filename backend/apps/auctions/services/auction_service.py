@@ -37,6 +37,7 @@ from apps.auctions.services.realtime_service import (
     build_timer_payload,
     publish_auction_event,
     publish_auction_snapshot,
+    publish_global_event,
 )
 from apps.auctions.services.stream_service import end_active_streams_for_auction
 from apps.auctions.services.scheduling_service import schedule_auction_activation, schedule_auction_close
@@ -405,6 +406,24 @@ def place_bid(
                 event_type=TIMER_UPDATED,
                 payload=build_timer_payload(auction=auction),
             )
+            
+            publish_global_event(
+                event_type="GLOBAL_BID_CREATED",
+                payload={
+                    "id": bid.id,
+                    "auction_id": auction.id,
+                    "auction_title": auction.item.title,
+                    "bidder": {
+                        "id": bidder.id,
+                        "username": bidder.username,
+                        "full_name": getattr(bidder, "full_name", ""),
+                    },
+                    "amount": str(amount),
+                    "is_buy_now": bid.is_buy_now,
+                    "created_at": bid.created_at.isoformat(),
+                }
+            )
+
             _publish_snapshot(auction=auction, broadcast=True)
             return bid
     finally:
