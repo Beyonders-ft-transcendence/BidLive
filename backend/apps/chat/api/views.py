@@ -84,6 +84,30 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
         except Exception as exc:
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
+        # Broadcast message to WebSocket group if channel layer is available
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            from apps.chat.websocket.consumers import private_group_name
+            
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                group_name = private_group_name(request.user.id, recipient.id)
+                async_to_sync(channel_layer.group_send)(
+                    group_name,
+                    {
+                        "type": "chat.message",
+                        "message_id": message.id,
+                        "message": message.message,
+                        "sender_id": message.sender_id,
+                        "sender_username": message.sender.username,
+                        "sender_avatar": message.sender.avatar_url or "",
+                        "created_at": message.created_at.isoformat(),
+                    }
+                )
+        except Exception as ws_err:
+            pass
+
         return success_response(
             data=PrivateMessageSerializer(message).data,
             status_code=status.HTTP_201_CREATED,
@@ -146,6 +170,30 @@ class AuctionChatViewSet(viewsets.GenericViewSet):
             )
         except Exception as exc:
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+
+        # Broadcast message to WebSocket group if channel layer is available
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            from apps.chat.websocket.consumers import auction_chat_group_name
+            
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                group_name = auction_chat_group_name(int(pk))
+                async_to_sync(channel_layer.group_send)(
+                    group_name,
+                    {
+                        "type": "chat.message",
+                        "message_id": message.id,
+                        "message": message.message,
+                        "sender_id": message.sender_id,
+                        "sender_username": message.sender.username,
+                        "sender_avatar": message.sender.avatar_url or "",
+                        "created_at": message.created_at.isoformat(),
+                    }
+                )
+        except Exception as ws_err:
+            pass
 
         return success_response(
             data=RoomMessageSerializer(message).data,
