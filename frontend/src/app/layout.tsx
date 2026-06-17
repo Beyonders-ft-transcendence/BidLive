@@ -5,6 +5,9 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import AuthCallbackHandler from "@/components/auth/AuthCallbackHandler";
 import "@/assets/styles/globals.css";
 
+import ENV from "@/utils/env.utils";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -42,10 +45,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-        <QueryProvider>
-          <AuthCallbackHandler />
-          {children}
-        </QueryProvider>
+        <GoogleOAuthProvider clientId={ENV.GOOGLE_CLIENT_ID}>
+          <QueryProvider>
+            <AuthCallbackHandler />
+            {children}
+          </QueryProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
