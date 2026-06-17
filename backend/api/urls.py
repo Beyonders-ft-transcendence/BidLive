@@ -13,6 +13,7 @@ from apps.users.views import (
     ResetPasswordView,
     SwaggerOAuth2TokenView,
     UserMeView,
+    VerifyUserView,
 )
 
 urlpatterns = [
@@ -25,6 +26,7 @@ urlpatterns = [
     path("auth/change-password/", ChangePasswordView.as_view(), name="auth-change-password"),
     path("auth/forgot-password/", ForgotPasswordView.as_view(), name="auth-forgot-password"),
     path("auth/reset-password/", ResetPasswordView.as_view(), name="auth-reset-password"),
+    path("auth/verify-user/", VerifyUserView.as_view(), name="auth-verify-user"),
     path("auth/google/", GoogleLoginView.as_view(), name="auth-google"),
     path("auth/google/callback/", GoogleCallbackView.as_view(), name="auth-google-callback"),
     path("auth/42/", FortyTwoAuthorizeView.as_view(), name="auth-42"),
