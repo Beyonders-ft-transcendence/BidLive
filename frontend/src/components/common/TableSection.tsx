@@ -22,7 +22,7 @@ export default function TableSection({
   entityName = "registros",
 }: TableSectionProps) {
   const showPagination = pagination && pagination.totalCount > 0;
-  
+
   // Calculate paging ranges
   const startRange = showPagination
     ? (pagination.currentPage - 1) * pagination.pageSize + 1
@@ -54,17 +54,16 @@ export default function TableSection({
           <span className="text-xs text-gray-500 font-semibold">
             Mostrando {startRange}–{endRange} de {pagination.totalCount} {entityName}
           </span>
-          
+
           <div className="flex items-center gap-1.5 select-none">
             {/* Prev Button */}
             <button
               onClick={() => hasPrevious && pagination.onPageChange(pagination.currentPage - 1)}
               disabled={!hasPrevious}
-              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${
-                hasPrevious
+              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${hasPrevious
                   ? "text-gray-600 hover:bg-gray-50 cursor-pointer"
                   : "text-gray-400 cursor-not-allowed opacity-55"
-              }`}
+                }`}
             >
               <ChevronLeft size={14} />
             </button>
@@ -78,11 +77,10 @@ export default function TableSection({
             <button
               onClick={() => hasNext && pagination.onPageChange(pagination.currentPage + 1)}
               disabled={!hasNext}
-              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${
-                hasNext
+              className={`p-1.5 border border-gray-200 bg-white rounded-md transition-colors ${hasNext
                   ? "text-gray-600 hover:bg-gray-50 cursor-pointer"
                   : "text-gray-400 cursor-not-allowed opacity-55"
-              }`}
+                }`}
             >
               <ChevronRight size={14} />
             </button>

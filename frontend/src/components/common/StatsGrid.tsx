@@ -31,9 +31,8 @@ export default function StatsGrid({ items, columns = 4 }: StatsGridProps) {
         >
           {/* Icon Wrap */}
           <div
-            className={`w-8 h-8 rounded-sm flex items-center justify-center shrink-0 ${
-              item.iconBgClass || "bg-primary/10"
-            } ${item.iconColorClass || "text-primary"}`}
+            className={`w-8 h-8 rounded-sm flex items-center justify-center shrink-0 ${item.iconBgClass || "bg-primary/10"
+              } ${item.iconColorClass || "text-primary"}`}
           >
             {item.icon}
           </div>

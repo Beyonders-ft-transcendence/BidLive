@@ -50,7 +50,7 @@ export default function CreateUserModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Novo Utilizador Administrativo" size="lg">
       <form onSubmit={handleSubmit(onSubmitForm)} className="flex flex-col flex-1 p-5 gap-4">
-        
+
         {/* Form Inputs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input

@@ -14,6 +14,7 @@ import {
 
 export default function Categories() {
   const { data: categoriesData, isLoading: loading } = useCategoriesQuery();
+  console.log(categoriesData);
   const categories = categoriesData || [];
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");

@@ -132,11 +132,10 @@ export default function UserDetailsDrawer({
           <button
             type="button"
             onClick={() => onToggleVerification(user.id)}
-            className={`px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase mt-1.5 border transition-all cursor-pointer focus:outline-none ${
-              user.is_verified
+            className={`px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase mt-1.5 border transition-all cursor-pointer focus:outline-none ${user.is_verified
                 ? "bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
                 : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200"
-            }`}
+              }`}
           >
             {user.is_verified ? "Verificado" : "Pendente"}
           </button>
@@ -180,9 +179,8 @@ export default function UserDetailsDrawer({
         <div className="grid grid-cols-2 gap-3 text-[10px] mt-1">
           <div>
             <span className="text-[8px] text-gray-400 font-bold block uppercase">Conexão Atual</span>
-            <span className={`inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 rounded-sm mt-0.5 uppercase ${
-              user.is_online ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
-            }`}>
+            <span className={`inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 rounded-sm mt-0.5 uppercase ${user.is_online ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
+              }`}>
               {user.is_online ? "Online" : "Offline"}
             </span>
           </div>

@@ -35,7 +35,7 @@ export default function SideDrawer({
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-end select-none backdrop-blur-sm animate-in fade-in duration-150">
       {/* Sliding Drawer Body */}
       <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-250">
-        
+
         {/* Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div className="flex items-center gap-3">
