@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from apps.auctions.models import AuctionCategory
 from apps.auctions.selectors import get_category_by_id, list_categories
@@ -28,6 +28,11 @@ CATEGORY_TAGS = ["categories"]
 class AuctionCategoryViewSet(viewsets.GenericViewSet):
     serializer_class = AuctionCategorySerializer
     permission_classes = [IsAuthenticated, HasRBACPermission]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [permission() for permission in self.permission_classes]
 
     def get_required_permissions(self):
         action_map = {

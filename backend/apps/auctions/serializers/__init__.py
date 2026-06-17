@@ -13,7 +13,12 @@ from apps.auctions.serializers.category_serializers import (
     AuctionCategorySerializer,
     AuctionCategoryUpdateSerializer,
 )
-from apps.auctions.serializers.bid_serializers import BidCreateSerializer, BidSerializer
+from apps.auctions.serializers.bid_serializers import (
+    BidCreateSerializer,
+    BidSerializer,
+    BidderSummarySerializer,
+    ActivitySerializer,
+)
 from apps.auctions.serializers.common import FileBriefSerializer
 from apps.auctions.serializers.stream_serializers import (
     StreamCreateSerializer,
@@ -43,6 +48,8 @@ __all__ = [
     "AuctionBuyNowSerializer",
     "BidSerializer",
     "BidCreateSerializer",
+    "BidderSummarySerializer",
+    "ActivitySerializer",
     "StreamViewerSerializer",
     "StreamListSerializer",
     "StreamDetailSerializer",
