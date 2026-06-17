@@ -54,7 +54,7 @@ seed:
 seed-clear:
 	$(UV) run python manage.py seed --clear
 
-clear: container-clear
+clean: seed-clear container-clear
 
 ngrok:
 	docker run --net=host -it -e NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN ngrok/ngrok:latest http --url=giovani-tippiest-overapprehensively.ngrok-free.dev 8000
