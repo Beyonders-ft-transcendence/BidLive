@@ -1,9 +1,5 @@
 FROM python:3.12-alpine
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV UV_PROJECT_ENVIRONMENT=/app/.venv
-
 RUN apk add --no-cache \
     build-base \
     netcat-openbsd \
@@ -14,22 +10,32 @@ RUN apk add --no-cache \
     curl \
     make
 
+RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
+
+RUN mkdir -p /app && \
+    chown -R appuser:appuser /app
+
 WORKDIR /app
 
-COPY pyproject.toml uv.lock README.md ./
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
+
+COPY --chown=appuser:appuser pyproject.toml uv.lock README.md ./
 
 RUN pip install --no-cache-dir uv
 
 RUN uv sync --frozen
 
-COPY . .
+COPY --chown=appuser:appuser . .
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENV PATH="/app/.venv/bin:$PATH"
+USER appuser
 
 EXPOSE 8000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["make", "dev"]
