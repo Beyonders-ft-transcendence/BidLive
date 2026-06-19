@@ -9,6 +9,6 @@ openssl req -x509 -nodes -days 365 \
     -newkey rsa:2048 \
     -keyout $SSL_DIR/privkey.pem \
     -out $SSL_DIR/fullchain.pem \
-    -subj "/C=AO/ST=Luanda/L=Luanda/O=42Luanda/OU=Inception/CN=nmatondo.42.fr"
+    -subj "/C=AO/ST=Luanda/L=Luanda/O=42Luanda/OU=Inception/CN=bidlive.42.fr"
 
-echo "✅ SSL certificates generated for nmatondo.42.fr"
+echo "✅ SSL certificates generated for bidlive.42.fr"
