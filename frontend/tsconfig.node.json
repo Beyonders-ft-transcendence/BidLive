@@ -12,7 +12,9 @@
       "@components/*": ["./src/components/*"],
       "@routes/*": ["./src/routes/*"],
       "@services/*": ["./src/services/*"],
-      "@utils/*": ["./src/utils/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@utils/*": ["./src/shared/utils/*"],
+      "@http/*": ["./src/shared/http/*"],
       "@assets/*": ["./src/assets/*"]
     },
 
