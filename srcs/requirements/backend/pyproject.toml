@@ -1,0 +1,78 @@
+[project]
+name = "bidlive-backend"
+version = "0.1.0"
+description = "BidLive backend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "Django>=5.0,<6.0",
+  "djangorestframework>=3.15,<4.0",
+  "django-environ>=0.11,<1.0",
+  "psycopg[binary]>=3.2,<4.0",
+  "redis>=5.0,<6.0",
+  "celery>=5.3,<6.0",
+  "channels>=4.1,<5.0",
+  "channels-redis>=4.2,<5.0",
+  "django-cors-headers>=4.3,<5.0",
+  "drf-spectacular>=0.27,<1.0",
+  "djangorestframework-simplejwt>=5.3,<6.0",
+  "gunicorn>=22.0,<23.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "whitenoise>=6.7,<7.0",
+  "django-filter>=24.2,<25.0",
+  "argon2-cffi>=23.1,<24.0",
+  "django-allauth[socialaccount]>=65.0,<66.0",
+  "dj-rest-auth>=7.0,<8.0",
+  "requests>=2.32,<3.0",
+  "daphne>=4.2.2",
+]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.5,<1.0",
+  "black>=24.4,<25.0",
+  "isort>=5.13,<6.0",
+  "pre-commit>=3.7,<4.0",
+  "pytest>=8.2,<9.0",
+  "pytest-django>=4.8,<5.0",
+  "coverage>=7.6,<8.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["apps", "core", "common", "api", "config", "infrastructure"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "N", "DJ", "PT"]
+ignore = ["DJ001", "DJ008"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.development"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-ra -q"
+
+[tool.coverage.run]
+branch = true
+source = ["apps", "core", "common", "api"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[build-system]
+requires = ["hatchling>=1.24,<2.0"]
+build-backend = "hatchling.build"

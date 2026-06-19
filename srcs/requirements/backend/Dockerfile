@@ -1,38 +1,40 @@
-FROM alpine:3.22
+FROM python:3.12-alpine
 
-# evitar problemas com logs/output
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# instalar dependências do sistema
 RUN apk add --no-cache \
-    python3 \
-    py3-pip \
     build-base \
     netcat-openbsd \
     postgresql-dev \
     libffi-dev \
     jpeg-dev \
-    zlib-dev
+    zlib-dev \
+    curl \
+    make
+
+RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
+
+RUN mkdir -p /app && \
+    chown -R appuser:appuser /app
 
 WORKDIR /app
 
-# copiar requirements primeiro (cache otimizado)
-COPY requirements.txt .
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
-RUN python3 -m venv .venv && \
-    . .venv/bin/activate && \
-     pip install --no-cache-dir --upgrade pip && \
-     pip install --no-cache-dir -r requirements.txt
+COPY --chown=appuser:appuser pyproject.toml uv.lock README.md ./
 
-# copiar projeto
-COPY . .
+RUN pip install --no-cache-dir uv
 
-# entrypoint
+RUN uv sync --frozen
+
+COPY --chown=appuser:appuser . .
+
+ENV PATH="/app/.venv/bin:$PATH"
+
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENV PATH="/app/.venv/bin:$PATH"
+USER appuser
 
 EXPOSE 8000
 
