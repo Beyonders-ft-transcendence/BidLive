@@ -6,6 +6,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
+    path("metrics/", include("django_prometheus.urls")),
     path("", lambda request: JsonResponse({"msg": "welcome in bidlive"}), name="api-root"),
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
