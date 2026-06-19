@@ -2,13 +2,11 @@ import json
 from datetime import timedelta
 
 import pytest
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.auctions.models import Auction, AuctionCategory, AuctionStatus
-from apps.storage.models import File
 from apps.users.models import Permission, Role, RolePermission, User, UserRole
 from apps.users.selectors import invalidate_user_permissions_cache
 
@@ -29,13 +27,6 @@ def _auction_client(user, permissions):
     return client
 
 
-def _sample_image(name="rolex.webp", content_type="image/webp", content=None):
-    return SimpleUploadedFile(
-        name,
-        content if content is not None else b"fake-image-content",
-        content_type=content_type,
-    )
-
 
 def _valid_create_payload(*, category_id, start_time=None, end_time=None, **overrides):
     start_time = start_time or (timezone.now() + timedelta(hours=2))
@@ -52,7 +43,7 @@ def _valid_create_payload(*, category_id, start_time=None, end_time=None, **over
         "start_time": start_time.isoformat(),
         "end_time": end_time.isoformat(),
         "is_draft": False,
-        "rules": json.dumps({"auto_extend_seconds": 30}),
+        "rules": {"auto_extend_seconds": 30},
     }
     payload.update(overrides)
     return payload
@@ -69,15 +60,14 @@ def _assert_field_error(response, field, expected_fragment):
 def test_auction_create_with_all_parameters(db, user):
     category, _ = AuctionCategory.objects.get_or_create(name="Watches", slug="watches")
     client = _auction_client(user, ["auction.create", "auction.read"])
-    image = _sample_image()
 
     response = client.post(
         "/api/auctions/",
         {
             **_valid_create_payload(category_id=category.id),
-            "images": image,
+            "image_urls": ["https://example.com/rolex.webp"],
         },
-        format="multipart",
+        format="json",
     )
 
     assert response.status_code == 201
@@ -96,23 +86,20 @@ def test_auction_create_with_all_parameters(db, user):
     assert data["rules"] == {"auto_extend_seconds": 30}
     assert len(item["images"]) == 1
     assert item["images"][0]["is_primary"] is True
-    assert item["images"][0]["file"]["mime_type"] == "image/webp"
-    assert File.objects.filter(uploader=user, original_name="rolex.webp").exists()
+    assert item["images"][0]["image_url"] == "https://example.com/rolex.webp"
 
 
 def test_auction_create_with_image_upload(db, user):
     category, _ = AuctionCategory.objects.get_or_create(name="Collectibles", slug="collectibles")
     client = _auction_client(user, ["auction.create", "auction.read"])
-    primary = _sample_image("primary.webp")
-    secondary = _sample_image("secondary.png", content_type="image/png")
 
     response = client.post(
         "/api/auctions/",
         {
             **_valid_create_payload(category_id=category.id),
-            "images": [primary, secondary],
+            "image_urls": ["https://example.com/primary.webp", "https://example.com/secondary.png"],
         },
-        format="multipart",
+        format="json",
     )
 
     assert response.status_code == 201
@@ -122,7 +109,6 @@ def test_auction_create_with_image_upload(db, user):
     assert images[1]["is_primary"] is False
     assert images[0]["sort_order"] == 0
     assert images[1]["sort_order"] == 1
-    assert File.objects.filter(uploader=user).count() == 2
 
 
 def test_auction_create_draft_publish_and_delete_flow(db, user):
@@ -139,9 +125,9 @@ def test_auction_create_draft_publish_and_delete_flow(db, user):
             start_time=start_time,
             end_time=end_time,
             is_draft=True,
-            rules=json.dumps({"visibility": "seller_only"}),
+            rules={"visibility": "seller_only"},
         ),
-        format="multipart",
+        format="json",
     )
 
     assert create_response.status_code == 201
@@ -161,14 +147,14 @@ def test_auction_create_draft_publish_and_delete_flow(db, user):
             end_time=end_time,
             is_draft=True,
         ),
-        format="multipart",
+        format="json",
     )
     published_id = republish_response.data["data"]["id"]
 
     publish_response = client.patch(
         f"/api/auctions/{published_id}/",
         {"publish": True},
-        format="multipart",
+        format="json",
     )
 
     assert publish_response.status_code == 200
@@ -182,7 +168,7 @@ def test_auction_create_reserve_price_persists(db, user):
     response = client.post(
         "/api/auctions/",
         _valid_create_payload(category_id=category.id, reserve_price="250.00"),
-        format="multipart",
+        format="json",
     )
 
     assert response.status_code == 201
@@ -207,7 +193,7 @@ def test_auction_create_rejects_invalid_fields(db, user, override, field, messag
 
     payload = _valid_create_payload(category_id=category.id)
     payload.update(override)
-    response = client.post("/api/auctions/", payload, format="multipart")
+    response = client.post("/api/auctions/", payload, format="json")
 
     _assert_field_error(response, field, message)
 
@@ -224,7 +210,7 @@ def test_auction_create_rejects_end_time_before_start_time(db, user):
             start_time=start_time,
             end_time=start_time,
         ),
-        format="multipart",
+        format="json",
     )
 
     _assert_field_error(response, "end_time", "End time must be after start time.")
@@ -239,7 +225,7 @@ def test_auction_create_accepts_image_urls_in_json_body(db, user):
         {
             **_valid_create_payload(category_id=category.id),
             "rules": {"note": "valid json"},
-            "images": ["https://example.com/image.webp"],
+            "image_urls": ["https://example.com/image.webp"],
         },
         format="json",
     )
@@ -247,7 +233,7 @@ def test_auction_create_accepts_image_urls_in_json_body(db, user):
     assert response.status_code == 201
     images = response.data["data"]["item"]["images"]
     assert len(images) == 1
-    assert images[0]["file"]["url"] == "https://example.com/image.webp"
+    assert images[0]["image_url"] == "https://example.com/image.webp"
 
 
 def test_auction_create_accepts_image_urls_field(db, user):
@@ -278,66 +264,12 @@ def test_auction_create_rejects_invalid_image_string_in_json_body(db, user):
         "/api/auctions/",
         {
             **_valid_create_payload(category_id=category.id),
-            "images": ["not-a-valid-url"],
+            "image_urls": ["not-a-valid-url"],
         },
         format="json",
     )
 
-    _assert_field_error(response, "images", "http://")
-
-
-def test_auction_create_supports_mixed_upload_and_urls(db, user):
-    category, _ = AuctionCategory.objects.get_or_create(name="MixedImages", slug="mixed-images")
-    client = _auction_client(user, ["auction.create"])
-
-    response = client.post(
-        "/api/auctions/",
-        {
-            **_valid_create_payload(category_id=category.id),
-            "images": _sample_image("uploaded.webp"),
-            "image_urls": ["https://example.com/external.webp"],
-        },
-        format="multipart",
-    )
-
-    assert response.status_code == 201
-    images = response.data["data"]["item"]["images"]
-    assert len(images) == 2
-    urls = {image["file"]["url"] for image in images}
-    assert "https://example.com/external.webp" in urls
-
-
-def test_auction_create_rejects_unsupported_image_type(db, user):
-    category, _ = AuctionCategory.objects.get_or_create(name="Mime", slug="mime")
-    client = _auction_client(user, ["auction.create"])
-
-    response = client.post(
-        "/api/auctions/",
-        {
-            **_valid_create_payload(category_id=category.id),
-            "images": _sample_image("document.pdf", content_type="application/pdf"),
-        },
-        format="multipart",
-    )
-
-    _assert_field_error(response, "images", "Unsupported image type.")
-
-
-@override_settings(AUCTION_IMAGE_MAX_SIZE=8)
-def test_auction_create_rejects_oversized_image(db, user):
-    category, _ = AuctionCategory.objects.get_or_create(name="Size", slug="size")
-    client = _auction_client(user, ["auction.create"])
-
-    response = client.post(
-        "/api/auctions/",
-        {
-            **_valid_create_payload(category_id=category.id),
-            "images": _sample_image(content=b"0123456789"),
-        },
-        format="multipart",
-    )
-
-    _assert_field_error(response, "images", "Image too large.")
+    _assert_field_error(response, "image_urls", "Enter a valid URL.")
 
 
 def test_auction_create_update_cancel_flow(db, user):
@@ -363,7 +295,7 @@ def test_auction_create_update_cancel_flow(db, user):
             "start_time": start_time.isoformat(),
             "end_time": end_time.isoformat(),
         },
-        format="multipart",
+        format="json",
     )
 
     assert response.status_code == 201
@@ -372,7 +304,7 @@ def test_auction_create_update_cancel_flow(db, user):
     update_response = client.patch(
         f"/api/auctions/{auction_id}/",
         {"description": "Updated", "buy_now_price": "350.00"},
-        format="multipart",
+        format="json",
     )
 
     assert update_response.status_code == 200
@@ -411,7 +343,7 @@ def test_auction_bid_and_buy_now(db, user):
             "start_time": start_time.isoformat(),
             "end_time": end_time.isoformat(),
         },
-        format="multipart",
+        format="json",
     )
     auction_id = create_response.data["data"]["id"]
 
@@ -462,7 +394,7 @@ def test_auction_watch_toggle(db, user):
             "start_time": start_time.isoformat(),
             "end_time": end_time.isoformat(),
         },
-        format="multipart",
+        format="json",
     )
 
     auction_id = create_response.data["data"]["id"]
@@ -494,12 +426,12 @@ def test_draft_auction_is_hidden_from_other_users(db, user, other_user):
     create_response = seller_client.post(
         "/api/auctions/",
         _valid_create_payload(category_id=category.id, is_draft=True),
-        format="multipart",
+        format="json",
     )
     auction_id = create_response.data["data"]["id"]
 
-    seller_list = seller_client.get("/api/auctions/")
-    other_list = other_client.get("/api/auctions/")
+    seller_list = seller_client.get("/api/auctions/?status=DRAFT")
+    other_list = other_client.get("/api/auctions/?status=DRAFT")
 
     seller_ids = {item["id"] for item in seller_list.data["data"]["results"]}
     other_ids = {item["id"] for item in other_list.data["data"]["results"]}

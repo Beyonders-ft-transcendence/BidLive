@@ -129,8 +129,7 @@ def _publish_snapshot(*, auction: Auction, broadcast: bool = False) -> None:
 
 
 @transaction.atomic
-def create_auction(*, seller, data: dict, images=None, image_urls=None, ip_address: str = "") -> Auction:
-    images = images or []
+def create_auction(*, seller, data: dict, image_urls=None, ip_address: str = "") -> Auction:
     image_urls = image_urls or []
     item = AuctionItem.objects.create(
         seller=seller,
@@ -160,7 +159,7 @@ def create_auction(*, seller, data: dict, images=None, image_urls=None, ip_addre
         started_at=now if status == AuctionStatus.LIVE else None,
     )
 
-    attach_images(item=item, uploader=seller, images=images, image_urls=image_urls)
+    attach_images(item=item, image_urls=image_urls)
 
     AuctionAuditLog.objects.create(
         auction=auction,
@@ -198,7 +197,6 @@ def update_auction(
     actor,
     auction: Auction,
     data: dict,
-    images=None,
     image_urls=None,
     ip_address: str = "",
 ) -> Auction:
@@ -244,10 +242,9 @@ def update_auction(
     item.save()
     auction.save()
 
-    images = images or []
     image_urls = image_urls or []
-    if images or image_urls:
-        attach_images(item=item, uploader=actor, images=images, image_urls=image_urls)
+    if image_urls:
+        attach_images(item=item, image_urls=image_urls)
     if "primary_image_id" in data:
         set_primary_image(item=item, image_id=data["primary_image_id"])
 

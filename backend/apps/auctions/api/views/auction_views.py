@@ -32,7 +32,6 @@ from apps.auctions.services import (
 )
 from apps.auctions.services.anti_spam_service import BidRateLimitExceeded
 from apps.auctions.throttles import BidIPThrottle, BidUserThrottle
-from apps.storage.media_inputs import collect_auction_image_inputs
 from apps.users.authorization_service import user_has_permission
 from apps.users.permissions.rbac import HasRBACPermission
 from common.responses import error_response, success_response
@@ -169,11 +168,10 @@ class AuctionViewSet(viewsets.GenericViewSet):
         serializer = AuctionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
-        images, image_urls = collect_auction_image_inputs(request, payload)
+        image_urls = payload.pop("image_urls", [])
         auction = create_auction(
             seller=request.user,
             data=payload,
-            images=images,
             image_urls=image_urls,
             ip_address=_client_ip(request),
         )
@@ -194,12 +192,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
         serializer = AuctionUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
-        images, image_urls = collect_auction_image_inputs(request, payload)
+        image_urls = payload.pop("image_urls", [])
         updated = update_auction(
             actor=request.user,
             auction=auction,
             data=payload,
-            images=images,
             image_urls=image_urls,
             ip_address=_client_ip(request),
         )

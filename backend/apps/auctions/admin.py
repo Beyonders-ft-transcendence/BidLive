@@ -35,7 +35,7 @@ class AuctionCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(AuctionImage)
 class AuctionImageAdmin(admin.ModelAdmin):
-    list_display = ("item", "file", "is_primary", "sort_order", "created_at")
+    list_display = ("item", "image_url", "is_primary", "sort_order", "created_at")
     list_filter = ("is_primary",)
 
 
