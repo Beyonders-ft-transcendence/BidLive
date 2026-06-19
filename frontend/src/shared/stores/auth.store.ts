@@ -70,15 +70,16 @@ export type AuthStore = AuthState & AuthActions
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
     if (isAxiosError(error)) {
-        const responseData = error.response?.data as any;
+        const responseData = error.response?.data as unknown;
 
         if (typeof responseData === 'string') return responseData;
 
         if (responseData && typeof responseData === 'object') {
-            if (typeof responseData.message === 'string') return responseData.message;
-            if (typeof responseData.detail === 'string') return responseData.detail;
+            const data = responseData as Record<string, unknown>;
+            if (typeof data.message === 'string') return data.message;
+            if (typeof data.detail === 'string') return data.detail;
 
-            const errorSource = responseData.errors || responseData.message || responseData;
+            const errorSource = data.errors || data.message || data;
 
             if (errorSource && typeof errorSource === 'object') {
                 const values = Object.values(errorSource).flat();

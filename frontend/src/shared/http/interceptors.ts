@@ -38,7 +38,7 @@ api.interceptors.response.use(
                     originalRequest.headers.Authorization = `Bearer ${access_token}`;
                     return axios(originalRequest);
                 }
-            } catch (refreshError) {
+            } catch {
                 window.dispatchEvent(new Event('bidlive:unauthorized'));
             }
         } else {
