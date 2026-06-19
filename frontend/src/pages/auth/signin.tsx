@@ -1,14 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SignInIllustration from "@/assets/images/signin_illustration.png";
-import { User, Lock } from "lucide-react";
+import SignInIllustrationDark from "@/assets/images/signin_illustration2.png";
+import Logo from "@/assets/images/logo.png";
+import Logo2 from "@/assets/images/logo2.png";
+import { User, Lock, Sun, Moon } from "lucide-react";
 import { useAuthStore } from "@/shared/stores/auth.store";
+import { getTheme, setTheme, type Theme } from "@/shared/utils/themes.utils";
 
 export default function Signin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { login, authorizeFortyTwo, isLoading, error } = useAuthStore();
+    const [theme, setCurrentTheme] = useState<Theme>("light");
+
+    useEffect(() => {
+        setCurrentTheme(getTheme());
+    }, []);
+
+    const handleToggleTheme = () => {
+        // Se estiver "system", verifica o modo atual pela classe dark no HTML, ou simplesmente força um dos dois
+        const isDark = document.documentElement.classList.contains("dark");
+        const newTheme = isDark ? "light" : "dark";
+        setTheme(newTheme);
+        setCurrentTheme(newTheme);
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,26 +55,46 @@ export default function Signin() {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4">
-            <div className="w-full max-w-4xl bg-card rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]">
+        <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4 relative">
+
+            {/* Theme Toggle Button */}
+            <button
+                onClick={handleToggleTheme}
+                title="Mudar Tema"
+                className="absolute top-6 right-6 p-3 rounded-full bg-card shadow-lg border border-border text-muted-foreground hover:text-primary hover:scale-105 transition-all z-10"
+            >
+                {theme === "dark" || document.documentElement.classList.contains("dark") ? (
+                    <Sun size={22} />
+                ) : (
+                    <Moon size={22} />
+                )}
+            </button>
+
+            <div className="w-full max-w-4xl bg-card rounded-md shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]">
                 {/* Left Side - Illustration */}
-                <div className="hidden md:flex flex-col w-1/2 bg-white items-center justify-between p-8 pb-10">
+                <div className="hidden md:flex flex-col w-1/2 bg-white dark:bg-[#0D1015] items-center justify-between p-8 pb-10 border-r border-border/50">
                     <div className="flex-1 flex items-center justify-center w-full">
                         <img
-                            src={SignInIllustration}
+                            src={theme === "dark" || document.documentElement.classList.contains("dark") ? SignInIllustrationDark : SignInIllustration}
                             alt="Ilustração de login"
                             className="w-full max-w-md h-auto object-contain hover:scale-105 transition-transform duration-500"
                         />
                     </div>
-                    <a href="#" className="text-sm font-semibold underline underline-offset-4 hover:text-primary transition-colors text-black">
+                    <a href="#" className="text-sm font-semibold underline underline-offset-4 hover:text-primary transition-colors text-foreground">
                         Criar uma conta
                     </a>
                 </div>
 
                 {/* Right Side - Form */}
-                <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-card">
+                <div className="w-full  md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-card relative">
                     <div className="max-w-sm w-full mx-auto">
-                        <h1 className="text-4xl font-bold mb-8 text-foreground">Entrar</h1>
+
+                        <img
+                            src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo}
+                            alt="BidLive Logo"
+                            className="h-10 w-40 mb-8 object-contain"
+                        />
+
 
                         <form className="space-y-6" onSubmit={handleLogin}>
                             <div className="space-y-6">
@@ -108,7 +145,7 @@ export default function Signin() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full py-6 rounded-xl font-medium text-base shadow-lg hover:shadow-primary/30 transition-all"
+                                    className="w-full py-6 rounded-md font-medium text-base shadow-lg hover:shadow-primary/30 transition-all"
                                 >
                                     {isLoading ? "Entrando..." : "Entrar"}
                                 </Button>
@@ -126,14 +163,14 @@ export default function Signin() {
                                     <button
                                         type="button"
                                         onClick={handleGoogleLogin}
-                                        className="w-11 h-11 rounded-xl flex items-center justify-center bg-[#ea4335] text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-lg"
+                                        className="w-11 h-11 rounded-md flex items-center justify-center bg-[#ea4335] text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-lg"
                                     >
                                         G
                                     </button>
                                     <button
                                         type="button"
                                         onClick={handleIntraLogin}
-                                        className="w-11 h-11 rounded-xl flex items-center justify-center bg-[#000000] dark:bg-white dark:text-black text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-base"
+                                        className="w-11 h-11 rounded-md flex items-center justify-center bg-[#000000] dark:bg-white dark:text-black text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-base"
                                     >
                                         42
                                     </button>
