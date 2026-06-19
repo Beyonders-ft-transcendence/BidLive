@@ -8,3 +8,32 @@ srcs/requirements/bonus/.env
 
 # Docker volumes data
 /home/nmatondo/data/
+
+.venv/
+.uv-cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+.env
+.env.*
+.envrc
+
+tool/
+/staticfiles/
+/media/
+htmlcov/
+
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+.pytest_cache/
+.coverage
+coverage.xml
+
+ruff_cache/
+
+.vscode/
+.idea/
+
