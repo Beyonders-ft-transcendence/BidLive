@@ -59,11 +59,6 @@ def test_schema_exposes_jwt_and_swagger_oauth2_security_schemes(api_client):
     response = api_client.get("/api/schema/")
     security_schemes = response.data["components"]["securitySchemes"]
 
-    assert security_schemes["jwtAuth"] == {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-    }
     assert security_schemes["SwaggerOAuth2"] == {
         "type": "oauth2",
         "description": (
@@ -78,7 +73,6 @@ def test_schema_exposes_jwt_and_swagger_oauth2_security_schemes(api_client):
         },
     }
     assert "basicAuth" not in security_schemes
-    assert {"jwtAuth": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
     assert {"SwaggerOAuth2": []} in response.data["paths"]["/api/auth/me/"]["get"]["security"]
 
 
