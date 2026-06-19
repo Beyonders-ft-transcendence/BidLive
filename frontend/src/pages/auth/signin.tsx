@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SignInIllustration from "@/assets/images/signin_illustration.png";
@@ -8,33 +12,71 @@ import Logo2 from "@/assets/images/logo2.png";
 import { User, Lock, Sun, Moon } from "lucide-react";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { getTheme, setTheme, type Theme } from "@/shared/utils/themes.utils";
+import { signInSchema, type SignInInput } from "@/shared/schema/auth.schema";
+import { UserRole } from "@/shared/types/auth.types";
 
-export default function Signin() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const { login, authorizeFortyTwo, isLoading, error } = useAuthStore();
+function SigninForm() {
+    const navigate = useNavigate();
+
+    const login = useAuthStore((state) => state.login);
+    const authorizeFortyTwo = useAuthStore((state) => state.authorizeFortyTwo);
+    const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+    const isLoading = useAuthStore((state) => state.isLoading);
+    const apiError = useAuthStore((state) => state.error);
+    const clearError = useAuthStore((state) => state.clearError);
+
     const [theme, setCurrentTheme] = useState<Theme>("light");
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<SignInInput>({
+        resolver: zodResolver(signInSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
+
+    const formValues = watch();
 
     useEffect(() => {
         setCurrentTheme(getTheme());
     }, []);
 
+    useEffect(() => {
+        if (apiError && clearError) {
+            clearError();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formValues.email, formValues.password]);
+
     const handleToggleTheme = () => {
-        // Se estiver "system", verifica o modo atual pela classe dark no HTML, ou simplesmente força um dos dois
         const isDark = document.documentElement.classList.contains("dark");
         const newTheme = isDark ? "light" : "dark";
         setTheme(newTheme);
         setCurrentTheme(newTheme);
     };
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email || !password) return;
+    const handleSuccessRedirect = () => {
+        const user = useAuthStore.getState().user;
+        if (user?.roles?.includes(UserRole.USER)) {
+            navigate("/user");
+        } else if (user?.roles?.includes(UserRole.SUPER_ADMIN) || user?.roles?.includes(UserRole.MONITOR)) {
+            navigate("/backoffice/dashboard");
+        } else {
+            navigate("/user"); // Fallback
+        }
+    };
+
+    const onSubmit = async (data: SignInInput) => {
         try {
-            await login({ email, password });
-            // Redirecionamento costuma ser tratado em camada superior (Router)
+            await login(data);
+            handleSuccessRedirect();
         } catch (err) {
-            console.error("Falha ao entrar:", err);
+            console.error("Falha ao entrar com e-mail/senha:", err);
         }
     };
 
@@ -43,16 +85,27 @@ export default function Signin() {
             const url = await authorizeFortyTwo();
             if (url) {
                 window.location.href = url;
+            } else {
+                console.error("A URL de autorização da Intra está vazia.");
             }
         } catch (err) {
             console.error("Falha ao autorizar 42:", err);
         }
     };
 
-    const handleGoogleLogin = () => {
-        // Integração do Google OAuth pendente de biblioteca @react-oauth/google
-        console.log("Login com Google");
-    };
+    const executeGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                await loginWithGoogle({ access_token: tokenResponse.access_token });
+                handleSuccessRedirect();
+            } catch (error) {
+                console.error("Erro na integração Google Auth do Backend:", error);
+            }
+        },
+        onError: () => {
+            console.error("Google Login falhou na resposta da tela do OAuth.");
+        },
+    });
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4 relative">
@@ -96,34 +149,40 @@ export default function Signin() {
                         />
 
 
-                        <form className="space-y-6" onSubmit={handleLogin}>
+                        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                             <div className="space-y-6">
-                                <div className="relative flex items-center">
-                                    <User className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
-                                    <Input
-                                        type="email"
-                                        placeholder="Seu E-mail"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                        className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
-                                    />
+                                <div className="space-y-2">
+                                    <div className="relative flex items-center">
+                                        <User className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
+                                        <Input
+                                            type="email"
+                                            placeholder="Seu E-mail"
+                                            {...register("email")}
+                                            className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
+                                        />
+                                    </div>
+                                    {errors.email && (
+                                        <p className="text-destructive text-xs font-medium">{errors.email.message}</p>
+                                    )}
                                 </div>
 
-                                <div className="relative flex items-center">
-                                    <Lock className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
-                                    <Input
-                                        type="password"
-                                        placeholder="Senha"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
-                                    />
+                                <div className="space-y-2">
+                                    <div className="relative flex items-center">
+                                        <Lock className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
+                                        <Input
+                                            type="password"
+                                            placeholder="Senha"
+                                            {...register("password")}
+                                            className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
+                                        />
+                                    </div>
+                                    {errors.password && (
+                                        <p className="text-destructive text-xs font-medium">{errors.password.message}</p>
+                                    )}
                                 </div>
                             </div>
 
-                            {error && <p className="text-destructive text-sm font-medium">{error}</p>}
+                            {apiError && <p className="text-destructive text-sm font-medium">{apiError}</p>}
 
                             <div className="flex items-center justify-between mt-4">
                                 <div className="flex items-center gap-3">
@@ -162,7 +221,7 @@ export default function Signin() {
                                 <div className="flex gap-4 mt-2">
                                     <button
                                         type="button"
-                                        onClick={handleGoogleLogin}
+                                        onClick={() => executeGoogleLogin()}
                                         className="w-11 h-11 rounded-md flex items-center justify-center bg-[#ea4335] text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-lg"
                                     >
                                         G
@@ -188,3 +247,17 @@ export default function Signin() {
         </div>
     );
 }
+
+export default function Signin() {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    
+    if (!googleClientId) {
+        console.warn("VITE_GOOGLE_CLIENT_ID não está configurado. Login via Google pode falhar.");
+    }
+
+    return (
+        <GoogleOAuthProvider clientId={googleClientId}>
+            <SigninForm />
+        </GoogleOAuthProvider>
+    );
+};
