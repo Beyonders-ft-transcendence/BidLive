@@ -48,8 +48,8 @@ AUCTION_TAGS = ["auctions"]
 
 
 @extend_schema_view(
-    list=extend_schema(tags=AUCTION_TAGS, summary="Listar leiloes"),
-    retrieve=extend_schema(tags=AUCTION_TAGS, summary="Detalhar leilao"),
+    list=extend_schema(tags=AUCTION_TAGS, summary="Listar leiloes", auth=[]),
+    retrieve=extend_schema(tags=AUCTION_TAGS, summary="Detalhar leilao", auth=[]),
     create=extend_schema(tags=AUCTION_TAGS, summary="Criar leilao"),
     partial_update=extend_schema(tags=AUCTION_TAGS, summary="Atualizar leilao"),
     destroy=extend_schema(tags=AUCTION_TAGS, summary="Remover leilao"),
@@ -78,10 +78,10 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return self.get_required_permissions()
 
     def get_permissions(self):
+        # Public endpoints: list, retrieve, featured, activities
         if self.action in ["list", "retrieve", "featured", "activities"]:
             return [AllowAny()]
-        if self.action == "bids" and self.request.method.lower() == "get":
-            return [AllowAny()]
+        # All other actions require authentication (default permission classes)
         return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
