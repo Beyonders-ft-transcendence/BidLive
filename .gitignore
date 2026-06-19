@@ -4,6 +4,7 @@ secrets/*.txt
 
 # Environment - NUNCA commitar .env com senhas reais
 srcs/.env
+srcs/.env*
 srcs/requirements/bonus/.env
 
 # Docker volumes data
