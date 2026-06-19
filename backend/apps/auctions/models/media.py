@@ -20,7 +20,7 @@ class AuctionWatcher(models.Model):
 
 class AuctionImage(TimeStampedModel):
     item = models.ForeignKey("auctions.AuctionItem", on_delete=models.CASCADE, related_name="images")
-    file = models.ForeignKey("storage.File", on_delete=models.CASCADE, related_name="auction_images")
+    image_url = models.URLField(max_length=1000)
     is_primary = models.BooleanField(default=False)
     sort_order = models.PositiveSmallIntegerField(default=0)
 
@@ -31,7 +31,7 @@ class AuctionImage(TimeStampedModel):
         ordering = ["sort_order", "created_at"]
         indexes = [models.Index(fields=["item"], name="idx_auction_images_item")]
         constraints = [
-            models.UniqueConstraint(fields=["item", "file"], name="uniq_auction_image"),
+            models.UniqueConstraint(fields=["item", "image_url"], name="uniq_auction_image"),
         ]
 
 

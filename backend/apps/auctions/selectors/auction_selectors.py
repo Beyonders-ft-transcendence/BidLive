@@ -13,7 +13,7 @@ def list_auctions() -> QuerySet[Auction]:
             "cancelled_by",
         )
         .prefetch_related(
-            Prefetch("item__images", queryset=AuctionImage.objects.select_related("file"))
+            Prefetch("item__images", queryset=AuctionImage.objects.all())
         )
         .order_by("-start_time")
     )
