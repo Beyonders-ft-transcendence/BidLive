@@ -16,9 +16,10 @@ container:
 	docker run -d --name livekit -p 7880:7880 -p 7881:7881 -p 5000-5100:5000-5100/udp livekit/livekit-server:latest --dev --bind 0.0.0.0
 
 container-clear:
-	docker container stop redis postgres livekit
-	docker container rm redis postgres livekit
-	docker image prune -f
+	docker stop redis postgres livekit
+	docker rm redis postgres livekit
+	docker rmi redis postgres livekit
+	docker volume rm postgres_data redis_data livekit_data
 
 runserver:
 	$(UV) run python manage.py runserver 0.0.0.0:8000
