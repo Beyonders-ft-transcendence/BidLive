@@ -1,23 +1,19 @@
-import Image from "next/image";
-import icon from "@/assets/images/icon.png"
+import Footer from "@/components/layout/Footer";
+import Hero from "@/components/layout/home/Hero";
+import AboutSection from "@/components/layout/home/About";
+import HomeHeader from "@/components/layout/home/HomeHeader";
+import HowItWorksSection from "@/components/layout/home/HowItWorksSection";
+import LiveAuctionsSection from "@/components/layout/home/LiveAuctionsSection";
 
 export default function Home() {
   return (
-    <div className="">
-      
-      <Image
-        src={icon}
-        width={200}
-        height={200}
-        alt="BidLive Logo"
-        className="mx-auto mt-20 animate-pulse"
-      />
-      <h1 className="text-4xl font-bold text-center mt-10 text-gray-800">
-        Bem-vindo ao BidLive!
-      </h1>
-      <p className="text-center mt-4 text-gray-600">
-        A plataforma de leilões em tempo real onde os lances nunca param!
-      </p>
-    </div>
+    <main>
+      <HomeHeader />
+      <Hero />
+      <AboutSection />
+      <HowItWorksSection />
+      <LiveAuctionsSection />
+      <Footer />
+    </main>
   );
 }

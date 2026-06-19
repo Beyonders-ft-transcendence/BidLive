@@ -1,4 +1,3 @@
-FROM alpine:3.22 AS builder
 
 RUN apk add --no-cache nodejs npm
 
