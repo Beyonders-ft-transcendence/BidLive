@@ -2,18 +2,13 @@ from rest_framework import serializers
 
 from apps.auctions.models import Auction, AuctionCategory, AuctionImage, AuctionItem
 from apps.auctions.serializers.category_serializers import AuctionCategorySerializer
-from apps.auctions.serializers.common import FileBriefSerializer
-from apps.storage.models import File
 from apps.storage.services import is_http_url
 
 
 class AuctionImageSerializer(serializers.ModelSerializer):
-    file = FileBriefSerializer(read_only=True)
-    file_id = serializers.PrimaryKeyRelatedField(queryset=File.objects.all(), source="file", write_only=True)
-
     class Meta:
         model = AuctionImage
-        fields = ("id", "file", "file_id", "is_primary", "sort_order", "created_at")
+        fields = ("id", "image_url", "is_primary", "sort_order", "created_at")
         read_only_fields = ("id", "created_at")
 
 
@@ -96,15 +91,7 @@ class AuctionCreateSerializer(serializers.Serializer):
     end_time = serializers.DateTimeField()
     is_draft = serializers.BooleanField(required=False, default=False)
     rules = serializers.JSONField(required=False)
-    image_urls = serializers.ListField(child=serializers.CharField(), required=False)
-
-    def validate_image_urls(self, value):
-        for url in value:
-            if not is_http_url(url):
-                raise serializers.ValidationError(
-                    "Each image URL must start with http:// or https://."
-                )
-        return value
+    image_urls = serializers.ListField(child=serializers.URLField(), required=False)
 
     def validate(self, attrs):
         start_time = attrs.get("start_time")
@@ -134,16 +121,8 @@ class AuctionUpdateSerializer(serializers.Serializer):
     buy_now_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     reserve_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     rules = serializers.JSONField(required=False)
-    image_urls = serializers.ListField(child=serializers.CharField(), required=False)
+    image_urls = serializers.ListField(child=serializers.URLField(), required=False)
     primary_image_id = serializers.IntegerField(required=False)
-
-    def validate_image_urls(self, value):
-        for url in value:
-            if not is_http_url(url):
-                raise serializers.ValidationError(
-                    "Each image URL must start with http:// or https://."
-                )
-        return value
     publish = serializers.BooleanField(required=False, default=False)
 
     def validate(self, attrs):

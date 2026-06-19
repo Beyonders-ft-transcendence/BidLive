@@ -18,8 +18,8 @@ CATEGORY_TAGS = ["categories"]
 
 
 @extend_schema_view(
-    list=extend_schema(tags=CATEGORY_TAGS, summary="Listar categorias"),
-    retrieve=extend_schema(tags=CATEGORY_TAGS, summary="Detalhar categoria"),
+    list=extend_schema(tags=CATEGORY_TAGS, summary="Listar categorias", auth=[]),
+    retrieve=extend_schema(tags=CATEGORY_TAGS, summary="Detalhar categoria", auth=[]),
     create=extend_schema(tags=CATEGORY_TAGS, summary="Criar categoria"),
     update=extend_schema(tags=CATEGORY_TAGS, summary="Atualizar categoria"),
     partial_update=extend_schema(tags=CATEGORY_TAGS, summary="Atualizar categoria parcialmente"),

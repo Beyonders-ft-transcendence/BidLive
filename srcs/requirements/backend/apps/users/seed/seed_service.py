@@ -21,8 +21,7 @@ from apps.domain.models import Domain
 from apps.notifications.models import Notification
 from apps.reports.models import Report, ReportReason, ReportStatus, ReportTargetType
 from apps.social.models import Friendship, FriendshipStatus
-from apps.storage.models import File
-from apps.storage.services import save_external_file_url
+
 from apps.users.models import User
 from apps.users.seed.demo_data import (
     DEMO_ANALYTICS_EVENTS,
@@ -79,7 +78,7 @@ def clear_demo_data() -> dict[str, int]:
         addressee_id__in=demo_user_ids,
     ).delete()[0]
     counts["domains"] = Domain.objects.filter(owner_id__in=demo_user_ids).delete()[0]
-    counts["files"] = File.objects.filter(uploader_id__in=demo_user_ids).delete()[0]
+    # Removed file count; storage app deprecated
     counts["users"] = demo_users.delete()[0]
     _AUCTION_REGISTRY.clear()
     return counts
@@ -120,14 +119,18 @@ def _seed_users(*, password: str) -> dict[str, User]:
 
 
 def _attach_images(*, item: AuctionItem, uploader: User, image_urls: tuple[str, ...]) -> None:
+    """Attach image URLs to an auction item.
+
+    The new AuctionImage model stores a plain ``image_url`` string instead of a
+    ``File`` foreign‑key. This helper now creates ``AuctionImage`` objects directly
+    with the supplied URLs.
+    """
+    # Remove any existing images for the item to avoid duplicates on re‑seed.
     AuctionImage.objects.filter(item=item).delete()
     for index, image_url in enumerate(image_urls):
-        file_obj = File.objects.filter(uploader=uploader, url=image_url).first()
-        if file_obj is None:
-            file_obj = save_external_file_url(uploader=uploader, url=image_url)
         AuctionImage.objects.create(
             item=item,
-            file=file_obj,
+            image_url=image_url,
             is_primary=index == 0,
             sort_order=index,
         )

@@ -32,7 +32,6 @@ from apps.auctions.services import (
 )
 from apps.auctions.services.anti_spam_service import BidRateLimitExceeded
 from apps.auctions.throttles import BidIPThrottle, BidUserThrottle
-from apps.storage.media_inputs import collect_auction_image_inputs
 from apps.users.authorization_service import user_has_permission
 from apps.users.permissions.rbac import HasRBACPermission
 from common.responses import error_response, success_response
@@ -49,8 +48,8 @@ AUCTION_TAGS = ["auctions"]
 
 
 @extend_schema_view(
-    list=extend_schema(tags=AUCTION_TAGS, summary="Listar leiloes"),
-    retrieve=extend_schema(tags=AUCTION_TAGS, summary="Detalhar leilao"),
+    list=extend_schema(tags=AUCTION_TAGS, summary="Listar leiloes", auth=[]),
+    retrieve=extend_schema(tags=AUCTION_TAGS, summary="Detalhar leilao", auth=[]),
     create=extend_schema(tags=AUCTION_TAGS, summary="Criar leilao"),
     partial_update=extend_schema(tags=AUCTION_TAGS, summary="Atualizar leilao"),
     destroy=extend_schema(tags=AUCTION_TAGS, summary="Remover leilao"),
@@ -79,10 +78,10 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return self.get_required_permissions()
 
     def get_permissions(self):
+        # Public endpoints: list, retrieve, featured, activities
         if self.action in ["list", "retrieve", "featured", "activities"]:
             return [AllowAny()]
-        if self.action == "bids" and self.request.method.lower() == "get":
-            return [AllowAny()]
+        # All other actions require authentication (default permission classes)
         return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
@@ -169,11 +168,10 @@ class AuctionViewSet(viewsets.GenericViewSet):
         serializer = AuctionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
-        images, image_urls = collect_auction_image_inputs(request, payload)
+        image_urls = payload.pop("image_urls", [])
         auction = create_auction(
             seller=request.user,
             data=payload,
-            images=images,
             image_urls=image_urls,
             ip_address=_client_ip(request),
         )
@@ -194,12 +192,11 @@ class AuctionViewSet(viewsets.GenericViewSet):
         serializer = AuctionUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
-        images, image_urls = collect_auction_image_inputs(request, payload)
+        image_urls = payload.pop("image_urls", [])
         updated = update_auction(
             actor=request.user,
             auction=auction,
             data=payload,
-            images=images,
             image_urls=image_urls,
             ip_address=_client_ip(request),
         )
