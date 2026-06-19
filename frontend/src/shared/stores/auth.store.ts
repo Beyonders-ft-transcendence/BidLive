@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import authService from '@/services/auth.service'
-import { tokenManager } from '../http/token-manager'
+import authService from '../../services/auth.service'
 import { isAxiosError } from 'axios'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
 import type {
@@ -15,7 +14,7 @@ import type {
     ResetPasswordPayload,
     SwaggerOAuth2TokenRequestPayload,
     User,
-} from '../types/auth.types'
+} from '@/shared/types/auth.types'
 
 // ─── State Shape ────────────────────────────────────────────────────────────
 
@@ -128,25 +127,8 @@ export const useAuthStore = create<AuthStore>()(
                 // ── Helpers ─────────────────────────────────────────────────────────
 
                 hydrateFromStorage() {
-                    const accessToken = tokenManager.getAccessToken()
-                    const refreshToken = tokenManager.getRefreshToken()
-                    if (accessToken && refreshToken) {
-                        set((s) => {
-                            s.accessToken = accessToken
-                            s.refreshToken = refreshToken
-                            s.status = 'authenticated'
-                            s.isAuthenticated = true
-                            s.error = null
-                        })
-                    } else {
-                        set((s) => {
-                            s.user = null
-                            s.accessToken = null
-                            s.refreshToken = null
-                            s.status = 'unauthenticated'
-                            s.isAuthenticated = false
-                        })
-                    }
+                    // O Zustand 'persist' já faz a hidratação automaticamente da localStorage/sessionStorage.
+                    // Podemos manter esta função vazia ou usá-la se precisarmos de lógicas extras.
                 },
 
                 setUser(user) {
@@ -164,7 +146,6 @@ export const useAuthStore = create<AuthStore>()(
                 },
 
                 setTokens(accessToken, refreshToken) {
-                    tokenManager.setTokens({ accessToken, refreshToken })
                     set((s) => {
                         s.accessToken = accessToken
                         s.refreshToken = refreshToken
@@ -180,7 +161,6 @@ export const useAuthStore = create<AuthStore>()(
                 },
 
                 reset() {
-                    tokenManager.clear()
                     set((s) => {
                         s.user = null
                         s.accessToken = null
@@ -233,7 +213,6 @@ export const useAuthStore = create<AuthStore>()(
                     try {
                         const res = await authService.login(payload)
                         if (res.data) {
-                            tokenManager.setTokens({ accessToken: res.data!.access_token, refreshToken: res.data!.refresh_token })
                             set((s) => {
                                 s.user = res.data!.user
                                 s.accessToken = res.data!.access_token
@@ -268,7 +247,6 @@ export const useAuthStore = create<AuthStore>()(
                     } catch {
                         // swallow — always clear locally
                     } finally {
-                        tokenManager.clear()
                         set((s) => {
                             s.user = null
                             s.accessToken = null
@@ -291,7 +269,6 @@ export const useAuthStore = create<AuthStore>()(
                         
                         const res = await authService.refresh(refreshToken)
                         if (res.data) {
-                            tokenManager.setTokens({ accessToken: res.data!.access_token, refreshToken: res.data!.refresh_token })
                             set((s) => {
                                 s.user = res.data!.user
                                 s.accessToken = res.data!.access_token
@@ -411,7 +388,6 @@ export const useAuthStore = create<AuthStore>()(
                     try {
                         const res = await authService.loginWithGoogle(payload)
                         if (res.data) {
-                            tokenManager.setTokens({ accessToken: res.data!.access_token, refreshToken: res.data!.refresh_token })
                             set((s) => {
                                 s.user = res.data!.user
                                 s.accessToken = res.data!.access_token
@@ -442,7 +418,6 @@ export const useAuthStore = create<AuthStore>()(
                     try {
                         const res = await authService.loginWithGoogleCallback(payload)
                         if (res.data) {
-                            tokenManager.setTokens({ accessToken: res.data!.access_token, refreshToken: res.data!.refresh_token })
                             set((s) => {
                                 s.user = res.data!.user
                                 s.accessToken = res.data!.access_token
@@ -493,7 +468,6 @@ export const useAuthStore = create<AuthStore>()(
                     try {
                         const res = await authService.loginWith42(payload)
                         if (res.data) {
-                            tokenManager.setTokens({ accessToken: res.data!.access_token, refreshToken: res.data!.refresh_token })
                             set((s) => {
                                 s.user = res.data!.user
                                 s.accessToken = res.data!.access_token
@@ -524,7 +498,6 @@ export const useAuthStore = create<AuthStore>()(
                     })
                     try {
                         const res = await authService.getSwaggerToken(payload)
-                        tokenManager.setTokens({ accessToken: res.access_token, refreshToken: res.refresh_token })
                         set((s) => {
                             s.accessToken = res.access_token
                             s.refreshToken = res.refresh_token
