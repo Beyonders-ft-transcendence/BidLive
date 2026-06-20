@@ -181,6 +181,8 @@ services:
       context: ./requirements/postgresql
       dockerfile: Dockerfile
     container_name: postgresql
+    ports:
+      - "5432:5432"
     networks:
       - bidlive_network
     restart: always
@@ -201,6 +203,8 @@ services:
       context: ./requirements/redis
       dockerfile: Dockerfile
     container_name: redis
+    ports:
+      - "6379:6379"
     networks:
       - bidlive_network
     restart: always
@@ -212,6 +216,8 @@ services:
   portainer:
     image: portainer/portainer-ce:2.39.3-alpine
     container_name: portainer
+    ports:
+      - "9001:9001"
     command: --base-url=/portainer
     networks:
       - bidlive_network
