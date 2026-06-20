@@ -13,6 +13,7 @@ RUN curl -sSL -o /tmp/livekit.tar.gz \
     rm /tmp/livekit.tar.gz && \
     apk del curl tar
 
+# CORRIGIDO: Comando unificado na mesma linha para evitar falha no build
 RUN id -u livekit >/dev/null 2>&1 || adduser -D livekit
 
 RUN mkdir -p /etc/livekit && \
