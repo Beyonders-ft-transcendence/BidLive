@@ -17,7 +17,6 @@ if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciai
 
     LIVEKIT_URL="https://livekit:${LIVEKIT_HTTP_PORT}"
     REDIS_URL="redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_PORT}"
-
 else
   echo "No credentials found"
   exit 1
