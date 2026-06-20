@@ -1,12 +1,14 @@
 #!/bin/sh
 set -e
 
-# Ler senha do secret
-if [ -f /run/secrets/redis_password ]; then
-    REDIS_PASSWORD=$(cat /run/secrets/redis_password)
-    # Substituir no arquivo de configuração
-    sed -i "s/REDIS_PASSWORD_PLACEHOLDER/$REDIS_PASSWORD/g" /etc/redis/redis.conf
-fi
+if [ -f /run/secrets/redis_credenciais ]; then
+    REDIS_USER=$(sed -n '1p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
+    REDIS_PASSWORD=$(sed -n '2p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
+    REDIS_PORT=$(sed -n '3p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
 
-# Iniciar Redis
+    sed -i "s/REDIS_USER_PLACEHOLDER/$REDIS_USER/g" /etc/redis/redis.conf
+    sed -i "s/REDIS_PASSWORD_PLACEHOLDER/$REDIS_PASSWORD/g" /etc/redis/redis.conf
+    sed -i "s/REDIS_PORT_PLACEHOLDER/$REDIS_PORT/g" /etc/redis/redis.conf
+fi  
+
 exec redis-server /etc/redis/redis.conf
