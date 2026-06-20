@@ -17,8 +17,9 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     chown -R postgres:postgres "$PGDATA"
     chmod 700 "$PGDATA"
 
+    # CORRIGIDO AQUI: Sem a opção -o
     echo "Inicializando o banco de dados..."
-    su-exec postgres initdb -D "$PGDATA" -o "-c listen_addresses='*' -c port='$POSTGRES_PORT'"
+    su-exec postgres initdb -D "$PGDATA"
 
     echo "Iniciando temporariamente para configuração..."
     su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses='*' -c port='$POSTGRES_PORT'" -w start
