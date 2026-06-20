@@ -17,22 +17,6 @@ services:
     env_file:
       - ./.env
 
-  adminer:
-    image: adminer:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/adminer
-      dockerfile: Dockerfile
-    container_name: adminer
-    depends_on:
-      postgresql:
-        condition: service_healthy
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-
   frontend:
     image: frontend:0.0.1
     pull_policy: never
@@ -120,22 +104,6 @@ services:
     environment:
       SERVICE_ROLE: celery-beat
 
-  livekit:
-    image: livekit:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/livekit
-      dockerfile: Dockerfile
-    container_name: livekit
-    depends_on:
-      redis:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-
   prometheus:
     image: prometheus:0.0.1
     pull_policy: never
@@ -173,6 +141,37 @@ services:
       - grafana_password
     environment:
       GF_SECURITY_ADMIN_PASSWORD_FILE: /run/secrets/grafana_password
+
+  livekit:
+    image: livekit:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/livekit
+      dockerfile: Dockerfile
+    container_name: livekit
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - bidlive_network
+    restart: always
+    secrets:
+      - redis_credenciais
+      - livekit_credenciais
+
+  adminer:
+    image: adminer:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - bidlive_network
+    restart: always
 
   postgresql:
     image: postgresql:0.0.1
@@ -229,10 +228,12 @@ services:
 secrets:
   db_credenciais:
     file: ../secrets/db_credenciais.txt
-  grafana_credenciais:
-    file: ../secrets/grafana_credenciais.txt
   redis_credenciais:
     file: ../secrets/redis_credenciais.txt
+  livekit_credenciais:
+    file: ../secrets/livekit_credenciais.txt
+  grafana_credenciais:
+    file: ../secrets/grafana_credenciais.txt
 
 networks:
   bidlive_network:
