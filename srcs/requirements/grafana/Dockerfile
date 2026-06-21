@@ -1,9 +1,9 @@
-FROM alpine:3.22
+FROM grafana/grafana-oss:12.0.0
 
-RUN apk add --no-cache grafana
-
+USER root
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+USER grafana
 
 EXPOSE 3000
 
