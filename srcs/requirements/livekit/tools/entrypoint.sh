@@ -6,7 +6,7 @@ if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciai
 
     LIVEKIT_API_KEY=$(sed -n '1p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
     LIVEKIT_API_SECRET=$(sed -n '2p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    export LIVEKIT_API_KEY LIVEKIT_API_SECRET
+    export LIVEKIT_API_KEY LIVEKIT_API_SECRET   
 
     REDIS_ADDRESS="redis:${REDIS_PORT}"
 else
@@ -44,4 +44,7 @@ EOF
 fi
 
 echo "Starting LiveKit Server..."
+echo "##################################"
+cat "$CONFIG_FILE"
+echo "##################################"
 exec livekit-server --config "$CONFIG_FILE" --bind 0.0.0.0

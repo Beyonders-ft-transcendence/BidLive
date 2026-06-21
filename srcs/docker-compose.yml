@@ -90,11 +90,17 @@ services:
       - bidlive_network
     restart: always
     env_file:
-      - ./.env
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
     secrets:
+      - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - 42_credenciais
+      - google_credenciais
     environment:
       SERVICE_ROLE: django
 
@@ -118,9 +124,12 @@ services:
     env_file:
       - ./.env
     secrets:
+      - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - 42_credenciais
+      - google_credenciais
     environment:
       SERVICE_ROLE: celery-worker
 
@@ -144,9 +153,12 @@ services:
     env_file:
       - ./.env
     secrets:
+      - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - 42_credenciais
+      - google_credenciais
     environment:
       SERVICE_ROLE: celery-beat
 
@@ -251,6 +263,10 @@ secrets:
     file: ../secrets/livekit_credenciais.txt
   backend_credenciais:
     file: ../secrets/backend_credenciais.txt
+  42_credenciais:
+    file: ../secrets/42_credenciais.txt
+  google_credenciais:
+    file: ../secrets/google_credenciais.txt
   grafana_credenciais:
     file: ../secrets/grafana_credenciais.txt
 

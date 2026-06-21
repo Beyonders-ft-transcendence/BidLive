@@ -4,7 +4,7 @@ RUN apk add --no-cache redis
 
 COPY conf/redis.conf /etc/redis/redis.conf
 
-COPY ./tools/entrypoint.sh /usr/local/bin/
+COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
