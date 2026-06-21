@@ -2,18 +2,11 @@
 set -e
 
 if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciais ]; then
-    REDIS_USER=$(sed -n '1p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
-    REDIS_PASSWORD=$(sed -n '2p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
-    REDIS_PORT=$(sed -n '3p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
+    REDIS_PASSWORD=$(sed -n '1p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
 
-    LIVEKIT_PUBLIC_URL=$(sed -n '1p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_API_KEY=$(sed -n '2p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_API_SECRET=$(sed -n '3p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_TOKEN_TTL_MINUTES=$(sed -n '4p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_HTTP_PORT=$(sed -n '5p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_TCP_PORT=$(sed -n '6p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_RTC_UDP_PORT_RANGE_START=$(sed -n '7p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_RTC_UDP_PORT_RANGE_END=$(sed -n '8p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
+    LIVEKIT_API_KEY=$(sed -n '1p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
+    LIVEKIT_API_SECRET=$(sed -n '2p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
+    export LIVEKIT_API_KEY LIVEKIT_API_SECRET
 
     REDIS_ADDRESS="redis:${REDIS_PORT}"
 else

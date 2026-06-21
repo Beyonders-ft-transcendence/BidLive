@@ -165,6 +165,9 @@ services:
     networks:
       - bidlive_network
     restart: always
+    env_file:
+      - ./.env.livekit
+      - ./.env.redis
     secrets:
       - redis_credenciais
       - livekit_credenciais
