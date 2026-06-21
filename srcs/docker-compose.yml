@@ -32,78 +32,6 @@ services:
     env_file:
       - ./.env
 
-  backend:
-    image: backend:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: backend
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      livekit:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-    secrets:
-      - redis_password
-    environment:
-      SERVICE_ROLE: django
-
-  celery_worker:
-    image: backend:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: celery_worker
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      backend:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-    secrets:
-      - redis_password
-    environment:
-      SERVICE_ROLE: celery-worker
-
-  celery_beat:
-    image: backend:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: celery_beat
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      backend:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-    secrets:
-      - redis_password
-    environment:
-      SERVICE_ROLE: celery-beat
-
   prometheus:
     image: prometheus:0.0.1
     pull_policy: never
@@ -138,9 +66,91 @@ services:
     env_file:
       - ./.env
     secrets:
-      - grafana_password
+      - grafana_credenciais
     environment:
       GF_SECURITY_ADMIN_PASSWORD_FILE: /run/secrets/grafana_password
+
+
+
+  backend:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      livekit:
+        condition: service_started
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+    environment:
+      SERVICE_ROLE: django
+
+  celery_worker:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+    environment:
+      SERVICE_ROLE: celery-worker
+
+  celery_beat:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: celery_beat
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env
+    secrets:
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+    environment:
+      SERVICE_ROLE: celery-beat
+
+
 
   livekit:
     image: livekit:0.0.1
@@ -207,6 +217,8 @@ services:
     networks:
       - bidlive_network
     restart: always
+    env_file:
+      - ./.env.redis
     secrets:
       - redis_credenciais
     volumes:
@@ -232,6 +244,8 @@ secrets:
     file: ../secrets/redis_credenciais.txt
   livekit_credenciais:
     file: ../secrets/livekit_credenciais.txt
+  backend_credenciais:
+    file: ../secrets/backend_credenciais.txt
   grafana_credenciais:
     file: ../secrets/grafana_credenciais.txt
 
