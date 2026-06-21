@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM alpine:3.22
 
 RUN apk add --no-cache \
     build-base \
@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     jpeg-dev \
     zlib-dev \
     curl \
-    make
+    make \
+    python3 py3-pip
 
 RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
 
