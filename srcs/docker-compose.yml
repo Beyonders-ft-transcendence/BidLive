@@ -195,6 +195,8 @@ services:
     networks:
       - bidlive_network
     restart: always
+    env_file:
+      - ./.env.db
     secrets:
       - db_credenciais
     volumes:

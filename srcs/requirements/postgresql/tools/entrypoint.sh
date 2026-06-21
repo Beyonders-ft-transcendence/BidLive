@@ -2,10 +2,8 @@
 set -e
 
 if [ -f /run/secrets/db_credenciais ]; then
-    POSTGRES_USER=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
-    POSTGRES_PASSWORD=$(sed -n '2p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
-    POSTGRES_DB=$(sed -n '3p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
-    POSTGRES_PORT=$(sed -n '4p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
+    POSTGRES_PASSWORD=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
+    export POSTGRES_PASSWORD
 else
     echo "Error: No se encontró el archivo de credenciales."
     exit 1
