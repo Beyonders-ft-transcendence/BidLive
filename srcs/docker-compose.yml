@@ -171,6 +171,10 @@ services:
       context: ./requirements/livekit
       dockerfile: Dockerfile
     container_name: livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882"
     depends_on:
       redis:
         condition: service_started
@@ -191,6 +195,8 @@ services:
       context: ./requirements/adminer
       dockerfile: Dockerfile
     container_name: adminer
+    ports:
+      - "8080:8080"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -242,14 +248,20 @@ services:
       - redis_data:/data
 
   portainer:
-    image: portainer/portainer-ce:2.39.3-alpine
+    image: portainer:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/portainer
+      dockerfile: Dockerfile
     container_name: portainer
     ports:
-      - "9001:9001"
-    command: --base-url=/portainer
+      - "9443:9443"
+      - "9000:9000"
     networks:
       - bidlive_network
     restart: always
+    secrets:
+      - portainer_credenciais
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
@@ -269,6 +281,8 @@ secrets:
     file: ../secrets/google_credenciais.txt
   grafana_credenciais:
     file: ../secrets/grafana_credenciais.txt
+  portainer_credenciais:
+    file: ../secrets/portainer_credenciais.txt
 
 networks:
   bidlive_network:
