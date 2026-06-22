@@ -146,6 +146,8 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     container_name: backend
+    ports:
+      - "8000:8000"
     depends_on:
       postgresql:
         condition: service_healthy
