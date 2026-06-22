@@ -24,7 +24,8 @@ ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
 COPY --chown=appuser:appuser pyproject.toml uv.lock README.md ./
 
-RUN pip install --no-cache-dir uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
 
 RUN uv sync --frozen
 
