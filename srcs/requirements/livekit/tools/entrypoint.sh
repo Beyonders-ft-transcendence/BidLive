@@ -8,7 +8,7 @@ if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciai
     LIVEKIT_API_SECRET=$(sed -n '2p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
     export LIVEKIT_API_KEY LIVEKIT_API_SECRET   
 
-    REDIS_ADDRESS="redis:${REDIS_PORT}"
+    REDIS_ADDRESS="${REDIS_HOST:-redis}:${REDIS_PORT}"
 else
   echo "No credentials found"
   exit 1
@@ -38,13 +38,16 @@ redis:
   username: ${REDIS_USER}
   password: ${REDIS_PASSWORD}
   db: 0
-  read_timeout: 5
-  write_timeout: 5
+  read_timeout: 2
+  write_timeout: 2
 EOF
 fi
 
 echo "Starting LiveKit Server..."
-echo "##################################"
-cat "$CONFIG_FILE"
-echo "##################################"
+
+unset REDIS_HOST
+unset REDIS_PORT
+unset REDIS_PASSWORD
+unset REDIS_USER
+
 exec livekit-server --config "$CONFIG_FILE" --bind 0.0.0.0
