@@ -31,5 +31,15 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop
 fi
 
+# Permite conexões externas na rede Docker
+if [ -f "$PGDATA/pg_hba.conf" ]; then
+    if ! grep -q "0.0.0.0/0" "$PGDATA/pg_hba.conf"; then
+        echo "host all all 0.0.0.0/0 scram-sha-256" >> "$PGDATA/pg_hba.conf"
+    fi
+    if ! grep -q "::/0" "$PGDATA/pg_hba.conf"; then
+        echo "host all all ::/0 scram-sha-256" >> "$PGDATA/pg_hba.conf"
+    fi
+fi
+
 echo "Starting PostgreSQL na porta $POSTGRES_PORT..."
 exec su-exec postgres postgres -D "$PGDATA" -c listen_addresses='*' -c port="$POSTGRES_PORT"
