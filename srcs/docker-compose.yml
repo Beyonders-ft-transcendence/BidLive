@@ -17,20 +17,25 @@ services:
     env_file:
       - ./.env
 
-  frontend:
-    image: frontend:0.0.1
+  grafana:
+    image: grafana:0.0.1
     pull_policy: never
     build:
-      context: ./requirements/frontend
+      context: ./requirements/grafana
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: grafana
+    ports:
+      - "3001:3001"
     depends_on:
-      - backend
+      prometheus:
+        condition: service_started
     networks:
       - bidlive_network
     restart: always
+    secrets:
+      - grafana_credenciais
     env_file:
-      - ./.env
+      - ./.env.grafana
 
   prometheus:
     image: prometheus:0.0.1
@@ -39,38 +44,100 @@ services:
       context: ./requirements/prometheus
       dockerfile: Dockerfile
     container_name: prometheus
+    ports:
+      - "9090-9090"
     depends_on:
+      - backend
+      - celery_worker
+      - celery_beat
+    networks:
+      - bidlive_network
+    restart: always
+    volumes:
+      - prometheus_data:/prometheus
+
+  frontend:
+    image: frontend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - celery_worker
+      - celery_beat
+    networks:
+      - bidlive_network
+    restart: always
+    env_file:
+      - ./.env.frontend
+
+  celery_beat:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: celery_beat
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
       backend:
         condition: service_started
     networks:
       - bidlive_network
     restart: always
     env_file:
-      - ./.env
-    volumes:
-      - prometheus_data:/prometheus
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
+    secrets:
+      - db_credenciais
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+      - 42_credenciais
+      - google_credenciais
+    environment:
+      SERVICE_ROLE: celery-beat
 
-  grafana:
-    image: grafana:0.0.1
+  celery_worker:
+    image: backend:0.0.1
     pull_policy: never
     build:
-      context: ./requirements/grafana
+      context: ./requirements/backend
       dockerfile: Dockerfile
-    container_name: grafana
+    container_name: celery_worker
     depends_on:
-      prometheus:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
         condition: service_started
     networks:
       - bidlive_network
     restart: always
     env_file:
-      - ./.env
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
     secrets:
-      - grafana_credenciais
+      - db_credenciais
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+      - 42_credenciais
+      - google_credenciais
     environment:
-      GF_SECURITY_ADMIN_PASSWORD_FILE: /run/secrets/grafana_password
-
-
+      SERVICE_ROLE: celery-worker
 
   backend:
     image: backend:0.0.1
@@ -103,66 +170,6 @@ services:
       - google_credenciais
     environment:
       SERVICE_ROLE: django
-
-  celery_worker:
-    image: backend:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: celery_worker
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      backend:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-    secrets:
-      - db_credenciais
-      - redis_credenciais
-      - livekit_credenciais
-      - backend_credenciais
-      - 42_credenciais
-      - google_credenciais
-    environment:
-      SERVICE_ROLE: celery-worker
-
-  celery_beat:
-    image: backend:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: celery_beat
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      backend:
-        condition: service_started
-    networks:
-      - bidlive_network
-    restart: always
-    env_file:
-      - ./.env
-    secrets:
-      - db_credenciais
-      - redis_credenciais
-      - livekit_credenciais
-      - backend_credenciais
-      - 42_credenciais
-      - google_credenciais
-    environment:
-      SERVICE_ROLE: celery-beat
-
-
 
   livekit:
     image: livekit:0.0.1
