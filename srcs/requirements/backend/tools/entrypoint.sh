@@ -60,6 +60,9 @@ if [ "$SERVICE_ROLE" = "django" ]; then
   echo "Running migrations..."
   python manage.py migrate --noinput
 
+  echo "Creating default objects..."
+  python manage.py seed --force
+
   if [ "${DJANGO_COLLECTSTATIC:-0}" = "1" ]; then
     echo "Collecting static files..."
     python manage.py collectstatic --noinput
