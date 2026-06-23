@@ -12,7 +12,7 @@ services:
     ports:
       - "443:443"
     networks:
-      - bidlive_network
+      - frontend-network
     restart: always
     env_file:
       - ./.env
@@ -28,7 +28,8 @@ services:
       prometheus:
         condition: service_started
     networks:
-      - bidlive_network
+      - frontend-network
+      - backend-network
     restart: always
     secrets:
       - grafana_credenciais
@@ -47,7 +48,7 @@ services:
       - celery_worker
       - celery_beat
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     volumes:
       - prometheus_data:/prometheus
@@ -64,7 +65,8 @@ services:
       - celery_worker
       - celery_beat
     networks:
-      - bidlive_network
+      - frontend-network
+      - backend-network
     restart: always
     env_file:
       - ./.env.frontend
@@ -84,7 +86,7 @@ services:
       backend:
         condition: service_started
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     env_file:
       - ./.env.backend
@@ -116,7 +118,7 @@ services:
       backend:
         condition: service_started
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     env_file:
       - ./.env.backend
@@ -148,7 +150,7 @@ services:
       livekit:
         condition: service_started
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     env_file:
       - ./.env.backend
@@ -176,7 +178,8 @@ services:
       redis:
         condition: service_started
     networks:
-      - bidlive_network
+      - frontend-network
+      - backend-network
     restart: always
     env_file:
       - ./.env.livekit
@@ -196,7 +199,8 @@ services:
       postgresql:
         condition: service_healthy
     networks:
-      - bidlive_network
+      - frontend-network
+      - backend-network
     restart: always
 
   postgresql:
@@ -207,7 +211,7 @@ services:
       dockerfile: Dockerfile
     container_name: postgresql
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     env_file:
       - ./.env.db
@@ -229,7 +233,7 @@ services:
       dockerfile: Dockerfile
     container_name: redis
     networks:
-      - bidlive_network
+      - backend-network
     restart: always
     env_file:
       - ./.env.redis
@@ -246,7 +250,8 @@ services:
       dockerfile: Dockerfile
     container_name: portainer
     networks:
-      - bidlive_network
+      - frontend-network
+      - backend-network
     restart: always
     secrets:
       - portainer_credenciais
@@ -273,9 +278,12 @@ secrets:
     file: ../secrets/portainer_credenciais.txt
 
 networks:
-  bidlive_network:
+  frontend-network:
     driver: bridge
-    name: bidlive_network
+    name: frontend-network
+  backend-network:
+    driver: bridge
+    name: backend-network
 
 volumes:
   redis_data:
