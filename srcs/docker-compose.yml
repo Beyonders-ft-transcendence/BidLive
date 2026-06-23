@@ -24,8 +24,6 @@ services:
       context: ./requirements/grafana
       dockerfile: Dockerfile
     container_name: grafana
-    ports:
-      - "3001:3001"
     depends_on:
       prometheus:
         condition: service_started
@@ -44,8 +42,6 @@ services:
       context: ./requirements/prometheus
       dockerfile: Dockerfile
     container_name: prometheus
-    ports:
-      - "9090-9090"
     depends_on:
       - backend
       - celery_worker
@@ -63,8 +59,6 @@ services:
       context: ./requirements/frontend
       dockerfile: Dockerfile
     container_name: frontend
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
       - celery_worker
@@ -146,8 +140,6 @@ services:
       context: ./requirements/backend
       dockerfile: Dockerfile
     container_name: backend
-    ports:
-      - "8000:8000"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -180,10 +172,6 @@ services:
       context: ./requirements/livekit
       dockerfile: Dockerfile
     container_name: livekit
-    ports:
-      - "7880:7880"
-      - "7881:7881"
-      - "7882:7882"
     depends_on:
       redis:
         condition: service_started
@@ -204,8 +192,6 @@ services:
       context: ./requirements/adminer
       dockerfile: Dockerfile
     container_name: adminer
-    ports:
-      - "8080:8080"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -220,8 +206,6 @@ services:
       context: ./requirements/postgresql
       dockerfile: Dockerfile
     container_name: postgresql
-    ports:
-      - "5432:5432"
     networks:
       - bidlive_network
     restart: always
@@ -244,8 +228,6 @@ services:
       context: ./requirements/redis
       dockerfile: Dockerfile
     container_name: redis
-    ports:
-      - "6379:6379"
     networks:
       - bidlive_network
     restart: always
@@ -263,9 +245,6 @@ services:
       context: ./requirements/portainer
       dockerfile: Dockerfile
     container_name: portainer
-    ports:
-      - "9443:9443"
-      - "9000:9000"
     networks:
       - bidlive_network
     restart: always
