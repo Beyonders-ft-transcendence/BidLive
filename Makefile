@@ -6,16 +6,13 @@ DATA_PATH = /mnt/d/NdDaniel/Code/42/BidLive/data
 
 all: build up
 
-bonus: bonus_build bonus_up
-
 build:
 	@echo "🔨 Building Docker images..."
-	@mkdir -p $(DATA_PATH)  $(DATA_PATH)/adminer  $(DATA_PATH)/backend  $(DATA_PATH)/celery_worker  $(DATA_PATH)/celery_beat  $(DATA_PATH)/frontend  $(DATA_PATH)/grafana  $(DATA_PATH)/livekit  $(DATA_PATH)/nginx  $(DATA_PATH)/portainer  $(DATA_PATH)/postgresql  $(DATA_PATH)/prometheus  $(DATA_PATH)/redis
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build  adminer  backend  celery_worker  celery_beat  frontend  grafana  livekit  nginx  portainer  postgresql  prometheus  redis
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
 
 up:
 	@echo "🚀 Starting containers..."
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d adminer  backend  celery_worker  celery_beat  frontend  grafana  livekit  nginx  portainer  postgresql  prometheus  redis
+	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d
 
 down:
 	@echo "🛑 Stopping containers..."
@@ -50,15 +47,6 @@ restart:
 
 status:
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) ps
-
-bonus_build:
-	@echo "🔨 Building Docker images..."
-	@mkdir -p $(DATA_PATH)  $(DATA_PATH)/adminer  $(DATA_PATH)/backend  $(DATA_PATH)/frontend  $(DATA_PATH)/grafana  $(DATA_PATH)/livekit  $(DATA_PATH)/nginx  $(DATA_PATH)/portainer  $(DATA_PATH)/postgresql  $(DATA_PATH)/prometheus  $(DATA_PATH)/redis
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
-
-bonus_up:
-	@echo "🚀 Starting containers..."
-	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d
 
 re: fclean all
 
