@@ -46,6 +46,7 @@ services:
       - backend
       - celery_worker
       - celery_beat
+      - livekit
     networks:
       - bidlive_network
     restart: always
@@ -177,6 +178,8 @@ services:
         condition: service_started
     networks:
       - bidlive_network
+    expose:
+      - "6789"
     restart: always
     env_file:
       - ./.env.livekit

@@ -15,11 +15,15 @@ else
 fi  
 
 CONFIG_FILE="/tmp/livekit.yaml"
+LIVEKIT_PROMETHEUS_PORT="${LIVEKIT_PROMETHEUS_PORT:-6789}"
+LIVEKIT_REGION="${LIVEKIT_REGION:-local}"
 
 echo "Generating LiveKit configuration..."
 
 cat > "$CONFIG_FILE" <<EOF
 port: ${LIVEKIT_HTTP_PORT}
+prometheus_port: ${LIVEKIT_PROMETHEUS_PORT}
+region: ${LIVEKIT_REGION}
 rtc:
   tcp_port: ${LIVEKIT_TCP_PORT}
   port_range_start: ${LIVEKIT_RTC_UDP_PORT_RANGE_START}
