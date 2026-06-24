@@ -1,11 +1,11 @@
-FROM prometheuscommunity/postgres-exporter:v0.17.1
+FROM prometheuscommunity/postgres-exporter:v0.17.1 AS binary-source
 
-USER root
+FROM alpine:3.22
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ca-certificates
 
-# Copy cfssl binaries from official image
+COPY --from=binary-source /bin/postgres_exporter /usr/bin/postgres_exporter
+
 COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
 COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
 
