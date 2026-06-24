@@ -24,6 +24,6 @@ RUN chmod +x /entrypoint.sh
 
 USER livekit
 
-EXPOSE 7880 7881 5000-5100/udp
+EXPOSE 7880 7881 6789 5000-5100/udp
 
 ENTRYPOINT ["/entrypoint.sh"]

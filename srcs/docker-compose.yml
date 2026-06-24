@@ -47,6 +47,10 @@ services:
       - backend
       - celery_worker
       - celery_beat
+      - livekit
+      - postgres-exporter
+      - redis-exporter
+      - nginx-exporter
     networks:
       - backend-network
     restart: always
@@ -180,6 +184,8 @@ services:
     networks:
       - frontend-network
       - backend-network
+    expose:
+      - "6789"
     restart: always
     env_file:
       - ./.env.livekit
@@ -187,6 +193,63 @@ services:
     secrets:
       - redis_credenciais
       - livekit_credenciais
+
+  postgres-exporter:
+    image: postgres-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/postgres_exporter
+      dockerfile: Dockerfile
+    container_name: postgres-exporter
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - bidlive_network
+    expose:
+      - "9187"
+    restart: always
+    secrets:
+      - db_credenciais
+    env_file:
+      - ./.env.postgres_exporter
+
+  redis-exporter:
+    image: redis-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/redis_exporter
+      dockerfile: Dockerfile
+    container_name: redis-exporter
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - bidlive_network
+    expose:
+      - "9121"
+    restart: always
+    secrets:
+      - redis_credenciais
+    env_file:
+      - ./.env.redis_exporter
+
+  nginx-exporter:
+    image: nginx-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/nginx_exporter
+      dockerfile: Dockerfile
+    container_name: nginx-exporter
+    depends_on:
+      - nginx
+    networks:
+      - bidlive_network
+    expose:
+      - "9113"
+    restart: always
+    env_file:
+      - ./.env.nginx_exporter
 
   adminer:
     image: adminer:0.0.1
