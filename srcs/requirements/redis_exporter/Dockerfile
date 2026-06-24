@@ -1,4 +1,4 @@
-FROM oliver006/redis_exporter:v1.62.0
+FROM oliver006/redis_exporter:v1.62.0-alpine
 
 USER root
 COPY ./tools/entrypoint.sh /entrypoint.sh
