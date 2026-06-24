@@ -15,7 +15,28 @@ services:
       - frontend-network
     restart: always
     env_file:
-      - ./.env
+      - ./.env.nginx
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+
+  nginx-exporter:
+    image: nginx-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/nginx_exporter
+      dockerfile: Dockerfile
+    container_name: nginx-exporter
+    depends_on:
+      - nginx
+    networks:
+      - frontend-network
+    expose:
+      - "9113"
+    restart: always
+    env_file:
+      - ./.env.nginx
 
   grafana:
     image: grafana:0.0.1
@@ -33,6 +54,9 @@ services:
     restart: always
     secrets:
       - grafana_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
     env_file:
       - ./.env.grafana
 
@@ -54,6 +78,10 @@ services:
     networks:
       - backend-network
     restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
     volumes:
       - prometheus_data:/prometheus
 
@@ -74,6 +102,10 @@ services:
     restart: always
     env_file:
       - ./.env.frontend
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
 
   celery_beat:
     image: backend:0.0.1
@@ -104,6 +136,9 @@ services:
       - backend_credenciais
       - 42_credenciais
       - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
     environment:
       SERVICE_ROLE: celery-beat
 
@@ -136,6 +171,9 @@ services:
       - backend_credenciais
       - 42_credenciais
       - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
     environment:
       SERVICE_ROLE: celery-worker
 
@@ -168,6 +206,9 @@ services:
       - backend_credenciais
       - 42_credenciais
       - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
     environment:
       SERVICE_ROLE: django
 
@@ -193,63 +234,9 @@ services:
     secrets:
       - redis_credenciais
       - livekit_credenciais
-
-  postgres-exporter:
-    image: postgres-exporter:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/postgres_exporter
-      dockerfile: Dockerfile
-    container_name: postgres-exporter
-    depends_on:
-      postgresql:
-        condition: service_healthy
-    networks:
-      - bidlive_network
-    expose:
-      - "9187"
-    restart: always
-    secrets:
-      - db_credenciais
-    env_file:
-      - ./.env.postgres_exporter
-
-  redis-exporter:
-    image: redis-exporter:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/redis_exporter
-      dockerfile: Dockerfile
-    container_name: redis-exporter
-    depends_on:
-      redis:
-        condition: service_started
-    networks:
-      - bidlive_network
-    expose:
-      - "9121"
-    restart: always
-    secrets:
-      - redis_credenciais
-    env_file:
-      - ./.env.redis_exporter
-
-  nginx-exporter:
-    image: nginx-exporter:0.0.1
-    pull_policy: never
-    build:
-      context: ./requirements/nginx_exporter
-      dockerfile: Dockerfile
-    container_name: nginx-exporter
-    depends_on:
-      - nginx
-    networks:
-      - bidlive_network
-    expose:
-      - "9113"
-    restart: always
-    env_file:
-      - ./.env.nginx_exporter
+      - ca_cert
+      - ca_key
+      - ca_config
 
   adminer:
     image: adminer:0.0.1
@@ -265,6 +252,10 @@ services:
       - frontend-network
       - backend-network
     restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
 
   postgresql:
     image: postgresql:0.0.1
@@ -283,10 +274,30 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U $DATABASE_USER"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  postgres-exporter:
+    image: postgres-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/postgres_exporter
+      dockerfile: Dockerfile
+    container_name: postgres-exporter
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - backend-network
+    expose:
+      - "9187"
+    restart: always
+    secrets:
+      - db_credenciais
+    env_file:
+      - ./.env.db
 
   redis:
     image: redis:0.0.1
@@ -305,6 +316,26 @@ services:
     volumes:
       - redis_data:/data
 
+  redis-exporter:
+    image: redis-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/redis_exporter
+      dockerfile: Dockerfile
+    container_name: redis-exporter
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend-network
+    expose:
+      - "9121"
+    restart: always
+    secrets:
+      - redis_credenciais
+    env_file:
+      - ./.env.redis
+
   portainer:
     image: portainer:0.0.1
     pull_policy: never
@@ -318,6 +349,9 @@ services:
     restart: always
     secrets:
       - portainer_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
@@ -339,6 +373,12 @@ secrets:
     file: ../secrets/grafana_credenciais.txt
   portainer_credenciais:
     file: ../secrets/portainer_credenciais.txt
+  ca_cert:
+    file: ../secrets/ca.pem
+  ca_key:
+    file: ../secrets/ca-key.pem
+  ca_config:
+    file: ../secrets/ca-config.json
 
 networks:
   frontend-network:

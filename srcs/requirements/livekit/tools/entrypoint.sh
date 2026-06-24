@@ -1,11 +1,22 @@
 #!/bin/sh
 set -e
 
-if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciais ]; then
-    REDIS_PASSWORD=$(sed -n '1p' /run/secrets/redis_credenciais | cut -d'=' -f2 | tr -d '\r')
+# === TLS Certificate Generation (runs as root) ===
+/usr/local/bin/generate_cert.sh livekit "livekit,localhost,127.0.0.1"
 
-    LIVEKIT_API_KEY=$(sed -n '1p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
-    LIVEKIT_API_SECRET=$(sed -n '2p' /run/secrets/livekit_credenciais | cut -d'=' -f2 | tr -d '\r')
+# Make certs readable by livekit user
+chmod 644 /etc/ssl/certs/server.crt 2>/dev/null || true
+chmod 644 /etc/ssl/private/server.key 2>/dev/null || true
+
+# === Drop privileges and continue as livekit user ===
+exec su -s /bin/sh livekit -c '
+set -e
+
+if [ -f /run/secrets/livekit_credenciais ] && [ -f /run/secrets/redis_credenciais ]; then
+    REDIS_PASSWORD=$(sed -n "1p" /run/secrets/redis_credenciais | cut -d"=" -f2 | tr -d "\r")
+
+    LIVEKIT_API_KEY=$(sed -n "1p" /run/secrets/livekit_credenciais | cut -d"=" -f2 | tr -d "\r")
+    LIVEKIT_API_SECRET=$(sed -n "2p" /run/secrets/livekit_credenciais | cut -d"=" -f2 | tr -d "\r")
     export LIVEKIT_API_KEY LIVEKIT_API_SECRET   
 
     REDIS_ADDRESS="${REDIS_HOST:-redis}:${REDIS_PORT}"
@@ -20,7 +31,7 @@ LIVEKIT_REGION="${LIVEKIT_REGION:-local}"
 
 echo "Generating LiveKit configuration..."
 
-cat > "$CONFIG_FILE" <<EOF
+cat > "$CONFIG_FILE" <<INNEREOF
 port: ${LIVEKIT_HTTP_PORT}
 prometheus_port: ${LIVEKIT_PROMETHEUS_PORT}
 region: ${LIVEKIT_REGION}
@@ -33,10 +44,10 @@ keys:
   ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
 logging:
   level: info
-EOF
+INNEREOF
 
 if [ -n "$REDIS_ADDRESS" ]; then
-  cat >> "$CONFIG_FILE" <<EOF
+  cat >> "$CONFIG_FILE" <<INNEREOF
 redis:
   address: ${REDIS_ADDRESS}
   username: ${REDIS_USER}
@@ -44,7 +55,7 @@ redis:
   db: 0
   read_timeout: 2
   write_timeout: 2
-EOF
+INNEREOF
 fi
 
 echo "Starting LiveKit Server..."
@@ -55,3 +66,4 @@ unset REDIS_PASSWORD
 unset REDIS_USER
 
 exec livekit-server --config "$CONFIG_FILE" --bind 0.0.0.0
+'

@@ -2,8 +2,8 @@
 set -e
 
 if [ -f /run/secrets/db_credenciais ]; then
-    POSTGRES_PASSWORD=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
-    export POSTGRES_PASSWORD
+    DATABASE_PASSWORD=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
+    export DATABASE_PASSWORD
 else
     echo "Error: No se encontró el archivo de credenciales."
     exit 1
@@ -20,12 +20,12 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     su-exec postgres initdb -D "$PGDATA"
 
     echo "Iniciando temporariamente para configuração..."
-    su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses='*' -c port='$POSTGRES_PORT'" -w start
+    su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses='*' -c port='$DATABASE_PORT'" -w start
 
     echo "Criando usuários e bancos..."
-    su-exec postgres psql -p "$POSTGRES_PORT" -U postgres -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
-    su-exec postgres psql -p "$POSTGRES_PORT" -U postgres -c "CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;"
-    su-exec postgres psql -p "$POSTGRES_PORT" -U postgres -c "ALTER USER $POSTGRES_USER CREATEDB;"
+    su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "CREATE USER $DATABASE_USER WITH PASSWORD '$DATABASE_PASSWORD';"
+    su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "CREATE DATABASE $DATABASE_DB OWNER $DATABASE_USER;"
+    su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "ALTER USER $DATABASE_USER CREATEDB;"
 
     echo "Desligando a instância temporária..."
     su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop
@@ -41,5 +41,5 @@ if [ -f "$PGDATA/pg_hba.conf" ]; then
     fi
 fi
 
-echo "Starting PostgreSQL na porta $POSTGRES_PORT..."
-exec su-exec postgres postgres -D "$PGDATA" -c listen_addresses='*' -c port="$POSTGRES_PORT"
+echo "Starting PostgreSQL na porta $DATABASE_PORT..."
+exec su-exec postgres postgres -D "$PGDATA" -c listen_addresses='*' -c port="$DATABASE_PORT"

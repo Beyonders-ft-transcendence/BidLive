@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# === TLS Certificate Generation ===
+/usr/local/bin/generate_cert.sh prometheus "prometheus,localhost,127.0.0.1"
+
 echo "Starting Prometheus..."
 
 exec prometheus \

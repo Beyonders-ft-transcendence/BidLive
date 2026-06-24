@@ -6,21 +6,21 @@ if [ ! -f /run/secrets/db_credenciais ]; then
   exit 1
 fi
 
-POSTGRES_PASSWORD=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
+DATABASE_PASSWORD=$(sed -n '1p' /run/secrets/db_credenciais | cut -d'=' -f2 | tr -d '\r')
 
-if [ -z "$POSTGRES_PASSWORD" ]; then
+if [ -z "$DATABASE_PASSWORD" ]; then
   echo "Postgres exporter password is empty" >&2
   exit 1
 fi
 
-POSTGRES_EXPORTER_DB_HOST="${POSTGRES_EXPORTER_DB_HOST:-postgresql}"
-POSTGRES_EXPORTER_DB_PORT="${POSTGRES_EXPORTER_DB_PORT:-5432}"
-POSTGRES_EXPORTER_DB_NAME="${POSTGRES_EXPORTER_DB_NAME:-bidlive}"
-POSTGRES_EXPORTER_DB_USER="${POSTGRES_EXPORTER_DB_USER:-bidlive}"
-POSTGRES_EXPORTER_SSLMODE="${POSTGRES_EXPORTER_SSLMODE:-disable}"
+DATABASE_HOST="${DATABASE_HOST:-postgresql}"
+DATABASE_PORT="${DATABASE_PORT:-5432}"
+DATABASE_DB="${DATABASE_DB:-bidlive}"
+DATABASE_USER="${DATABASE_USER:-bidlive}"
+DATABASE_SSLMODE="${DATABASE_SSLMODE:-disable}"
 
-export DATA_SOURCE_NAME="host=${POSTGRES_EXPORTER_DB_HOST} port=${POSTGRES_EXPORTER_DB_PORT} user=${POSTGRES_EXPORTER_DB_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_EXPORTER_DB_NAME} sslmode=${POSTGRES_EXPORTER_SSLMODE}"
+export DATA_SOURCE_NAME="host=${DATABASE_HOST} port=${DATABASE_PORT} user=${DATABASE_USER} password=${DATABASE_PASSWORD} dbname=${DATABASE_DB} sslmode=${DATABASE_SSLMODE}"
 
-unset POSTGRES_PASSWORD
+unset DATABASE_PASSWORD
 
 exec postgres_exporter "$@"
