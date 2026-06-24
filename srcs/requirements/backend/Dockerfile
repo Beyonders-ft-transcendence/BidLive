@@ -9,7 +9,16 @@ RUN apk add --no-cache \
     zlib-dev \
     curl \
     make \
-    python3 py3-pip
+    python3 py3-pip \
+    ca-certificates
+
+# Copy cfssl binaries from official image
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
+
+# Copy shared certificate generation script
+COPY ./generate_cert.sh  /usr/local/bin/generate_cert.sh
+RUN chmod +x /usr/local/bin/generate_cert.sh
 
 RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
 
@@ -36,8 +45,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER appuser
-
 EXPOSE 8000
 
+# Entrypoint runs as root to generate certs, then drops to appuser
 ENTRYPOINT ["/entrypoint.sh"]

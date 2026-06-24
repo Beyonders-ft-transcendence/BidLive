@@ -16,7 +16,15 @@ RUN npm prune --omit=dev
 
 FROM alpine:3.22
 
-RUN apk add --no-cache nodejs npm
+RUN apk add --no-cache nodejs npm ca-certificates
+
+# Copy cfssl binaries from official image
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
+
+# Copy shared certificate generation script
+COPY ./generate_cert.sh  /usr/local/bin/generate_cert.sh
+RUN chmod +x /usr/local/bin/generate_cert.sh
 
 WORKDIR /app
 
@@ -27,6 +35,9 @@ COPY --from=builder /app/public /app/public
 COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/node_modules /app/node_modules
 
+COPY ./tools/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,16 +1,22 @@
 FROM alpine:3.22
 
-# Instalar NGINX e OpenSSL
-RUN apk add --no-cache nginx openssl
+# Install NGINX and dependencies
+RUN apk add --no-cache nginx openssl ca-certificates
 
-# Copiar configuração do nginx
+# Copy cfssl binaries from official image
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
+COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
+
+# Copy shared certificate generation script
+COPY ./generate_cert.sh  /usr/local/bin/generate_cert.sh
+RUN chmod +x /usr/local/bin/generate_cert.sh
+
+# Copy nginx configuration
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
-# Copiar e executar script de geração de certificados
-COPY ./tools/generate_certificates.sh /usr/local/bin/generate_certificates.sh
-RUN chmod +x /usr/local/bin/generate_certificates.sh && \
-    /usr/local/bin/generate_certificates.sh
+COPY ./tools/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 443
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,14 +1,36 @@
-.PHONY: all build up down clean fclean re logs bonus bonus_build bonus_up
+.PHONY: all build up down clean fclean re logs bonus bonus_build bonus_up ca
 
 COMPOSE_FILE = srcs/docker-compose.yml
 PROJECT_NAME = bidlive
 DATA_PATH = /mnt/d/NdDaniel/Code/42/BidLive/data
 
-all: build up
+all: ca build up
+
+ca:
+	@echo "🔑 Generating Root CA certificates (if needed)..."
+	@bash srcs/ca/generate_ca.sh
 
 build:
+	@echo "📁 Copying generate_cert.sh to service contexts..."
+	@cp srcs/ca/generate_cert.sh srcs/requirements/nginx/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/livekit/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/frontend/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/adminer/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/prometheus/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/portainer/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/grafana/
+	@cp srcs/ca/generate_cert.sh srcs/requirements/backend/
 	@echo "🔨 Building Docker images..."
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
+	@echo "🧹 Cleaning up copied scripts..."
+	@rm -f srcs/requirements/nginx/generate_cert.sh \
+	       srcs/requirements/livekit/generate_cert.sh \
+	       srcs/requirements/frontend/generate_cert.sh \
+	       srcs/requirements/adminer/generate_cert.sh \
+	       srcs/requirements/prometheus/generate_cert.sh \
+	       srcs/requirements/portainer/generate_cert.sh \
+	       srcs/requirements/grafana/generate_cert.sh \
+	       srcs/requirements/backend/generate_cert.sh
 
 up:
 	@echo "🚀 Starting containers..."
