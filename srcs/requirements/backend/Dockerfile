@@ -17,7 +17,7 @@ COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
 COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
 
 # Copy shared certificate generation script
-COPY ./generate_cert.sh  /usr/local/bin/generate_cert.sh
+COPY ./tools/generate_cert.sh  /usr/local/bin/generate_cert.sh
 RUN chmod +x /usr/local/bin/generate_cert.sh
 
 RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser

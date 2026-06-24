@@ -11,26 +11,7 @@ ca:
 	@bash srcs/ca/generate_ca.sh
 
 build:
-	@echo "📁 Copying generate_cert.sh to service contexts..."
-	@cp srcs/ca/generate_cert.sh srcs/requirements/nginx/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/livekit/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/frontend/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/adminer/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/prometheus/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/portainer/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/grafana/
-	@cp srcs/ca/generate_cert.sh srcs/requirements/backend/
-	@echo "🔨 Building Docker images..."
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
-	@echo "🧹 Cleaning up copied scripts..."
-	@rm -f srcs/requirements/nginx/generate_cert.sh \
-	       srcs/requirements/livekit/generate_cert.sh \
-	       srcs/requirements/frontend/generate_cert.sh \
-	       srcs/requirements/adminer/generate_cert.sh \
-	       srcs/requirements/prometheus/generate_cert.sh \
-	       srcs/requirements/portainer/generate_cert.sh \
-	       srcs/requirements/grafana/generate_cert.sh \
-	       srcs/requirements/backend/generate_cert.sh
 
 up:
 	@echo "🚀 Starting containers..."
