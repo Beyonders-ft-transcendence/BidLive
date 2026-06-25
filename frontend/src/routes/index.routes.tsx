@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import {
     SigninPage,
     HomePage,
+    AuctionsPage,
     NotFoundPage,
     UserDashboard,
     BackofficeDashboard,
@@ -20,6 +21,7 @@ export default function IndexRoot() {
                 {/* Rotas Públicas */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/leiloes" element={<AuctionsPage />} />
                     <Route path="/signin" element={<SigninPage />} />
                 </Route>
 

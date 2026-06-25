@@ -116,7 +116,7 @@ function SigninForm() {
                     
                     {/* Left Image */}
                     <div className="hidden lg:block w-1/2 relative">
-                        <div className="rounded-3xl overflow-hidden shadow-2xl border-[12px] border-background bg-background transform translate-x-12 relative z-20 aspect-square max-w-md mx-auto">
+                        <div className="rounded-md overflow-hidden shadow-2xl border-[12px] border-background bg-background transform translate-x-12 relative z-20 aspect-square max-w-md mx-auto">
                             <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? SignInIllustrationDark : SignInIllustration} alt="Ilustração de login" className="w-full h-full object-cover" />
                         </div>
                     </div>
@@ -124,7 +124,7 @@ function SigninForm() {
                     {/* Right Form */}
                     <div className="w-full lg:w-1/2 max-w-md bg-background/50 backdrop-blur-sm p-8 rounded-2xl lg:bg-transparent lg:backdrop-blur-none lg:p-0 lg:rounded-none">
                         <div className="mb-8">
-                            <h1 className="text-4xl font-bold text-primary mb-3 tracking-tight">Entrar no Sistema</h1>
+                            <h1 className={`text-4xl font-bold mb-3 tracking-tight ${theme === "dark" ? "text-black" : "text-white"}`}>Entrar no Sistema</h1>
                             <p className="text-muted-foreground text-sm">Bem-vindo ao BidLive. Por favor, insira suas credenciais.</p>
                         </div>
 
