@@ -2,9 +2,8 @@ FROM grafana/grafana-oss:12.0.0
 
 USER root
 
-# Install cfssl (grafana image is Alpine-based)
-COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
-COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
+# Install cfssl natively from Alpine edge testing repository
+RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 # Copy shared certificate generation script
 COPY ./tools/generate_cert.sh  /usr/local/bin/generate_cert.sh

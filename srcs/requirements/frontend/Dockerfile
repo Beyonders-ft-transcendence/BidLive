@@ -18,9 +18,8 @@ FROM alpine:3.22
 
 RUN apk add --no-cache nodejs npm ca-certificates
 
-# Copy cfssl binaries from official image
-COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssl /usr/bin/cfssl
-COPY --from=cfssl/cfssl:1.6.1 /usr/bin/cfssljson /usr/bin/cfssljson
+# Install cfssl natively from Alpine edge testing repository
+RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 # Copy shared certificate generation script
 COPY ./tools/generate_cert.sh  /usr/local/bin/generate_cert.sh
