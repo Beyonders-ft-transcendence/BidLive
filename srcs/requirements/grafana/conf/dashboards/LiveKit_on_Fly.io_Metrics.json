@@ -942,7 +942,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": null,
+        "datasource": "Prometheus",
         "definition": "label_values(livekit_room_total,region)",
         "description": null,
         "error": null,

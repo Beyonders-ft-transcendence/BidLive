@@ -833,7 +833,7 @@
         "multi": false,
         "name": "service",
         "options": [],
-        "query": "label_values(django_db_new_connections_total, service)",
+        "query": "label_values(up, service)",
         "refresh": 1,
         "regex": "",
         "sort": 0,
