@@ -38,4 +38,6 @@ urlpatterns += [
 	path("", include("apps.social.api.urls")),
     path("", include("apps.auctions.api.urls")),
     path("", include("apps.chat.api.urls")),
+    path("", include("apps.notifications.api.urls")),
 ]
+
