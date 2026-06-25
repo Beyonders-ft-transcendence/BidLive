@@ -21,7 +21,8 @@ export default function Header() {
     };
 
     return (
-        <header className="relative z-10 flex items-center justify-between px-8 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
+        <header className="relative z-10 w-full bg-background/80 backdrop-blur-sm border-b border-border">
+            <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
                 <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo} alt="BidLive Logo" className="h-8 object-contain" />
@@ -31,7 +32,7 @@ export default function Header() {
             <div className="hidden md:flex items-center gap-8 flex-1 justify-center px-4">
                 <nav className="flex items-center gap-6 text-sm font-medium text-foreground/80">
                     <Link to="/" className="hover:text-primary transition-colors">Início</Link>
-                    <a href="#destaques" className="hover:text-primary transition-colors">Leilões</a>
+                    <Link to="/leiloes" className="hover:text-primary transition-colors">Leilões</Link>
                     
                     {/* Categories Dropdown */}
                     <div className="relative group">
@@ -69,6 +70,9 @@ export default function Header() {
                     Registrar / Entrar
                 </Link>
             </div>
+          
+
+            </nav>
         </header>
     );
 }

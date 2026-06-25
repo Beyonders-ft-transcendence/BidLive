@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ItemCondition } from "@/types/auction.types";
+import { ItemCondition } from "@/shared/types/auction.types";
 
 export const createAuctionSchema = z
   .object({
