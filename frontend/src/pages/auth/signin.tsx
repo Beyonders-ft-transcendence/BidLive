@@ -1,19 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import Header from "@/components/layout/Header";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail, Lock } from "lucide-react";
+import { UserRole } from "@/shared/types/auth.types";
+import { useAuthStore } from "@/shared/stores/auth.store";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import SignInIllustration from "@/assets/images/signin_illustration.png";
 import SignInIllustrationDark from "@/assets/images/signin_illustration2.png";
-import Logo from "@/assets/images/logo.png";
-import Logo2 from "@/assets/images/logo2.png";
-import { User, Lock, Sun, Moon } from "lucide-react";
-import { useAuthStore } from "@/shared/stores/auth.store";
-import { getTheme, setTheme, type Theme } from "@/shared/utils/themes.utils";
 import { signInSchema, type SignInInput } from "@/shared/schema/auth.schema";
-import { UserRole } from "@/shared/types/auth.types";
+import { getTheme, type Theme } from "@/shared/utils/themes.utils";
 
 function SigninForm() {
     const navigate = useNavigate();
@@ -52,13 +51,6 @@ function SigninForm() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formValues.email, formValues.password]);
-
-    const handleToggleTheme = () => {
-        const isDark = document.documentElement.classList.contains("dark");
-        const newTheme = isDark ? "light" : "dark";
-        setTheme(newTheme);
-        setCurrentTheme(newTheme);
-    };
 
     const handleSuccessRedirect = () => {
         const user = useAuthStore.getState().user;
@@ -108,142 +100,125 @@ function SigninForm() {
     });
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4 relative">
+        <div className="min-h-screen flex flex-col font-sans bg-background relative overflow-hidden">
+            {/* Background split (z-0) */}
+            <div className="absolute inset-0 flex z-0">
+                <div className="w-[40%] bg-background"></div>
+                <div className="w-[60%] bg-secondary"></div>
+            </div>
 
-            {/* Theme Toggle Button */}
-            <button
-                onClick={handleToggleTheme}
-                title="Mudar Tema"
-                className="absolute top-6 right-6 p-3 rounded-full bg-card shadow-lg border border-border text-muted-foreground hover:text-primary hover:scale-105 transition-all z-10"
-            >
-                {theme === "dark" || document.documentElement.classList.contains("dark") ? (
-                    <Sun size={22} />
-                ) : (
-                    <Moon size={22} />
-                )}
-            </button>
+            {/* Header Component */}
+            <Header />
 
-            <div className="w-full max-w-4xl bg-card rounded-md shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]">
-                {/* Left Side - Illustration */}
-                <div className="hidden md:flex flex-col w-1/2 bg-white dark:bg-[#0D1015] items-center justify-between p-8 pb-10 border-r border-border/50">
-                    <div className="flex-1 flex items-center justify-center w-full">
-                        <img
-                            src={theme === "dark" || document.documentElement.classList.contains("dark") ? SignInIllustrationDark : SignInIllustration}
-                            alt="Ilustração de login"
-                            className="w-full max-w-md h-auto object-contain hover:scale-105 transition-transform duration-500"
-                        />
+            {/* Main Content (z-10) */}
+            <main className="relative z-10 flex-1 flex items-center justify-center w-full max-w-7xl mx-auto p-4 sm:p-8">
+                <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
+                    
+                    {/* Left Image */}
+                    <div className="hidden lg:block w-1/2 relative">
+                        <div className="rounded-3xl overflow-hidden shadow-2xl border-[12px] border-background bg-background transform translate-x-12 relative z-20 aspect-square max-w-md mx-auto">
+                            <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? SignInIllustrationDark : SignInIllustration} alt="Ilustração de login" className="w-full h-full object-cover" />
+                        </div>
                     </div>
-                    <a href="#" className="text-sm font-semibold underline underline-offset-4 hover:text-primary transition-colors text-foreground">
-                        Criar uma conta
-                    </a>
-                </div>
 
-                {/* Right Side - Form */}
-                <div className="w-full  md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-card relative">
-                    <div className="max-w-sm w-full mx-auto">
-
-                        <img
-                            src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo}
-                            alt="BidLive Logo"
-                            className="h-10 w-40 mb-8 object-contain"
-                        />
-
+                    {/* Right Form */}
+                    <div className="w-full lg:w-1/2 max-w-md bg-background/50 backdrop-blur-sm p-8 rounded-2xl lg:bg-transparent lg:backdrop-blur-none lg:p-0 lg:rounded-none">
+                        <div className="mb-8">
+                            <h1 className="text-4xl font-bold text-primary mb-3 tracking-tight">Entrar no Sistema</h1>
+                            <p className="text-muted-foreground text-sm">Bem-vindo ao BidLive. Por favor, insira suas credenciais.</p>
+                        </div>
 
                         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <div className="relative flex items-center">
-                                        <User className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
-                                        <Input
-                                            type="email"
-                                            placeholder="Seu E-mail"
-                                            {...register("email")}
-                                            className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
-                                        />
-                                    </div>
-                                    {errors.email && (
-                                        <p className="text-destructive text-xs font-medium">{errors.email.message}</p>
-                                    )}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-semibold text-foreground">Endereço de Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+                                    <Input
+                                        type="email"
+                                        placeholder="exemplo@email.com"
+                                        {...register("email")}
+                                        className="pl-10 h-12 bg-background border border-border rounded-md focus-visible:ring-1 focus-visible:ring-primary shadow-sm w-full"
+                                    />
                                 </div>
+                                {errors.email && (
+                                    <p className="text-destructive text-xs font-medium">{errors.email.message}</p>
+                                )}
+                            </div>
 
-                                <div className="space-y-2">
-                                    <div className="relative flex items-center">
-                                        <Lock className="absolute left-2 w-5 h-5 text-muted-foreground/70" />
-                                        <Input
-                                            type="password"
-                                            placeholder="Senha"
-                                            {...register("password")}
-                                            className="pl-10 h-12 bg-transparent border-t-0 border-l-0 border-r-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-primary border-border shadow-none w-full text-base"
-                                        />
-                                    </div>
-                                    {errors.password && (
-                                        <p className="text-destructive text-xs font-medium">{errors.password.message}</p>
-                                    )}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-semibold text-foreground">Palavra-passe</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+                                    <Input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        {...register("password")}
+                                        className="pl-10 h-12 bg-background border border-border rounded-md focus-visible:ring-1 focus-visible:ring-primary shadow-sm w-full"
+                                    />
                                 </div>
+                                {errors.password && (
+                                    <p className="text-destructive text-xs font-medium">{errors.password.message}</p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center justify-end">
+                                <a href="#" className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+                                    Esqueceu a palavra-passe?
+                                </a>
                             </div>
 
                             {apiError && <p className="text-destructive text-sm font-medium">{apiError}</p>}
 
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        id="remember"
-                                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
-                                    />
-                                    <label htmlFor="remember" className="text-sm font-medium text-muted-foreground cursor-pointer">
-                                        Lembrar de mim
-                                    </label>
-                                </div>
-                                <a href="#" className="text-sm font-semibold text-primary hover:underline underline-offset-4 transition-colors">
-                                    Esqueci minha senha
-                                </a>
-                            </div>
-
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <Button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full py-6 rounded-md font-medium text-base shadow-lg hover:shadow-primary/30 transition-all"
+                                    className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md font-semibold text-base transition-all shadow-md"
                                 >
-                                    {isLoading ? "Entrando..." : "Entrar"}
+                                    {isLoading ? "Acedendo..." : "Aceder à Plataforma"}
                                 </Button>
                             </div>
                         </form>
 
-                        <div className="mt-10 flex flex-col items-center gap-8">
-                            <div className="flex flex-col items-center gap-4 w-full">
-                                <div className="flex items-center w-full">
-                                    <div className="flex-1 border-t border-border"></div>
-                                    <span className="px-4 text-sm font-medium text-muted-foreground">Ou entre com</span>
-                                    <div className="flex-1 border-t border-border"></div>
-                                </div>
-                                <div className="flex gap-4 mt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => executeGoogleLogin()}
-                                        className="w-11 h-11 rounded-md flex items-center justify-center bg-[#ea4335] text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-lg"
-                                    >
-                                        G
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleIntraLogin}
-                                        className="w-11 h-11 rounded-md flex items-center justify-center bg-[#000000] dark:bg-white dark:text-black text-white hover:opacity-90 hover:scale-105 transition-all shadow-md font-bold text-base"
-                                    >
-                                        42
-                                    </button>
-                                </div>
-                            </div>
+                        <div className="mt-8 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                Ainda não tem acesso? <a href="#" className="text-primary font-semibold hover:underline">Crie uma conta.</a>
+                            </p>
+                        </div>
 
-                            {/* Mobile only link */}
-                            <a href="#" className="md:hidden text-sm font-semibold underline underline-offset-4 hover:text-primary transition-colors text-foreground">
-                                Criar uma conta
-                            </a>
+                        {/* Social Login */}
+                        <div className="mt-8 flex flex-col items-center gap-6">
+                            <div className="flex items-center w-full">
+                                <div className="flex-1 border-t border-border"></div>
+                                <span className="px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Ou entre com</span>
+                                <div className="flex-1 border-t border-border"></div>
+                            </div>
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => executeGoogleLogin()}
+                                    className="w-12 h-12 rounded-full flex items-center justify-center bg-background border border-border text-[#ea4335] hover:bg-muted transition-all shadow-sm"
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleIntraLogin}
+                                    className="w-12 h-12 rounded-full flex items-center justify-center bg-foreground text-background hover:opacity-80 transition-all shadow-sm font-bold text-lg"
+                                >
+                                    42
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
