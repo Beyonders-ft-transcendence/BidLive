@@ -2,6 +2,11 @@
 secrets/*.txt
 secrets/*.pem
 secrets/*.csr
+secrets/*.json
+secrets/*.key
+secrets/*.srl
+secrets/*.crt
+
 .vscode/
 
 # Environment - NUNCA commitar .env com senhas reais
