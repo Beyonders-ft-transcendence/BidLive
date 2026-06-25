@@ -47,7 +47,7 @@ export interface FileBrief {
 
 export interface AuctionImage {
   id: number;
-  file: FileBrief;
+  image_url: string;
   is_primary: boolean;
   sort_order: number;
   created_at: string;

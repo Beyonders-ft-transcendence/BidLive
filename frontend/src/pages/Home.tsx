@@ -30,7 +30,7 @@ export default function HomePage() {
             {heroAuction?.item?.images?.[0] && (
                <div 
                  className="absolute inset-0 bg-cover bg-center z-0 opacity-40 group-hover:opacity-50 transition-opacity" 
-                 style={{ backgroundImage: `url(${heroAuction.item.images[0]?.file?.url})` }}
+                 style={{ backgroundImage: `url(${heroAuction.item.images[0]?.image_url})` }}
                />
             )}
             <div className="z-10 relative">
@@ -68,7 +68,7 @@ export default function HomePage() {
             <div className="flex items-end justify-between z-10 relative">
               <div className="flex gap-4">
                 {heroAuction?.item?.images?.slice(1, 4).map((img, idx) => (
-                  <img key={idx} src={img?.file?.url} alt="Galeria" className="w-16 h-16 bg-muted rounded-md object-cover border border-border" />
+                  <img key={idx} src={img?.image_url} alt="Galeria" className="w-16 h-16 bg-muted rounded-md object-cover border border-border" />
                 )) || (
                   <>
                     <div className="w-16 h-16 bg-muted rounded-md"></div>
@@ -163,7 +163,7 @@ export default function HomePage() {
                 <div key={auction.id} className="border border-border rounded-2xl overflow-hidden flex flex-col bg-card shadow-sm hover:shadow-md transition-shadow group">
                   <div className="h-48 bg-muted relative overflow-hidden">
                     {auction.item.images?.[0] ? (
-                      <img src={auction.item.images[0]?.file?.url} alt={auction.item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={auction.item.images[0]?.image_url} alt={auction.item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">Sem foto</div>
                     )}
@@ -212,7 +212,7 @@ export default function HomePage() {
               ) : upcomingAuctions.slice(0, 5).map(auction => (
                 <Link key={auction.id} to={`/auction/${auction.id}`} className="flex gap-4 items-center group cursor-pointer hover:bg-muted/30 p-2 -mx-2 rounded-lg transition-colors">
                   <div className="w-16 h-16 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
-                    {auction.item.images?.[0]?.file?.url && <img src={auction.item.images[0]?.file?.url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />}
+                    {auction.item.images?.[0]?.image_url && <img src={auction.item.images[0]?.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />}
                   </div>
                   <div className="flex-1 min-w-0">
                      <div className="text-[10px] text-primary font-bold mb-1 uppercase">Em breve</div>
