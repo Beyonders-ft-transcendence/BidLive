@@ -23,6 +23,7 @@ scrape_configs:
           region: "local"
 
   - job_name: "postgres-exporter"
+    metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
@@ -30,6 +31,7 @@ scrape_configs:
       - targets: ["postgres-exporter:9187"]
 
   - job_name: "redis-exporter"
+    metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
@@ -40,6 +42,7 @@ scrape_configs:
           statefulset_kubernetes_io_pod_name: "redis-0"
 
   - job_name: "nginx-exporter"
+    metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
@@ -50,6 +53,7 @@ scrape_configs:
           app: "nginx"
 
   - job_name: "celery-exporter"
+    metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
