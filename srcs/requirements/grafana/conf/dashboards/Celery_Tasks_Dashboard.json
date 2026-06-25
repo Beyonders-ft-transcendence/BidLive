@@ -1,7 +1,7 @@
 {
   "__inputs": [
     {
-      "name": "DS_PROMETHEUS",
+      "name": "Prometheus",
       "label": "Prometheus",
       "description": "Need celery_exporter from https://github.com/danihodovic/celery-exporter in order to make this dashboard work properly",
       "type": "datasource",
