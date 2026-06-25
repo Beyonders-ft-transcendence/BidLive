@@ -5,7 +5,7 @@ secrets/*.csr
 secrets/*.json
 secrets/*.key
 secrets/*.srl
-secrets/*.crt
+secrets/
 
 .vscode/
 
