@@ -54,7 +54,7 @@ export default function Header() {
                     <Input 
                         type="text" 
                         placeholder="Pesquisar leilões..." 
-                        className="pl-9 h-9 bg-background/50 border-border focus-visible:ring-primary rounded-full text-sm w-full"
+                        className="pl-9 h-9 bg-background/50 border-border focus-visible:ring-primary rounded-md text-sm w-full"
                     />
                 </div>
             </div>
