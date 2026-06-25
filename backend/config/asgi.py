@@ -9,8 +9,9 @@ django.setup()
 from apps.auctions.websocket.middleware import JWTAuthMiddleware
 from apps.auctions.websocket.routing import websocket_urlpatterns as auction_ws
 from apps.chat.websocket.routing import websocket_urlpatterns as chat_ws
+from apps.notifications.websocket.routing import websocket_urlpatterns as notifications_ws
 
-all_websocket_patterns = auction_ws + chat_ws
+all_websocket_patterns = auction_ws + chat_ws + notifications_ws
 
 application = ProtocolTypeRouter(
     {
