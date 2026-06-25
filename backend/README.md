@@ -71,7 +71,7 @@ docker run -d --name postgres \
   -e POSTGRES_DB=bidlive \
   -e POSTGRES_USER=bidlive \
   -e POSTGRES_PASSWORD=bidlive \
-  -v postgres_data:/var/lib/postgresql/data \
+  -v DATABASE_data:/var/lib/postgresql/data \
   postgres:16-alpine
 
 docker run -d --name livekit \
