@@ -16,7 +16,7 @@ RUN npm prune --omit=dev
 
 FROM alpine:3.22
 
-RUN apk add --no-cache nodejs npm ca-certificates
+RUN apk add --no-cache nodejs npm ca-certificates stunnel
 
 # Install cfssl natively from Alpine edge testing repository
 RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing

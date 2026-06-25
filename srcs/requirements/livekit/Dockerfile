@@ -5,7 +5,8 @@ ENV LIVEKIT_VERSION=1.11.0
 RUN apk add --no-cache \
     ca-certificates \
     curl \
-    tar
+    tar \
+    stunnel
 
 # Install cfssl natively from Alpine edge testing repository
 RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing

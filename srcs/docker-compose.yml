@@ -32,6 +32,7 @@ services:
       - nginx
     networks:
       - frontend-network
+      - backend-network
     expose:
       - "9113"
     restart: always

@@ -23,6 +23,10 @@ DATABASE_SSLMODE="${DATABASE_SSLMODE:-disable}"
 
 export DATA_SOURCE_NAME="host=${DATABASE_HOST} port=${DATABASE_PORT} user=${DATABASE_USER} password=${DATABASE_PASSWORD} dbname=${DATABASE_DB} sslmode=${DATABASE_SSLMODE}"
 
-unset DATABASE_PASSWORD
+cat > /etc/ssl/certs/web-config.yml <<EOF
+tls_server_config:
+  cert_file: /etc/ssl/certs/server.crt
+  key_file: /etc/ssl/private/server.key
+EOF
 
-exec postgres_exporter "$@"
+exec postgres_exporter --web.config.file=/etc/ssl/certs/web-config.yml "$@"

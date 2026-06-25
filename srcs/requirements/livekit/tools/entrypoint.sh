@@ -25,15 +25,36 @@ else
   exit 1
 fi  
 
+# === Configure stunnel ===
+echo "Configuring stunnel..."
+cat > /tmp/stunnel.conf <<EOF
+pid = /tmp/stunnel.pid
+foreground = no
+client = no
+
+[livekit-api]
+accept = 0.0.0.0:7880
+connect = 127.0.0.1:8080
+cert = /etc/ssl/certs/server.crt
+key = /etc/ssl/private/server.key
+
+[livekit-metrics]
+accept = 0.0.0.0:6789
+connect = 127.0.0.1:6788
+cert = /etc/ssl/certs/server.crt
+key = /etc/ssl/private/server.key
+EOF
+
+stunnel /tmp/stunnel.conf
+
 CONFIG_FILE="/tmp/livekit.yaml"
-LIVEKIT_PROMETHEUS_PORT="${LIVEKIT_PROMETHEUS_PORT:-6789}"
 LIVEKIT_REGION="${LIVEKIT_REGION:-local}"
 
 echo "Generating LiveKit configuration..."
 
 cat > "$CONFIG_FILE" <<INNEREOF
-port: ${LIVEKIT_HTTP_PORT}
-prometheus_port: ${LIVEKIT_PROMETHEUS_PORT}
+port: 8080
+prometheus_port: 6788
 region: ${LIVEKIT_REGION}
 rtc:
   tcp_port: ${LIVEKIT_TCP_PORT}

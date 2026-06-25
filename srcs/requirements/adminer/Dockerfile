@@ -7,7 +7,8 @@ RUN apk add --no-cache \
     php83-pgsql \
     php83-sqlite3 \
     curl \
-    ca-certificates
+    ca-certificates \
+    stunnel
 
 # Install cfssl natively from Alpine edge testing repository
 RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
