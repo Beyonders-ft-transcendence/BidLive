@@ -80,6 +80,7 @@ services:
       - postgres-exporter
       - redis-exporter
       - nginx-exporter
+      - celery-exporter
     networks:
       - backend-network
     restart: always
@@ -338,6 +339,29 @@ services:
       - backend-network
     expose:
       - "9121"
+    restart: always
+    secrets:
+      - redis_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    env_file:
+      - ./.env.redis
+
+  celery-exporter:
+    image: celery-exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/celery_exporter
+      dockerfile: Dockerfile
+    container_name: celery-exporter
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend-network
+    expose:
+      - "9808"
     restart: always
     secrets:
       - redis_credenciais

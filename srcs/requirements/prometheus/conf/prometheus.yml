@@ -9,6 +9,8 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ["backend:8000"]
+        labels:
+          service: "backend"
 
   - job_name: "livekit"
     metrics_path: "/metrics"
@@ -17,6 +19,8 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ["livekit:6789"]
+        labels:
+          region: "local"
 
   - job_name: "postgres-exporter"
     scheme: https
@@ -31,6 +35,9 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ["redis-exporter:9121"]
+        labels:
+          kubernetes_namespace: "bidlive"
+          statefulset_kubernetes_io_pod_name: "redis-0"
 
   - job_name: "nginx-exporter"
     scheme: https
@@ -38,3 +45,13 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ["nginx-exporter:9113"]
+        labels:
+          namespace: "bidlive"
+          app: "nginx"
+
+  - job_name: "celery-exporter"
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ["celery-exporter:9808"]
