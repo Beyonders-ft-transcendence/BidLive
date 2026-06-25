@@ -33,7 +33,7 @@ export default function AuthCallbackHandler() {
                     }
                 } catch (error) {
                     console.error("42 Auth Error:", error);
-                    navigate("/");
+                    navigate("/signin");
                 }
             };
             processAuth();

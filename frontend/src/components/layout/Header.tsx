@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Sun, Moon, Search, ChevronDown } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 export default function Header() {
     const [theme, setCurrentTheme] = useState<Theme>("light");
@@ -22,15 +23,15 @@ export default function Header() {
     return (
         <header className="relative z-10 flex items-center justify-between px-8 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
             {/* Logo */}
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
                 <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo} alt="BidLive Logo" className="h-8 object-contain" />
-            </div>
+            </Link>
 
             {/* Middle Section: Nav Links & Search */}
             <div className="hidden md:flex items-center gap-8 flex-1 justify-center px-4">
                 <nav className="flex items-center gap-6 text-sm font-medium text-foreground/80">
-                    <a href="#" className="hover:text-primary transition-colors">Início</a>
-                    <a href="#" className="hover:text-primary transition-colors">Leilões</a>
+                    <Link to="/" className="hover:text-primary transition-colors">Início</Link>
+                    <a href="#destaques" className="hover:text-primary transition-colors">Leilões</a>
                     
                     {/* Categories Dropdown */}
                     <div className="relative group">
@@ -64,9 +65,9 @@ export default function Header() {
                 <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors">
                     {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <button className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm">
+                <Link to="/signin" className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm text-center">
                     Registrar / Entrar
-                </button>
+                </Link>
             </div>
         </header>
     );

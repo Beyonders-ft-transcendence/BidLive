@@ -1,9 +1,18 @@
-import logo from "@/assets/images/logo2.png"
 
-export default function HomePage(){
-    return(
-        <div>
-            <img src={logo} className="h-[100px]" alt="Logo" />
-        </div>
-    )
+import Header from "@/components/layout/Header";
+
+
+export default function HomePage() {
+
+
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-white">
+      {/* Reused Global Header */}
+      <Header />
+
+   
+
+    </div>
+  );
 }
