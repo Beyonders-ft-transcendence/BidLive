@@ -23,4 +23,4 @@ export REDIS_ADDR="redis://${REDIS_HOST}:${REDIS_PORT}"
 export REDIS_USER="${REDIS_USER}"
 export REDIS_PASSWORD
 
-exec redis_exporter "$@"
+exec /redis_exporter "$@"

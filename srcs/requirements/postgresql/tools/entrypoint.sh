@@ -26,6 +26,7 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "CREATE USER $DATABASE_USER WITH PASSWORD '$DATABASE_PASSWORD';"
     su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "CREATE DATABASE $DATABASE_DB OWNER $DATABASE_USER;"
     su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "ALTER USER $DATABASE_USER CREATEDB;"
+    su-exec postgres psql -p "$DATABASE_PORT" -U postgres -c "GRANT pg_monitor TO $DATABASE_USER;"
 
     echo "Desligando a instância temporária..."
     su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop
