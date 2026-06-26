@@ -70,6 +70,7 @@ class ReportViewSet(viewsets.GenericViewSet):
             status_code=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(tags=REPORTS_TAGS, summary="Listar denúncias do utilizador autenticado")
     @action(detail=False, methods=["get"], url_path="mine")
     def my_reports(self, request: Request):
         reports = list_my_reports(user=request.user)
