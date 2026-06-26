@@ -26,6 +26,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # Override EMAIL_BACKEND to avoid trying to send real emails to demo users
+        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
         if options["clear"]:
             counts = clear_demo_data()
             if not counts:
