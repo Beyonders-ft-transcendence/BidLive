@@ -7,6 +7,6 @@ loglevel = "info"
 accesslog = "-"
 errorlog = "-"
 
-certfile = "/etc/ssl/certs/server.crt"
-keyfile = "/etc/ssl/private/server.key"
+# certfile = "/etc/ssl/certs/server.crt"
+# keyfile = "/etc/ssl/private/server.key"
 
