@@ -153,6 +153,49 @@ def soft_delete_user(*, actor: User, user: User, ip_address: str = "") -> User:
     return user
 
 
+@transaction.atomic
+def hard_delete_user(*, actor: User, user: User, ip_address: str = "") -> None:
+    if not user_has_permission(user=actor, permission_name="user.delete"):
+        raise PermissionDenied({"permission": ["Permissao user.delete necessaria."]})
+    if actor.id == user.id:
+        raise ValidationError({"user": ["Nao e possivel remover a propria conta por este endpoint."]})
+
+    # Check hierarchy: actor's level must be strictly greater than target's level
+    from apps.users.authorization_service import get_user_level
+    actor_level = get_user_level(actor)
+    target_level = get_user_level(user)
+    if actor_level <= target_level:
+        raise PermissionDenied({"hierarchy": ["Nao e possivel remover um usuario de nivel igual ou superior ao seu."]})
+
+
+    # Explicitly delete related records configured as SET_NULL or generic relationships referencing the user
+    from apps.users.models import PermissionAuditLog
+    from django.db.models import Q
+    PermissionAuditLog.objects.filter(Q(actor=user) | Q(target_user=user)).delete()
+
+    from apps.analytics.models import AnalyticsEvent
+    AnalyticsEvent.objects.filter(user=user).delete()
+
+    from apps.auctions.models.media import AuctionAuditLog
+    AuctionAuditLog.objects.filter(actor=user).delete()
+
+    from apps.reports.models import Report, ReportTargetType
+    Report.objects.filter(target_type=ReportTargetType.USER, target_id=user.id).delete()
+
+    # Log the audit action first (before deleting the user record)
+    log_permission_audit(
+        actor=actor,
+        target_user=None,
+        action="user.hard_deleted",
+        resource_type="user",
+        resource_id=user.id,
+        metadata={"email": user.email, "username": user.username},
+        ip_address=ip_address,
+    )
+
+    user.delete()
+
+
 def _set_user_roles(*, user: User, role_names: list[str]) -> None:
     roles = list(Role.objects.filter(name__in=role_names))
     if len(roles) != len(set(role_names)):
