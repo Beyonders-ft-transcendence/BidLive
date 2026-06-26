@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM alpine:3.22
 
 RUN apk add --no-cache \
     build-base \
@@ -8,7 +8,16 @@ RUN apk add --no-cache \
     jpeg-dev \
     zlib-dev \
     curl \
-    make
+    make \
+    python3 py3-pip \
+    ca-certificates
+
+# Install cfssl natively from Alpine edge testing repository
+RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+# Copy shared certificate generation script
+COPY ./tools/generate_cert.sh  /usr/local/bin/generate_cert.sh
+RUN chmod +x /usr/local/bin/generate_cert.sh
 
 RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
 
@@ -23,7 +32,8 @@ ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
 COPY --chown=appuser:appuser pyproject.toml uv.lock README.md ./
 
-RUN pip install --no-cache-dir uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
 
 RUN uv sync --frozen
 
@@ -34,8 +44,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER appuser
-
 EXPOSE 8000
 
+# Entrypoint runs as root to generate certs, then drops to appuser
 ENTRYPOINT ["/entrypoint.sh"]
