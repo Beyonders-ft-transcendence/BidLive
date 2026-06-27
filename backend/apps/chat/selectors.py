@@ -61,12 +61,33 @@ def get_or_create_auction_room(*, auction_id: int) -> tuple[ChatRoom, bool]:
     )
 
 
-def get_room_messages(*, room_id: int) -> QuerySet[Message]:
-    return (
-        Message.objects.filter(room_id=room_id, is_deleted=False)
-        .select_related("sender")
-        .order_by("created_at")
-    )
+def get_room_messages(
+    *, room_id: int, viewer: User | None = None
+) -> QuerySet[Message]:
+    """
+    Mensagens visíveis de uma sala.
+    BE-005: se viewer for fornecido, exclui mensagens de utilizadores
+    que o viewer bloqueou (ou que bloquearam o viewer).
+    """
+    from apps.social.models import Friendship, FriendshipStatus
+
+    qs = Message.objects.filter(room_id=room_id, is_deleted=False)
+
+    if viewer:
+        blocked_ids = Friendship.objects.filter(
+            Q(requester=viewer) | Q(addressee=viewer),
+            status=FriendshipStatus.BLOCKED,
+        ).values_list(
+            "addressee_id", flat=True
+        ) | Friendship.objects.filter(
+            Q(requester=viewer) | Q(addressee=viewer),
+            status=FriendshipStatus.BLOCKED,
+        ).values_list("requester_id", flat=True)
+
+        blocked_ids = [bid for bid in blocked_ids if bid != viewer.id]
+        qs = qs.exclude(sender_id__in=blocked_ids)
+
+    return qs.select_related("sender").order_by("created_at")
 
 
 def get_room(*, room_id: int) -> ChatRoom | None:
