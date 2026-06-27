@@ -9,6 +9,7 @@ from apps.chat.selectors import (
 )
 from apps.notifications.models import NotificationType
 from apps.notifications.services import notify_user
+from apps.social.selectors import is_blocked
 from apps.users.models import User
 
 
@@ -21,6 +22,9 @@ def send_private_message(
 
     if sender.id == recipient.id:
         raise ValidationError("Não podes enviar mensagem a ti mesmo.")
+
+    if is_blocked(user=sender, other_user=recipient):
+        raise ValidationError("Não podes enviar mensagem a este utilizador.")
 
     conversation, _ = get_or_create_private_conversation(
         user_one=sender,
