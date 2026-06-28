@@ -268,6 +268,8 @@ def test_stream_livekit_token_endpoint_rejects_viewer_before_stream_is_live(db, 
     )
 
     assert token_response.status_code == 403
+
+
 def test_stream_end_service_closes_live_stream(db, user):
     cache.clear()
     auction = _create_live_auction(seller=user, title="End Live")
@@ -283,3 +285,4 @@ def test_stream_end_service_closes_live_stream(db, user):
     ended.refresh_from_db()
     assert ended.is_live is False
     assert ended.ended_at is not None
+

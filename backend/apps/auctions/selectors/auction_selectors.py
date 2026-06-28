@@ -1,6 +1,7 @@
 from django.db.models import Prefetch, QuerySet
 
 from apps.auctions.models import Auction, AuctionImage, AuctionItem, AuctionStatus, Bid
+from apps.users.models import User
 
 
 def list_auctions() -> QuerySet[Auction]:
@@ -31,10 +32,17 @@ def get_auction_item_by_id(*, item_id: int) -> AuctionItem:
     return AuctionItem.objects.select_related("category", "seller").get(pk=item_id)
 
 
-def list_bids_for_auction(*, auction_id: int) -> QuerySet[Bid]:
+def list_bids_for_auction(*, auction_id: int, viewer: User | None = None) -> QuerySet[Bid]:
+    from apps.social.selectors import get_blocked_user_ids
+
+    qs = Bid.objects.filter(auction_id=auction_id)
+    if viewer and viewer.is_authenticated:
+        blocked_ids = get_blocked_user_ids(user=viewer)
+        if blocked_ids:
+            qs = qs.exclude(bidder_id__in=blocked_ids)
+
     return (
-        Bid.objects.filter(auction_id=auction_id)
-        .select_related("bidder")
+        qs.select_related("bidder")
         .order_by("-created_at", "-id")
     )
 
