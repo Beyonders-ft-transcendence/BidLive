@@ -277,7 +277,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     def bids(self, request, pk=None):
         auction = self.get_queryset().get(pk=int(pk))
         if request.method.lower() == "get":
-            queryset = list_bids_for_auction(auction_id=auction.id)
+            queryset = list_bids_for_auction(auction_id=auction.id, viewer=request.user)
             page = self.paginate_queryset(queryset)
             serializer = BidSerializer(page or queryset, many=True)
             if page is not None:

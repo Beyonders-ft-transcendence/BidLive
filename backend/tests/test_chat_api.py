@@ -455,4 +455,32 @@ class TestDeleteRoomMessage:
  
         res_after = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
         assert len(res_after.data["data"]) == 0
+
+    def test_list_room_messages_excludes_blocked_users(
+        self, auth_client, auction, room_message, user, other_user
+    ):
+        """Messages of blocked users should be excluded from room history."""
+        from apps.chat.models import Message
+        from apps.chat.selectors import get_or_create_auction_room
+        room, _ = get_or_create_auction_room(auction_id=auction.id)
+        msg2 = Message.objects.create(
+            room=room,
+            sender=other_user,
+            message="Mensagem de usuário bloqueado"
+        )
+
+        # viewer (user) blocks other_user
+        from apps.social.models import Friendship, FriendshipStatus
+        Friendship.objects.create(
+            requester=user,
+            addressee=other_user,
+            status=FriendshipStatus.BLOCKED
+        )
+
+        # user fetches history
+        res = auth_client.get(f"/api/chat/auctions/{auction.id}/messages/")
+        assert res.status_code == 200
+        ids = [msg["id"] for msg in res.data["data"]]
+        assert room_message.id in ids
+        assert msg2.id not in ids
  

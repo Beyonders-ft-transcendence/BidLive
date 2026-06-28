@@ -60,3 +60,20 @@ def is_blocked(*, user: User, other_user: User) -> bool:
 		| Q(requester=other_user, addressee=user),
 		status=FriendshipStatus.BLOCKED,
 	).exists()
+
+
+def get_blocked_user_ids(*, user: User) -> set[int]:
+	"""
+	Retorna um conjunto contendo os IDs de todos os utilizadores que 'user' bloqueou
+	e todos os utilizadores que bloquearam 'user'.
+	"""
+	blocked_by_user = Friendship.objects.filter(
+		requester=user, status=FriendshipStatus.BLOCKED
+	).values_list("addressee_id", flat=True)
+
+	blocking_user = Friendship.objects.filter(
+		addressee=user, status=FriendshipStatus.BLOCKED
+	).values_list("requester_id", flat=True)
+
+	return set(list(blocked_by_user) + list(blocking_user))
+
