@@ -17,6 +17,7 @@ from apps.auctions.services.realtime_service import (
     increment_auction_presence,
 )
 from apps.users.authorization_service import user_has_permission
+from apps.social.selectors import get_blocked_user_ids
 
 
 @sync_to_async
@@ -58,6 +59,7 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
             return
 
         self.group_name = auction_group_name(auction_id=self.auction_id)
+        self.blocked_user_ids = await sync_to_async(get_blocked_user_ids)(user=user)
         await self.accept()
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
@@ -65,6 +67,15 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
         if snapshot is None:
             await self.close(code=4404)
             return
+
+        highest_bidder_id = snapshot.get("highest_bidder", {}).get("id") if snapshot.get("highest_bidder") else None
+        if highest_bidder_id and highest_bidder_id in self.blocked_user_ids:
+            snapshot = snapshot.copy()
+            snapshot["highest_bidder"] = {
+                "id": None,
+                "username": "Usuário Bloqueado",
+                "full_name": "Usuário Bloqueado"
+            }
 
         active_connections = await sync_to_async(increment_auction_presence)(auction_id=self.auction_id)
         snapshot["active_connections"] = active_connections
@@ -158,7 +169,38 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
 
     async def auction_event(self, event):
         try:
-            await self.send_json({"event": event.get("event"), "payload": event.get("payload")})
+            event_type = event.get("event")
+            payload = event.get("payload") or {}
+
+            if event_type == "new_bid":
+                bidder_id = payload.get("bidder", {}).get("id")
+                if bidder_id and bidder_id in getattr(self, "blocked_user_ids", set()):
+                    payload = payload.copy()
+                    payload["bidder"] = {
+                        "id": None,
+                        "username": "Usuário Bloqueado",
+                        "full_name": "Usuário Bloqueado"
+                    }
+            elif event_type == "outbid":
+                bidder_id = payload.get("bidder", {}).get("id")
+                outbid_user_id = payload.get("outbid_user", {}).get("id")
+                blocked_ids = getattr(self, "blocked_user_ids", set())
+                if (bidder_id and bidder_id in blocked_ids) or (outbid_user_id and outbid_user_id in blocked_ids):
+                    payload = payload.copy()
+                    if bidder_id in blocked_ids:
+                        payload["bidder"] = {
+                            "id": None,
+                            "username": "Usuário Bloqueado",
+                            "full_name": "Usuário Bloqueado"
+                        }
+                    if outbid_user_id in blocked_ids:
+                        payload["outbid_user"] = {
+                            "id": None,
+                            "username": "Usuário Bloqueado",
+                            "full_name": "Usuário Bloqueado"
+                        }
+
+            await self.send_json({"event": event_type, "payload": payload})
         except RuntimeError:
             pass
 

@@ -438,3 +438,80 @@ def test_draft_auction_is_hidden_from_other_users(db, user, other_user):
 
     assert auction_id in seller_ids
     assert auction_id not in other_ids
+
+
+def test_auction_bids_excludes_blocked_users(db, user):
+    from apps.auctions.models import Auction, AuctionItem, Bid
+    from apps.social.models import Friendship, FriendshipStatus
+
+    _grant_permissions(user, ["auction.create", "auction.read"])
+    category, _ = AuctionCategory.objects.get_or_create(name="Fashion", slug="fashion")
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    # Create auction
+    start_time = timezone.now() + timezone.timedelta(hours=1)
+    end_time = start_time + timezone.timedelta(hours=2)
+    item = AuctionItem.objects.create(
+        seller=user,
+        title="Test Item",
+        category=category,
+        starting_price=100.00,
+        current_price=100.00,
+        minimum_increment=10.00,
+    )
+    auction = Auction.objects.create(
+        item=item,
+        start_time=start_time,
+        end_time=end_time,
+        status="LIVE",
+    )
+
+    # Create another user (blocked user)
+    blocked_user = User.objects.create_user(
+        email="blocked@example.com",
+        username="blocked",
+        full_name="Blocked User",
+        password="password123",
+    )
+
+    # Block relationship: user blocks blocked_user
+    Friendship.objects.create(
+        requester=user,
+        addressee=blocked_user,
+        status=FriendshipStatus.BLOCKED,
+    )
+
+    # Blocked user places a bid
+    bid1 = Bid.objects.create(
+        auction=auction,
+        bidder=blocked_user,
+        amount=110.00,
+    )
+
+    # Normal user (user itself) places a bid
+    bid2 = Bid.objects.create(
+        auction=auction,
+        bidder=user,
+        amount=120.00,
+    )
+
+    # Get bids list as user -> bid1 from blocked_user should be excluded, bid2 should be present
+    res = client.get(f"/api/auctions/{auction.id}/bids/")
+    assert res.status_code == 200
+    ids = [b["id"] for b in res.data["data"]]
+    assert bid2.id in ids
+    assert bid1.id not in ids
+
+    # BidSerializer should mask bidder info of bid1 if serialized directly
+    from apps.auctions.serializers.bid_serializers import BidSerializer
+    class DummyRequest:
+        def __init__(self, user):
+            self.user = user
+
+    serializer = BidSerializer(bid1, context={"request": DummyRequest(user)})
+    data = serializer.data
+    assert data["bidder"]["username"] == "Usuário Bloqueado"
+    assert data["bidder"]["id"] is None
+
