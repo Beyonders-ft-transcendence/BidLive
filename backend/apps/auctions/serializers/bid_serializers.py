@@ -32,6 +32,21 @@ class BidSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            from apps.social.selectors import get_blocked_user_ids
+            blocked_ids = get_blocked_user_ids(user=request.user)
+            if instance.bidder_id in blocked_ids:
+                ret["bidder"] = {
+                    "id": None,
+                    "username": "Usuário Bloqueado",
+                    "full_name": "Usuário Bloqueado"
+                }
+                ret["bidder_id"] = None
+        return ret
+
 
 class BidCreateSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
