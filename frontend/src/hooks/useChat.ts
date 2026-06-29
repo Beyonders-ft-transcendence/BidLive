@@ -279,9 +279,11 @@ export function useAuctionChatRealtime(auctionId: number) {
                 username: data.sender_username,
                 full_name: data.sender_username,
                 avatar_url: data.sender_avatar,
+                is_online: true,
               },
               message: data.message,
               created_at: data.created_at,
+              is_deleted: false,
             };
 
             queryClient.setQueryData(
