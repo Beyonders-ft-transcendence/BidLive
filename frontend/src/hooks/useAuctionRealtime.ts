@@ -53,7 +53,7 @@ export function useAuctionRealtime(id: number) {
   }, [activeStream, hasInitializedStream]);
 
   useEffect(() => {
-    if (!id || isNaN(id)) return;
+    if (!id || isNaN(id) || !accessToken) return;
 
     // Setup WebSocket for Real-time Updates and Bidding
     const token = accessToken;
