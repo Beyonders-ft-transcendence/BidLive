@@ -3,6 +3,7 @@ import {
     SigninPage,
     HomePage,
     AuctionsPage,
+    AuctionDetailPage,
     NotFoundPage,
     UserDashboard,
     BackofficeDashboard,
@@ -22,6 +23,7 @@ export default function IndexRoot() {
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/leiloes" element={<AuctionsPage />} />
+                    <Route path="/auction/:id" element={<AuctionDetailPage />} />
                     <Route path="/signin" element={<SigninPage />} />
                 </Route>
 
