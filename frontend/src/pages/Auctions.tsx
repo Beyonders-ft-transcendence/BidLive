@@ -19,6 +19,7 @@ export default function AuctionsPage() {
     const [startsAfter, setStartsAfter] = useState<string>("");
     const [endsBefore, setEndsBefore] = useState<string>("");
     const [sellerId, setSellerId] = useState<string>("");
+    const [viewType, setViewType] = useState<"list" | "grid">("list");
 
     const { data: auctionsData, isLoading } = useAuctionsQuery({ 
         page: page,
@@ -107,10 +108,16 @@ export default function AuctionsPage() {
                         <div className="flex items-center gap-2">
                             <span className="text-muted-foreground">Visualização</span>
                             <div className="flex items-center gap-1">
-                                <button className="p-1.5 text-primary bg-primary/10 rounded-md">
+                                <button 
+                                    onClick={() => setViewType("list")}
+                                    className={`p-1.5 rounded-md ${viewType === 'list' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`}
+                                >
                                     <List className="w-4 h-4" />
                                 </button>
-                                <button className="p-1.5 text-muted-foreground hover:bg-muted rounded-md opacity-50 cursor-not-allowed" title="Em breve">
+                                <button 
+                                    onClick={() => setViewType("grid")}
+                                    className={`p-1.5 rounded-md ${viewType === 'grid' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`}
+                                >
                                     <Grid2X2 className="w-4 h-4" />
                                 </button>
                             </div>
@@ -127,11 +134,11 @@ export default function AuctionsPage() {
                     <div className="flex-1 w-full flex flex-col gap-4">
                         
                         {/* List Items */}
-                        <div className="space-y-6">
+                        <div className={viewType === 'list' ? "space-y-6" : "grid grid-cols-1 xl:grid-cols-2 gap-6"}>
                             {isLoading ? (
-                                <div className="py-20 text-center text-muted-foreground animate-pulse">Buscando leilões...</div>
+                                <div className="py-20 text-center text-muted-foreground animate-pulse col-span-full">Buscando leilões...</div>
                             ) : auctions.length === 0 ? (
-                                <div className="py-20 text-center text-muted-foreground bg-card border border-border rounded-xl shadow-sm dark:shadow-none">
+                                <div className="py-20 text-center text-muted-foreground bg-card border border-border rounded-xl shadow-sm dark:shadow-none col-span-full">
                                     Nenhum leilão encontrado para os filtros selecionados.
                                 </div>
                             ) : auctions.map((auction) => {
@@ -139,10 +146,10 @@ export default function AuctionsPage() {
                                 const currentPrice = item.current_price || item.starting_price;
                                 
                                 return (
-                                <div key={auction.id} className="flex flex-col md:flex-row bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md dark:shadow-none transition-all duration-300">
+                                <div key={auction.id} className={`bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md dark:shadow-none transition-all duration-300 flex ${viewType === 'list' ? 'flex-col md:flex-row' : 'flex-col'}`}>
                                     
                                     {/* Image Area */}
-                                    <div className="w-full md:w-[280px] h-[200px] md:h-auto bg-muted/30 relative flex-shrink-0 p-4 flex items-center justify-center border-b md:border-b-0 md:border-r border-border/50">
+                                    <div className={`${viewType === 'list' ? 'w-full md:w-[280px] h-[200px] md:h-auto border-b md:border-b-0 md:border-r' : 'w-full h-[200px] border-b'} bg-muted/30 relative flex-shrink-0 p-4 flex items-center justify-center border-border/50`}>
                                         {item.images?.[0]?.image_url ? (
                                             <img src={item.images[0].image_url} alt={item.title} className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
                                         ) : (
@@ -209,7 +216,7 @@ export default function AuctionsPage() {
                                     </div>
 
                                     {/* Action Area */}
-                                    <div className="w-full md:w-[240px] p-6 border-t md:border-t-0 md:border-l border-border flex flex-col justify-center items-center bg-muted/10">
+                                    <div className={`${viewType === 'list' ? 'w-full md:w-[240px] border-t md:border-t-0 md:border-l' : 'w-full border-t'} p-6 border-border flex flex-col justify-center items-center bg-muted/10`}>
                                         <div className="text-center mb-4">
                                             <p className="text-sm text-muted-foreground font-medium mb-1">Lance Atual</p>
                                             <div className="text-3xl font-bold text-primary flex items-end justify-center gap-1">
