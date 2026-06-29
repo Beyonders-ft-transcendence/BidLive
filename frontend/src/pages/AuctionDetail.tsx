@@ -78,8 +78,8 @@ export default function AuctionDetailPage() {
     const countdown = useCountdown(auction?.end_time, auction?.status || "");
 
     const [activeImage, setActiveImage] = useState(0);
-    const [rightTab, setRightTab] = useState<"BIDS" | "CHAT">("BIDS");
     const [chatInput, setChatInput] = useState("");
+    const [showChat, setShowChat] = useState(true);
     
     // Chat integration
     const { data: messagesData } = useAuctionMessagesQuery(auctionId);
@@ -89,10 +89,8 @@ export default function AuctionDetailPage() {
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (rightTab === "CHAT") {
-            chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [chatMessages, rightTab]);
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatMessages]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -171,100 +169,176 @@ export default function AuctionDetailPage() {
                 </div>
 
                 {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
                     
                     {/* ── LEFT COLUMN ── */}
                     <div className="flex flex-col gap-6">
                         
-                        {/* Media Section */}
-                        <div className="bg-[#111827] border border-slate-800 rounded-sm shadow-md shadow-black/20 overflow-hidden flex flex-col">
-                            {/* Tab Header if active stream exists */}
-                            {activeStream && (
-                                <div className="flex border-b border-slate-800/60 bg-slate-800/40">
-                                    <button
-                                        onClick={() => setIsWatchingStream(false)}
-                                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream ? "text-primary bg-[#111827] border-b-2 border-primary" : "text-slate-400 hover:text-slate-200"}`}
-                                    >
-                                        Galeria de Fotos
-                                    </button>
-                                    <button
-                                        onClick={() => setIsWatchingStream(true)}
-                                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream ? "text-red-500 bg-[#111827] border-b-2 border-red-500" : "text-slate-400 hover:text-red-500"}`}
-                                    >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                                        Transmissão Ao Vivo (LIVE)
-                                    </button>
-                                </div>
-                            )}
+                        {/* Top Section: Media + Chat side by side on large screens */}
+                        <div className="bg-[#111827] border border-slate-800 rounded-sm shadow-md shadow-black/20 overflow-hidden flex flex-col xl:flex-row">
+                            
+                            {/* Media Section */}
+                            <div className="flex-1 flex flex-col">
+                                {/* Tab Header if active stream exists */}
+                                {activeStream && (
+                                    <div className="flex border-b border-slate-800/60 bg-slate-800/40">
+                                        <button
+                                            onClick={() => setIsWatchingStream(false)}
+                                            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream ? "text-primary bg-[#111827] border-b-2 border-primary" : "text-slate-400 hover:text-slate-200"}`}
+                                        >
+                                            Galeria de Fotos
+                                        </button>
+                                        <button
+                                            onClick={() => setIsWatchingStream(true)}
+                                            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream ? "text-red-500 bg-[#111827] border-b-2 border-red-500" : "text-slate-400 hover:text-red-500"}`}
+                                        >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                            Transmissão Ao Vivo (LIVE)
+                                        </button>
+                                    </div>
+                                )}
 
-                            {isWatchingStream && activeStream ? (
-                                /* LIVE STREAM PLAYER */
-                                <div className="relative aspect-video bg-slate-950 flex flex-col justify-between p-4 text-white">
-                                    <div className="flex items-center justify-between z-10">
-                                        <div className="flex items-center gap-2">
-                                            <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
-                                                <span className="w-1 h-1 bg-[#111827] rounded-full" /> AO VIVO
+                                {isWatchingStream && activeStream ? (
+                                    /* LIVE STREAM PLAYER */
+                                    <div className="relative h-[300px] sm:h-[400px] xl:h-[480px] bg-slate-950 flex flex-col justify-between p-4 text-white">
+                                        <div className="flex items-center justify-between z-10">
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
+                                                    <span className="w-1 h-1 bg-[#111827] rounded-full" /> AO VIVO
+                                                </span>
+                                                <span className="text-[10px] font-bold text-slate-300 truncate max-w-[200px]">{activeStream.title}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {viewerCount} assistindo
+                                                </div>
+                                                <button onClick={() => setShowChat(!showChat)} className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1.5 text-white hover:bg-black/60 transition-colors cursor-pointer">
+                                                    <MessageSquare size={12} /> {showChat ? "Ocultar Chat" : "Chat"}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950/20 via-slate-900 to-slate-950">
+                                            <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 animate-pulse mb-3">
+                                                <Video size={24} className="text-white" />
+                                            </div>
+                                            <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">Transmissão em Andamento</p>
+                                        </div>
+
+                                        <div className="flex items-center justify-between z-10 w-full pt-2">
+                                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                                                Streamer: @{activeStream.streamer?.username || "Vendedor"}
                                             </span>
-                                            <span className="text-[10px] font-bold text-slate-300 truncate max-w-[200px]">{activeStream.title}</span>
-                                        </div>
-                                        <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {viewerCount} assistindo
                                         </div>
                                     </div>
+                                ) : (
+                                    /* STANDARD IMAGE GALLERY */
+                                    <div className="flex flex-col h-full">
+                                        <div className="relative flex-1 min-h-[300px] xl:min-h-[400px] bg-slate-800 flex items-center justify-center">
+                                            {images.length > 0 ? (
+                                                <img src={images[activeImage]?.image_url} alt={auction.item.title} className="max-w-full max-h-full object-contain p-2 absolute inset-0 m-auto" />
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center text-slate-500">
+                                                    <Gavel size={44} className="mb-2" />
+                                                    <span className="text-sm">Sem imagem</span>
+                                                </div>
+                                            )}
 
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950/20 via-slate-900 to-slate-950">
-                                        <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 animate-pulse mb-3">
-                                            <Video size={24} className="text-white" />
-                                        </div>
-                                        <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">Transmissão em Andamento</p>
-                                    </div>
+                                            <div className="absolute top-3 left-3 flex gap-2">
+                                                <span className="bg-[#111827]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-md shadow-black/20">
+                                                    Lote #{auction.id}
+                                                </span>
+                                                {isLive && (
+                                                    <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> Ao Vivo
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                    <div className="flex items-center justify-between z-10 w-full pt-2">
-                                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                                            Streamer: @{activeStream.streamer?.username || "Vendedor"}
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                /* STANDARD IMAGE GALLERY */
-                                <>
-                                    <div className="relative aspect-video bg-slate-800">
-                                        {images.length > 0 ? (
-                                            <img src={images[activeImage]?.image_url} alt={auction.item.title} className="w-full h-full object-contain p-2" />
-                                        ) : (
-                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
-                                                <Gavel size={44} className="mb-2" />
-                                                <span className="text-sm">Sem imagem</span>
+                                            <div className="absolute top-3 right-3 flex gap-2">
+                                                <button onClick={() => setShowChat(!showChat)} className="bg-[#111827]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm shadow-md shadow-black/20 flex items-center gap-1.5 hover:bg-slate-800 transition-colors cursor-pointer">
+                                                    <MessageSquare size={12} /> {showChat ? "Ocultar Chat" : "Mostrar Chat"}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {images.length > 1 && (
+                                            <div className="flex gap-2 p-3 border-t border-slate-800/60 bg-slate-800/50 overflow-x-auto h-[90px] shrink-0">
+                                                {images.map((img, i) => (
+                                                    <button
+                                                        key={img.id}
+                                                        onClick={() => setActiveImage(i)}
+                                                        className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${activeImage === i ? "border-primary" : "border-transparent hover:border-slate-600"}`}
+                                                    >
+                                                        <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                                                    </button>
+                                                ))}
                                             </div>
                                         )}
-
-                                        <div className="absolute top-3 left-3 flex gap-2">
-                                            <span className="bg-[#111827]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-md shadow-black/20">
-                                                Lote #{auction.id}
-                                            </span>
-                                            {isLive && (
-                                                <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> Ao Vivo
-                                                </span>
-                                            )}
-                                        </div>
                                     </div>
+                                )}
+                            </div>
 
-                                    {images.length > 1 && (
-                                        <div className="flex gap-2 p-3 border-t border-slate-800/60 bg-slate-800/50 overflow-x-auto">
-                                            {images.map((img, i) => (
-                                                <button
-                                                    key={img.id}
-                                                    onClick={() => setActiveImage(i)}
-                                                    className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${activeImage === i ? "border-primary" : "border-transparent hover:border-slate-600"}`}
-                                                >
-                                                    <img src={img.image_url} alt="" className="w-full h-full object-cover" />
-                                                </button>
-                                            ))}
+                            {/* Chat Card (Now beside the media on XL screens) */}
+                            {showChat && (
+                                <div className="w-full xl:w-[320px] shrink-0 border-t xl:border-t-0 xl:border-l border-slate-800/60 flex flex-col h-[400px] xl:h-auto bg-[#0A0F1C]/20">
+                                <div className="px-4 py-3 border-b border-slate-800/60 bg-slate-800/40 flex items-center gap-2 shrink-0">
+                                    <MessageSquare size={16} className="text-primary" /> 
+                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-200">Chat Público</span>
+                                </div>
+                                <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-800/30">
+                                    {chatMessages.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-center">
+                                            <MessageSquare size={24} className="text-slate-600 mb-2" />
+                                            <p className="text-xs text-slate-400 font-medium">Chat vazio.</p>
+                                            <p className="text-[10px] text-slate-500 mt-1">Mande a primeira mensagem!</p>
+                                        </div>
+                                    ) : (
+                                        chatMessages.map((msg) => {
+                                            const isMine = msg.sender.id === currentUser?.id;
+                                            return (
+                                                <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                                                    <span className="text-[9px] text-slate-400 mb-0.5 ml-1 mr-1">{msg.sender.username}</span>
+                                                    <div className={`px-3 py-2 rounded-md text-sm max-w-[85%] break-words ${isMine ? 'bg-primary text-white rounded-br-none' : 'bg-slate-800 text-white rounded-bl-none'}`}>
+                                                        {msg.message}
+                                                    </div>
+                                                    <span className="text-[8px] text-slate-400 mt-0.5 mx-1">
+                                                        {new Date(msg.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })
+                                    )}
+                                    <div ref={chatEndRef} />
+                                </div>
+                                
+                                <div className="p-3 bg-[#111827] border-t border-slate-800/60 shrink-0">
+                                    {isAuthenticated ? (
+                                        <form onSubmit={handleSendMessage} className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                value={chatInput}
+                                                onChange={e => setChatInput(e.target.value)}
+                                                placeholder="Digite..."
+                                                className="w-full bg-slate-800/50 border border-slate-800 rounded-full pl-4 pr-10 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 text-white"
+                                            />
+                                            <button 
+                                                type="submit" 
+                                                disabled={!chatInput.trim()}
+                                                className="absolute right-1.5 p-1.5 bg-primary text-white rounded-full hover:bg-primary/90 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                <Send size={12} />
+                                            </button>
+                                        </form>
+                                    ) : (
+                                        <div className="text-center py-1">
+                                            <p className="text-[10px] text-slate-400">Faça <Link to="/signin" className="text-primary hover:underline font-medium">login</Link> para conversar</p>
                                         </div>
                                     )}
-                                </>
+                                </div>
+                                </div>
                             )}
+
                         </div>
 
                         {/* Details Card */}
@@ -433,28 +507,16 @@ export default function AuctionDetailPage() {
                                     </div>
                                 )}
                             </div>
-                        </div>
 
-                        {/* Interactive Tabs (Bids & Chat) */}
-                        <div className="bg-[#111827] border border-slate-800 rounded-sm shadow-md shadow-black/20 overflow-hidden flex flex-col">
-                            <div className="flex border-b border-slate-800/60 bg-slate-800/40">
-                                <button
-                                    onClick={() => setRightTab("BIDS")}
-                                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-2 ${rightTab === "BIDS" ? "text-primary bg-[#111827] border-b-2 border-primary" : "text-slate-400 hover:text-slate-200"}`}
-                                >
-                                    <Gavel size={14} /> Lances ({auction.bids_count || bids.length})
-                                </button>
-                                <button
-                                    onClick={() => setRightTab("CHAT")}
-                                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-2 ${rightTab === "CHAT" ? "text-primary bg-[#111827] border-b-2 border-primary" : "text-slate-400 hover:text-slate-200"}`}
-                                >
-                                    <MessageSquare size={14} /> Chat Público
-                                </button>
-                            </div>
-
-                            {/* BIDS TAB */}
-                            {rightTab === "BIDS" && (
-                                <div className="divide-y divide-slate-800/60 h-80 overflow-y-auto">
+                            {/* Bids History Card (Now placed below Bidding actions) */}
+                            <div className="border-t border-slate-800/60 bg-slate-800/20">
+                                <div className="px-6 py-3 border-b border-slate-800/60 flex items-center gap-2">
+                                    <Gavel size={14} className="text-slate-400" />
+                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                                        Histórico de Lances ({auction.bids_count || bids.length})
+                                    </span>
+                                </div>
+                                <div className="divide-y divide-slate-800/60 max-h-[300px] overflow-y-auto">
                                     {bids.length > 0 ? (
                                         bids.map((bid, i) => (
                                             <div key={bid.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-800/60 transition-colors">
@@ -474,70 +536,14 @@ export default function AuctionDetailPage() {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="px-6 py-10 text-center">
-                                            <Gavel size={28} className="text-slate-600 mx-auto mb-3" />
+                                        <div className="px-6 py-8 text-center">
+                                            <Gavel size={24} className="text-slate-600 mx-auto mb-2" />
                                             <p className="text-sm text-slate-400 font-medium">Nenhum lance ainda.</p>
-                                            <p className="text-xs text-slate-500 mt-1">Seja o primeiro a dar um lance!</p>
                                         </div>
                                     )}
                                 </div>
-                            )}
+                            </div>
 
-                            {/* CHAT TAB */}
-                            {rightTab === "CHAT" && (
-                                <div className="flex flex-col h-80">
-                                    <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-800/30">
-                                        {chatMessages.length === 0 ? (
-                                            <div className="h-full flex flex-col items-center justify-center text-center">
-                                                <MessageSquare size={24} className="text-slate-600 mb-2" />
-                                                <p className="text-xs text-slate-400 font-medium">Chat vazio.</p>
-                                                <p className="text-[10px] text-slate-500 mt-1">Mande a primeira mensagem!</p>
-                                            </div>
-                                        ) : (
-                                            chatMessages.map((msg) => {
-                                                const isMine = msg.sender.id === currentUser?.id;
-                                                return (
-                                                    <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                                                        <span className="text-[9px] text-slate-400 mb-0.5 ml-1 mr-1">{msg.sender.username}</span>
-                                                        <div className={`px-3 py-2 rounded-md text-sm max-w-[85%] break-words ${isMine ? 'bg-primary text-white rounded-br-none' : 'bg-slate-800 text-white rounded-bl-none'}`}>
-                                                            {msg.message}
-                                                        </div>
-                                                        <span className="text-[8px] text-slate-400 mt-0.5 mx-1">
-                                                            {new Date(msg.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })
-                                        )}
-                                        <div ref={chatEndRef} />
-                                    </div>
-                                    
-                                    <div className="p-3 bg-[#111827] border-t border-slate-800/60">
-                                        {isAuthenticated ? (
-                                            <form onSubmit={handleSendMessage} className="relative flex items-center">
-                                                <input
-                                                    type="text"
-                                                    value={chatInput}
-                                                    onChange={e => setChatInput(e.target.value)}
-                                                    placeholder="Digite uma mensagem..."
-                                                    className="w-full bg-slate-800/50 border border-slate-800 rounded-full pl-4 pr-10 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
-                                                />
-                                                <button 
-                                                    type="submit" 
-                                                    disabled={!chatInput.trim()}
-                                                    className="absolute right-1.5 p-1.5 bg-primary text-white rounded-full hover:bg-primary/90 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors"
-                                                >
-                                                    <Send size={12} />
-                                                </button>
-                                            </form>
-                                        ) : (
-                                            <div className="text-center py-1">
-                                                <p className="text-[10px] text-slate-400">Faça <Link to="/signin" className="text-primary hover:underline font-medium">login</Link> para participar no chat</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
