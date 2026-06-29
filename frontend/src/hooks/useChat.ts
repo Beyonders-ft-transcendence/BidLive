@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import chatService from "@/services/chat.service";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import ENV from "@/shared/utils/env.utils";
-import type { PrivateMessage } from "@/shared/types/chat.types";
+import type { PrivateMessage, RoomMessage } from "@/shared/types/chat.types";
 
 // 1. Hook to fetch the conversations list
 export function useConversationsQuery() {
@@ -41,16 +41,12 @@ export function useSendPrivateMessageMutation() {
       return res.data;
     },
     onSuccess: (newMessage) => {
-      // Optmistically invalidate conversations list to update previews
       queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
-      
-      // Update the active message list cache
       if (newMessage) {
         queryClient.setQueryData(
           ["privateMessages", newMessage.conversation],
           (old: PrivateMessage[] | undefined) => {
             if (!old) return [newMessage];
-            // Prevent duplicates
             if (old.some((m) => m.id === newMessage.id)) return old;
             return [...old, newMessage];
           }
@@ -71,7 +67,6 @@ export function useMarkMessagesAsReadMutation() {
     },
     onSuccess: (_, conversationId) => {
       queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
-      // Update messages locally to set is_read = true
       queryClient.setQueryData(
         ["privateMessages", conversationId],
         (old: PrivateMessage[] | undefined) => {
@@ -107,13 +102,10 @@ export function usePrivateChatRealtime(
       if (isClosedIntentional) return;
 
       const wsUrl = `${ENV.WS_BASE_URL}/ws/chat/private/${recipientId}/?token=${accessToken}`;
-      console.log(`[WS PrivateChat] Connecting to recipient ${recipientId}...`);
       socket = new WebSocket(wsUrl);
       ws.current = socket;
 
       socket.onopen = () => {
-        console.log(`[WS PrivateChat] Connected to recipient ${recipientId}`);
-        // Mark as read when entering room
         if (conversationId) {
           socket?.send(JSON.stringify({ type: "chat.read" }));
         }
@@ -122,12 +114,10 @@ export function usePrivateChatRealtime(
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log(`[WS PrivateChat] Received message event:`, data);
-
           if (data.type === "chat.message") {
             const newMessage: PrivateMessage = {
               id: data.message_id,
-              conversation: conversationId || 0, // Fallback if not set
+              conversation: conversationId || 0,
               sender: {
                 id: data.sender_id,
                 username: data.sender_username,
@@ -136,11 +126,10 @@ export function usePrivateChatRealtime(
                 is_online: true,
               },
               message: data.message,
-              is_read: data.sender_id === currentUser?.id, // read if we sent it
+              is_read: data.sender_id === currentUser?.id,
               created_at: data.created_at,
             };
 
-            // Append to message history in query client cache
             if (conversationId) {
               queryClient.setQueryData(
                 ["privateMessages", conversationId],
@@ -152,12 +141,9 @@ export function usePrivateChatRealtime(
               );
             }
 
-            // Trigger read update if we are the recipient of this new message and active in the conversation
             if (data.sender_id !== currentUser?.id && conversationId) {
               socket?.send(JSON.stringify({ type: "chat.read" }));
             }
-
-            // Invalidate conversations list for sidebar preview
             queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
             setIsTyping(false);
           } else if (data.type === "chat.typing") {
@@ -165,7 +151,6 @@ export function usePrivateChatRealtime(
               setIsTyping(data.is_typing);
             }
           } else if (data.type === "chat.read") {
-            // If the other user read our messages, update local cache
             if (data.reader_id !== currentUser?.id && conversationId) {
               queryClient.setQueryData(
                 ["privateMessages", conversationId],
@@ -177,23 +162,13 @@ export function usePrivateChatRealtime(
               queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
             }
           }
-        } catch (err) {
-          console.error("[WS PrivateChat] Error parsing message:", err);
-        }
+        } catch (err) {}
       };
 
-      socket.onclose = (e) => {
-        console.log(`[WS PrivateChat] Disconnected from recipient ${recipientId}. Code: ${e.code}`);
+      socket.onclose = () => {
         if (!isClosedIntentional) {
-          // Attempt reconnect after 3 seconds
-          reconnectTimeout = setTimeout(() => {
-            connect();
-          }, 3000);
+          reconnectTimeout = setTimeout(() => { connect(); }, 3000);
         }
-      };
-
-      socket.onerror = (error) => {
-        console.error("[WS PrivateChat] WebSocket error:", error);
       };
     };
 
@@ -206,45 +181,144 @@ export function usePrivateChatRealtime(
     };
   }, [recipientId, conversationId, accessToken, currentUser?.id, queryClient]);
 
-  // Send message via WebSocket
   const sendWsMessage = (text: string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(
-        JSON.stringify({
-          type: "chat.message",
-          message: text,
-        })
-      );
+      ws.current.send(JSON.stringify({ type: "chat.message", message: text }));
       return true;
     }
     return false;
   };
 
-  // Send typing status
   const sendTypingStatus = (typing: boolean) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(
-        JSON.stringify({
-          type: "chat.typing",
-          is_typing: typing,
-        })
-      );
+      ws.current.send(JSON.stringify({ type: "chat.typing", is_typing: typing }));
     }
   };
 
   const handleKeyPress = () => {
     sendTypingStatus(true);
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    typingTimeoutRef.current = setTimeout(() => {
-      sendTypingStatus(false);
-    }, 2000);
+    typingTimeoutRef.current = setTimeout(() => { sendTypingStatus(false); }, 2000);
   };
 
-  return {
-    isPartnerTyping: isTyping,
-    sendWsMessage,
-    handleKeyPress,
+  return { isPartnerTyping: isTyping, sendWsMessage, handleKeyPress };
+}
+
+// ============================================
+// PUBLIC AUCTION CHAT HOOKS
+// ============================================
+
+export function useAuctionMessagesQuery(auctionId: number) {
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
+  return useQuery({
+    queryKey: ["auctionMessages", auctionId],
+    queryFn: async () => {
+      const res = await chatService.listAuctionMessages(auctionId);
+      if (!res.success) throw new Error(res.message || "Erro ao carregar mensagens do leilão.");
+      return res.data || [];
+    },
+    enabled: !!auctionId && isAuthenticated,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401 || error?.response?.status === 403) return false;
+      return failureCount < 2;
+    }
+  });
+}
+
+export function useSendAuctionMessageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ auctionId, message }: { auctionId: number; message: string }) => {
+      const res = await chatService.sendAuctionMessage(auctionId, message);
+      if (!res.success) throw new Error(res.message || "Erro ao enviar mensagem.");
+      return res.data;
+    },
+    onSuccess: (newMessage, { auctionId }) => {
+      if (newMessage) {
+        queryClient.setQueryData(
+          ["auctionMessages", auctionId],
+          (old: RoomMessage[] | undefined) => {
+            if (!old) return [newMessage];
+            if (old.some((m) => m.id === newMessage.id)) return old;
+            return [...old, newMessage];
+          }
+        );
+      }
+    },
+  });
+}
+
+export function useAuctionChatRealtime(auctionId: number) {
+  const queryClient = useQueryClient();
+  const accessToken = useAuthStore((s: any) => s.accessToken);
+  const ws = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (!auctionId || !accessToken) return;
+
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isClosedIntentional = false;
+
+    const connect = () => {
+      if (isClosedIntentional) return;
+
+      const wsUrl = `${ENV.WS_BASE_URL}/ws/chat/auction/${auctionId}/?token=${accessToken}`;
+      socket = new WebSocket(wsUrl);
+      ws.current = socket;
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "chat.message") {
+            const newMessage: RoomMessage = {
+              id: data.message_id,
+              room: data.room_id || 0,
+              sender: {
+                id: data.sender_id,
+                username: data.sender_username,
+                full_name: data.sender_username,
+                avatar_url: data.sender_avatar,
+              },
+              message: data.message,
+              created_at: data.created_at,
+            };
+
+            queryClient.setQueryData(
+              ["auctionMessages", auctionId],
+              (old: RoomMessage[] | undefined) => {
+                if (!old) return [newMessage];
+                if (old.some((m) => m.id === newMessage.id)) return old;
+                return [...old, newMessage];
+              }
+            );
+          }
+        } catch (err) {}
+      };
+
+      socket.onclose = () => {
+        if (!isClosedIntentional) {
+          reconnectTimeout = setTimeout(() => { connect(); }, 3000);
+        }
+      };
+    };
+
+    connect();
+
+    return () => {
+      isClosedIntentional = true;
+      if (socket) socket.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, [auctionId, accessToken, queryClient]);
+
+  const sendWsMessage = (text: string) => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: "chat.message", message: text }));
+      return true;
+    }
+    return false;
   };
+
+  return { sendWsMessage };
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import auctionService from "@/services/auction.service";
+import { useAuthStore } from "@/shared/stores/auth.store";
 import type {
   AuctionCreatePayload,
   AuctionUpdatePayload,
@@ -53,6 +54,7 @@ export function useAuctionQuery(id: number) {
 }
 
 export function useAuctionBidsQuery(id: number, params?: Record<string, any>) {
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
   return useQuery({
     queryKey: ["auctionBids", id, params],
     queryFn: async () => {
@@ -60,7 +62,11 @@ export function useAuctionBidsQuery(id: number, params?: Record<string, any>) {
       if (!res.success) throw new Error(res.message || "Falha ao obter lances.");
       return res.data;
     },
-    enabled: !!id && !isNaN(id),
+    enabled: !!id && !isNaN(id) && isAuthenticated,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401 || error?.response?.status === 403) return false;
+      return failureCount < 2;
+    }
   });
 }
 
