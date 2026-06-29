@@ -62,7 +62,8 @@ export default function AuctionDetailPage() {
         auction,
         bids,
         loading,
-        error,
+        auctionError,
+        bidError,
         activeStream,
         isWatchingStream,
         setIsWatchingStream,
@@ -129,7 +130,7 @@ export default function AuctionDetailPage() {
         );
     }
 
-    if (error || !auction) {
+    if (auctionError || !auction) {
         return (
             <div className="min-h-screen bg-[#0A0F1C] flex flex-col">
                 <Header />
@@ -137,7 +138,7 @@ export default function AuctionDetailPage() {
                     <AlertCircle size={44} className="text-red-400" />
                     <h2 className="text-xl font-bold text-white">Lote não encontrado</h2>
                     <p className="text-sm text-slate-400 text-center max-w-sm">
-                        {error || "O leilão que você está procurando não existe ou foi removido."}
+                        {auctionError || "O leilão que você está procurando não existe ou foi removido."}
                     </p>
                     <Link to="/leiloes" className="mt-2 bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
                         Voltar para Leilões
@@ -470,7 +471,10 @@ export default function AuctionDetailPage() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <p className="text-[10px] text-slate-400">Lance mínimo: <span className="font-semibold text-white">{formatCurrency(minBid)}</span></p>
+                                                <div className="flex items-center justify-between mt-1">
+                                                    <p className="text-[10px] text-slate-400">Lance mínimo: <span className="font-semibold text-white">{formatCurrency(minBid)}</span></p>
+                                                    {bidError && <p className="text-[10px] text-red-500 font-bold">{bidError}</p>}
+                                                </div>
                                             </form>
 
                                             {auction.item.buy_now_price && (
