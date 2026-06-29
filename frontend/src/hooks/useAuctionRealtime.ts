@@ -39,8 +39,6 @@ export function useAuctionRealtime(id: number) {
 
   const loading = loadingAuction || loadingBids;
 
-  const displayedError = error || (auctionQueryError ? "Não foi possível carregar os detalhes do leilão." : null);
-
   const [hasInitializedStream, setHasInitializedStream] = useState(false);
 
   // Initialize stream view state
@@ -326,7 +324,8 @@ export function useAuctionRealtime(id: number) {
     auction,
     bids,
     loading,
-    error: displayedError,
+    auctionError: auctionQueryError ? "Não foi possível carregar os detalhes do leilão." : null,
+    bidError: error,
     activeStream,
     isWatchingStream,
     setIsWatchingStream,
