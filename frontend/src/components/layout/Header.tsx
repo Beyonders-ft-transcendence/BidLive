@@ -22,7 +22,12 @@ export default function Header() {
     const { data: notificationsResponse } = useNotificationsQuery();
     const markReadMutation = useMarkNotificationReadMutation();
     
-    const notifications = notificationsResponse?.data || [];
+    const notifications = Array.isArray(notificationsResponse) 
+        ? notificationsResponse 
+        : Array.isArray((notificationsResponse as any)?.data)
+            ? (notificationsResponse as any).data
+            : (notificationsResponse as any)?.results || (notificationsResponse as any)?.data?.results || [];
+
     const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
     useEffect(() => {
