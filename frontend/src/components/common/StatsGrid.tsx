@@ -1,3 +1,4 @@
+
 import { type ReactNode } from "react";
 
 export interface StatItem {
@@ -25,11 +26,11 @@ export default function StatsGrid({ items, columns = 4 }: StatsGridProps) {
       {items.map((item, idx) => (
         <div
           key={idx}
-          className="bg-card border border-border rounded-sm p-4 shadow-sm flex items-center gap-3 select-none text-foreground"
+          className="bg-card border border-border rounded-xl p-4 shadow-sm flex items-center gap-3 select-none text-foreground"
         >
           {/* Icon Wrap */}
           <div
-            className={`w-8 h-8 rounded-sm flex items-center justify-center shrink-0 ${item.iconBgClass || "bg-primary/10"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.iconBgClass || "bg-primary/10"
               } ${item.iconColorClass || "text-primary"}`}
           >
             {item.icon}
