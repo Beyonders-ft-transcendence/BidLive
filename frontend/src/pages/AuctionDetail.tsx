@@ -111,34 +111,39 @@ export default function AuctionDetailPage() {
 
     const handleToggleFavorite = async () => {
         try {
+            const stored = localStorage.getItem("bidlive_watched_auctions");
+            let ids = stored ? (JSON.parse(stored) as number[]) : [];
+            
             if (isFavorite) {
-                const res = await auctionService.unwatch(auctionId);
-                if (res.success) {
-                    const stored = localStorage.getItem("bidlive_watched_auctions");
-                    const ids = stored ? JSON.parse(stored) as number[] : [];
-                    const updated = ids.filter((id) => id !== auctionId);
-                    localStorage.setItem("bidlive_watched_auctions", JSON.stringify(updated));
-                    setIsFavorite(false);
-                    window.dispatchEvent(new Event("storage"));
-                    toast.success("Removido dos favoritos.");
+                // Atualização Otimista (UI e LocalStorage)
+                ids = ids.filter((id) => id !== auctionId);
+                localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
+                setIsFavorite(false);
+                window.dispatchEvent(new Event("storage"));
+                toast.success("Removido dos favoritos.");
+                
+                // Tenta sincronizar com o backend se autenticado
+                if (isAuthenticated) {
+                    auctionService.unwatch(auctionId).catch(console.error);
                 }
             } else {
-                const res = await auctionService.watch(auctionId);
-                if (res.success) {
-                    const stored = localStorage.getItem("bidlive_watched_auctions");
-                    const ids = stored ? JSON.parse(stored) as number[] : [];
-                    if (!ids.includes(auctionId)) {
-                        ids.push(auctionId);
-                    }
-                    localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
-                    setIsFavorite(true);
-                    window.dispatchEvent(new Event("storage"));
-                    toast.success("Adicionado aos favoritos.");
+                // Atualização Otimista (UI e LocalStorage)
+                if (!ids.includes(auctionId)) {
+                    ids.push(auctionId);
+                }
+                localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
+                setIsFavorite(true);
+                window.dispatchEvent(new Event("storage"));
+                toast.success("Adicionado aos favoritos.");
+                
+                // Tenta sincronizar com o backend se autenticado
+                if (isAuthenticated) {
+                    auctionService.watch(auctionId).catch(console.error);
                 }
             }
         } catch (err) {
-            console.error("Erro ao favoritar:", err);
-            toast.error("Erro ao processar ação.");
+            console.error("Erro ao favoritar localmente:", err);
+            toast.error("Ocorreu um erro ao atualizar os favoritos.");
         }
     };
 
