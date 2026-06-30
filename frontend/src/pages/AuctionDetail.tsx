@@ -20,10 +20,25 @@ const conditionLabels: Record<string, string> = {
     DAMAGED: "Com Defeito",
 };
 
-function formatCurrency(val: string | number | null | undefined) {
+function formatCurrency(val: string | number | null | undefined, compact: boolean = false) {
     if (!val) return "—";
     const n = Number(val);
-    return isNaN(n) ? String(val) : new Intl.NumberFormat("pt-AO", { style: "currency", currency: "AOA" }).format(n);
+    if (isNaN(n)) return String(val);
+    
+    const options: Intl.NumberFormatOptions = { 
+        style: "currency", 
+        currency: "AOA" 
+    };
+    
+    if (compact && n >= 1000000) {
+        options.notation = "compact";
+        options.maximumFractionDigits = 2;
+    } else if (n % 1 === 0) {
+        options.minimumFractionDigits = 0;
+        options.maximumFractionDigits = 0;
+    }
+    
+    return new Intl.NumberFormat("pt-AO", options).format(n);
 }
 
 // Countdown hook
@@ -137,10 +152,29 @@ export default function AuctionDetailPage() {
     const { sendWsMessage } = useAuctionChatRealtime(auctionId);
     const sendMsgMutation = useSendAuctionMessageMutation();
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const prevLengthRef = useRef(0);
 
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatMessages]);
+        if (!chatEndRef.current) return;
+        const lastMsg = chatMessages[chatMessages.length - 1];
+        const isMyMessage = lastMsg?.sender?.id === currentUser?.id;
+        
+        if (chatMessages.length > prevLengthRef.current) {
+            if (isMyMessage) {
+                chatEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            } else {
+                const container = chatEndRef.current.parentElement;
+                if (container) {
+                    const threshold = 150;
+                    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+                    if (isNearBottom) {
+                        chatEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    }
+                }
+            }
+        }
+        prevLengthRef.current = chatMessages.length;
+    }, [chatMessages, currentUser?.id]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -189,7 +223,7 @@ export default function AuctionDetailPage() {
                     <p className="text-sm text-muted-foreground text-center max-w-sm">
                         {auctionError || "O leilão que você está procurando não existe ou foi removido."}
                     </p>
-                    <Link to="/leiloes" className="mt-2 bg-primary text-foreground text-sm font-semibold px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
+                    <Link to="/leiloes" className="mt-2 bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
                         Voltar para Leilões
                     </Link>
                 </div>
@@ -326,7 +360,7 @@ export default function AuctionDetailPage() {
                         return (
                             <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
                                 <span className="text-[9px] text-muted-foreground mb-0.5 ml-1 mr-1">{msg.sender.username}</span>
-                                <div className={`px-3 py-2 rounded-md text-sm max-w-[85%] break-words ${isMine ? 'bg-primary text-foreground rounded-br-none' : 'bg-muted text-foreground rounded-bl-none'}`}>
+                                <div className={`px-3 py-2 rounded-md text-sm max-w-[85%] break-words ${isMine ? 'bg-primary text-white rounded-br-none' : 'bg-muted text-foreground rounded-bl-none'}`}>
                                     {msg.message}
                                 </div>
                                 <span className="text-[8px] text-muted-foreground mt-0.5 mx-1">
@@ -352,7 +386,7 @@ export default function AuctionDetailPage() {
                         <button 
                             type="submit" 
                             disabled={!chatInput.trim()}
-                            className="absolute right-1.5 p-1.5 bg-primary text-foreground rounded-full hover:bg-primary/90 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors"
+                            className="absolute right-1.5 p-1.5 bg-primary text-white rounded-full hover:bg-primary/90 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors"
                         >
                             <Send size={12} />
                         </button>
@@ -394,7 +428,7 @@ export default function AuctionDetailPage() {
                 <div>
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Lance Atual</p>
                     <p className={`text-3xl font-black tracking-tight ${isLive ? "text-primary" : "text-foreground"}`}>
-                        {formatCurrency(currentPrice)}
+                        {formatCurrency(currentPrice, true)}
                     </p>
                 </div>
                 <div className="text-right">
@@ -440,7 +474,7 @@ export default function AuctionDetailPage() {
                                         required
                                     />
                                     <div className="absolute right-1.5 top-1.5 flex gap-1.5">
-                                        <button type="submit" disabled={submittingBid} className="h-8 px-4 bg-primary hover:bg-primary/90 disabled:bg-slate-700 disabled:text-muted-foreground text-foreground rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-black/20 cursor-pointer">
+                                        <button type="submit" disabled={submittingBid} className="h-8 px-4 bg-primary hover:bg-primary/90 disabled:bg-slate-700 disabled:text-muted-foreground text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-black/20 cursor-pointer">
                                             {submittingBid ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Gavel className="h-3.5 w-3.5" /> Ofertar</>}
                                         </button>
                                     </div>
@@ -450,17 +484,20 @@ export default function AuctionDetailPage() {
                                     {bidError && <p className="text-[10px] text-red-500 font-bold">{bidError}</p>}
                                 </div>
                             </form>
-
-                            {auction.item.buy_now_price && (
-                                <div className="pt-4 border-t border-border flex items-center justify-between gap-4 mt-2">
-                                    <div className="text-left">
-                                        <span className="text-[10px] text-muted-foreground font-mono block">Arremate Imediato:</span>
-                                        <span className="text-foreground text-xs font-bold leading-normal block">Adquira agora sem disputas</span>
+                                {auction.item.buy_now_price && (
+                                <div className="pt-4 border-t border-border flex flex-col gap-3">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div>
+                                            <span className="text-[10px] text-muted-foreground font-mono block">Arremate Imediato:</span>
+                                            <span className="text-foreground text-xs font-bold block">Adquira agora sem disputas</span>
+                                        </div>
+                                        <button type="button" onClick={handleBuyNowSubmit} disabled={submittingBuyNow} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-black/20 disabled:opacity-50 shrink-0">
+                                            <ShoppingBag className="h-4 w-4 shrink-0" />
+                                            <span>
+                                                {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `Comprar por ${formatCurrency(auction.item.buy_now_price, true)}`}
+                                            </span>
+                                        </button>
                                     </div>
-                                    <button type="button" onClick={handleBuyNowSubmit} disabled={submittingBuyNow} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-foreground rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-black/20 disabled:opacity-50 shrink-0">
-                                        <ShoppingBag className="h-4 w-4" />
-                                        {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `Comprar por ${formatCurrency(auction.item.buy_now_price)}`}
-                                    </button>
                                 </div>
                             )}
                         </div>
@@ -469,7 +506,7 @@ export default function AuctionDetailPage() {
                             <User size={28} className="text-muted-foreground" />
                             <p className="text-sm font-semibold text-foreground">Faça login para participar</p>
                             <p className="text-xs text-muted-foreground max-w-[240px]">Você precisa estar autenticado para dar lances ou arrematar este lote.</p>
-                            <Link to="/signin" className="mt-2 bg-primary text-foreground text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
+                            <Link to="/signin" className="mt-2 bg-primary text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
                                 Fazer Login
                             </Link>
                         </div>
@@ -510,7 +547,7 @@ export default function AuctionDetailPage() {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <span className={`text-sm font-black ${i === 0 ? "text-primary" : "text-foreground"}`}>{formatCurrency(bid.amount)}</span>
+                                <span className={`text-sm font-black ${i === 0 ? "text-primary" : "text-foreground"}`}>{formatCurrency(bid.amount, true)}</span>
                                 {bid.is_buy_now && <span className="block text-[9px] text-green-500 font-bold uppercase">Compra Direta</span>}
                             </div>
                         </div>
@@ -567,7 +604,7 @@ export default function AuctionDetailPage() {
                             {auction.item.buy_now_price && (
                                 <div className="border border-border rounded-sm p-4 bg-muted">
                                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Comprar Agora</p>
-                                    <p className="text-lg font-black text-primary">{formatCurrency(auction.item.buy_now_price)}</p>
+                                    <p className="text-lg font-black text-primary">{formatCurrency(auction.item.buy_now_price, true)}</p>
                                 </div>
                             )}
                             {auction.item.reserve_price && (
