@@ -3,8 +3,8 @@ import type { User } from "@/shared/types/auth.types";
 import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "friends" | "reports";
-  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "friends" | "reports") => void;
+  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
+  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => void;
   user: User;
   onLogout: () => void;
 }
