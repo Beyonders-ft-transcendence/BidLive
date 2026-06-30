@@ -1,10 +1,10 @@
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare, Heart, Radio } from "lucide-react";
 import type { User } from "@/shared/types/auth.types";
 import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail";
-  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail") => void;
+  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream";
+  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream") => void;
   user: User;
   onLogout: () => void;
 }
@@ -20,6 +20,8 @@ export default function UserSidebar({
     { id: "my-auctions", label: "Meus Leilões", icon: <Gavel size={16} /> },
     { id: "create-auction", label: "Criar Leilão", icon: <PlusCircle size={16} /> },
     { id: "my-bids", label: "Meus Lances", icon: <TrendingUp size={16} /> },
+    { id: "favorites", label: "Meus Favoritos", icon: <Heart size={16} /> },
+    { id: "live-stream", label: "Transmitir Live", icon: <Radio size={16} /> },
     { id: "chat", label: "Mensagens", icon: <MessageSquare size={16} /> },
   ] as const;
 
