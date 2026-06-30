@@ -201,7 +201,7 @@ function SigninForm() {
 
                                 <div className="mt-6 text-center">
                                     <p className="text-sm text-muted-foreground">
-                                        Não tem uma conta? <a href="#" className="text-primary font-semibold hover:underline">Registe-se</a>
+                                        Não tem uma conta? <Link to="/signup" className="text-primary font-semibold hover:underline">Registe-se</Link>
                                     </p>
                                 </div>
                             </div>

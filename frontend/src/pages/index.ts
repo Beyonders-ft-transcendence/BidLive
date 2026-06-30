@@ -1,5 +1,6 @@
 // PAGE AUTH
 export { default as SigninPage } from "./auth/signin";
+export { default as SignupPage } from "./auth/signup";
 export { default as HomePage } from "./Home";
 export { default as AuctionsPage } from "./Auctions";
 export { default as AuctionDetailPage } from "./AuctionDetail";
