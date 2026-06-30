@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { useAuctionsQuery } from "@/hooks/useAuction";
@@ -246,7 +246,12 @@ export default function AuctionsPage() {
                                                         {item.category?.name && (
                                                             <span className="inline-block text-[9px] sm:text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full mb-1.5">{item.category.name}</span>
                                                         )}
-                                                        <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">{item.description || "Sem descrição disponível."}</p>
+                                                        <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
+                                                            {item.description 
+                                                                ? (item.description.length > 120 ? item.description.substring(0, 120) + "..." : item.description) 
+                                                                : "Sem descrição disponível."
+                                                            }
+                                                        </p>
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                                                         <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold uppercase ${auction.status === 'LIVE' ? 'text-red-500' : 'text-muted-foreground'}`}>
