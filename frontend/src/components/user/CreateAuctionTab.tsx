@@ -100,48 +100,50 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
   };
 
   const onSubmit = async (data: CreateAuctionInput) => {
-    setUploadProgress(null);
+    if (selectedFiles.length === 0) {
+      toast.error("Por favor, adicione pelo menos uma imagem para o lote.");
+      return;
+    }
+
     try {
-      const urls: string[] = [];
-      if (selectedFiles.length > 0) {
-        for (let i = 0; i < selectedFiles.length; i++) {
-          setUploadProgress(`Carregando imagem ${i + 1} de ${selectedFiles.length}...`);
-          const url = await uploadImageToCloudinary(selectedFiles[i].file);
-          if (url) {
-            urls.push(url);
-          } else {
-            throw new Error(`Falha no upload do arquivo: ${selectedFiles[i].file.name}`);
-          }
+      setUploadProgress("Enviando imagens para o servidor...");
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        setUploadProgress(`Enviando imagem ${i + 1} de ${selectedFiles.length}...`);
+        const url = await uploadImageToCloudinary(selectedFiles[i].file);
+        if (url) {
+          uploadedUrls.push(url);
         }
       }
 
-      setUploadProgress("Registrando lote no servidor...");
+      if (uploadedUrls.length === 0) {
+        toast.error("Falha ao carregar as imagens do lote.");
+        setUploadProgress(null);
+        return;
+      }
+
+      setUploadProgress("Salvando detalhes do leilão...");
 
       const payload = {
-        ...data,
-        category_id: data.category_id ? Number(data.category_id) : null,
+        title: data.title,
+        description: data.description,
+        category_id: Number(data.category_id),
+        condition_type: data.condition_type,
         starting_price: Number(data.starting_price),
         minimum_increment: Number(data.minimum_increment),
-        reserve_price: data.reserve_price ? Number(data.reserve_price) : null,
-        buy_now_price: data.buy_now_price ? Number(data.buy_now_price) : null,
+        reserve_price: data.reserve_price ? Number(data.reserve_price) : undefined,
+        buy_now_price: data.buy_now_price ? Number(data.buy_now_price) : undefined,
         start_time: new Date(data.start_time).toISOString(),
         end_time: new Date(data.end_time).toISOString(),
-        is_draft: true, // starts as draft by default
-        image_urls: urls,
+        image_urls: uploadedUrls,
       };
 
-      const res = await createAuctionMutation.mutateAsync(payload);
-      if (res.success) {
-        toast.success("Lote criado e salvo como rascunho!");
-        reset();
-        // Clear files
-        selectedFiles.forEach((f) => URL.revokeObjectURL(f.previewUrl));
-        setSelectedFiles([]);
-        setStep(1);
-        onSuccess();
-      } else {
-        toast.error(res.message || "Erro ao criar leilão.");
-      }
+      await createAuctionMutation.mutateAsync(payload);
+      toast.success("Leilão criado com sucesso!");
+      reset();
+      setSelectedFiles([]);
+      onSuccess();
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || err?.response?.data?.message || "Erro ao processar criação de leilão.");
@@ -159,13 +161,13 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none max-w-4xl mx-auto text-foreground">
       {/* Header and Stepper */}
-      <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+      <div className="bg-card border border-border p-6 rounded-sm shadow-sm">
         <h2 className="text-xl font-black tracking-tight mb-6">Criar Novo Lote</h2>
         
         <div className="flex items-center justify-between relative">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full z-0"></div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-muted z-0"></div>
           <div 
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full z-0 transition-all duration-500"
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-primary z-0 transition-all duration-500"
             style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }}
           ></div>
           
@@ -175,17 +177,17 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
             return (
               <div key={s.id} className="relative z-10 flex flex-col items-center gap-2">
                 <div 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 border-4 border-card shadow-sm ${
+                  className={`w-9 h-9 rounded-sm flex items-center justify-center font-bold text-xs transition-colors duration-300 border-2 border-card shadow-sm ${
                     isActive 
-                      ? 'bg-primary text-primary-foreground scale-110' 
+                      ? 'bg-primary text-primary-foreground scale-105' 
                       : isCompleted 
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-muted text-muted-foreground'
                   }`}
                 >
-                  {isCompleted ? <Save size={16} /> : <span>{s.id}</span>}
+                  {isCompleted ? <Save size={14} /> : <span>{s.id}</span>}
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                <span className={`text-[9px] uppercase font-bold tracking-wider ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                   {s.title}
                 </span>
               </div>
@@ -384,39 +386,41 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
               </div>
 
               {/* Media upload zone */}
-              <div className="space-y-2.5 pt-2 text-left">
+              <div className="space-y-3 pt-2 text-left">
                 <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-primary" />
                   Galeria de Mídias do Lote
                 </h3>
-                <p className="text-[10px] text-muted-foreground">Suporta múltiplas imagens de até 5MB cada.</p>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                  {selectedFiles.map((fileObj, idx) => (
-                    <div key={idx} className="relative aspect-square border border-border bg-muted rounded-sm overflow-hidden group">
-                      <img src={fileObj.previewUrl} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeFile(idx)}
-                        className="absolute top-1 right-1 bg-black/60 hover:bg-destructive text-white rounded-full p-1 transition cursor-pointer border-none"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
+                <label className="border border-dashed border-border hover:border-primary/50 rounded-sm flex flex-col items-center justify-center p-6 cursor-pointer bg-muted/10 hover:bg-muted/30 transition duration-150 text-center w-full min-h-[140px] col-span-full select-none">
+                  <Upload className="w-6 h-6 text-muted-foreground mb-2 animate-bounce" style={{ animationDuration: '2.5s' }} />
+                  <span className="text-xs font-bold text-foreground">Selecionar Imagens do Lote</span>
+                  <span className="text-[10px] text-muted-foreground mt-1">Formatos aceitos: PNG, JPG, WEBP • Máx 5MB por arquivo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
 
-                  <label className="border-2 border-dashed border-border hover:border-primary rounded-sm flex flex-col items-center justify-center aspect-square cursor-pointer bg-muted hover:bg-muted/80 transition">
-                    <Upload className="w-5 h-5 text-muted-foreground mb-1" />
-                    <span className="text-[9px] font-bold uppercase text-muted-foreground">Adicionar</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+                {selectedFiles.length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 pt-4 w-full">
+                    {selectedFiles.map((fileObj, idx) => (
+                      <div key={idx} className="relative aspect-square border border-border bg-muted rounded-sm overflow-hidden group">
+                        <img src={fileObj.previewUrl} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeFile(idx)}
+                          className="absolute top-1.5 right-1.5 bg-black/60 hover:bg-destructive text-white rounded-sm p-1 transition cursor-pointer border-none"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
