@@ -35,15 +35,15 @@ export default function OverviewTab({
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none">
       {/* Welcome header card */}
-      <div className="bg-card border border-border rounded-xl p-5 shadow-sm text-foreground">
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15 rounded-2xl p-6 shadow-sm text-foreground">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
+          <div>
             <h2 className="text-xl font-black tracking-tight">Bem-vindo, {user.full_name}!</h2>
             <p className="text-xs text-muted-foreground mt-1 font-normal">Controle aqui seus lances, leilões ativos e preferências do portal.</p>
           </div>
           <button
             onClick={onCreateNewClick}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs rounded-xl shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
           >
             <PlusCircle size={15} />
             Novo Leilão
@@ -64,9 +64,9 @@ export default function OverviewTab({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Created Auctions */}
-        <div className="bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between text-foreground">
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between text-foreground">
           <div>
-            <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
+            <div className="flex justify-between items-center mb-4 border-b border-border pb-2.5">
               <span className="text-xs font-black uppercase tracking-wider">Meus Leilões Recentes</span>
               <button
                 onClick={onViewAllAuctionsClick}
@@ -85,10 +85,10 @@ export default function OverviewTab({
                 myAuctions.slice(0, 4).map((auc) => (
                   <div
                     key={auc.id}
-                    className="flex justify-between items-center p-3 bg-muted/40 hover:bg-muted rounded-lg transition-colors border border-border/50"
+                    className="flex justify-between items-center p-3 bg-muted/30 hover:bg-muted/50 rounded-xl transition-colors border border-border/40"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded bg-primary/5 flex items-center justify-center text-primary border border-primary/10 shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary border border-primary/10 shrink-0">
                         <Gavel size={12} />
                       </div>
                       <div className="flex flex-col min-w-0">
@@ -120,9 +120,9 @@ export default function OverviewTab({
         </div>
 
         {/* Bidding Summary Panel */}
-        <div className="bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between text-foreground">
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between text-foreground">
           <div>
-            <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
+            <div className="flex justify-between items-center mb-4 border-b border-border pb-2.5">
               <span className="text-xs font-black uppercase tracking-wider">Histórico de Disputas</span>
               <button
                 onClick={onViewAllBidsClick}
@@ -147,10 +147,10 @@ export default function OverviewTab({
                   .map((auc) => (
                     <div
                       key={auc.id}
-                      className="flex justify-between items-center p-3 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-lg transition-colors border border-emerald-500/10"
+                      className="flex justify-between items-center p-3 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-xl transition-colors border border-emerald-500/10"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shrink-0">
                           <CheckCircle2 size={12} />
                         </div>
                         <div className="flex flex-col min-w-0">

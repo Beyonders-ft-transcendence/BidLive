@@ -266,10 +266,10 @@ export default function ChatTab() {
                   return (
                     <div
                       key={msg.id}
-                      className={`flex gap-3 items-end ${isMe ? "justify-end" : "justify-start"}`}
+                      className={`flex gap-3 items-end ${isMe ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-200`}
                     >
                       {!isMe && (
-                        <div className="shrink-0 mb-4">
+                        <div className="shrink-0 mb-3">
                           <Avatar
                             name={msg.sender.full_name || msg.sender.username}
                             src={msg.sender.avatar_url || undefined}
@@ -280,29 +280,22 @@ export default function ChatTab() {
                       
                       <div className={`max-w-[70%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
                         <div
-                          className={`relative p-3 px-4 rounded-2xl text-xs font-semibold leading-relaxed shadow-xs transition-all duration-200 hover:shadow-sm ${
+                          className={`relative p-3 px-4 text-xs font-semibold leading-relaxed shadow-sm transition-all duration-200 ${
                             isMe
-                              ? "bg-primary text-primary-foreground rounded-br-none"
-                              : "bg-background text-foreground border border-border rounded-bl-none"
+                              ? "bg-gradient-to-br from-primary to-primary/95 text-primary-foreground rounded-2xl rounded-br-xs"
+                              : "bg-muted/50 text-foreground border border-border rounded-2xl rounded-bl-xs"
                           }`}
                         >
-                          {/* Chat bubble tail using a rotated square */}
-                          <div className={`absolute bottom-0 w-2 h-2 rotate-45 ${
-                            isMe 
-                              ? "right-[-3px] bg-primary" 
-                              : "left-[-3px] bg-background border-b border-l border-border"
-                          }`} />
-
-                          <p className="relative z-10 whitespace-pre-wrap wrap-break-word">{msg.message}</p>
+                          <p className="whitespace-pre-wrap wrap-break-word">{msg.message}</p>
                         </div>
                         
-                        <span className="text-[9px] font-bold text-muted-foreground mt-1 flex items-center gap-1.5 px-1.5">
+                        <span className="text-[9px] font-bold text-muted-foreground/60 mt-1 flex items-center gap-1.5 px-1.5 select-none">
                           {new Date(msg.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                           {isMe && (
-                            <span className={msg.is_read ? "text-blue-500 font-black" : "text-muted-foreground/60"}>
+                            <span className={msg.is_read ? "text-primary font-black" : "text-muted-foreground/40"}>
                               {msg.is_read ? "Lida" : "Enviada"}
                             </span>
                           )}
@@ -315,7 +308,7 @@ export default function ChatTab() {
 
               {/* Typing indicator */}
               {isPartnerTyping && (
-                <div className="flex gap-3 items-end justify-start">
+                <div className="flex gap-3 items-end justify-start animate-in fade-in duration-200">
                   <div className="shrink-0">
                     <Avatar
                       name={recipient?.full_name || recipient?.username || ""}
@@ -323,8 +316,7 @@ export default function ChatTab() {
                       size="sm"
                     />
                   </div>
-                  <div className="relative p-3 px-4 bg-background border border-border rounded-2xl rounded-bl-none shadow-xs flex items-center gap-1">
-                    <div className="absolute bottom-0 w-2 h-2 rotate-45 left-[-3px] bg-background border-b border-l border-border" />
+                  <div className="relative p-3 px-4 bg-muted/50 border border-border rounded-2xl rounded-bl-xs shadow-sm flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
@@ -338,22 +330,24 @@ export default function ChatTab() {
             {/* Input Box */}
             <form
               onSubmit={handleSendMessage}
-              className="p-3 border-t border-border flex items-center gap-2 bg-card shrink-0"
+              className="p-4 border-t border-border flex items-center gap-3 bg-card shrink-0"
             >
-              <input
-                type="text"
-                value={typedMessage}
-                onChange={(e) => setTypedMessage(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Escreva sua mensagem aqui..."
-                className="flex-1 px-4 py-2.5 bg-background border border-border hover:border-border/80 focus:border-primary focus:ring-1 focus:ring-primary outline-none rounded-xl text-xs transition-all font-medium text-foreground"
-              />
+              <div className="flex-1 flex items-center bg-muted/30 border border-border focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 rounded-2xl px-4 py-1 transition-all">
+                <input
+                  type="text"
+                  value={typedMessage}
+                  onChange={(e) => setTypedMessage(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Escreva sua mensagem aqui..."
+                  className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder-muted-foreground/75 py-2 font-medium"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={!typedMessage.trim()}
-                className="p-2.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl shadow-md shadow-primary/10 transition-all hover:shadow-lg disabled:opacity-50 flex items-center justify-center shrink-0 cursor-pointer border-none"
+                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-md shadow-primary/10 hover:shadow-lg transition-all disabled:opacity-40 flex items-center justify-center shrink-0 cursor-pointer border-none"
               >
-                <Send size={15} />
+                <Send size={14} />
               </button>
             </form>
           </>
