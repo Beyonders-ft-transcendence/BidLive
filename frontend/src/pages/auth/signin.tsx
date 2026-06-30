@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserRole } from "@/shared/types/auth.types";
+
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { signInSchema, type SignInInput } from "@/shared/schema/auth.schema";
@@ -45,14 +45,7 @@ function SigninForm() {
     }, [formValues.email, formValues.password]);
 
     const handleSuccessRedirect = () => {
-        const user = useAuthStore.getState().user;
-        if (user?.roles?.includes(UserRole.USER)) {
-            navigate("/user");
-        } else if (user?.roles?.includes(UserRole.SUPER_ADMIN) || user?.roles?.includes(UserRole.MONITOR)) {
-            navigate("/backoffice/dashboard");
-        } else {
-            navigate("/user"); // Fallback
-        }
+        navigate("/leiloes");
     };
 
     const onSubmit = async (data: SignInInput) => {
