@@ -98,7 +98,7 @@ function SigninForm() {
 
     return (
         <div className="min-h-screen flex items-center justify-center w-full font-sans bg-slate-200 dark:bg-slate-950 text-foreground p-4 sm:p-8">
-            <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[700px] max-h-[95vh] border border-border">
+            <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[600px] max-h-[90vh] border border-border">
                 {/* Left Column */}
                 <div className="w-full lg:w-1/2 flex flex-col relative p-6 lg:p-10 bg-card overflow-y-auto">
                     {/* Form Container */}
