@@ -39,11 +39,13 @@ export function auctionStatusColor(status: AuctionStatus | string): string {
   }
 }
 
-export function formatCurrency(value: number | string): string {
+export function formatCurrency(value: number | string, compact?: boolean): string {
   const numeric = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(numeric)) return "—";
   return new Intl.NumberFormat("pt-AO", {
     style: "currency",
     currency: "AOA",
+    notation: compact && numeric >= 1000000 ? "compact" : "standard",
+    maximumFractionDigits: compact ? 1 : 2,
   }).format(numeric);
 }

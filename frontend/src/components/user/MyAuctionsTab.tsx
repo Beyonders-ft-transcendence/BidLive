@@ -95,21 +95,21 @@ export default function MyAuctionsTab({
                       <div className="w-7 h-7 rounded-sm bg-primary/5 text-primary flex items-center justify-center border border-primary/10 shrink-0">
                         <Gavel size={12} />
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-foreground text-xs leading-tight">
+                      <div className="flex flex-col max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
+                        <span className="font-bold text-foreground text-xs leading-tight truncate" title={auc.item?.title}>
                           {auc.item?.title}
                         </span>
-                        <span className="text-[8px] font-bold text-muted-foreground mt-0.5 uppercase tracking-wider font-mono">
+                        <span className="text-[8px] font-bold text-muted-foreground mt-0.5 uppercase tracking-wider font-mono truncate" title={auc.item?.category_label || "Sem categoria"}>
                           ID: #{auc.id} | {auc.item?.category_label || "Sem categoria"}
                         </span>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 font-semibold">
-                    {formatCurrency(auc.item?.starting_price || 0)}
+                    {formatCurrency(auc.item?.starting_price || 0, true)}
                   </td>
                   <td className="py-3 font-bold text-primary font-mono">
-                    {formatCurrency(auc.item?.current_price || 0)}
+                    {formatCurrency(auc.item?.current_price || 0, true)}
                   </td>
                   <td className="py-3">
                     <span

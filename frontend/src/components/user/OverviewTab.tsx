@@ -492,7 +492,7 @@ export default function OverviewTab({
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-primary font-mono">
-                      {formatCurrency(auc.item?.current_price || 0)}
+                      {formatCurrency(auc.item?.current_price || 0, true)}
                     </p>
                     <span
                       className={`inline-block px-1.5 py-0.5 rounded-sm text-[7px] font-bold uppercase mt-1 ${auctionStatusColor(
@@ -552,7 +552,7 @@ export default function OverviewTab({
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-black text-emerald-600 font-mono">
-                        {formatCurrency(auc.item?.current_price || 0)}
+                        {formatCurrency(auc.item?.current_price || 0, true)}
                       </p>
                       <span className="inline-block px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[7px] font-bold uppercase rounded-sm mt-1">
                         Ganho
