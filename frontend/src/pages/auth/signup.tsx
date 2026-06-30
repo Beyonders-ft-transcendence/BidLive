@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 
 function SignupForm() {
     const navigate = useNavigate();
+    const [step, setStep] = useState(1);
 
     const registerUser = useAuthStore((state) => state.register);
     const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
@@ -21,6 +23,7 @@ function SignupForm() {
     const {
         register,
         handleSubmit,
+        trigger,
         formState: { errors },
     } = useForm<SignUpInput>({
         resolver: zodResolver(signUpSchema),
@@ -47,6 +50,14 @@ function SignupForm() {
         } catch (err: any) {
             console.error("Falha ao registrar:", err);
             toast.error(err?.response?.data?.message || err?.message || "Erro ao registrar. Verifique os dados inseridos.");
+        }
+    };
+
+    const handleNextStep = async () => {
+        // Valida apenas os campos do passo 1 antes de avançar
+        const isValid = await trigger(["full_name", "username", "email"]);
+        if (isValid) {
+            setStep(2);
         }
     };
 
@@ -82,7 +93,7 @@ function SignupForm() {
 
     return (
         <div className="min-h-screen flex items-center justify-center w-full font-sans bg-slate-200 dark:bg-slate-950 text-foreground p-4 sm:p-8">
-            <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[700px] max-h-[95vh] border border-border">
+            <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[600px] max-h-[90vh] border border-border">
                 {/* Left Column */}
                 <div className="w-full lg:w-1/2 flex flex-col relative p-6 lg:p-8 bg-card overflow-y-auto">
                     {/* Form Container */}
@@ -95,7 +106,9 @@ function SignupForm() {
                             </Link>
 
                             <h1 className="text-2xl font-bold mb-1 text-foreground">Criar conta</h1>
-                            <p className="text-muted-foreground text-sm mb-4">Registe-se para começar a licitar.</p>
+                            <p className="text-muted-foreground text-sm mb-4">
+                                {step === 1 ? "Passo 1 de 2: Dados Pessoais" : "Passo 2 de 2: Segurança"}
+                            </p>
 
                             <div className="w-full text-left">
                                 <div className="flex gap-3 mb-4">
@@ -132,100 +145,126 @@ function SignupForm() {
                                 </div>
 
                                 <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-foreground">Nome Completo</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="text"
-                                                placeholder="Insira o seu nome completo"
-                                                {...register("full_name")}
-                                                className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.full_name ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
-                                            />
-                                            {errors.full_name && (
-                                                <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
-                                                    {errors.full_name.message}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                    {step === 1 && (
+                                        <>
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-foreground">Nome Completo</label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Insira o seu nome completo"
+                                                        {...register("full_name")}
+                                                        className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.full_name ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                                    />
+                                                    {errors.full_name && (
+                                                        <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                            {errors.full_name.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-foreground">Nome de Usuário</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="text"
-                                                placeholder="Escolha um nome de usuário"
-                                                {...register("username")}
-                                                className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.username ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
-                                            />
-                                            {errors.username && (
-                                                <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
-                                                    {errors.username.message}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-foreground">Nome de Usuário</label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Escolha um nome de usuário"
+                                                        {...register("username")}
+                                                        className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.username ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                                    />
+                                                    {errors.username && (
+                                                        <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                            {errors.username.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-foreground">Email</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="email"
-                                                placeholder="Insira o seu email"
-                                                {...register("email")}
-                                                className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
-                                            />
-                                            {errors.email && (
-                                                <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
-                                                    {errors.email.message}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-foreground">Email</label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="Insira o seu email"
+                                                        {...register("email")}
+                                                        className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                                    />
+                                                    {errors.email && (
+                                                        <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                            {errors.email.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="password"
-                                                placeholder="Mínimo 8 caracteres"
-                                                {...register("password")}
-                                                className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
-                                            />
-                                            {errors.password && (
-                                                <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
-                                                    {errors.password.message}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                            <div className="pt-2">
+                                                <Button
+                                                    type="button"
+                                                    onClick={handleNextStep}
+                                                    className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
+                                                >
+                                                    Continuar
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
 
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-foreground">Confirmar Palavra-passe</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="password"
-                                                placeholder="Confirme a palavra-passe"
-                                                {...register("password_confirm")}
-                                                className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password_confirm ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
-                                            />
-                                            {errors.password_confirm && (
-                                                <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
-                                                    {errors.password_confirm.message}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                    {step === 2 && (
+                                        <>
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="password"
+                                                        placeholder="Mínimo 8 caracteres"
+                                                        {...register("password")}
+                                                        className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                                    />
+                                                    {errors.password && (
+                                                        <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                            {errors.password.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                    <div className="pt-2">
-                                        <Button
-                                            type="submit"
-                                            disabled={isLoading}
-                                            className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
-                                        >
-                                            {isLoading ? "A criar conta..." : "Criar conta"}
-                                        </Button>
-                                    </div>
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-foreground">Confirmar Palavra-passe</label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="password"
+                                                        placeholder="Confirme a palavra-passe"
+                                                        {...register("password_confirm")}
+                                                        className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password_confirm ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                                    />
+                                                    {errors.password_confirm && (
+                                                        <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                            {errors.password_confirm.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-2 flex gap-3">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={() => setStep(1)}
+                                                    className="w-1/3 h-11 border border-border text-foreground hover:bg-muted rounded-sm font-semibold text-base transition-colors"
+                                                >
+                                                    Voltar
+                                                </Button>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isLoading}
+                                                    className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
+                                                >
+                                                    {isLoading ? "A criar conta..." : "Criar conta"}
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
                                 </form>
 
                                 <div className="mt-4 text-center">
