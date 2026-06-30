@@ -7,7 +7,18 @@ interface SideDrawerProps {
   title: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
 }
+
+const sizeClasses = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+};
 
 export default function SideDrawer({
   isOpen,
@@ -15,6 +26,7 @@ export default function SideDrawer({
   title,
   children,
   footer,
+  size = "md",
 }: SideDrawerProps) {
   // Close on ESC key press
   useEffect(() => {
@@ -30,12 +42,12 @@ export default function SideDrawer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex justify-end select-none backdrop-blur-sm animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-black/40 flex justify-end select-none backdrop-blur-xs animate-in fade-in duration-150">
       {/* Sliding Drawer Body */}
-      <div className="w-full max-w-md bg-background h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-250 border-l border-border">
+      <div className={`w-full ${sizeClasses[size]} bg-background h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-250 border-l border-border rounded-l-sm`}>
 
         {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between bg-card">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-card shrink-0">
           <div className="flex items-center gap-3">
             {title}
           </div>
@@ -48,7 +60,7 @@ export default function SideDrawer({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-6">
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           {children}
         </div>
 
