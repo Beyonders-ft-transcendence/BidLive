@@ -27,7 +27,7 @@ export default function ChatTab() {
   const currentUser = useAuthStore((s) => s.user);
   
   // Left Panel Tabs
-  const [leftTab, setLeftTab] = useState<"conversas" | "amigos">("conversas");
+  const [leftTab, setLeftTab] = useState<"conversas" | "amigos" | "pedidos">("conversas");
 
   // Selected State
   const [selectedConv, setSelectedConv] = useState<PrivateConversation | null>(null);
@@ -250,6 +250,13 @@ export default function ChatTab() {
             >
               Amigos
             </button>
+            <button 
+              onClick={() => setLeftTab("pedidos")}
+              className={`flex-1 text-xs font-bold py-1.5 rounded-sm transition-colors cursor-pointer border-none relative ${leftTab === "pedidos" ? "bg-background shadow-sm text-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Pedidos
+              {receivedRequests.length > 0 && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>}
+            </button>
           </div>
         </div>
 
@@ -342,6 +349,58 @@ export default function ChatTab() {
               )}
             </>
           )}
+
+          {leftTab === "pedidos" && (
+            <div className="space-y-4 pt-2">
+              {receivedRequests.length === 0 && sentRequests.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 px-4 text-center text-muted-foreground">
+                  <Users size={24} className="opacity-30 mb-2" />
+                  <p className="text-[10px] font-bold text-foreground">Sem pedidos pendentes</p>
+                </div>
+              ) : (
+                <>
+                  {receivedRequests.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-[9px] font-black uppercase text-muted-foreground tracking-wider px-2">Recebidos</h4>
+                      {receivedRequests.map((req: any) => (
+                        <div key={req.id} className="w-full flex items-center justify-between p-2 rounded-sm bg-muted/20">
+                          <div className="flex items-center gap-2 overflow-hidden mr-2 cursor-pointer" onClick={() => handleSelectFriend(req.requester)}>
+                             <Avatar name={req.requester.username} src={req.requester.avatar_url} size="sm" />
+                             <div className="flex-1 min-w-0">
+                               <h4 className="text-[10px] font-bold truncate text-foreground">{req.requester.full_name || req.requester.username}</h4>
+                             </div>
+                          </div>
+                          <button 
+                             onClick={() => handleAcceptRequest(req.id)}
+                             className="text-[9px] font-bold bg-green-500/10 text-green-500 hover:bg-green-500/20 px-2 py-1 rounded-sm border-none cursor-pointer whitespace-nowrap"
+                          >
+                             Aceitar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {sentRequests.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <h4 className="text-[9px] font-black uppercase text-muted-foreground tracking-wider px-2">Enviados</h4>
+                      {sentRequests.map((req: any) => (
+                        <div key={req.id} className="w-full flex items-center justify-between p-2 rounded-sm bg-muted/20">
+                          <div className="flex items-center gap-2 overflow-hidden cursor-pointer" onClick={() => handleSelectFriend(req.addressee)}>
+                             <Avatar name={req.addressee.username} src={req.addressee.avatar_url} size="sm" />
+                             <div className="flex-1 min-w-0">
+                               <h4 className="text-[10px] font-bold truncate text-foreground">{req.addressee.full_name || req.addressee.username}</h4>
+                             </div>
+                          </div>
+                          <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap ml-2">Pendente</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
       )}
@@ -410,13 +469,13 @@ export default function ChatTab() {
                           {showAvatar && <Avatar name={msg.sender.username} src={msg.sender.avatar_url || undefined} size="sm" />}
                         </div>
                       )}
-                      <div className={`max-w-[75%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                         <div className={`p-3.5 px-5 text-xs font-semibold leading-relaxed shadow-sm transition-all duration-200 ${
+                      <div className={`max-w-[85%] flex flex-col ${isMe ? "items-end" : "items-start"} overflow-hidden`}>
+                         <div className={`p-3.5 px-5 text-xs font-semibold leading-relaxed shadow-sm transition-all duration-200 overflow-hidden ${
                            isMe 
                             ? "bg-gradient-to-br from-primary to-primary/95 text-primary-foreground rounded-2xl rounded-br-sm" 
                             : "bg-muted/50 border border-border text-foreground rounded-2xl rounded-bl-sm"
                          }`}>
-                            <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                            <p className="whitespace-pre-wrap break-all md:break-words w-full overflow-hidden">{msg.message}</p>
                          </div>
                          <span className="text-[9px] font-bold text-muted-foreground/60 mt-1.5 px-1.5">
                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
