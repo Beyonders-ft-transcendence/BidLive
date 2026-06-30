@@ -7,8 +7,10 @@ import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageM
 import {
     ChevronLeft, Clock, Gavel, CheckCircle2, Shield, AlertCircle,
     Tag, User, CalendarDays, TrendingUp, Video, ShoppingBag, MessageSquare,
-    Send
+    Send, Heart
 } from "lucide-react";
+import auctionService from "@/services/auction.service";
+import { toast } from "sonner";
 
 // Condition label map
 const conditionLabels: Record<string, string> = {
@@ -77,6 +79,53 @@ export default function AuctionDetailPage() {
     } = useAuctionRealtime(auctionId);
 
     const countdown = useCountdown(auction?.end_time, auction?.status || "");
+
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("bidlive_watched_auctions");
+            if (stored) {
+                const ids = JSON.parse(stored) as number[];
+                setIsFavorite(ids.includes(auctionId));
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }, [auctionId]);
+
+    const handleToggleFavorite = async () => {
+        try {
+            if (isFavorite) {
+                const res = await auctionService.unwatch(auctionId);
+                if (res.success) {
+                    const stored = localStorage.getItem("bidlive_watched_auctions");
+                    const ids = stored ? JSON.parse(stored) as number[] : [];
+                    const updated = ids.filter((id) => id !== auctionId);
+                    localStorage.setItem("bidlive_watched_auctions", JSON.stringify(updated));
+                    setIsFavorite(false);
+                    window.dispatchEvent(new Event("storage"));
+                    toast.success("Removido dos favoritos.");
+                }
+            } else {
+                const res = await auctionService.watch(auctionId);
+                if (res.success) {
+                    const stored = localStorage.getItem("bidlive_watched_auctions");
+                    const ids = stored ? JSON.parse(stored) as number[] : [];
+                    if (!ids.includes(auctionId)) {
+                        ids.push(auctionId);
+                    }
+                    localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
+                    setIsFavorite(true);
+                    window.dispatchEvent(new Event("storage"));
+                    toast.success("Adicionado aos favoritos.");
+                }
+            }
+        } catch (err) {
+            console.error("Erro ao favoritar:", err);
+            toast.error("Erro ao processar ação.");
+        }
+    };
 
     const [activeImage, setActiveImage] = useState(0);
     const [chatInput, setChatInput] = useState("");
@@ -323,7 +372,22 @@ export default function AuctionDetailPage() {
                 <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-sm mb-3">
                     {auction.item.category?.name || "Leilão"}
                 </span>
-                <h1 className="text-xl font-extrabold text-foreground leading-snug">{auction.item.title}</h1>
+                <div className="flex items-start justify-between gap-4">
+                    <h1 className="text-xl font-extrabold text-foreground leading-snug">{auction.item.title}</h1>
+                    {isAuthenticated && (
+                        <button
+                            onClick={handleToggleFavorite}
+                            className={`p-2 border rounded-sm transition cursor-pointer shrink-0 ${
+                                isFavorite
+                                    ? "bg-red-50 text-red-500 border-red-200 hover:bg-red-100"
+                                    : "bg-background text-muted-foreground border-border hover:bg-muted"
+                            }`}
+                            title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                        >
+                            <Heart size={18} className={isFavorite ? "fill-current" : ""} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="px-6 py-5 flex items-end justify-between border-b border-border bg-muted">
