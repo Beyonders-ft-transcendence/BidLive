@@ -20,7 +20,6 @@ import ChatTab from "@/components/user/ChatTab";
 import MyBidsTab from "@/components/user/MyBidsTab";
 import OverviewTab from "@/components/user/OverviewTab";
 import UserSidebar from "@/components/user/UserSidebar";
-import SettingsTab from "@/components/user/SettingsTab";
 import MyAuctionsTab from "@/components/user/MyAuctionsTab";
 import CreateAuctionTab from "@/components/user/CreateAuctionTab";
 
@@ -42,13 +41,13 @@ export function UserDashboard() {
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["overview", "my-auctions", "my-bids", "settings", "create-auction", "chat"].includes(tab)) {
-      return tab as "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat";
+    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat"].includes(tab)) {
+      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat";
     }
     return "overview";
   }, [searchParams]);
 
-  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat") => {
+  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat") => {
     setSearchParams({ tab });
   };
 
@@ -260,8 +259,6 @@ export function UserDashboard() {
               loadingAll={loadingAll}
             />
           )}
-
-          {activeTab === "settings" && <SettingsTab user={user} />}
 
           {activeTab === "chat" && <ChatTab />}
 
