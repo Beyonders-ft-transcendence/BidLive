@@ -1,10 +1,10 @@
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, Settings, PlusCircle, MessageSquare } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare } from "lucide-react";
 import type { User } from "@/shared/types/auth.types";
 import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat";
-  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "settings" | "create-auction" | "chat") => void;
+  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat";
+  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat") => void;
   user: User;
   onLogout: () => void;
 }
@@ -21,7 +21,6 @@ export default function UserSidebar({
     { id: "create-auction", label: "Criar Leilão", icon: <PlusCircle size={16} /> },
     { id: "my-bids", label: "Meus Lances", icon: <TrendingUp size={16} /> },
     { id: "chat", label: "Mensagens", icon: <MessageSquare size={16} /> },
-    { id: "settings", label: "Configurações", icon: <Settings size={16} /> },
   ] as const;
 
   return (
