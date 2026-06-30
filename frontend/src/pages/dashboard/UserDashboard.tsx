@@ -10,7 +10,6 @@ import {
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
 } from "@/hooks/useAuction";
-import type { Auction } from "@/shared/types/auction.types";
 import { AuctionStatus } from "@/shared/types/auction.types";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { AlertCircle } from "lucide-react";
@@ -28,7 +27,6 @@ import LiveStreamTab from "@/components/user/LiveStreamTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
-import StreamConsoleModal from "@/components/user/StreamConsoleModal";
 
 export function UserDashboard() {
   const navigate = useNavigate();
@@ -77,9 +75,7 @@ export function UserDashboard() {
   const [approveAuctionId, setApproveAuctionId] = useState<number | null>(null);
   const [deleteAuctionId, setDeleteAuctionId] = useState<number | null>(null);
   
-  // Estados de Transmissão
-  const [selectedStreamAuction, setSelectedStreamAuction] = useState<Auction | null>(null);
-  const [isStreamConsoleOpen, setIsStreamConsoleOpen] = useState(false);
+
 
   // Proteção de Rota
   useEffect(() => {
@@ -256,10 +252,7 @@ export function UserDashboard() {
               onCancelClick={setCancelAuctionId}
               onDeleteClick={setDeleteAuctionId}
               onCreateNewClick={() => setActiveTab("create-auction")}
-              onManageStreamClick={(auc) => {
-                setSelectedStreamAuction(auc);
-                setIsStreamConsoleOpen(true);
-              }}
+              onManageStreamClick={(auc) => setSearchParams({ tab: "live-stream", id: String(auc.id) })}
             />
           )}
 
@@ -296,10 +289,7 @@ export function UserDashboard() {
                 onPublishClick={setApproveAuctionId}
                 onCancelClick={setCancelAuctionId}
                 onDeleteClick={setDeleteAuctionId}
-                onManageStreamClick={(auc) => {
-                  setSelectedStreamAuction(auc);
-                  setIsStreamConsoleOpen(true);
-                }}
+                onManageStreamClick={(auc) => setSearchParams({ tab: "live-stream", id: String(auc.id) })}
               />
             ) : (
               <div className="bg-card border border-border p-12 rounded-sm text-center">
@@ -394,15 +384,7 @@ export function UserDashboard() {
         </div>
       )}
 
-      {/* CONSOLE DE TRANSMISSÃO */}
-      <StreamConsoleModal
-        isOpen={isStreamConsoleOpen}
-        onClose={() => {
-          setIsStreamConsoleOpen(false);
-          setSelectedStreamAuction(null);
-        }}
-        auction={selectedStreamAuction}
-      />
+
     </div>
   );
 }

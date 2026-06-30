@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { 
   Video, VideoOff, Mic, MicOff, Key, Copy, Check, 
   Tv, Radio, Users, RefreshCw, Play, Square, ArrowLeft,
@@ -17,7 +18,19 @@ interface LiveStreamTabProps {
 }
 
 export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNewClick }: LiveStreamTabProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeAuction, setActiveAuction] = useState<Auction | null>(null);
+
+  // Sync from URL search params
+  useEffect(() => {
+    const idParam = searchParams.get("id");
+    if (idParam && myAuctions.length > 0) {
+      const found = myAuctions.find((auc) => auc.id === Number(idParam));
+      if (found) {
+        setActiveAuction(found);
+      }
+    }
+  }, [searchParams, myAuctions]);
   
   // Stream console states
   const [stream, setStream] = useState<any | null>(null);
@@ -266,6 +279,9 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                 stopCamera();
                 setActiveAuction(null);
                 setStream(null);
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete("id");
+                setSearchParams(newParams);
               }}
               className="p-2 border border-border hover:bg-muted text-muted-foreground hover:text-foreground rounded-sm transition cursor-pointer bg-background"
             >
@@ -319,7 +335,10 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
               return (
                 <div
                   key={auc.id}
-                  onClick={() => setActiveAuction(auc)}
+                  onClick={() => {
+                    setActiveAuction(auc);
+                    setSearchParams({ tab: "live-stream", id: String(auc.id) });
+                  }}
                   className="bg-card border border-border rounded-sm p-5 hover:border-primary/45 transition shadow-xs flex flex-col justify-between cursor-pointer group"
                 >
                   <div className="flex gap-4">

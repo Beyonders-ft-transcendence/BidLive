@@ -1,7 +1,7 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Search, ChevronDown, Heart, Menu, X, Globe } from "lucide-react";
+import { Sun, Moon, Search, ChevronDown, Menu, X, Globe } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -74,10 +74,7 @@ export default function Header() {
                             </div>
                         </div>
                     </div>
-
-                    <Link to="/favoritos" className="p-2 text-muted-foreground hover:text-primary transition-colors" title="Favoritos">
-                        <Heart size={20} />
-                    </Link>
+ 
                     <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
@@ -143,9 +140,6 @@ export default function Header() {
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
                             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Início</Link>
                             <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Leilões</Link>
-                            <Link to="/favoritos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50 flex items-center gap-2">
-                                <Heart size={18} /> Favoritos
-                            </Link>
                             
                             {/* Mobile Language Selection */}
                             <div className="py-4 border-b border-border/50">
