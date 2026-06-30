@@ -31,9 +31,11 @@ export default function IndexRoot() {
 
                 {/* Rotas Autenticadas (Plataforma/Backoffice) */}
                 <Route element={<ProtectedRoute />}>
+                    {/* Portal do Usuário (Usa o Header Global) */}
+                    <Route path="/user" element={<UserDashboard />} />
+
                     <Route element={<AuthLayout />}>
                         {/* Dashboards Base */}
-                        <Route path="/user" element={<UserDashboard />} />
                         <Route path="/explore" element={<div>Explorar (Em Breve)</div>} />
                         
                         {/* Rotas exclusivas de Backoffice (SUPER_ADMIN / MONITOR) */}

@@ -5,11 +5,18 @@ import { Sun, Moon, Search, ChevronDown, Heart, Menu, X, Globe } from "lucide-re
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "@/shared/stores/auth.store";
+import Avatar from "../common/Avatar";
+import UserDrawer from "./UserDrawer";
 
 export default function Header() {
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
     const [language, setLanguage] = useState("PT"); // PT, EN, AR
+
+    const user = useAuthStore((state) => state.user);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
     useEffect(() => {
         setCurrentTheme(getTheme());
@@ -74,9 +81,22 @@ export default function Header() {
                     <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
-                    <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm text-center">
-                        Registrar / Entrar
-                    </Link>
+
+                    {isAuthenticated && user ? (
+                        <button 
+                            onClick={() => setIsUserDrawerOpen(true)}
+                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card"
+                        >
+                            <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
+                            <span className="hidden lg:inline text-xs font-bold text-foreground">
+                                {user.full_name || user.username}
+                            </span>
+                        </button>
+                    ) : (
+                        <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm text-center">
+                            Registrar / Entrar
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -140,13 +160,31 @@ export default function Header() {
                     </div>
 
                     <div className="p-4 border-t border-border mt-auto bg-card">
-                        <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm text-center">
-                            Registrar / Entrar
-                        </Link>
+                        {isAuthenticated && user ? (
+                            <button 
+                                onClick={() => { setIsMobileMenuOpen(false); setIsUserDrawerOpen(true); }}
+                                className="flex items-center justify-between w-full p-2.5 rounded-md hover:bg-muted text-left border border-border bg-background"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-foreground leading-tight">{user.full_name || user.username}</span>
+                                        <span className="text-[10px] text-muted-foreground mt-0.5">{user.email}</span>
+                                    </div>
+                                </div>
+                                <ChevronDown size={16} className="-rotate-90 text-muted-foreground" />
+                            </button>
+                        ) : (
+                            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm text-center">
+                                Registrar / Entrar
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
         )}
+
+        <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)} />
         </>
     );
 }

@@ -43,13 +43,13 @@ function SignupForm() {
                 username: data.username,
                 full_name: data.full_name,
                 password: data.password,
-                password_confirm: data.password_confirm,
             });
             toast.success("Conta criada com sucesso! Faça login para continuar.");
             navigate("/signin");
         } catch (err: any) {
             console.error("Falha ao registrar:", err);
-            toast.error(err?.response?.data?.message || err?.message || "Erro ao registrar. Verifique os dados inseridos.");
+            const errMsg = useAuthStore.getState().error || "Erro ao registrar. Verifique os dados inseridos.";
+            toast.error(errMsg);
         }
     };
 
