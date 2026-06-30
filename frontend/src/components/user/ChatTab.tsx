@@ -8,11 +8,12 @@ import {
   useMarkMessagesAsReadMutation,
   usePrivateChatRealtime,
 } from "@/hooks/useChat";
-import { 
+import {
   useFriendsQuery, 
   useOnlineFriendsQuery,
   useRemoveFriendMutation,
   useUserSearchQuery,
+  useSendFriendRequestMutation,
 } from "@/hooks/useSocial";
 import Avatar from "@/components/common/Avatar";
 import type { PrivateConversation, ChatUser } from "@/shared/types/chat.types";
@@ -60,6 +61,7 @@ export default function ChatTab() {
   const sendMutation = useSendPrivateMessageMutation();
   const markAsReadMutation = useMarkMessagesAsReadMutation();
   const removeMutation = useRemoveFriendMutation();
+  const sendFriendRequest = useSendFriendRequestMutation();
 
   // Scroll ref for chat history
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -171,15 +173,27 @@ export default function ChatTab() {
     }
   };
 
-  const handleRemoveFriend = async () => {
+  const handleRemoveFriend = () => {
     if (!recipient) return;
-    try {
-      await removeMutation.mutateAsync(recipient.id);
-      setSelectedFriend(null);
-      setSelectedConv(null);
-    } catch (err) {
-      console.error(err);
-    }
+    const isFriend = friends.find((f: any) => f.id === recipient.id);
+    if (!isFriend) return;
+    removeMutation.mutate(recipient.id, {
+      onSuccess: () => {
+        setSelectedFriend(null);
+      }
+    });
+  };
+
+  const handleSendRequest = () => {
+    if (!recipient) return;
+    sendFriendRequest.mutate(
+      { addressee_id: recipient.id },
+      {
+        onSuccess: () => {
+          // You might show a toast here in the future
+        }
+      }
+    );
   };
 
   return (
@@ -478,10 +492,20 @@ export default function ChatTab() {
                        Remover Amigo
                      </button>
                    ) : (
-                     <button className="w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-sm transition-colors cursor-pointer border-none">
-                       Enviar Pedido de Amizade
+                     <button 
+                       onClick={handleSendRequest}
+                       disabled={sendFriendRequest.isPending}
+                       className="w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-sm transition-colors cursor-pointer border-none disabled:opacity-50"
+                     >
+                       {sendFriendRequest.isPending ? "A enviar..." : "Enviar Pedido de Amizade"}
                      </button>
                    )}
+                   <button 
+                     onClick={() => { setSelectedConv(null); setSelectedFriend(null); }} 
+                     className="w-full py-2 bg-transparent hover:bg-muted/50 text-muted-foreground text-xs font-bold rounded-sm transition-colors cursor-pointer border-none"
+                   >
+                     Sair do Perfil
+                   </button>
                 </div>
              </div>
           </div>
