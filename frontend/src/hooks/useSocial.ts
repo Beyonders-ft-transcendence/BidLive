@@ -115,3 +115,16 @@ export function useUnblockUserMutation() {
     mutationFn: (payload: BlockUserPayload) => socialService.unblockUser(payload),
   });
 }
+
+export function useUserSearchQuery(query: string) {
+  return useQuery({
+    queryKey: ["usersSearch", query],
+    queryFn: async () => {
+      if (!query.trim()) return [];
+      const res = await socialService.searchUsers(query);
+      if (!res.success) throw new Error(res.message || "Falha na pesquisa de utilizadores.");
+      return res.data?.results || [];
+    },
+    enabled: query.trim().length > 0,
+  });
+}

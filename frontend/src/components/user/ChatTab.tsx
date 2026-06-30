@@ -12,6 +12,7 @@ import {
   useFriendsQuery, 
   useOnlineFriendsQuery,
   useRemoveFriendMutation,
+  useUserSearchQuery,
 } from "@/hooks/useSocial";
 import Avatar from "@/components/common/Avatar";
 import type { PrivateConversation, ChatUser } from "@/shared/types/chat.types";
@@ -33,6 +34,13 @@ export default function ChatTab() {
   const [showRightSidebar, setShowRightSidebar] = useState(true);
   
   const [typedMessage, setTypedMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Queries - Chat
   const { data: conversations = [], isLoading: loadingConvs } = useConversationsQuery();
@@ -43,6 +51,7 @@ export default function ChatTab() {
   // Queries - Social
   const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
   const { data: onlineResponse } = useOnlineFriendsQuery();
+  const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
 
   const friends = Array.isArray(friendsResponse) ? friendsResponse : ((friendsResponse as any)?.data || []);
   const onlineFriends = Array.isArray(onlineResponse) ? onlineResponse : ((onlineResponse as any)?.data || []); 
@@ -425,7 +434,15 @@ export default function ChatTab() {
             </form>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-muted/5">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-muted/5 relative">
+             {!showLeftSidebar && (
+               <button 
+                 onClick={() => setShowLeftSidebar(true)} 
+                 className="absolute top-4 left-4 text-muted-foreground hover:text-foreground border-none bg-transparent cursor-pointer"
+               >
+                 <PanelLeftOpen size={20} />
+               </button>
+             )}
              <div className="w-20 h-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 shadow-sm">
                <MessageSquare size={32} className="text-muted-foreground/50" />
              </div>
@@ -474,21 +491,45 @@ export default function ChatTab() {
                <Users size={14} className="text-primary" />
                Descobrir Pessoas
             </h3>
-            <div className="relative mb-6">
+            <div className="relative mb-6 shrink-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                   type="text" 
                   placeholder="Pesquisar..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-9 bg-background/50 border-border focus-visible:ring-primary rounded-sm text-xs w-full"
               />
             </div>
             
-            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60">
-              <Search size={32} className="text-muted-foreground mb-3" />
-              <p className="text-xs font-bold text-foreground">Pesquisa Global</p>
-              <p className="text-[10px] text-muted-foreground mt-1 max-w-[180px]">
-                Brevemente poderás pesquisar e adicionar qualquer utilizador do BidLive.
-              </p>
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {isSearching ? (
+                <div className="flex justify-center py-6"><Loader2 className="animate-spin text-muted-foreground" /></div>
+              ) : debouncedQuery && searchResults && searchResults.length > 0 ? (
+                searchResults.map((u: PublicUser) => (
+                  <button 
+                    key={u.id}
+                    onClick={() => handleSelectFriend(u)}
+                    className="w-full flex items-center gap-3 p-2 rounded-sm hover:bg-muted/50 transition-colors text-left cursor-pointer border-none bg-transparent"
+                  >
+                    <Avatar name={u.full_name || u.username} src={u.avatar_url || undefined} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[11px] font-bold truncate text-foreground">{u.full_name || u.username}</h4>
+                      <p className="text-[9px] text-muted-foreground truncate">@{u.username}</p>
+                    </div>
+                  </button>
+                ))
+              ) : debouncedQuery ? (
+                <p className="text-[10px] text-center text-muted-foreground py-6">Nenhum utilizador encontrado.</p>
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center opacity-60 mt-10">
+                  <Search size={32} className="text-muted-foreground mb-3" />
+                  <p className="text-xs font-bold text-foreground">Pesquisa Global</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 max-w-[180px]">
+                    Escreve um nome ou username para procurar pessoas no BidLive.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
