@@ -1,13 +1,16 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserRole } from "@/shared/types/auth.types";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { signInSchema, type SignInInput } from "@/shared/schema/auth.schema";
+import logoImg from "@/assets/images/logo.png";
+import logoImgDark from "@/assets/images/logo2.png";
+import { toast } from "sonner";
 
 function SigninForm() {
     const navigate = useNavigate();
@@ -56,8 +59,9 @@ function SigninForm() {
         try {
             await login(data);
             handleSuccessRedirect();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Falha ao entrar com e-mail/senha:", err);
+            toast.error(err?.response?.data?.message || err?.message || "Erro ao entrar. Verifique os seus dados.");
         }
     };
 
@@ -68,9 +72,11 @@ function SigninForm() {
                 window.location.href = url;
             } else {
                 console.error("A URL de autorização da Intra está vazia.");
+                toast.error("Serviço de autenticação da Intra temporariamente indisponível.");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Falha ao autorizar 42:", err);
+            toast.error("Ocorreu um erro ao tentar conectar com a Intra 42.");
         }
     };
 
@@ -79,12 +85,14 @@ function SigninForm() {
             try {
                 await loginWithGoogle({ access_token: tokenResponse.access_token });
                 handleSuccessRedirect();
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Erro na integração Google Auth do Backend:", error);
+                toast.error("Erro ao completar a autenticação com o Google.");
             }
         },
         onError: () => {
             console.error("Google Login falhou na resposta da tela do OAuth.");
+            toast.error("Autenticação cancelada ou falhou. Tente novamente.");
         },
     });
 
@@ -93,19 +101,20 @@ function SigninForm() {
             <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[700px] max-h-[95vh] border border-border">
                 {/* Left Column */}
                 <div className="w-full lg:w-1/2 flex flex-col relative p-6 lg:p-10 bg-card overflow-y-auto">
-                    {/* Logo */}
-                    <div className="flex items-center gap-2 font-semibold text-lg text-foreground">
-                        <div className="w-3.5 h-3.5 rounded-full bg-foreground"></div>
-                        <span>BidLive</span>
-                    </div>
-
                     {/* Form Container */}
                     <div className="flex-1 flex items-center justify-center py-6">
-                        <div className="w-full max-w-[360px]">
+                        <div className="w-full max-w-[360px] flex flex-col items-center text-center">
+                            {/* Logo */}
+                            <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity w-fit mb-6">
+                                <img src={logoImg} alt="BidLive Logo" className="h-8 object-contain dark:hidden" />
+                                <img src={logoImgDark} alt="BidLive Logo" className="h-8 object-contain hidden dark:block" />
+                            </Link>
+
                             <h1 className="text-3xl font-bold mb-2 text-foreground">Bem-vindo de volta</h1>
                             <p className="text-muted-foreground text-sm mb-6">Bem-vindo de volta! Por favor, insira os seus dados.</p>
 
-                            <div className="flex gap-3 mb-6">
+                            <div className="w-full text-left">
+                                <div className="flex gap-3 mb-6">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -141,28 +150,36 @@ function SigninForm() {
                             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                                 <div className="space-y-1.5">
                                     <label className="block text-sm font-medium text-foreground">Email</label>
-                                    <Input
-                                        type="email"
-                                        placeholder="Insira o seu email"
-                                        {...register("email")}
-                                        className="h-11 bg-background border border-border rounded-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary shadow-sm w-full text-foreground placeholder:text-muted-foreground"
-                                    />
-                                    {errors.email && (
-                                        <p className="text-red-500 text-xs">{errors.email.message}</p>
-                                    )}
+                                    <div className="relative">
+                                        <Input
+                                            type="email"
+                                            placeholder="Insira o seu email"
+                                            {...register("email")}
+                                            className={`h-11 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                        />
+                                        {errors.email && (
+                                            <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                {errors.email.message}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-1.5">
                                     <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
-                                    <Input
-                                        type="password"
-                                        placeholder="••••••••"
-                                        {...register("password")}
-                                        className="h-11 bg-background border border-border rounded-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary shadow-sm w-full text-foreground placeholder:text-muted-foreground"
-                                    />
-                                    {errors.password && (
-                                        <p className="text-red-500 text-xs">{errors.password.message}</p>
-                                    )}
+                                    <div className="relative">
+                                        <Input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            {...register("password")}
+                                            className={`h-11 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
+                                        />
+                                        {errors.password && (
+                                            <p className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive text-xs font-medium">
+                                                {errors.password.message}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center justify-end text-sm">
@@ -170,8 +187,6 @@ function SigninForm() {
                                         Esqueceu a palavra-passe?
                                     </a>
                                 </div>
-
-                                {apiError && <p className="text-red-500 text-sm font-medium">{apiError}</p>}
 
                                 <div className="pt-2">
                                     <Button
@@ -184,10 +199,11 @@ function SigninForm() {
                                 </div>
                             </form>
 
-                            <div className="mt-8 text-center">
-                                <p className="text-sm text-muted-foreground">
-                                    Não tem uma conta? <a href="#" className="text-primary font-semibold hover:underline">Registe-se</a>
-                                </p>
+                                <div className="mt-8 text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                        Não tem uma conta? <a href="#" className="text-primary font-semibold hover:underline">Registe-se</a>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -197,9 +213,9 @@ function SigninForm() {
                 <div className="hidden lg:flex w-1/2 h-full bg-secondary items-center justify-center relative overflow-hidden">
                     <div className="relative flex flex-col items-center">
                         {/* Top half circle */}
-                        <div className="w-[320px] h-[160px] bg-primary rounded-t-full relative z-10" style={{ boxShadow: "inset 0px -4px 10px rgba(0,0,0,0.05)" }}></div>
+                        <div className="w-[240px] h-[120px] bg-primary rounded-t-full relative z-10" style={{ boxShadow: "inset 0px -4px 10px rgba(0,0,0,0.05)" }}></div>
                         {/* Blurry shadow reflection */}
-                        <div className="w-[320px] h-[160px] bg-primary/40 blur-[40px] rounded-b-full relative -mt-4 z-0"></div>
+                        <div className="w-[240px] h-[120px] bg-primary/40 blur-[40px] rounded-b-full relative -mt-4 z-0"></div>
                     </div>
                 </div>
             </div>
