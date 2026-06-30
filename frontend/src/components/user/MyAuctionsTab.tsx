@@ -35,7 +35,7 @@ export default function MyAuctionsTab({
 }: MyAuctionsTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none text-foreground">
-      <div className="bg-card border border-border p-5 rounded-xl shadow-sm flex flex-col justify-between">
+      <div className="bg-card border border-border p-5 rounded-sm shadow-sm flex flex-col justify-between">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-black tracking-tight">Meus Leilões</h2>
@@ -45,7 +45,7 @@ export default function MyAuctionsTab({
           </div>
           <button
             onClick={onCreateNewClick}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs rounded-xl shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
           >
             <PlusCircle size={15} />
             Criar Leilão
@@ -133,7 +133,7 @@ export default function MyAuctionsTab({
                       <button
                         onClick={() => onViewDetails(auc)}
                         title="Ver Detalhes"
-                        className="p-1.5 rounded-lg hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
+                        className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                       >
                         <Eye size={12} />
                       </button>
@@ -143,14 +143,14 @@ export default function MyAuctionsTab({
                           <button
                             onClick={() => onPublishClick(auc.id)}
                             title="Publicar Leilão"
-                            className="p-1.5 rounded-lg hover:bg-green-500/10 text-green-600 transition-colors cursor-pointer border border-border bg-background"
+                            className="p-1.5 rounded-sm hover:bg-green-500/10 text-green-600 transition-colors cursor-pointer border border-border bg-background"
                           >
                             <CheckCircle size={12} />
                           </button>
                           <button
                             onClick={() => onDeleteClick(auc.id)}
                             title="Excluir Rascunho"
-                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
+                            className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                           >
                             <Trash2 size={12} />
                           </button>
@@ -161,7 +161,7 @@ export default function MyAuctionsTab({
                         <button
                           onClick={() => onCancelClick(auc.id)}
                           title="Cancelar Leilão"
-                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
+                          className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Ban size={12} />
                         </button>
@@ -171,7 +171,7 @@ export default function MyAuctionsTab({
                         <button
                           onClick={() => onManageStreamClick(auc)}
                           title="Transmitir Ao Vivo"
-                          className="p-1.5 rounded-lg hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
+                          className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Video size={12} />
                         </button>

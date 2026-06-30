@@ -59,13 +59,13 @@ export default function ConfirmModal({
         <div className="flex justify-end gap-2.5 mt-3">
           <button
             onClick={onClose}
-            className="bg-background border border-border hover:bg-muted text-muted-foreground hover:text-foreground font-semibold text-xs py-2 px-4 rounded-md transition-colors cursor-pointer focus:outline-none"
+            className="bg-background border border-border hover:bg-muted text-muted-foreground hover:text-foreground font-semibold text-xs py-2 px-4 rounded-sm transition-colors cursor-pointer focus:outline-none"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className={`font-semibold text-xs py-2 px-5 rounded-md transition-colors cursor-pointer focus:outline-none shadow-sm ${styles.confirmButton}`}
+            className={`font-semibold text-xs py-2 px-5 rounded-sm transition-colors cursor-pointer focus:outline-none shadow-sm ${styles.confirmButton}`}
           >
             {confirmText}
           </button>

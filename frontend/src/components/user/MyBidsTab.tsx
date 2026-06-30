@@ -14,7 +14,7 @@ export default function MyBidsTab({ allAuctions, user, loadingAll }: MyBidsTabPr
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none">
-      <div className="bg-card border border-border p-5 rounded-xl shadow-sm text-foreground">
+      <div className="bg-card border border-border p-5 rounded-sm shadow-sm text-foreground">
         <div>
           <h2 className="text-xl font-black tracking-tight">Meus Lances</h2>
           <p className="text-xs text-muted-foreground mt-1 font-normal">
@@ -23,7 +23,7 @@ export default function MyBidsTab({ allAuctions, user, loadingAll }: MyBidsTabPr
         </div>
       </div>
 
-      <div className="bg-card border border-border p-5 rounded-xl shadow-sm text-foreground">
+      <div className="bg-card border border-border p-5 rounded-sm shadow-sm text-foreground">
         {loadingAll ? (
           <p className="text-center text-xs text-muted-foreground py-8">Carregando seus lances da API...</p>
         ) : wonAuctions.length === 0 ? (
@@ -39,11 +39,11 @@ export default function MyBidsTab({ allAuctions, user, loadingAll }: MyBidsTabPr
             {wonAuctions.map((auc) => (
               <div
                 key={auc.id}
-                className="border border-emerald-500/10 bg-emerald-500/5 rounded-xl p-4 flex flex-col justify-between gap-4 hover:shadow-md transition"
+                className="border border-emerald-500/10 bg-emerald-500/5 rounded-sm p-4 flex flex-col justify-between gap-4 hover:shadow-md transition"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
-                    <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-500/10 rounded px-2 py-0.5 border border-emerald-500/20 inline-block uppercase">
+                    <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-500/10 rounded-sm px-2 py-0.5 border border-emerald-500/20 inline-block uppercase">
                       Arrematado
                     </span>
                     <h4 className="text-xs font-bold truncate mt-2 leading-snug">
