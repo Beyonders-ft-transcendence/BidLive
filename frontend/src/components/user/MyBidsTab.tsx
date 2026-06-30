@@ -54,7 +54,7 @@ export default function MyBidsTab({ allAuctions, user, loadingAll }: MyBidsTabPr
                   <div className="text-right">
                     <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">Preço Final</span>
                     <span className="text-xs font-black text-emerald-600 font-mono">
-                      {formatCurrency(auc.item?.current_price || 0)}
+                      {formatCurrency(auc.item?.current_price || 0, true)}
                     </span>
                   </div>
                 </div>
