@@ -693,15 +693,15 @@ export default function AuctionDetailPage() {
                     </div>
 
                     {/* ── RIGHT COLUMN ── */}
-                    <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-5 sticky top-24 self-start max-h-[calc(100vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         
                         {/* Bidding Card */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden sticky top-20">
+                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden shrink-0">
                             {renderBidding()}
                         </div>
 
                         {/* Bids History Card */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden">
+                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden shrink-0">
                             {renderBidsHistory()}
                         </div>
                     </div>
