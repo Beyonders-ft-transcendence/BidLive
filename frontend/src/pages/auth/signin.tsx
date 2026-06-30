@@ -100,21 +100,21 @@ function SigninForm() {
         <div className="min-h-screen flex items-center justify-center w-full font-sans bg-slate-200 dark:bg-slate-950 text-foreground p-4 sm:p-8">
             <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-sm shadow-2xl overflow-hidden lg:h-[600px] max-h-[90vh] border border-border">
                 {/* Left Column */}
-                <div className="w-full lg:w-1/2 flex flex-col relative p-6 lg:p-10 bg-card overflow-y-auto">
+                <div className="w-full lg:w-1/2 flex flex-col relative p-6 lg:p-8 bg-card overflow-y-auto">
                     {/* Form Container */}
-                    <div className="flex-1 flex items-center justify-center py-6">
+                    <div className="flex-1 flex items-center justify-center py-2">
                         <div className="w-full max-w-[360px] flex flex-col items-center text-center">
                             {/* Logo */}
-                            <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity w-fit mb-6">
+                            <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity w-fit mb-4">
                                 <img src={logoImg} alt="BidLive Logo" className="h-8 object-contain dark:hidden" />
                                 <img src={logoImgDark} alt="BidLive Logo" className="h-8 object-contain hidden dark:block" />
                             </Link>
 
-                            <h1 className="text-3xl font-bold mb-2 text-foreground">Bem-vindo de volta</h1>
-                            <p className="text-muted-foreground text-sm mb-6">Bem-vindo de volta! Por favor, insira os seus dados.</p>
+                            <h1 className="text-2xl font-bold mb-1 text-foreground">Bem-vindo de volta</h1>
+                            <p className="text-muted-foreground text-sm mb-4">Bem-vindo de volta! Por favor, insira os seus dados.</p>
 
                             <div className="w-full text-left">
-                                <div className="flex gap-3 mb-6">
+                                <div className="flex gap-3 mb-4">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -141,13 +141,13 @@ function SigninForm() {
                                 </Button>
                             </div>
 
-                            <div className="flex items-center gap-3 mb-6">
+                            <div className="flex items-center gap-3 mb-4">
                                 <div className="flex-1 border-t border-border"></div>
                                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ou</span>
                                 <div className="flex-1 border-t border-border"></div>
                             </div>
 
-                            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                            <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
                                 <div className="space-y-1.5">
                                     <label className="block text-sm font-medium text-foreground">Email</label>
                                     <div className="relative">
@@ -199,7 +199,7 @@ function SigninForm() {
                                 </div>
                             </form>
 
-                                <div className="mt-8 text-center">
+                                <div className="mt-6 text-center">
                                     <p className="text-sm text-muted-foreground">
                                         Não tem uma conta? <a href="#" className="text-primary font-semibold hover:underline">Registe-se</a>
                                     </p>
