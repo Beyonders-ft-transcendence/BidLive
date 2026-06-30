@@ -36,18 +36,18 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
   const handleUnfavorite = async (e: React.MouseEvent, auctionId: number) => {
     e.stopPropagation();
     try {
-      const res = await auctionService.unwatch(auctionId);
-      if (res.success) {
-        const updated = favoriteIds.filter((id) => id !== auctionId);
-        setFavoriteIds(updated);
-        localStorage.setItem("bidlive_watched_auctions", JSON.stringify(updated));
-        // Dispatch storage event to sync other tabs/components
-        window.dispatchEvent(new Event("storage"));
-        toast.success("Removido dos favoritos.");
-      }
+      // Atualização Otimista
+      const updated = favoriteIds.filter((id) => id !== auctionId);
+      setFavoriteIds(updated);
+      localStorage.setItem("bidlive_watched_auctions", JSON.stringify(updated));
+      window.dispatchEvent(new Event("storage"));
+      toast.success("Removido dos favoritos.");
+      
+      // Sincronização em background
+      auctionService.unwatch(auctionId).catch(console.error);
     } catch (err) {
       console.error("Erro ao remover favorito:", err);
-      toast.error("Erro ao processar ação.");
+      toast.error("Ocorreu um erro ao atualizar a lista de favoritos.");
     }
   };
 
