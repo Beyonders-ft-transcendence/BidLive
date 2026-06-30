@@ -14,6 +14,9 @@ import {
   useRemoveFriendMutation,
   useUserSearchQuery,
   useSendFriendRequestMutation,
+  usePendingRequestsSentQuery,
+  usePendingRequestsReceivedQuery,
+  useAcceptFriendRequestMutation,
 } from "@/hooks/useSocial";
 import Avatar from "@/components/common/Avatar";
 import type { PrivateConversation, ChatUser } from "@/shared/types/chat.types";
@@ -53,15 +56,20 @@ export default function ChatTab() {
   const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
   const { data: onlineResponse } = useOnlineFriendsQuery();
   const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
+  const { data: sentReqsResponse } = usePendingRequestsSentQuery();
+  const { data: recReqsResponse } = usePendingRequestsReceivedQuery();
 
   const friends = Array.isArray(friendsResponse) ? friendsResponse : ((friendsResponse as any)?.data || []);
   const onlineFriends = Array.isArray(onlineResponse) ? onlineResponse : ((onlineResponse as any)?.data || []); 
+  const sentRequests = Array.isArray(sentReqsResponse) ? sentReqsResponse : ((sentReqsResponse as any)?.data || []);
+  const receivedRequests = Array.isArray(recReqsResponse) ? recReqsResponse : ((recReqsResponse as any)?.data || []);
 
   // Mutations
   const sendMutation = useSendPrivateMessageMutation();
   const markAsReadMutation = useMarkMessagesAsReadMutation();
   const removeMutation = useRemoveFriendMutation();
   const sendFriendRequest = useSendFriendRequestMutation();
+  const acceptFriendRequest = useAcceptFriendRequestMutation();
 
   // Scroll ref for chat history
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -189,12 +197,24 @@ export default function ChatTab() {
     sendFriendRequest.mutate(
       { addressee_id: recipient.id },
       {
-        onSuccess: () => {
-          // You might show a toast here in the future
+        onSuccess: (res: any) => {
+          if (!res.success) {
+            alert(res.message || "Erro ao enviar pedido.");
+          }
+        },
+        onError: () => {
+          alert("Não foi possível enviar o pedido. Pode já existir um pendente.");
         }
       }
     );
   };
+
+  const handleAcceptRequest = (friendshipId: number) => {
+    acceptFriendRequest.mutate(friendshipId);
+  };
+
+  const pendingSent = sentRequests.find((req: any) => req.addressee.id === recipient?.id);
+  const pendingReceived = receivedRequests.find((req: any) => req.requester.id === recipient?.id);
 
   return (
     <div className="bg-background border border-border rounded-sm shadow-sm flex flex-col md:flex-row h-[700px] overflow-hidden select-none animate-in fade-in slide-in-from-bottom-3 duration-300 text-foreground">
@@ -490,6 +510,18 @@ export default function ChatTab() {
                    {friends.some((f: any) => f.id === recipient.id) ? (
                      <button onClick={handleRemoveFriend} className="w-full py-2 bg-background border border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 text-xs font-bold text-muted-foreground rounded-sm transition-colors cursor-pointer border-none">
                        Remover Amigo
+                     </button>
+                   ) : pendingSent ? (
+                     <button disabled className="w-full py-2 bg-muted/50 text-muted-foreground text-xs font-bold rounded-sm transition-colors cursor-not-allowed border-none">
+                       Pedido Enviado
+                     </button>
+                   ) : pendingReceived ? (
+                     <button 
+                       onClick={() => handleAcceptRequest(pendingReceived.id)}
+                       disabled={acceptFriendRequest.isPending}
+                       className="w-full py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 text-xs font-bold rounded-sm transition-colors cursor-pointer border-none disabled:opacity-50"
+                     >
+                       {acceptFriendRequest.isPending ? "A aceitar..." : "Aceitar Pedido"}
                      </button>
                    ) : (
                      <button 
