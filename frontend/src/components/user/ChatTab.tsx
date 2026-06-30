@@ -106,7 +106,7 @@ export default function ChatTab() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col md:flex-row h-[600px] overflow-hidden select-none animate-in fade-in slide-in-from-bottom-3 duration-300 text-foreground">
+    <div className="bg-card border border-border rounded-sm shadow-sm flex flex-col md:flex-row h-[600px] overflow-hidden select-none animate-in fade-in slide-in-from-bottom-3 duration-300 text-foreground">
       
       {/* 1. Conversations List Sidebar */}
       <div
@@ -143,7 +143,7 @@ export default function ChatTab() {
                 <button
                   key={conv.id}
                   onClick={() => setSelectedConv(conv)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left cursor-pointer border ${
+                  className={`w-full flex items-center gap-3 p-3 rounded-sm transition-all text-left cursor-pointer border ${
                     isSelected
                       ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/10"
                       : "bg-background border-border hover:bg-muted text-foreground hover:border-border/80"
@@ -282,8 +282,8 @@ export default function ChatTab() {
                         <div
                           className={`relative p-3 px-4 text-xs font-semibold leading-relaxed shadow-sm transition-all duration-200 ${
                             isMe
-                              ? "bg-gradient-to-br from-primary to-primary/95 text-primary-foreground rounded-2xl rounded-br-xs"
-                              : "bg-muted/50 text-foreground border border-border rounded-2xl rounded-bl-xs"
+                              ? "bg-gradient-to-br from-primary to-primary/95 text-primary-foreground rounded-sm"
+                              : "bg-muted/50 text-foreground border border-border rounded-sm"
                           }`}
                         >
                           <p className="whitespace-pre-wrap wrap-break-word">{msg.message}</p>
@@ -316,7 +316,7 @@ export default function ChatTab() {
                       size="sm"
                     />
                   </div>
-                  <div className="relative p-3 px-4 bg-muted/50 border border-border rounded-2xl rounded-bl-xs shadow-sm flex items-center gap-1">
+                  <div className="relative p-3 px-4 bg-muted/50 border border-border rounded-sm shadow-sm flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
@@ -332,7 +332,7 @@ export default function ChatTab() {
               onSubmit={handleSendMessage}
               className="p-4 border-t border-border flex items-center gap-3 bg-card shrink-0"
             >
-              <div className="flex-1 flex items-center bg-muted/30 border border-border focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 rounded-2xl px-4 py-1 transition-all">
+              <div className="flex-1 flex items-center bg-muted/30 border border-border focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 rounded-sm px-4 py-1 transition-all">
                 <input
                   type="text"
                   value={typedMessage}
@@ -345,7 +345,7 @@ export default function ChatTab() {
               <button
                 type="submit"
                 disabled={!typedMessage.trim()}
-                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-md shadow-primary/10 hover:shadow-lg transition-all disabled:opacity-40 flex items-center justify-center shrink-0 cursor-pointer border-none"
+                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm shadow-md shadow-primary/10 hover:shadow-lg transition-all disabled:opacity-40 flex items-center justify-center shrink-0 cursor-pointer border-none"
               >
                 <Send size={14} />
               </button>

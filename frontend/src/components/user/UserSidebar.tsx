@@ -24,7 +24,7 @@ export default function UserSidebar({
   ] as const;
 
   return (
-    <aside className="sticky top-24 self-start hidden md:flex w-64 shrink-0 flex-col gap-6 select-none bg-card border border-border rounded-2xl p-5 shadow-sm text-foreground transition-all duration-300">
+    <aside className="sticky top-24 self-start hidden md:flex w-64 shrink-0 flex-col gap-6 select-none bg-card border border-border rounded-sm p-5 shadow-sm text-foreground transition-all duration-300">
       {/* Profile summary header */}
       <div className="flex flex-col items-center text-center px-1 py-3">
         <div className="relative group cursor-pointer">
@@ -39,7 +39,7 @@ export default function UserSidebar({
           {user.email}
         </span>
         
-        <span className="inline-block bg-primary/10 text-primary px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider mt-3">
+        <span className="inline-block bg-primary/10 text-primary px-3 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-wider mt-3">
           {typeof user.roles?.[0] === "object" && user.roles[0] !== null
             ? (user.roles[0] as any).name || "USER"
             : (user.roles?.[0] as any) || "USER"}
@@ -56,7 +56,7 @@ export default function UserSidebar({
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-xs transition-all duration-200 cursor-pointer text-left border-none w-full ${
+              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-sm text-xs transition-all duration-200 cursor-pointer text-left border-none w-full ${
                 isActive
                   ? "bg-primary text-primary-foreground font-bold shadow-md shadow-primary/25 scale-[1.01]"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/70 font-semibold"
@@ -76,7 +76,7 @@ export default function UserSidebar({
       {/* Logout action */}
       <button
         onClick={onLogout}
-        className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-full cursor-pointer focus:outline-none bg-transparent border-none"
+        className="flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-full cursor-pointer focus:outline-none bg-transparent border-none"
       >
         <LogOut size={14} />
         Terminar Sessão

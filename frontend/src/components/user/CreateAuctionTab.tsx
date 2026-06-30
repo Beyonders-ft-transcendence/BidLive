@@ -194,7 +194,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
         </div>
       </div>
 
-      <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+      <div className="bg-card border border-border p-6 rounded-sm shadow-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
           
           {/* STEP 1: Details */}
@@ -206,7 +206,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="text"
                     {...register("title")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.title
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -220,7 +220,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Categoria</label>
                   <select
                     {...register("category_id")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs bg-background text-foreground outline-none transition duration-150 h-[38px] ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm text-xs bg-background text-foreground outline-none transition duration-150 h-[38px] ${
                       errors.category_id
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -242,7 +242,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estado de Conservação</label>
                   <select
                     {...register("condition_type")}
-                    className="w-full px-3.5 py-2.5 border border-border bg-background text-foreground rounded-xl text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition duration-150 h-[38px]"
+                    className="w-full px-3.5 py-2.5 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition duration-150 h-[38px]"
                   >
                     <option value={ItemCondition.NEW}>Novo (NEW)</option>
                     <option value={ItemCondition.USED}>Usado (USED)</option>
@@ -257,7 +257,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 <textarea
                   rows={4}
                   {...register("description")}
-                  className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none resize-none transition duration-150 ${
+                  className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none resize-none transition duration-150 ${
                     errors.description
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -278,7 +278,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="text"
                     {...register("starting_price")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.starting_price
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -295,7 +295,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="text"
                     {...register("minimum_increment")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.minimum_increment
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -314,7 +314,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="text"
                     {...register("reserve_price")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.reserve_price
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -331,7 +331,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="text"
                     {...register("buy_now_price")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.buy_now_price
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -355,7 +355,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="datetime-local"
                     {...register("start_time")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.start_time
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -371,7 +371,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   <input
                     type="datetime-local"
                     {...register("end_time")}
-                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                    className={`w-full px-3.5 py-2.5 border rounded-sm bg-background text-foreground text-xs outline-none transition duration-150 ${
                       errors.end_time
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
@@ -393,7 +393,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
                   {selectedFiles.map((fileObj, idx) => (
-                    <div key={idx} className="relative aspect-square border border-border bg-muted rounded-xl overflow-hidden group">
+                    <div key={idx} className="relative aspect-square border border-border bg-muted rounded-sm overflow-hidden group">
                       <img src={fileObj.previewUrl} alt="" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -405,7 +405,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                     </div>
                   ))}
 
-                  <label className="border-2 border-dashed border-border hover:border-primary rounded-xl flex flex-col items-center justify-center aspect-square cursor-pointer bg-muted hover:bg-muted/80 transition">
+                  <label className="border-2 border-dashed border-border hover:border-primary rounded-sm flex flex-col items-center justify-center aspect-square cursor-pointer bg-muted hover:bg-muted/80 transition">
                     <Upload className="w-5 h-5 text-muted-foreground mb-1" />
                     <span className="text-[9px] font-bold uppercase text-muted-foreground">Adicionar</span>
                     <input
@@ -427,7 +427,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
               <button
                 type="button"
                 onClick={handlePrev}
-                className="px-6 py-2.5 bg-muted hover:bg-muted/80 text-foreground font-bold text-xs rounded-xl transition uppercase cursor-pointer border-none"
+                className="px-6 py-2.5 bg-muted hover:bg-muted/80 text-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer border-none"
               >
                 Voltar
               </button>
@@ -447,7 +447,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-8 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-md shadow-primary/20 transition uppercase cursor-pointer border-none"
+                  className="px-8 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/20 transition uppercase cursor-pointer border-none"
                 >
                   Próximo
                 </button>
@@ -455,7 +455,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 <button
                   type="submit"
                   disabled={isSubmitting || !!uploadProgress}
-                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-md shadow-green-600/20 transition uppercase disabled:opacity-50 cursor-pointer border-none"
+                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-sm shadow-md shadow-green-600/20 transition uppercase disabled:opacity-50 cursor-pointer border-none"
                 >
                   <Save size={14} />
                   {isSubmitting || uploadProgress ? "Processando..." : "Salvar Rascunho"}

@@ -37,7 +37,7 @@ export default function TableSection({
   const hasNext = showPagination && pagination.currentPage < totalPages;
 
   return (
-    <div className="bg-card p-5 rounded-md border border-border shadow-sm overflow-hidden flex flex-col text-foreground">
+    <div className="bg-card p-5 rounded-sm border border-border shadow-sm overflow-hidden flex flex-col text-foreground">
       {/* FILTER BAR SLOT */}
       {filters && <div className="mb-4">{filters}</div>}
 
@@ -58,7 +58,7 @@ export default function TableSection({
             <button
               onClick={() => hasPrevious && pagination.onPageChange(pagination.currentPage - 1)}
               disabled={!hasPrevious}
-              className={`p-1.5 border border-border bg-background rounded-md transition-colors ${hasPrevious
+              className={`p-1.5 border border-border bg-background rounded-sm transition-colors ${hasPrevious
                   ? "text-foreground hover:bg-muted cursor-pointer"
                   : "text-muted-foreground cursor-not-allowed opacity-55"
                 }`}
@@ -67,7 +67,7 @@ export default function TableSection({
             </button>
 
             {/* Current Page Indicator */}
-            <button className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-md focus:outline-none shadow-sm border-none">
+            <button className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-sm focus:outline-none shadow-sm border-none">
               {pagination.currentPage}
             </button>
 
@@ -75,7 +75,7 @@ export default function TableSection({
             <button
               onClick={() => hasNext && pagination.onPageChange(pagination.currentPage + 1)}
               disabled={!hasNext}
-              className={`p-1.5 border border-border bg-background rounded-md transition-colors ${hasNext
+              className={`p-1.5 border border-border bg-background rounded-sm transition-colors ${hasNext
                   ? "text-foreground hover:bg-muted cursor-pointer"
                   : "text-muted-foreground cursor-not-allowed opacity-55"
                 }`}
