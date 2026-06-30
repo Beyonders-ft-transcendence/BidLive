@@ -103,7 +103,7 @@ export function useAuctionRealtime(id: number) {
             if (data.payload.active_connections !== undefined) {
               setViewerCount(data.payload.active_connections);
             }
-          } else if (data.event === "BID_CREATED" && data.payload) {
+          } else if (data.event === "new_bid" && data.payload) {
             const newBid = {
               id: data.payload.bid_id,
               auction: data.payload.auction_id,
@@ -139,11 +139,11 @@ export function useAuctionRealtime(id: number) {
               };
             });
           } else if (
-            (data.event === "TIMER_UPDATED" ||
-              data.event === "AUCTION_STARTED" ||
-              data.event === "AUCTION_ENDED" ||
-              data.event === "AUCTION_CANCELLED" ||
-              data.event === "AUCTION_UPDATED") &&
+            (data.event === "timer_update" ||
+              data.event === "auction_started" ||
+              data.event === "auction_ended" ||
+              data.event === "auction_cancelled" ||
+              data.event === "auction_updated") &&
             data.payload
           ) {
             queryClient.setQueryData(["auction", id], (prev: any) => {
@@ -156,7 +156,7 @@ export function useAuctionRealtime(id: number) {
               };
             });
           } else if (
-            (data.event === "USER_JOINED" || data.event === "USER_LEFT") &&
+            (data.event === "user_joined" || data.event === "user_left") &&
             data.payload
           ) {
             if (data.payload.active_connections !== undefined) {
