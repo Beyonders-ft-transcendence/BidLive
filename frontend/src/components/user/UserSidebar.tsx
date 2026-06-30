@@ -1,4 +1,3 @@
-
 import { LogOut, Gavel, LayoutDashboard, TrendingUp, Settings, PlusCircle, MessageSquare } from "lucide-react";
 import type { User } from "@/shared/types/auth.types";
 import Avatar from "@/components/common/Avatar";
@@ -16,8 +15,6 @@ export default function UserSidebar({
   user,
   onLogout,
 }: UserSidebarProps) {
-
-
   const sidebarItems = [
     { id: "overview", label: "Visão Geral", icon: <LayoutDashboard size={16} /> },
     { id: "my-auctions", label: "Meus Leilões", icon: <Gavel size={16} /> },
@@ -28,67 +25,63 @@ export default function UserSidebar({
   ] as const;
 
   return (
-    <aside className="w-full md:w-64 shrink-0 flex flex-col gap-5 select-none">
-      {/* Blue branding block */}
-      <div className="bg-[#0C1B33] text-white rounded-xl p-5 flex flex-col shadow-sm border border-slate-800">
-        <div className="flex items-center gap-2.5 mb-6 px-1.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary border border-primary/10 shrink-0">
-            <Gavel size={16} className="text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-black tracking-tight leading-none">BidLive</span>
-            <span className="text-[8px] font-bold text-white/50 uppercase tracking-widest mt-1">Portal do Usuário</span>
-          </div>
-        </div>
-
-        {/* Navigation links */}
-        <nav className="flex flex-col gap-1">
-          {sidebarItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-xs transition-all duration-200 cursor-pointer text-left border-none bg-transparent ${
-                  isActive
-                    ? "bg-primary text-white font-bold shadow-md shadow-primary/10"
-                    : "text-white/70 hover:text-white hover:bg-white/10 font-semibold"
-                }`}
-              >
-                <span className={isActive ? "text-white animate-pulse" : "text-white/50"}>
-                  {item.icon}
-                </span>
-                <span className="truncate tracking-wide">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* User profile brief card */}
-      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-4 shadow-sm text-foreground">
-        <div className="flex items-center gap-3">
+    <aside className="sticky top-24 self-start hidden md:flex w-64 shrink-0 flex-col gap-6 select-none bg-card border border-border rounded-2xl p-5 shadow-sm text-foreground transition-all duration-300">
+      {/* Profile summary header */}
+      <div className="flex flex-col items-center text-center px-1 py-3">
+        <div className="relative group cursor-pointer">
           <Avatar name={user.full_name || user.username} src={user.avatar_url} size="lg" />
-          <div className="flex flex-col text-left min-w-0">
-            <span className="text-xs font-bold text-foreground truncate leading-tight">
-              {user.full_name}
-            </span>
-            <span className="text-[9px] text-muted-foreground font-bold truncate">
-              {user.email}
-            </span>
-          </div>
+          <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 group-hover:scale-125 transition duration-300"></div>
         </div>
-
-        <hr className="border-border my-0.5" />
-
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-destructive transition-colors w-full text-left cursor-pointer focus:outline-none bg-transparent border-none"
-        >
-          <LogOut size={14} />
-          Terminar Sessão
-        </button>
+        
+        <h3 className="text-xs font-black text-foreground mt-4 truncate max-w-full leading-tight">
+          {user.full_name || user.username}
+        </h3>
+        <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-full mt-1">
+          {user.email}
+        </span>
+        
+        <span className="inline-block bg-primary/10 text-primary px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider mt-3">
+          {typeof user.roles?.[0] === "object" && user.roles[0] !== null
+            ? (user.roles[0] as any).name || "USER"
+            : (user.roles?.[0] as any) || "USER"}
+        </span>
       </div>
+
+      <hr className="border-border w-full m-0" />
+
+      {/* Navigation menu list */}
+      <nav className="flex flex-col gap-1 w-full">
+        {sidebarItems.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-xs transition-all duration-200 cursor-pointer text-left border-none w-full ${
+                isActive
+                  ? "bg-primary text-primary-foreground font-bold shadow-md shadow-primary/25 scale-[1.01]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70 font-semibold"
+              }`}
+            >
+              <span className={isActive ? "text-primary-foreground" : "text-muted-foreground/70"}>
+                {item.icon}
+              </span>
+              <span className="truncate tracking-wide">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <hr className="border-border w-full m-0" />
+
+      {/* Logout action */}
+      <button
+        onClick={onLogout}
+        className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-full cursor-pointer focus:outline-none bg-transparent border-none"
+      >
+        <LogOut size={14} />
+        Terminar Sessão
+      </button>
     </aside>
   );
 }

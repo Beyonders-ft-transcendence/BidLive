@@ -208,7 +208,7 @@ export function UserDashboard() {
       <Header />
 
       {/* Container Principal */}
-      <main className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 py-8 flex flex-col md:flex-row gap-6 flex-1 select-none">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start gap-6 flex-1 select-none">
         {/* Sidebar do Usuário */}
         <UserSidebar
           activeTab={activeTab}
