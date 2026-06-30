@@ -133,7 +133,7 @@ export default function MyAuctionsTab({
                       <button
                         onClick={() => onViewDetails(auc)}
                         title="Ver Detalhes"
-                        className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
+                        className="p-1.5 rounded-lg hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                       >
                         <Eye size={12} />
                       </button>
@@ -143,14 +143,14 @@ export default function MyAuctionsTab({
                           <button
                             onClick={() => onPublishClick(auc.id)}
                             title="Publicar Leilão"
-                            className="p-1.5 rounded-sm hover:bg-green-500/10 text-green-600 transition-colors cursor-pointer border border-border bg-background"
+                            className="p-1.5 rounded-lg hover:bg-green-500/10 text-green-600 transition-colors cursor-pointer border border-border bg-background"
                           >
                             <CheckCircle size={12} />
                           </button>
                           <button
                             onClick={() => onDeleteClick(auc.id)}
                             title="Excluir Rascunho"
-                            className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                           >
                             <Trash2 size={12} />
                           </button>
@@ -161,7 +161,7 @@ export default function MyAuctionsTab({
                         <button
                           onClick={() => onCancelClick(auc.id)}
                           title="Cancelar Leilão"
-                          className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
+                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Ban size={12} />
                         </button>
@@ -171,7 +171,7 @@ export default function MyAuctionsTab({
                         <button
                           onClick={() => onManageStreamClick(auc)}
                           title="Transmitir Ao Vivo"
-                          className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
+                          className="p-1.5 rounded-lg hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Video size={12} />
                         </button>

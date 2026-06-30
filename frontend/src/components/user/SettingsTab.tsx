@@ -170,206 +170,245 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none">
-      <div className="bg-card border border-border p-5 rounded-xl shadow-sm text-foreground">
-        <h2 className="text-xl font-black tracking-tight">Configurações do Perfil</h2>
-        <p className="text-xs text-muted-foreground mt-1 font-normal">
-          Gerencie suas credenciais, nome público e informações de segurança.
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none text-foreground">
+      {/* Header Info */}
+      <div className="bg-card border border-border p-5 rounded-xl shadow-sm text-left">
+        <h2 className="text-xl font-black tracking-tight">Configurações de Conta</h2>
+        <p className="text-xs text-muted-foreground mt-1">
+          Atualize seus dados pessoais, foto de perfil e senha de segurança.
         </p>
       </div>
 
-      <div className="bg-card border border-border p-6 rounded-xl shadow-sm space-y-6 text-foreground">
-        {/* Information update form */}
-        <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-5">
-          <input type="hidden" {...registerProfile("avatar_url")} />
-          <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2 border-b border-border pb-2">
-            <UserIcon className="w-4 h-4 text-primary animate-pulse" />
-            Detalhes Pessoais
-          </h3>
-
-          <div className="flex flex-col sm:flex-row items-center gap-5 pb-2">
-            <div className="relative w-20 h-20 shrink-0">
-              {avatarPreview ? (
-                <img
-                  src={avatarPreview}
-                  alt="Avatar Preview"
-                  className="w-full h-full rounded-full object-cover border-2 border-primary/20 shadow-sm"
-                />
-              ) : (
-                <div className="w-full h-full rounded-full bg-primary/10 text-primary border-2 border-primary/20 flex items-center justify-center font-bold text-xl uppercase">
-                  {user.full_name?.slice(0, 2).toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
-                </div>
-              )}
-
-              {uploadingAvatar && (
-                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1 items-center sm:items-start text-center sm:text-left">
-              <span className="text-xs font-bold">Foto de Perfil</span>
-              <span className="text-[10px] text-muted-foreground">Formatos aceitos: JPG, PNG. Máx: 5MB</span>
-              <div className="flex items-center gap-2 mt-2">
-                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-muted border border-border text-foreground rounded-sm text-[10px] font-bold uppercase hover:bg-muted/80 cursor-pointer transition select-none">
-                  <Camera className="w-3.5 h-3.5" />
-                  {uploadingAvatar ? "Enviando..." : "Alterar Foto"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                    disabled={uploadingAvatar}
-                  />
-                </label>
-                {avatarPreview && avatarPreview !== user.avatar_url && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAvatarPreview(user.avatar_url || null);
-                      setProfileValue("avatar_url", user.avatar_url || "");
-                    }}
-                    className="px-3 py-1.5 text-destructive hover:bg-destructive/10 rounded-sm text-[10px] font-bold uppercase border border-transparent transition cursor-pointer"
-                  >
-                    Descartar
-                  </button>
-                )}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
+        {/* Left Column: Avatar & Profile Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col items-center text-center gap-4">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Foto do Perfil</span>
+          
+          <div className="relative group w-24 h-24 rounded-full overflow-hidden border-2 border-primary/20 shadow-md">
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl uppercase">
+                {user.full_name?.slice(0, 2).toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
               </div>
-            </div>
+            )}
+            
+            {/* Upload Overlay */}
+            <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-300">
+              <Camera className="w-5 h-5 text-white" />
+              <span className="text-[8px] font-bold text-white mt-1 uppercase">Mudar</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                disabled={uploadingAvatar}
+              />
+            </label>
+
+            {uploadingAvatar && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase">Nome Completo</label>
-              <input
-                type="text"
-                {...registerProfile("full_name")}
-                className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none transition ${
-                  profileErrors.full_name
-                    ? "border-destructive focus:ring-1 focus:ring-destructive"
-                    : "border-border focus:ring-1 focus:ring-primary"
-                }`}
-              />
-              {profileErrors.full_name && (
-                <p className="text-[10px] text-destructive font-semibold">{profileErrors.full_name.message}</p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase">Endereço de E-mail</label>
-              <input
-                type="email"
-                value={user.email}
-                disabled
-                className="w-full px-3 py-2 border border-border bg-muted/50 text-muted-foreground rounded-sm text-xs outline-none cursor-not-allowed transition"
-              />
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase">Biografia</label>
-              <textarea
-                rows={3}
-                {...registerProfile("bio")}
-                placeholder="Fale um pouco sobre si..."
-                className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none resize-none transition ${
-                  profileErrors.bio
-                    ? "border-destructive focus:ring-1 focus:ring-destructive"
-                    : "border-border focus:ring-1 focus:ring-primary"
-                }`}
-              />
-              {profileErrors.bio && (
-                <p className="text-[10px] text-destructive font-semibold">{profileErrors.bio.message}</p>
-              )}
-            </div>
+          <div className="space-y-1 w-full min-w-0">
+            <h4 className="text-xs font-black truncate">{user.full_name || user.username}</h4>
+            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-wrap justify-center gap-1.5 w-full">
+            {user.roles?.map((role: any, idx: number) => {
+              const roleName = typeof role === "object" && role !== null ? role.name : role;
+              return (
+                <span key={idx} className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
+                  {roleName || "USER"}
+                </span>
+              );
+            }) || (
+              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
+                USER
+              </span>
+            )}
+          </div>
+
+          {avatarPreview && avatarPreview !== user.avatar_url && (
             <button
-              type="submit"
-              disabled={isProfileSubmitting}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-sm hover:bg-primary/90 shadow-sm transition uppercase cursor-pointer disabled:opacity-50"
+              type="button"
+              onClick={() => {
+                setAvatarPreview(user.avatar_url || null);
+                setProfileValue("avatar_url", user.avatar_url || "");
+              }}
+              className="text-[10px] font-bold text-destructive hover:underline bg-transparent border-none cursor-pointer uppercase tracking-wider"
             >
-              <Save className="w-3.5 h-3.5" />
-              {isProfileSubmitting ? "Salvando..." : "Salvar Detalhes"}
+              Descartar Foto
             </button>
-          </div>
-        </form>
+          )}
+        </div>
 
-        {/* Password update switcher */}
-        <div className="pt-4 border-t border-border">
-          <button
-            onClick={() => setShowPasswordFields(!showPasswordFields)}
-            className="text-xs font-extrabold text-primary hover:text-primary/80 uppercase tracking-wider flex items-center gap-2 cursor-pointer bg-transparent border-none"
-          >
-            <Lock className="w-4 h-4" />
-            {showPasswordFields ? "Esconder Modificar Senha" : "Alterar Senha de Acesso"}
-          </button>
-
-          {showPasswordFields && (
-            <form
-              onSubmit={handlePasswordSubmit(onPasswordSubmit)}
-              className="mt-5 space-y-4 max-w-md animate-in slide-in-from-top-2 duration-250 text-left"
-            >
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Senha Atual</label>
-                <input
-                  type="password"
-                  {...registerPassword("current_password")}
-                  className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none transition ${
-                    passwordErrors.current_password
-                      ? "border-destructive focus:ring-1 focus:ring-destructive"
-                      : "border-border focus:ring-1 focus:ring-primary"
-                  }`}
-                />
-                {passwordErrors.current_password && (
-                  <p className="text-[10px] text-destructive font-semibold">{passwordErrors.current_password.message}</p>
-                )}
+        {/* Right Column: Forms */}
+        <div className="space-y-6">
+          {/* Personal Details Form */}
+          <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+            <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-5">
+              <input type="hidden" {...registerProfile("avatar_url")} />
+              
+              <div className="flex items-center gap-2 border-b border-border pb-3">
+                <UserIcon className="w-4.5 h-4.5 text-primary" />
+                <h3 className="text-xs font-black uppercase tracking-wider">Detalhes Pessoais</h3>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Nova Senha</label>
-                <input
-                  type="password"
-                  {...registerPassword("new_password")}
-                  className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none transition ${
-                    passwordErrors.new_password
-                      ? "border-destructive focus:ring-1 focus:ring-destructive"
-                      : "border-border focus:ring-1 focus:ring-primary"
-                  }`}
-                  placeholder="Mínimo de 8 caracteres"
-                />
-                {passwordErrors.new_password && (
-                  <p className="text-[10px] text-destructive font-semibold">{passwordErrors.new_password.message}</p>
-                )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-left">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Nome Completo</label>
+                  <input
+                    type="text"
+                    {...registerProfile("full_name")}
+                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                      profileErrors.full_name
+                        ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
+                        : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
+                    }`}
+                    placeholder="Ex: João Silva"
+                  />
+                  {profileErrors.full_name && (
+                    <p className="text-[10px] text-destructive font-semibold">{profileErrors.full_name.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Endereço de E-mail</label>
+                  <input
+                    type="email"
+                    value={user.email}
+                    disabled
+                    className="w-full px-3.5 py-2.5 border border-border bg-muted/50 text-muted-foreground rounded-xl text-xs outline-none cursor-not-allowed transition h-[38px]"
+                  />
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Biografia</label>
+                  <textarea
+                    rows={4}
+                    {...registerProfile("bio")}
+                    placeholder="Escreva algo sobre você ou suas preferências de leilão..."
+                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none resize-none transition duration-150 ${
+                      profileErrors.bio
+                        ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
+                        : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
+                    }`}
+                  />
+                  {profileErrors.bio && (
+                    <p className="text-[10px] text-destructive font-semibold">{profileErrors.bio.message}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Confirmar Nova Senha</label>
-                <input
-                  type="password"
-                  {...registerPassword("new_password_confirm")}
-                  className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none transition ${
-                    passwordErrors.new_password_confirm
-                      ? "border-destructive focus:ring-1 focus:ring-destructive"
-                      : "border-border focus:ring-1 focus:ring-primary"
-                  }`}
-                />
-                {passwordErrors.new_password_confirm && (
-                  <p className="text-[10px] text-destructive font-semibold">{passwordErrors.new_password_confirm.message}</p>
-                )}
-              </div>
-
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-2 border-t border-border">
                 <button
                   type="submit"
-                  disabled={isPasswordSubmitting}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#0C1B33] dark:bg-muted text-white dark:text-foreground text-xs font-bold rounded-sm hover:bg-slate-900 dark:hover:bg-muted/80 shadow-sm transition uppercase cursor-pointer disabled:opacity-50"
+                  disabled={isProfileSubmitting}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-xl shadow-sm transition uppercase cursor-pointer disabled:opacity-50 border-none"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  {isPasswordSubmitting ? "Processando..." : "Atualizar Senha"}
+                  {isProfileSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </button>
               </div>
             </form>
-          )}
+          </div>
+
+          {/* Security / Password Form */}
+          <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4.5 h-4.5 text-primary" />
+                <h3 className="text-xs font-black uppercase tracking-wider">Segurança e Senha</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordFields(!showPasswordFields)}
+                className="text-[10px] font-extrabold text-primary hover:underline uppercase bg-transparent border-none cursor-pointer"
+              >
+                {showPasswordFields ? "Cancelar" : "Alterar Senha"}
+              </button>
+            </div>
+
+            {showPasswordFields ? (
+              <form
+                onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+                className="mt-5 space-y-4 max-w-md text-left animate-in slide-in-from-top-3 duration-200"
+              >
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Senha Atual</label>
+                  <input
+                    type="password"
+                    {...registerPassword("current_password")}
+                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                      passwordErrors.current_password
+                        ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
+                        : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
+                    }`}
+                  />
+                  {passwordErrors.current_password && (
+                    <p className="text-[10px] text-destructive font-semibold">{passwordErrors.current_password.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Nova Senha</label>
+                  <input
+                    type="password"
+                    {...registerPassword("new_password")}
+                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                      passwordErrors.new_password
+                        ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
+                        : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
+                    }`}
+                    placeholder="Mínimo de 8 caracteres"
+                  />
+                  {passwordErrors.new_password && (
+                    <p className="text-[10px] text-destructive font-semibold">{passwordErrors.new_password.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    {...registerPassword("new_password_confirm")}
+                    className={`w-full px-3.5 py-2.5 border rounded-xl bg-background text-foreground text-xs outline-none transition duration-150 ${
+                      passwordErrors.new_password_confirm
+                        ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
+                        : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
+                    }`}
+                  />
+                  {passwordErrors.new_password_confirm && (
+                    <p className="text-[10px] text-destructive font-semibold">{passwordErrors.new_password_confirm.message}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={isPasswordSubmitting}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 shadow-sm transition uppercase cursor-pointer disabled:opacity-50 border-none"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    {isPasswordSubmitting ? "Processando..." : "Atualizar Senha"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-[11px] text-muted-foreground mt-3 text-left">
+                Recomendamos alterar a sua senha periodicamente para manter a conta segura. Clique em "Alterar Senha" para atualizar.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

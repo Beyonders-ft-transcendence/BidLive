@@ -41,7 +41,16 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
 
   if (!user) return null;
 
-  const isAdminOrMonitor = user.roles?.includes(UserRole.SUPER_ADMIN) || user.roles?.includes(UserRole.MONITOR);
+  const hasRole = (roleName: string) => {
+    if (!user.roles) return false;
+    return user.roles.some((r: any) => {
+      if (typeof r === "string") return r === roleName;
+      if (typeof r === "object" && r !== null) return r.name === roleName;
+      return false;
+    });
+  };
+
+  const isAdminOrMonitor = hasRole(UserRole.SUPER_ADMIN) || hasRole(UserRole.MONITOR);
 
   return (
     <SideDrawer
@@ -74,7 +83,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
             {user.email}
           </span>
           <span className="inline-block w-fit px-1.5 py-0.5 rounded-[4px] bg-primary/10 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-wider mt-1.5">
-            {user.roles?.includes(UserRole.SUPER_ADMIN) ? "Administrador" : user.roles?.includes(UserRole.MONITOR) ? "Moderador" : "Licitante"}
+            {hasRole(UserRole.SUPER_ADMIN) ? "Administrador" : hasRole(UserRole.MONITOR) ? "Moderador" : "Licitante"}
           </span>
         </div>
       </div>
