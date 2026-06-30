@@ -1,13 +1,14 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Search, ChevronDown, Menu, X, Globe } from "lucide-react";
+import { Sun, Moon, Search, ChevronDown, Menu, X, Globe, Bell, CheckCircle2 } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import Avatar from "../common/Avatar";
 import UserDrawer from "./UserDrawer";
+import { useNotificationsQuery, useMarkNotificationReadMutation } from "@/hooks/useNotification";
 
 export default function Header() {
     const [theme, setCurrentTheme] = useState<Theme>("light");
@@ -17,6 +18,12 @@ export default function Header() {
 
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+    const { data: notificationsResponse } = useNotificationsQuery();
+    const markReadMutation = useMarkNotificationReadMutation();
+    
+    const notifications = notificationsResponse?.data || [];
+    const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
     useEffect(() => {
         setCurrentTheme(getTheme());
@@ -75,9 +82,63 @@ export default function Header() {
                         </div>
                     </div>
  
-                    <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                    <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
+
+                    {isAuthenticated && (
+                        <div className="relative group flex items-center h-full">
+                            <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                                <Bell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
+                                )}
+                            </button>
+                            
+                            <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
+                                    <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
+                                        <span className="text-xs font-bold uppercase tracking-wider">Notificações</span>
+                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{unreadCount} novas</span>}
+                                    </div>
+                                    <div className="overflow-y-auto flex-1">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-6 text-center text-muted-foreground">
+                                                <Bell size={24} className="mx-auto mb-2 opacity-50" />
+                                                <p className="text-xs">Sem notificações</p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-border">
+                                                {notifications.slice(0, 10).map((notif: any) => (
+                                                    <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
+                                                        <div className="flex gap-3">
+                                                            <div className="mt-0.5 text-primary shrink-0">
+                                                                <Bell size={14} />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
+                                                                <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
+                                                                <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                            {!notif.is_read && (
+                                                                <button 
+                                                                    onClick={() => markReadMutation.mutate(notif.id)}
+                                                                    className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
+                                                                    title="Marcar como lida"
+                                                                >
+                                                                    <CheckCircle2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {isAuthenticated && user ? (
                         <button 
