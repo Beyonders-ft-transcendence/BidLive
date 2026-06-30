@@ -7,10 +7,12 @@ import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageM
 import {
     ChevronLeft, Clock, Gavel, CheckCircle2, Shield, AlertCircle,
     Tag, User, CalendarDays, TrendingUp, Video, ShoppingBag, MessageSquare,
-    Send, Heart
+    Send, Heart, AlertOctagon
 } from "lucide-react";
 import auctionService from "@/services/auction.service";
 import { toast } from "sonner";
+import ReportModal from "@/components/common/ReportModal";
+import { ReportTargetType } from "@/shared/types/report.types";
 
 // Condition label map
 const conditionLabels: Record<string, string> = {
@@ -96,6 +98,7 @@ export default function AuctionDetailPage() {
     const countdown = useCountdown(auction?.end_time, auction?.status || "");
 
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     useEffect(() => {
         try {
@@ -414,17 +417,26 @@ export default function AuctionDetailPage() {
                 <div className="flex items-start justify-between gap-4">
                     <h1 className="text-xl font-extrabold text-foreground leading-snug">{auction.item.title}</h1>
                     {isAuthenticated && (
-                        <button
-                            onClick={handleToggleFavorite}
-                            className={`p-2 border rounded-sm transition cursor-pointer shrink-0 ${
-                                isFavorite
-                                    ? "bg-red-50 text-red-500 border-red-200 hover:bg-red-100"
-                                    : "bg-background text-muted-foreground border-border hover:bg-muted"
-                            }`}
-                            title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                        >
-                            <Heart size={18} className={isFavorite ? "fill-current" : ""} />
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={() => setIsReportModalOpen(true)}
+                                className="p-2 border rounded-sm transition cursor-pointer bg-background text-muted-foreground border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                                title="Denunciar Leilão"
+                            >
+                                <AlertOctagon size={18} />
+                            </button>
+                            <button
+                                onClick={handleToggleFavorite}
+                                className={`p-2 border rounded-sm transition cursor-pointer shrink-0 ${
+                                    isFavorite
+                                        ? "bg-red-50 text-red-500 border-red-200 hover:bg-red-100"
+                                        : "bg-background text-muted-foreground border-border hover:bg-muted"
+                                }`}
+                                title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                            >
+                                <Heart size={18} className={isFavorite ? "fill-current" : ""} />
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -712,6 +724,13 @@ export default function AuctionDetailPage() {
                     </div>
                 </div>
             </main>
+
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                targetType={ReportTargetType.AUCTION}
+                targetId={auctionId}
+            />
         </div>
     );
 }
