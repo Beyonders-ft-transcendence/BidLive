@@ -57,6 +57,11 @@ class SocialService {
     const response = await api.post<ApiResponse<Record<string, never>>>('/social/users/unblock/', payload);
     return response.data;
   }
+
+  async searchUsers(query: string): Promise<ApiResponse<{ results: PublicUser[] }>> {
+    const response = await api.get<ApiResponse<{ results: PublicUser[] }>>(`/users/?search=${encodeURIComponent(query)}`);
+    return response.data;
+  }
 }
 
 const socialService = new SocialService();
