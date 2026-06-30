@@ -5,6 +5,7 @@ import { useAuthStore } from "@/shared/stores/auth.store";
 import Header from "@/components/layout/Header";
 import {
   useAuctionsQuery,
+  useAuctionQuery,
   useUpdateAuctionMutation,
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
@@ -12,8 +13,7 @@ import {
 import type { Auction } from "@/shared/types/auction.types";
 import { AuctionStatus } from "@/shared/types/auction.types";
 import { useCategoriesQuery } from "@/hooks/useCategory";
-import { Calendar, AlertCircle } from "lucide-react";
-import { formatCurrency, getAuctionStatusLabel, auctionStatusColor } from "@/shared/utils/auction.utils";
+import { AlertCircle } from "lucide-react";
 
 // Subcomponents
 import ChatTab from "@/components/user/ChatTab";
@@ -22,10 +22,10 @@ import OverviewTab from "@/components/user/OverviewTab";
 import UserSidebar from "@/components/user/UserSidebar";
 import MyAuctionsTab from "@/components/user/MyAuctionsTab";
 import CreateAuctionTab from "@/components/user/CreateAuctionTab";
+import AuctionDetailTab from "@/components/user/AuctionDetailTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
-import Modal from "@/components/common/Modal";
 import StreamConsoleModal from "@/components/user/StreamConsoleModal";
 
 export function UserDashboard() {
@@ -41,15 +41,25 @@ export function UserDashboard() {
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat"].includes(tab)) {
-      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat";
+    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail"].includes(tab)) {
+      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail";
     }
     return "overview";
   }, [searchParams]);
 
-  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat") => {
+  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail") => {
     setSearchParams({ tab });
   };
+
+  const selectedAuctionId = useMemo(() => {
+    const id = searchParams.get("id");
+    return id ? Number(id) : null;
+  }, [searchParams]);
+
+  // Carregar leilão individual caso esteja visualizando detalhes
+  const { data: fetchedAuction, isLoading: loadingDetail } = useAuctionQuery(
+    selectedAuctionId || 0
+  );
 
   // Carregar categorias usando React Query
   const { data: categoriesData } = useCategoriesQuery();
@@ -60,7 +70,6 @@ export function UserDashboard() {
   const myAuctionsPageSize = 10;
 
   // Estados de ações
-  const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
   const [cancelAuctionId, setCancelAuctionId] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [approveAuctionId, setApproveAuctionId] = useState<number | null>(null);
@@ -240,7 +249,7 @@ export function UserDashboard() {
               myAuctionsTotal={myAuctionsTotal}
               myAuctionsPageSize={myAuctionsPageSize}
               onPageChange={(page) => setMyAuctionsPage(page)}
-              onViewDetails={setSelectedAuction}
+              onViewDetails={(auc) => setSearchParams({ tab: "auction-detail", id: String(auc.id) })}
               onPublishClick={setApproveAuctionId}
               onCancelClick={setCancelAuctionId}
               onDeleteClick={setDeleteAuctionId}
@@ -271,124 +280,39 @@ export function UserDashboard() {
               }}
             />
           )}
+
+          {activeTab === "auction-detail" && (
+            loadingDetail ? (
+              <div className="bg-card border border-border p-12 rounded-sm text-center flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs text-muted-foreground font-semibold">Carregando detalhes do lote...</span>
+              </div>
+            ) : fetchedAuction ? (
+              <AuctionDetailTab
+                auction={fetchedAuction}
+                onBack={() => setSearchParams({ tab: "my-auctions" })}
+                onPublishClick={setApproveAuctionId}
+                onCancelClick={setCancelAuctionId}
+                onDeleteClick={setDeleteAuctionId}
+                onManageStreamClick={(auc) => {
+                  setSelectedStreamAuction(auc);
+                  setIsStreamConsoleOpen(true);
+                }}
+              />
+            ) : (
+              <div className="bg-card border border-border p-12 rounded-sm text-center">
+                <p className="text-sm font-bold text-destructive">Leilão não encontrado</p>
+                <button
+                  onClick={() => setSearchParams({ tab: "my-auctions" })}
+                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-sm cursor-pointer"
+                >
+                  Voltar para Meus Leilões
+                </button>
+              </div>
+            )
+          )}
         </div>
       </main>
-
-      {/* MODAL DE VISUALIZAÇÃO DE DETALHES */}
-      {selectedAuction && (
-        <Modal
-          isOpen={selectedAuction !== null}
-          onClose={() => setSelectedAuction(null)}
-          title={`Detalhes do Leilão #${selectedAuction.id}`}
-          size="lg"
-        >
-          <div className="p-6 space-y-6 text-left text-foreground bg-card">
-            <div>
-              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-                Item do Leilão
-              </span>
-              <h4 className="text-sm font-bold leading-tight mt-0.5">
-                {selectedAuction.item?.title}
-              </h4>
-              <p className="text-[10px] text-muted-foreground leading-relaxed mt-2 bg-muted/30 p-3 rounded-sm border border-border italic">
-                "{selectedAuction.item?.description || "Sem descrição informada para este item."}"
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-              <div>
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Categoria
-                </span>
-                <span className="text-xs font-semibold">
-                  {selectedAuction.item?.category_label || "Sem Categoria"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Estado de Conservação
-                </span>
-                <span className="text-xs font-semibold uppercase font-mono">
-                  {selectedAuction.item?.condition_type || "Novo"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  ID Lote
-                </span>
-                <span className="text-xs font-semibold font-mono">
-                  #{selectedAuction.id}
-                </span>
-              </div>
-              <div>
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Status Atual
-                </span>
-                <span
-                  className={`inline-block px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase mt-1 ${auctionStatusColor(
-                    selectedAuction.status
-                  )}`}
-                >
-                  {getAuctionStatusLabel(selectedAuction.status)}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-border pt-4 bg-primary/5 p-4 rounded-sm border border-primary/10">
-              <div>
-                <span className="text-[8px] font-bold text-primary/70 uppercase tracking-wider block">
-                  Preço Inicial
-                </span>
-                <span className="text-xs font-black font-mono">
-                  {formatCurrency(selectedAuction.item?.starting_price || 0)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[8px] font-bold text-primary/70 uppercase tracking-wider block">
-                  Preço Atual
-                </span>
-                <span className="text-xs font-black text-primary font-mono">
-                  {formatCurrency(selectedAuction.item?.current_price || 0)}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-              <div className="flex gap-2 items-center">
-                <Calendar size={12} className="text-muted-foreground" />
-                <div>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Início
-                  </span>
-                  <span className="text-[10px] font-semibold">
-                    {new Date(selectedAuction.start_time).toLocaleString("pt-PT")}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-2 items-center">
-                <Calendar size={12} className="text-muted-foreground" />
-                <div>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Término
-                  </span>
-                  <span className="text-[10px] font-semibold">
-                    {new Date(selectedAuction.end_time).toLocaleString("pt-PT")}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2 border-t border-border">
-              <button
-                onClick={() => setSelectedAuction(null)}
-                className="px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted border border-border rounded-sm uppercase tracking-wider cursor-pointer bg-background"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* CONFIRMAÇÃO DE PUBLICAÇÃO */}
       <ConfirmModal
