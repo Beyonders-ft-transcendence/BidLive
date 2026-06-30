@@ -24,7 +24,6 @@ import CreateAuctionTab from "@/components/user/CreateAuctionTab";
 import AuctionDetailTab from "@/components/user/AuctionDetailTab";
 import FavoritesTab from "@/components/user/FavoritesTab";
 import LiveStreamTab from "@/components/user/LiveStreamTab";
-import FriendsTab from "@/components/user/FriendsTab";
 import MyReportsTab from "@/components/user/MyReportsTab";
 
 // Common UI Components
@@ -43,13 +42,13 @@ export function UserDashboard() {
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "friends", "reports"].includes(tab)) {
-      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "friends" | "reports";
+    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "reports"].includes(tab)) {
+      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
     }
     return "overview";
   }, [searchParams]);
 
-  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "friends" | "reports") => {
+  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => {
     setSearchParams({ tab });
   };
 
@@ -267,7 +266,6 @@ export function UserDashboard() {
           )}
 
           {activeTab === "chat" && <ChatTab />}
-          {activeTab === "friends" && <FriendsTab />}
           {activeTab === "reports" && <MyReportsTab />}
 
           {activeTab === "create-auction" && (

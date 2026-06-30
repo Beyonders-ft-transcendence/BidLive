@@ -11,7 +11,6 @@ import {
   MessageSquare,
   ShieldCheck,
   ChevronRight,
-  Users,
   ShieldAlert
 } from "lucide-react";
 
@@ -84,17 +83,10 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
     },
     {
       id: "chat",
-      title: "Mensagens",
-      subtitle: "Conversar com vendedores/compradores",
+      title: "Mensagens & Social",
+      subtitle: "Conversas e rede de amigos",
       icon: <MessageSquare size={14} />,
       action: () => navigateToTab("chat")
-    },
-    {
-      id: "friends",
-      title: "Rede de Amigos",
-      subtitle: "Gerir amizades e ligações",
-      icon: <Users size={14} />,
-      action: () => navigateToTab("friends")
     },
     {
       id: "reports",
