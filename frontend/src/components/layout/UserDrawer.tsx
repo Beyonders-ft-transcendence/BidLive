@@ -185,12 +185,24 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
 
           {/* Action buttons */}
           <div className="flex gap-3">
-            <button
-              onClick={() => navigateToTab("overview")}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer border-none"
-            >
-              Visão Geral
-            </button>
+            {isAdminOrMonitor ? (
+              <button
+                onClick={() => {
+                  onClose();
+                  navigate("/backoffice");
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer border-none"
+              >
+                Painel Admin
+              </button>
+            ) : (
+              <button
+                onClick={() => navigateToTab("overview")}
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer border-none"
+              >
+                Visão Geral
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-background border border-border hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold rounded-sm transition cursor-pointer"

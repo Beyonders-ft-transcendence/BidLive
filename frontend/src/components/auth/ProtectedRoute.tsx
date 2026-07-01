@@ -15,12 +15,18 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     }
 
     if (allowedRoles && allowedRoles.length > 0) {
-        const hasRequiredRole = user?.roles?.some((role) => allowedRoles.includes(role));
+        const hasRequiredRole = user?.roles?.some((role: any) => {
+            if (typeof role === 'string') {
+                return allowedRoles.includes(role as UserRole);
+            }
+            if (typeof role === 'object' && role !== null) {
+                return allowedRoles.includes(role.name as UserRole);
+            }
+            return false;
+        });
         
         if (!hasRequiredRole) {
-            // Se o usuário estiver autenticado mas não tiver a permissão, pode redirecionar 
-            // de volta para a dashboard geral ou uma página de Acesso Negado.
-            // Por simplicidade, enviando para /user como default.
+            // Se o usuário estiver autenticado mas não tiver a permissão, redireciona
             return <Navigate to="/user" replace />;
         }
     }
