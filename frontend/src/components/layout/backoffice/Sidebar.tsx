@@ -5,7 +5,8 @@ import {
   ShieldCheck, 
   Settings, 
   LogOut,
-  Gavel
+  Gavel,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png"; // Assuming logo2 is the dark theme / light text logo
@@ -17,6 +18,7 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/backoffice', icon: LayoutDashboard },
     { name: 'Utilizadores', path: '/backoffice/users', icon: Users },
+    { name: 'Denúncias', path: '/backoffice/reports', icon: ShieldAlert },
     { name: 'Leilões (Admin)', path: '/backoffice/auctions', icon: Gavel },
     { name: 'Perfis & Acessos', path: '/backoffice/roles', icon: ShieldCheck },
     { name: 'Configurações', path: '/backoffice/settings', icon: Settings },

@@ -6,7 +6,10 @@ import type {
   AnalyticsStats, 
   RoleWritePayload, 
   UserBanPayload,
-  PaginatedResponse 
+  PaginatedResponse,
+  Report,
+  ReportStatusUpdatePayload,
+  ReportActionPayload
 } from "@/shared/types/admin.types";
 
 export const adminService = {
@@ -67,6 +70,32 @@ export const adminService = {
   getStats: async (): Promise<AnalyticsStats> => {
     const response = await api.get("/analytics/stats/");
     return response.data.data;
+  },
+
+  // --- Reports (Denúncias) ---
+  getReports: async (status?: string, targetType?: string): Promise<Report[]> => {
+    const params = new URLSearchParams();
+    if (status) params.append("status", status);
+    if (targetType) params.append("target_type", targetType);
+    
+    const response = await api.get(`/reports/?${params.toString()}`);
+    // If backend returns data wrapped in success_response format
+    return response.data.data || response.data;
+  },
+
+  getReportById: async (id: number): Promise<Report> => {
+    const response = await api.get(`/reports/${id}/`);
+    return response.data.data || response.data;
+  },
+
+  updateReportStatus: async (id: number, payload: ReportStatusUpdatePayload): Promise<Report> => {
+    const response = await api.patch(`/reports/${id}/`, payload);
+    return response.data.data || response.data;
+  },
+
+  applyReportAction: async (id: number, payload: ReportActionPayload): Promise<Report> => {
+    const response = await api.post(`/reports/${id}/action/`, payload);
+    return response.data.data || response.data;
   }
 };
 

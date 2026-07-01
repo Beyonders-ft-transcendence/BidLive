@@ -9,6 +9,7 @@ import {
     UserDashboard,
     BackofficeDashboard,
     UsersPage,
+    ReportsPage,
 } from "@/pages/index";
 import { UserRole } from "@/shared/types/auth.types";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -47,6 +48,7 @@ export default function IndexRoot() {
                     >
                         <Route path="/backoffice" element={<BackofficeDashboard />} />
                         <Route path="/backoffice/users" element={<UsersPage />} />
+                        <Route path="/backoffice/reports" element={<ReportsPage />} />
                     </Route>
                 </Route>
 
