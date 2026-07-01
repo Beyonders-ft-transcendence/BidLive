@@ -38,14 +38,15 @@ export default function IndexRoot() {
                     <Route element={<AuthLayout />}>
                         {/* Dashboards Base */}
                         <Route path="/explore" element={<div>Explorar (Em Breve)</div>} />
-                        
-                        {/* Rotas exclusivas de Backoffice (SUPER_ADMIN / MONITOR) */}
-                        <Route 
-                            element={<ProtectedRoute allowedRoles={[UserRole.SUPER_ADMIN, UserRole.MONITOR]} />}
-                        >
-                            <Route path="/backoffice" element={<BackofficeDashboard />} />
-                            <Route path="/backoffice/users" element={<UsersPage />} />
-                        </Route>
+                    </Route>
+
+                    {/* Rotas exclusivas de Backoffice (SUPER_ADMIN / MONITOR) */}
+                    {/* Não usam AuthLayout porque têm o seu próprio Container (Sidebar + Header) */}
+                    <Route 
+                        element={<ProtectedRoute allowedRoles={[UserRole.SUPER_ADMIN, UserRole.MONITOR]} />}
+                    >
+                        <Route path="/backoffice" element={<BackofficeDashboard />} />
+                        <Route path="/backoffice/users" element={<UsersPage />} />
                     </Route>
                 </Route>
 

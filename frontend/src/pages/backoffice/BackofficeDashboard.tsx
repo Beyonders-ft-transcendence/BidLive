@@ -10,14 +10,6 @@ export default function BackofficeDashboard() {
     <Container>
       <div className="flex flex-col gap-6">
         
-        {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Resumo do estado e performance da plataforma.</p>
-          </div>
-        </div>
-
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
