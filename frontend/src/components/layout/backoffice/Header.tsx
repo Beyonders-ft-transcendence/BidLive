@@ -51,7 +51,9 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex flex-col items-end text-xs">
             <span className="font-bold text-foreground leading-tight">{user?.full_name || 'Super Admin'}</span>
-            <span className="text-primary font-medium">{user?.roles?.[0] || 'Administrador'}</span>
+            <span className="text-primary font-medium">
+              {typeof user?.roles?.[0] === 'object' ? (user.roles[0] as any).name : user?.roles?.[0] || 'Administrador'}
+            </span>
           </div>
           <div className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background rounded-full">
             <Avatar name={user?.full_name || 'Admin'} src={user?.avatar_url} size="sm" />

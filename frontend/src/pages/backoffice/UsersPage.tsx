@@ -88,7 +88,7 @@ export default function UsersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          {user.roles?.[0] || 'USER'}
+                          {typeof user.roles?.[0] === 'object' ? user.roles[0].name : user.roles?.[0] || 'USER'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
