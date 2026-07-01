@@ -16,7 +16,7 @@ RUN chmod +x /usr/local/bin/generate_cert.sh
 COPY ./conf/logstash.yml /usr/share/logstash/config/logstash.yml
 
 # Copy pipeline configuration
-COPY ./pipeline/pipeline.conf /usr/share/logstash/pipeline/pipeline.conf
+COPY ./conf/pipeline.conf /usr/share/logstash/pipeline/pipeline.conf
 
 # Copy ILM policy and setup script
 COPY ./conf/ilm-policy.json /usr/share/logstash/config/ilm-policy.json
