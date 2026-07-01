@@ -36,6 +36,7 @@ export function useAuctionRealtime(id: number) {
 
   const bids = bidsData?.results || [];
   const activeStream = streamsData?.find((s: any) => s.status === "LIVE") || null;
+  const hasEndedStream = streamsData?.some((s: any) => s.status === "ENDED") || false;
 
   const loading = loadingAuction || loadingBids;
 
@@ -341,6 +342,7 @@ export function useAuctionRealtime(id: number) {
     auctionError: auctionQueryError ? "Não foi possível carregar os detalhes do leilão." : null,
     bidError: error,
     activeStream,
+    hasEndedStream,
     isWatchingStream,
     setIsWatchingStream,
     viewerCount,
