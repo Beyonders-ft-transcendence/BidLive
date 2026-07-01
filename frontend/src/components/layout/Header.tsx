@@ -1,9 +1,8 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Search, ChevronDown, Menu, X, Globe, Bell, CheckCircle2 } from "lucide-react";
+import { Sun, Moon, ChevronDown, Menu, X, Globe, Bell, CheckCircle2 } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
-import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import Avatar from "../common/Avatar";
@@ -54,20 +53,16 @@ export default function Header() {
 
                 {/* Middle Section: Nav Links & Search (Desktop) */}
                 <div className="hidden md:flex items-center gap-8 flex-1 justify-center px-4">
-                    <nav className="flex items-center gap-6 text-sm font-medium text-foreground/80">
-                        <Link to="/" className="hover:text-primary transition-colors">Início</Link>
-                        <Link to="/leiloes" className="hover:text-primary transition-colors">Leilões</Link>
+                    <nav className="flex items-center gap-8 text-sm font-semibold text-foreground/70">
+                        <Link to="/" className="relative hover:text-primary transition-colors group">
+                            Início
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
+                        <Link to="/leiloes" className="relative hover:text-primary transition-colors group">
+                            Leilões
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
                     </nav>
-
-                    {/* Search Bar */}
-                    <div className="relative w-full max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input 
-                            type="text" 
-                            placeholder="Pesquisar leilões..." 
-                            className="pl-9 h-9 bg-background/50 border-border focus-visible:ring-primary rounded-md text-sm w-full"
-                        />
-                    </div>
                 </div>
 
                 {/* Right Actions (Desktop) */}
@@ -195,16 +190,7 @@ export default function Header() {
                     </div>
                     
                     <div className="p-4 overflow-y-auto space-y-6 flex-1">
-                        {/* Mobile Search */}
-                        <div className="relative w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                type="text" 
-                                placeholder="Pesquisar leilões..." 
-                                className="pl-9 h-10 bg-background/50 border-border focus-visible:ring-primary rounded-md text-sm w-full"
-                            />
-                        </div>
-                        
+
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
                             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Início</Link>
                             <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Leilões</Link>
