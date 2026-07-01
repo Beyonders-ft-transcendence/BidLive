@@ -25,12 +25,8 @@ export default function UsersPage() {
     <Container>
       <div className="flex flex-col gap-6">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-foreground">Utilizadores</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Faça a gestão dos acessos e bloqueios.</p>
-          </div>
+        {/* Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
           
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
