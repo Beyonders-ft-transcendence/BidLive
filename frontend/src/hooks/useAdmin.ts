@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import adminService from "@/services/admin.service";
-import type { RoleWritePayload, UserBanPayload } from "@/shared/types/admin.types";
+import type { RoleWritePayload, UserBanPayload, ReportActionPayload, ReportStatusUpdatePayload } from "@/shared/types/admin.types";
 import { toast } from "sonner";
 
 export const adminKeys = {
@@ -10,6 +10,8 @@ export const adminKeys = {
   roles: () => [...adminKeys.all, "roles"] as const,
   permissions: () => [...adminKeys.all, "permissions"] as const,
   stats: () => [...adminKeys.all, "stats"] as const,
+  reports: (status?: string, targetType?: string) => [...adminKeys.all, "reports", status, targetType] as const,
+  report: (id: number) => [...adminKeys.all, "report", id] as const,
 };
 
 export function useAdminUsersQuery(page = 1, search = "") {
@@ -116,3 +118,54 @@ export function useUpdateRoleMutation() {
     }
   });
 }
+
+export function useAdminReportsQuery(status?: string, targetType?: string) {
+  return useQuery({
+    queryKey: adminKeys.reports(status, targetType),
+    queryFn: () => adminService.getReports(status, targetType),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useAdminReportDetailQuery(id: number) {
+  return useQuery({
+    queryKey: adminKeys.report(id),
+    queryFn: () => adminService.getReportById(id),
+    enabled: !!id,
+  });
+}
+
+export function useUpdateReportStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: ReportStatusUpdatePayload }) =>
+      adminService.updateReportStatus(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.all });
+      toast.success("Estado da denúncia atualizado");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao atualizar estado da denúncia";
+      toast.error(msg);
+    }
+  });
+}
+
+export function useApplyReportActionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: ReportActionPayload }) =>
+      adminService.applyReportAction(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.all });
+      toast.success("Ação administrativa aplicada com sucesso");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao aplicar ação administrativa";
+      toast.error(msg);
+    }
+  });
+}
+

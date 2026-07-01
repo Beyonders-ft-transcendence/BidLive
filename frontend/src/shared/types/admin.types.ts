@@ -23,11 +23,22 @@ export interface Role {
 }
 
 export interface AnalyticsStats {
-  total_users: number;
-  active_auctions: number;
-  total_auctions: number;
-  total_bids: number;
-  total_sales: string | number; 
+  active_users: {
+    online_now: number;
+    active_last_hour: number;
+  };
+  bids_activity: {
+    bids_per_hour_last_24h: Array<{ hour: string; count: number }>;
+  };
+  conversion_metrics: {
+    auction_conversion_rate_percentage: number;
+    bidder_engagement_rate_percentage: number;
+    total_ended_auctions: number;
+    sold_auctions: number;
+    total_active_users: number;
+    unique_bidders: number;
+  };
+  top_event_types: Array<{ event_type: string; count: number }>;
 }
 
 export interface PaginatedResponse<T> {
@@ -47,3 +58,59 @@ export interface RoleWritePayload {
 export interface UserBanPayload {
   status: 'BANNED' | 'SUSPENDED' | 'ACTIVE';
 }
+
+// --- Reports (Denúncias) ---
+export type ReportStatus = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED' | 'IGNORED';
+
+export type ReportReason = 'SPAM' | 'HARASSMENT' | 'SCAM' | 'HATE_SPEECH' | 'FRAUD' | 'INAPPROPRIATE_CONTENT' | 'COPYRIGHT' | 'OTHER';
+
+export type ReportTargetType = 'USER' | 'MESSAGE' | 'PRIVATE_MESSAGE' | 'AUCTION' | 'AUCTION_ITEM' | 'BID' | 'STREAM' | 'FILE';
+
+export type ReportActionType = 'COMMENT' | 'CHANGE_STATUS' | 'WARN_USER' | 'BAN_USER' | 'DELETE_CONTENT' | 'ESCALATE';
+
+export interface ReportReporter {
+  id: number;
+  username: string;
+  full_name: string;
+  avatar_url: string | null;
+}
+
+export interface ReportAction {
+  id: number;
+  admin: ReportReporter;
+  action: ReportActionType;
+  note: string;
+  created_at: string;
+}
+
+export interface ReportEvidence {
+  id: number;
+  file: string;
+  created_at: string;
+}
+
+export interface Report {
+  id: number;
+  reporter: ReportReporter;
+  target_type: ReportTargetType;
+  target_id: number;
+  reason: ReportReason;
+  description: string;
+  status: ReportStatus;
+  actions: ReportAction[];
+  evidence: ReportEvidence[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReportActionPayload {
+  action: ReportActionType;
+  note?: string;
+  new_status?: ReportStatus | null;
+}
+
+export interface ReportStatusUpdatePayload {
+  status: 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED' | 'IGNORED';
+  note?: string;
+}
+

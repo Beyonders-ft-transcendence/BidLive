@@ -8,3 +8,4 @@ export { NotFoundPage } from "./errors/NotFoundPage";
 export { UserDashboard } from "./dashboard/UserDashboard";
 export { default as BackofficeDashboard } from "./backoffice/BackofficeDashboard";
 export { default as UsersPage } from "./backoffice/UsersPage";
+export { default as ReportsPage } from "./backoffice/ReportsPage";
