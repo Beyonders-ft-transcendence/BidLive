@@ -20,6 +20,11 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "nginx"
 
   nginx-exporter:
     image: nginx-exporter:0.0.1
@@ -135,6 +140,11 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "frontend"
 
   celery_beat:
     image: backend:0.0.1
@@ -172,6 +182,11 @@ services:
       - ca_config
     environment:
       SERVICE_ROLE: celery-beat
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "celery-beat"
 
   celery_worker:
     image: backend:0.0.1
@@ -209,6 +224,11 @@ services:
       - ca_config
     environment:
       SERVICE_ROLE: celery-worker
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "celery-worker"
 
   backend:
     image: backend:0.0.1
@@ -223,6 +243,8 @@ services:
       redis:
         condition: service_started
       livekit:
+        condition: service_started
+      logstash:
         condition: service_started
     networks:
       - backend-network
@@ -246,6 +268,11 @@ services:
       - ca_config
     environment:
       SERVICE_ROLE: django
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "django-backend"
 
   livekit:
     image: livekit:0.0.1
@@ -420,6 +447,77 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
 
+  elasticsearch:
+    image: elasticsearch:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/elasticsearch
+      dockerfile: Dockerfile
+    container_name: elasticsearch
+    networks:
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  logstash:
+    image: logstash:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/logstash
+      dockerfile: Dockerfile
+    container_name: logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - backend-network
+    ports:
+      - "12201:12201/udp"
+    expose:
+      - "5000"
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - logstash_data:/usr/share/logstash/data
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+
+  kibana:
+    image: kibana:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/kibana
+      dockerfile: Dockerfile
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+
 secrets:
   db_credenciais:
     file: ../secrets/db_credenciais.txt
@@ -470,4 +568,10 @@ volumes:
     driver: local
 
   alertmanager_data:
+    driver: local
+
+  elasticsearch_data:
+    driver: local
+
+  logstash_data:
     driver: local
