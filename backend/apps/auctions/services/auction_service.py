@@ -25,6 +25,7 @@ from apps.auctions.models import (
     AuctionStatus,
     AuctionWatcher,
     Bid,
+    LiveStreamStatus,
 )
 from apps.auctions.selectors import get_highest_bid_for_auction
 from apps.auctions.services.anti_spam_service import enforce_bid_rate_limit
@@ -523,6 +524,8 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
 def activate_auction(*, auction: Auction) -> Auction:
     if auction.status != AuctionStatus.SCHEDULED:
         return auction
+    if not auction.streams.filter(status=LiveStreamStatus.LIVE).exists():
+        raise ValidationError({"status": ["Cannot activate auction without an active live stream."]})
     auction.status = AuctionStatus.LIVE
     auction.started_at = timezone.now()
     auction.save(update_fields=["status", "started_at", "updated_at"])
