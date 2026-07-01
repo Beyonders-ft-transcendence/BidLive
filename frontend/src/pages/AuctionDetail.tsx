@@ -84,6 +84,7 @@ export default function AuctionDetailPage() {
         auctionError,
         bidError,
         activeStream,
+        hasEndedStream,
         isWatchingStream,
         setIsWatchingStream,
         viewerCount,
@@ -539,7 +540,7 @@ export default function AuctionDetailPage() {
                             Este leilão está {
                                 auction.status === "SOLD" ? "Vendido" 
                                 : auction.status === "ENDED" ? "Encerrado" 
-                                : auction.status === "LIVE" ? "Aguardando Início da Stream" 
+                                : auction.status === "LIVE" ? (hasEndedStream ? "Transmissão Encerrada" : "Aguardando Início da Stream") 
                                 : auction.status === "SCHEDULED" ? "Agendado" 
                                 : "Inativo"
                             }.
