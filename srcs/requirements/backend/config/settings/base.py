@@ -297,16 +297,37 @@ LOGGING = {
         "standard": {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
         },
+        "json": {
+            "()": "common.logging.JSONFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
+        "logstash": {
+            "class": "common.logging.LogstashTCPHandler",
+            "host": env("LOGSTASH_HOST", default="logstash"),
+            "port": env.int("LOGSTASH_PORT", default=5000),
+            "formatter": "json",
+        },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["console", "logstash"],
         "level": "INFO",
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console", "logstash"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console", "logstash"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 

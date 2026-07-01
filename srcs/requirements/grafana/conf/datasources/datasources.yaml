@@ -10,3 +10,17 @@ datasources:
     jsonData:
       tlsSkipVerify: true
     editable: true
+
+  - name: Elasticsearch
+    uid: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    isDefault: false
+    jsonData:
+      index: "bidlive-logs-*"
+      timeField: "@timestamp"
+      esVersion: "8.17.0"
+      logMessageField: "message"
+      logLevelField: "log_level"
+    editable: true
