@@ -61,18 +61,27 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
     try {
       const res = await auctionService.listStreams(auctionId);
       if (res.success && res.data && res.data.length > 0) {
-        const activeStream = res.data[0];
-        setStream(activeStream);
-        setBroadcasting(activeStream.status === LiveStreamStatus.LIVE);
+        // Find a stream that is LIVE or READY
+        const activeStream = res.data.find((s: any) => s.status === LiveStreamStatus.LIVE || s.status === LiveStreamStatus.READY);
         
-        try {
-          const vRes = await auctionService.listStreamViewers(auctionId, activeStream.id);
-          if (vRes.success && vRes.data) {
-            setViewers(vRes.data.results || []);
-            setViewerCount(vRes.data.count || 0);
+        if (activeStream) {
+          setStream(activeStream);
+          setBroadcasting(activeStream.status === LiveStreamStatus.LIVE);
+          
+          try {
+            const vRes = await auctionService.listStreamViewers(auctionId, activeStream.id);
+            if (vRes.success && vRes.data) {
+              setViewers(vRes.data.results || []);
+              setViewerCount(vRes.data.count || 0);
+            }
+          } catch (vErr) {
+            console.error("Erro ao carregar viewers:", vErr);
           }
-        } catch (vErr) {
-          console.error("Erro ao carregar viewers:", vErr);
+        } else {
+          setStream(null);
+          if (activeAuction) {
+            setTitle(`Live Stream: ${activeAuction.item?.title || "Leilão"}`);
+          }
         }
       } else {
         setStream(null);
