@@ -45,7 +45,16 @@ function SigninForm() {
     }, [formValues.email, formValues.password]);
 
     const handleSuccessRedirect = () => {
-        navigate("/leiloes");
+        const userState = useAuthStore.getState().user;
+        const hasAdminRole = userState?.roles?.some((r: any) => 
+            (typeof r === "string" && r === "SUPER_ADMIN") || 
+            (typeof r === "object" && r !== null && r.name === "SUPER_ADMIN")
+        );
+        if (hasAdminRole) {
+            navigate("/backoffice");
+        } else {
+            navigate("/leiloes");
+        }
     };
 
     const onSubmit = async (data: SignInInput) => {

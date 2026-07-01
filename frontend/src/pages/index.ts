@@ -6,4 +6,5 @@ export { default as AuctionsPage } from "./Auctions";
 export { default as AuctionDetailPage } from "./AuctionDetail";
 export { NotFoundPage } from "./errors/NotFoundPage";
 export { UserDashboard } from "./dashboard/UserDashboard";
-export { BackofficeDashboard } from "./dashboard/BackofficeDashboard";
+export { default as BackofficeDashboard } from "./backoffice/BackofficeDashboard";
+export { default as UsersPage } from "./backoffice/UsersPage";
