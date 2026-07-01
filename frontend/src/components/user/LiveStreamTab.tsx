@@ -153,8 +153,9 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
     }
 
     try {
+      // Usar 'true' simples maximiza a compatibilidade com qualquer webcam
       const constraints = {
-        video: cameraOn ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+        video: cameraOn,
         audio: micOn
       };
       const streamObj = await navigator.mediaDevices.getUserMedia(constraints);
@@ -164,7 +165,18 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       }
     } catch (err: any) {
       console.error("Erro ao acessar câmera/microfone:", err);
-      toast.error("Não foi possível acessar a câmera ou o microfone.");
+      
+      const errorMsg = err.name || err.message || "";
+      if (errorMsg.includes('NotFound') || errorMsg.includes('NotFoundError')) {
+        toast.error("Dispositivo não encontrado. Certifique-se de que a câmera/microfone estão conectados.");
+      } else if (errorMsg.includes('NotAllowed') || errorMsg.includes('NotAllowedError')) {
+        toast.error("Permissão negada. Autorize o acesso no seu navegador.");
+      } else if (errorMsg.includes('OverconstrainedError')) {
+        toast.error("A câmera não suporta as configurações exigidas.");
+      } else {
+        toast.error("Não foi possível acessar a câmera ou o microfone.");
+      }
+      
       if (cameraOn) setCameraOn(false);
       if (micOn) setMicOn(false);
     }
