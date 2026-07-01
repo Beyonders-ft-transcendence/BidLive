@@ -81,6 +81,7 @@ services:
       - redis-exporter
       - nginx-exporter
       - celery-exporter
+      - alertmanager
     networks:
       - backend-network
     restart: always
@@ -90,6 +91,28 @@ services:
       - ca_config
     volumes:
       - prometheus_data:/prometheus
+
+  alertmanager:
+    image: alertmanager:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/alertmanager
+      dockerfile: Dockerfile
+    container_name: alertmanager
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.email
+      - ./.env.webhook
+    secrets:
+      - email_credenciais
+      - webhook_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - alertmanager_data:/alertmanager
 
   frontend:
     image: frontend:0.0.1
@@ -135,11 +158,13 @@ services:
       - ./.env.db
       - ./.env.redis
       - ./.env.livekit
+      - ./.env.email
     secrets:
       - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - email_credenciais
       - 42_credenciais
       - google_credenciais
       - ca_cert
@@ -170,11 +195,13 @@ services:
       - ./.env.db
       - ./.env.redis
       - ./.env.livekit
+      - ./.env.email
     secrets:
       - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - email_credenciais
       - 42_credenciais
       - google_credenciais
       - ca_cert
@@ -205,11 +232,13 @@ services:
       - ./.env.db
       - ./.env.redis
       - ./.env.livekit
+      - ./.env.email
     secrets:
       - db_credenciais
       - redis_credenciais
       - livekit_credenciais
       - backend_credenciais
+      - email_credenciais
       - 42_credenciais
       - google_credenciais
       - ca_cert
@@ -408,6 +437,10 @@ secrets:
     file: ../secrets/grafana_credenciais.txt
   portainer_credenciais:
     file: ../secrets/portainer_credenciais.txt
+  email_credenciais:
+    file: ../secrets/email_credenciais.txt
+  webhook_credenciais:
+    file: ../secrets/webhook_credenciais.txt
   ca_cert:
     file: ../secrets/ca.pem
   ca_key:
@@ -434,4 +467,7 @@ volumes:
     driver: local
 
   portainer_data:
+    driver: local
+
+  alertmanager_data:
     driver: local
