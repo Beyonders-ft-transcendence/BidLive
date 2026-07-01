@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import { useAdminUsersQuery, useBanUserMutation } from '@/hooks/useAdmin';
 import Avatar from '@/components/common/Avatar';
-import { Search, MoreVertical, ShieldBan, CheckCircle, ShieldAlert } from 'lucide-react';
-import { toast } from 'sonner';
+import { Search, ShieldBan, CheckCircle, ShieldAlert } from 'lucide-react';
+
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
