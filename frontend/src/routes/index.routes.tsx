@@ -8,6 +8,7 @@ import {
     NotFoundPage,
     UserDashboard,
     BackofficeDashboard,
+    UsersPage,
 } from "@/pages/index";
 import { UserRole } from "@/shared/types/auth.types";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -42,7 +43,8 @@ export default function IndexRoot() {
                         <Route 
                             element={<ProtectedRoute allowedRoles={[UserRole.SUPER_ADMIN, UserRole.MONITOR]} />}
                         >
-                            <Route path="/backoffice/dashboard" element={<BackofficeDashboard />} />
+                            <Route path="/backoffice" element={<BackofficeDashboard />} />
+                            <Route path="/backoffice/users" element={<UsersPage />} />
                         </Route>
                     </Route>
                 </Route>

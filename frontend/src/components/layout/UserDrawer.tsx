@@ -53,6 +53,16 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
   const isAdminOrMonitor = hasRole(UserRole.SUPER_ADMIN) || hasRole(UserRole.MONITOR);
 
   const navItems = [
+    ...(isAdminOrMonitor ? [{
+      id: "backoffice",
+      title: "Painel Backoffice",
+      subtitle: "Gestão da plataforma",
+      icon: <ShieldCheck size={14} className="text-primary" />,
+      action: () => {
+        onClose();
+        navigate("/backoffice");
+      }
+    }] : []),
     {
       id: "overview",
       title: "Visão Geral",
