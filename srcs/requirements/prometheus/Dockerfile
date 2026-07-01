@@ -14,6 +14,7 @@ RUN chmod +x /usr/local/bin/generate_cert.sh
 WORKDIR /etc/prometheus
 
 COPY conf/prometheus.yml /etc/prometheus/prometheus.yml
+COPY conf/alert_rules.yml /etc/prometheus/alert_rules.yml
 COPY ./tools/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
