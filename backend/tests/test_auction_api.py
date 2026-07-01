@@ -500,7 +500,7 @@ def test_auction_bids_excludes_blocked_users(db, user):
     # Get bids list as user -> bid1 from blocked_user should be excluded, bid2 should be present
     res = client.get(f"/api/auctions/{auction.id}/bids/")
     assert res.status_code == 200
-    ids = [b["id"] for b in res.data["data"]]
+    ids = [b["id"] for b in res.data["data"]["results"]]
     assert bid2.id in ids
     assert bid1.id not in ids
 

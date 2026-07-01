@@ -353,6 +353,10 @@ def start_stream(
     stream.is_live = True
     stream.started_at = stream.started_at or timezone.now()
     stream.save(update_fields=["status", "is_live", "started_at", "updated_at"])
+    
+    from apps.auctions.services.auction_service import activate_auction
+    activate_auction(auction=stream.auction)
+
     ensure_livekit_room(stream=stream)
 
     notify_auction_watchers(
@@ -424,6 +428,30 @@ def end_stream(
         remove_livekit_room(stream=stream)
     except ValidationError:
         pass
+
+    auction = stream.auction
+    auction.refresh_from_db(fields=["status", "started_at"])
+    if auction.status == AuctionStatus.LIVE:
+        if auction.bids.exists():
+            from apps.auctions.services.auction_service import close_auction
+            close_auction(auction=auction)
+        else:
+            auction.status = AuctionStatus.SCHEDULED
+            auction.started_at = None
+            auction.save(update_fields=["status", "started_at", "updated_at"])
+            
+            from apps.auctions.events import AUCTION_UPDATED
+            from apps.auctions.services.realtime_service import publish_auction_event, publish_auction_snapshot, build_auction_snapshot
+            publish_auction_event(
+                auction_id=auction.id,
+                event_type=AUCTION_UPDATED,
+                payload={"auction_id": auction.id, "status": auction.status},
+            )
+            publish_auction_snapshot(
+                auction_id=auction.id,
+                snapshot=build_auction_snapshot(auction=auction),
+                broadcast=True,
+            )
 
     if actor and getattr(actor, "is_authenticated", False):
         log_permission_audit(
