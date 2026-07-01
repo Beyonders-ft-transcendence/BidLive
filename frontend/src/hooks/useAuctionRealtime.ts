@@ -313,7 +313,21 @@ export function useAuctionRealtime(id: number) {
         if (err.response?.status === 401) {
           navigate("/signin");
         }
-        const msg = err.response?.data?.message || err.message || "Erro ao realizar compra imediata.";
+        let msg = "Erro ao realizar compra imediata.";
+        if (err.response?.data) {
+          const errorData = err.response.data;
+          if (errorData.errors) {
+            msg = Array.isArray(errorData.errors) 
+              ? errorData.errors.map((e: any) => typeof e === 'object' ? Object.values(e).flat().join(" ") : String(e)).join(" ")
+              : typeof errorData.errors === 'object' 
+                ? Object.values(errorData.errors).flat().join(" ")
+                : String(errorData.errors);
+          } else if (errorData.message) {
+            msg = errorData.message;
+          }
+        } else if (err.message) {
+          msg = err.message;
+        }
         return { success: false, message: msg };
       }
     },

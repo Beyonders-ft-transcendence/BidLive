@@ -9,6 +9,7 @@ import { useAuthStore } from "@/shared/stores/auth.store";
 import Avatar from "../common/Avatar";
 import UserDrawer from "./UserDrawer";
 import { useNotificationsQuery, useMarkNotificationReadMutation } from "@/hooks/useNotification";
+import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 
 export default function Header() {
     const [theme, setCurrentTheme] = useState<Theme>("light");
@@ -21,6 +22,7 @@ export default function Header() {
 
     const { data: notificationsResponse } = useNotificationsQuery();
     const markReadMutation = useMarkNotificationReadMutation();
+    useNotificationRealtime();
     
     const notifications = Array.isArray(notificationsResponse) 
         ? notificationsResponse 

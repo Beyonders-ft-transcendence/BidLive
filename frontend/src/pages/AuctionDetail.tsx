@@ -206,7 +206,12 @@ export default function AuctionDetailPage() {
     };
 
     const handleBuyNowSubmit = async () => {
-        await buyNow();
+        const res = await buyNow();
+        if (res && res.success) {
+            toast.success("Compra imediata efetuada com sucesso!");
+        } else if (res) {
+            toast.error(res.message || "Não foi possível concluir a compra.");
+        }
     };
 
     if (loading) {
@@ -243,7 +248,7 @@ export default function AuctionDetailPage() {
     const minIncrement = Number(auction.item.minimum_increment || 1);
     const hasBids = bids && bids.length > 0;
     const minBid = hasBids ? currentPrice + minIncrement : Number(auction.item.starting_price);
-    const isLive = auction.status === "LIVE";
+    const isLive = auction.status === "LIVE" && !!activeStream;
     const images = auction.item.images || [];
 
 
@@ -530,7 +535,15 @@ export default function AuctionDetailPage() {
                     )
                 ) : (
                     <div className="bg-muted border border-border rounded-sm text-center py-5 flex flex-col items-center gap-3">
-                        <p className="text-sm font-semibold text-muted-foreground">Este leilão está {auction.status === "SOLD" ? "Vendido" : auction.status === "ENDED" ? "Encerrado" : "Inativo"}.</p>
+                        <p className="text-sm font-semibold text-muted-foreground">
+                            Este leilão está {
+                                auction.status === "SOLD" ? "Vendido" 
+                                : auction.status === "ENDED" ? "Encerrado" 
+                                : auction.status === "LIVE" ? "Aguardando Início da Stream" 
+                                : auction.status === "SCHEDULED" ? "Agendado" 
+                                : "Inativo"
+                            }.
+                        </p>
                         {isAuthenticated && currentUser && auction.winner === currentUser.id && (
                             <div className="mt-1 bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 text-sm rounded-sm font-semibold flex items-center gap-2">
                                 <CheckCircle2 size={16} /> Você venceu este leilão!

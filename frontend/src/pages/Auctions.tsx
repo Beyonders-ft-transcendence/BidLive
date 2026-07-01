@@ -1,13 +1,35 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
-import { useAuctionsQuery } from "@/hooks/useAuction";
+import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import {
     List, Grid2X2, Search, ChevronRight,
     Clock, DollarSign, Activity,
     SlidersHorizontal, X
 } from "lucide-react";
+
+const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number, status: string }) => {
+    const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
+    const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
+    
+    if (isActuallyLive) {
+        return <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase shadow-md">Ao Vivo</div>;
+    }
+    return null;
+};
+
+const AuctionLiveText = ({ auctionId, status, viewType }: { auctionId: number, status: string, viewType?: 'list' | 'grid' }) => {
+    const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
+    const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
+    
+    return (
+        <span className={`inline-flex items-center gap-1 ${viewType === 'list' ? 'text-[9px] sm:text-[10px]' : 'text-[9px] sm:text-[10px]'} font-semibold uppercase ${isActuallyLive ? 'text-red-500' : 'text-muted-foreground'}`}>
+            <Activity className={viewType === 'list' ? "w-2.5 h-2.5 sm:w-3 sm:h-3" : "w-2.5 h-2.5"} />
+            {isActuallyLive ? 'Ao Vivo' : status === 'LIVE' ? 'Agendado' : status === 'SCHEDULED' ? 'Agendado' : 'Encerrado'}
+        </span>
+    );
+};
 
 export default function AuctionsPage() {
     const [page, setPage] = useState(1);
@@ -21,7 +43,7 @@ export default function AuctionsPage() {
     const [startsAfter, setStartsAfter] = useState<string>("");
     const [endsBefore, setEndsBefore] = useState<string>("");
     const [sellerId, setSellerId] = useState<string>("");
-    const [viewType, setViewType] = useState<"list" | "grid">("list");
+    const [viewType, setViewType] = useState<"grid" | "list">("grid");
     const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
     const { data: auctionsData, isLoading } = useAuctionsQuery({
@@ -230,9 +252,7 @@ export default function AuctionsPage() {
                                             ) : (
                                                 <div className="text-muted-foreground text-xs p-2 text-center">Sem foto</div>
                                             )}
-                                            {auction.status === 'LIVE' && (
-                                                <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase">Ao Vivo</div>
-                                            )}
+                                            <AuctionLiveBadge auctionId={auction.id} status={auction.status} />
                                             {viewType === 'grid' && item.category?.name && (
                                                 <div className="absolute top-2 right-2 bg-background/90 border border-border text-[9px] font-semibold px-2 py-0.5 rounded-full text-muted-foreground uppercase">{item.category.name}</div>
                                             )}
@@ -254,10 +274,7 @@ export default function AuctionsPage() {
                                                         </p>
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
-                                                        <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold uppercase ${auction.status === 'LIVE' ? 'text-red-500' : 'text-muted-foreground'}`}>
-                                                            <Activity className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                                            {auction.status === 'LIVE' ? 'Ao Vivo' : auction.status === 'SCHEDULED' ? 'Agendado' : 'Encerrado'}
-                                                        </span>
+                                                        <AuctionLiveText auctionId={auction.id} status={auction.status} viewType="list" />
                                                         {auction.end_time && (
                                                             <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                                                                 <Clock className="w-3 h-3" />
@@ -288,10 +305,7 @@ export default function AuctionsPage() {
                                                 <div className="p-2.5 sm:p-3 flex-1">
                                                     <h3 className="text-foreground font-semibold text-xs sm:text-sm line-clamp-2 mb-1.5" title={item.title}>{item.title}</h3>
                                                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                        <span className={`inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-semibold uppercase ${auction.status === 'LIVE' ? 'text-red-500' : 'text-muted-foreground'}`}>
-                                                            <Activity className="w-2.5 h-2.5" />
-                                                            {auction.status === 'LIVE' ? 'Ao Vivo' : auction.status === 'SCHEDULED' ? 'Agendado' : 'Encerrado'}
-                                                        </span>
+                                                        <AuctionLiveText auctionId={auction.id} status={auction.status} viewType="grid" />
                                                         {auction.end_time && (
                                                             <span className="hidden sm:inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-muted-foreground">
                                                                 <Clock className="w-2.5 h-2.5" />
