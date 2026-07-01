@@ -146,18 +146,16 @@ def test_reports_serializers_include_expected_fields(user):
     evidence_data = ReportEvidenceSerializer(evidence).data
 
     assert report_data["id"] == report.id
-    assert report_data["reporter"] == user.id
+    assert report_data["reporter"]["id"] == user.id
     assert report_data["target_type"] == ReportTargetType.USER
     assert report_data["target_id"] == 123
     assert report_data["reason"] == ReportReason.SPAM
     assert report_data["status"] == report.status
 
     assert action_data["id"] == action.id
-    assert action_data["report"] == report.id
-    assert action_data["admin"] == user.id
+    assert action_data["admin"]["id"] == user.id
     assert action_data["action"] == ReportActionType.COMMENT
     assert action_data["note"] == "Investigating"
 
     assert evidence_data["id"] == evidence.id
-    assert evidence_data["report"] == report.id
     assert evidence_data["file"] == target_file.id

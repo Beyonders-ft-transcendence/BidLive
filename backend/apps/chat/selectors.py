@@ -74,15 +74,15 @@ def get_room_messages(
     qs = Message.objects.filter(room_id=room_id, is_deleted=False)
 
     if viewer:
-        blocked_ids = Friendship.objects.filter(
-            Q(requester=viewer) | Q(addressee=viewer),
-            status=FriendshipStatus.BLOCKED,
-        ).values_list(
-            "addressee_id", flat=True
-        ) | Friendship.objects.filter(
+        blocked_req = Friendship.objects.filter(
             Q(requester=viewer) | Q(addressee=viewer),
             status=FriendshipStatus.BLOCKED,
         ).values_list("requester_id", flat=True)
+        blocked_add = Friendship.objects.filter(
+            Q(requester=viewer) | Q(addressee=viewer),
+            status=FriendshipStatus.BLOCKED,
+        ).values_list("addressee_id", flat=True)
+        blocked_ids = set(blocked_req) | set(blocked_add)
 
         blocked_ids = [bid for bid in blocked_ids if bid != viewer.id]
         qs = qs.exclude(sender_id__in=blocked_ids)
