@@ -9,3 +9,6 @@ xpack.security.enrollment.enabled: false
 
 # Performance tuning for single-node
 indices.memory.index_buffer_size: 20%
+
+# Disable disk watermark thresholds for development/low-disk environments
+cluster.routing.allocation.disk.threshold_enabled: false
