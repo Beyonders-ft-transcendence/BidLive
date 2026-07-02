@@ -2,7 +2,6 @@
 
 COMPOSE_FILE = srcs/docker-compose.yml
 PROJECT_NAME = bidlive
-DATA_PATH = /mnt/d/NdDaniel/Code/42/BidLive/data
 
 all: ca build up
 
@@ -33,8 +32,6 @@ fclean: clean
 	@docker rmi -f $$(docker images -qa) 2>/dev/null || true
 	@docker volume rm $$(docker volume ls -q) 2>/dev/null || true
 	@docker network rm $$(docker network ls -q) 2>/dev/null || true
-	@echo "🗑️  Removing persistent data directories..."
-	@sudo rm -rf $(DATA_PATH)/adminer $(DATA_PATH)/backend $(DATA_PATH)/celery_worker $(DATA_PATH)/celery_beat $(DATA_PATH)/frontend $(DATA_PATH)/grafana $(DATA_PATH)/livekit $(DATA_PATH)/nginx $(DATA_PATH)/portainer $(DATA_PATH)/postgresql $(DATA_PATH)/prometheus $(DATA_PATH)/redis $(DATA_PATH)/elasticsearch $(DATA_PATH)/logstash $(DATA_PATH)/kibana 2>/dev/null || true
 	@echo "✅ All data removed!"
 
 stop:
