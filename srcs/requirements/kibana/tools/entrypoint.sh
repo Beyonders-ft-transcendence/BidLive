@@ -21,6 +21,11 @@ until curl -sk -u "elastic:${ELASTIC_PASSWORD}" https://elasticsearch:9200/_clus
 done
 echo "✅ Elasticsearch is ready."
 
+echo "Setting password for kibana_system user..."
+curl -sk -u "elastic:${ELASTIC_PASSWORD}" -X POST "https://elasticsearch:9200/_security/user/kibana_system/_password" \
+     -H "Content-Type: application/json" \
+     -d "{\"password\":\"${ELASTIC_PASSWORD}\"}"
+
 # Import dashboards in background (waits for Kibana to be ready internally)
 /usr/local/bin/setup-dashboards.sh &
 
@@ -32,7 +37,7 @@ export SERVER_SSL_CERTIFICATE=/etc/ssl/certs/server.crt
 export SERVER_SSL_KEY=/etc/ssl/private/server.key
 
 # Configure Kibana connection to secure Elasticsearch
-export ELASTICSEARCH_USERNAME=elastic
+export ELASTICSEARCH_USERNAME=kibana_system
 export ELASTICSEARCH_PASSWORD="$ELASTIC_PASSWORD"
 export ELASTICSEARCH_SSL_VERIFICATIONMODE=full
 export ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/run/secrets/ca_cert
