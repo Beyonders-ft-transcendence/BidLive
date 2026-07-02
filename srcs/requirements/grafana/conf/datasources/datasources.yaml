@@ -15,12 +15,17 @@ datasources:
     uid: Elasticsearch
     type: elasticsearch
     access: proxy
-    url: http://elasticsearch:9200
+    url: https://elasticsearch:9200
     isDefault: false
+    basicAuth: true
+    basicAuthUser: elastic
     jsonData:
       index: "bidlive-logs-*"
       timeField: "@timestamp"
       esVersion: "8.17.0"
       logMessageField: "message"
       logLevelField: "log_level"
+      tlsSkipVerify: true
+    secureJsonData:
+      basicAuthPassword: ${GF_ELASTICSEARCH_PASSWORD}
     editable: true

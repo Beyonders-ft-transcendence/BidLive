@@ -1,20 +1,27 @@
 #!/bin/sh
 set -e
 
-ES_HOST="http://elasticsearch:9200"
+ES_HOST="https://elasticsearch:9200"
 ILM_POLICY_FILE="/usr/share/logstash/config/ilm-policy.json"
 POLICY_NAME="bidlive-retention-policy"
+
+# Load Elasticsearch credentials from Secret if not inherited
+if [ -z "$ELASTIC_PASSWORD" ] && [ -f /run/secrets/elasticsearch_credenciais ]; then
+    ELASTIC_PASSWORD=$(grep "^ELASTIC_PASSWORD=" /run/secrets/elasticsearch_credenciais | cut -d'=' -f2- | tr -d '\r')
+fi
+
+CURL_OPTS="-s -u elastic:${ELASTIC_PASSWORD} --cacert /run/secrets/ca_cert"
 
 echo "🔧 Setting up ILM (Index Lifecycle Management) policy..."
 
 # Check if policy already exists
-EXISTING=$(curl -s -o /dev/null -w "%{http_code}" "${ES_HOST}/_ilm/policy/${POLICY_NAME}")
+EXISTING=$(curl $CURL_OPTS -o /dev/null -w "%{http_code}" "${ES_HOST}/_ilm/policy/${POLICY_NAME}")
 
 if [ "$EXISTING" = "200" ]; then
     echo "  ILM policy '${POLICY_NAME}' already exists. Skipping creation."
 else
     echo "  Creating ILM policy '${POLICY_NAME}'..."
-    curl -s -X PUT "${ES_HOST}/_ilm/policy/${POLICY_NAME}" \
+    curl $CURL_OPTS -X PUT "${ES_HOST}/_ilm/policy/${POLICY_NAME}" \
         -H "Content-Type: application/json" \
         -d @"${ILM_POLICY_FILE}"
     echo ""
@@ -24,7 +31,7 @@ fi
 # Create index template for bidlive-logs
 echo "🔧 Setting up index template..."
 
-curl -s -X PUT "${ES_HOST}/_index_template/bidlive-logs-template" \
+curl $CURL_OPTS -X PUT "${ES_HOST}/_index_template/bidlive-logs-template" \
     -H "Content-Type: application/json" \
     -d '{
   "index_patterns": ["bidlive-logs-*"],

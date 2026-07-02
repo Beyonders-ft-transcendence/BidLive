@@ -3,9 +3,13 @@ node.name: es-node-1
 network.host: 0.0.0.0
 discovery.type: single-node
 
-# Disable X-Pack security (access restricted via Docker network)
-xpack.security.enabled: false
+# Enable X-Pack security with HTTP SSL/TLS
+xpack.security.enabled: true
 xpack.security.enrollment.enabled: false
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.key: certs/server.key
+xpack.security.http.ssl.certificate: certs/server.crt
+xpack.security.http.ssl.certificate_authorities: [ "certs/ca.crt" ]
 
 # Performance tuning for single-node
 indices.memory.index_buffer_size: 20%

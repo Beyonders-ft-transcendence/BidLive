@@ -9,8 +9,13 @@ chmod 644 /etc/ssl/certs/server.crt 2>/dev/null || true
 chmod 644 /etc/ssl/private/server.key 2>/dev/null || true
 chmod 755 /etc/ssl/private 2>/dev/null || true
 
+# Load Elasticsearch credentials from Secret
+if [ -f /run/secrets/elasticsearch_credenciais ]; then
+    export ELASTIC_PASSWORD=$(grep "^ELASTIC_PASSWORD=" /run/secrets/elasticsearch_credenciais | cut -d'=' -f2- | tr -d '\r')
+fi
+
 echo "Waiting for Elasticsearch to be ready..."
-until curl -s http://elasticsearch:9200/_cluster/health > /dev/null 2>&1; do
+until curl -sk -u "elastic:${ELASTIC_PASSWORD}" https://elasticsearch:9200/_cluster/health > /dev/null 2>&1; do
     echo "  Elasticsearch not ready yet, retrying in 5s..."
     sleep 5
 done
@@ -26,5 +31,11 @@ export SERVER_SSL_ENABLED=true
 export SERVER_SSL_CERTIFICATE=/etc/ssl/certs/server.crt
 export SERVER_SSL_KEY=/etc/ssl/private/server.key
 
-# Drop to kibana user and start
-exec runuser -u kibana -- /usr/local/bin/kibana-docker "$@"
+# Configure Kibana connection to secure Elasticsearch
+export ELASTICSEARCH_USERNAME=elastic
+export ELASTICSEARCH_PASSWORD="$ELASTIC_PASSWORD"
+export ELASTICSEARCH_SSL_VERIFICATIONMODE=full
+export ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/run/secrets/ca_cert
+
+# Drop to kibana user and start (preserving env variables)
+exec runuser -p -u kibana -- /usr/local/bin/kibana-docker "$@"

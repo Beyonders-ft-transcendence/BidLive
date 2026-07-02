@@ -5,7 +5,13 @@ set -e
 
 KIBANA_URL="https://localhost:5601/kibana"
 DASHBOARDS_FILE="/usr/share/kibana/dashboards/dashboards.ndjson"
-CURL_OPTS="-sk"
+
+# Load Elasticsearch credentials from Secret if not inherited
+if [ -z "$ELASTIC_PASSWORD" ] && [ -f /run/secrets/elasticsearch_credenciais ]; then
+    ELASTIC_PASSWORD=$(grep "^ELASTIC_PASSWORD=" /run/secrets/elasticsearch_credenciais | cut -d'=' -f2- | tr -d '\r')
+fi
+
+CURL_OPTS="-sk -u elastic:${ELASTIC_PASSWORD}"
 MAX_RETRIES=60
 RETRY_INTERVAL=5
 

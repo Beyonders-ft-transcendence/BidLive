@@ -67,6 +67,7 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+      - elasticsearch_credenciais
     env_file:
       - ./.env.grafana
 
@@ -461,13 +462,14 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+      - elasticsearch_credenciais
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "discovery.type=single-node"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "ELASTIC_PASSWORD=$$(grep '^ELASTIC_PASSWORD=' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2- | tr -d '\\r') && curl -k -sf -u \"elastic:$$ELASTIC_PASSWORD\" https://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -494,6 +496,7 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+      - elasticsearch_credenciais
     volumes:
       - logstash_data:/usr/share/logstash/data
     environment:
@@ -517,6 +520,7 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+      - elasticsearch_credenciais
 
 secrets:
   db_credenciais:
@@ -545,6 +549,9 @@ secrets:
     file: ../secrets/ca-key.pem
   ca_config:
     file: ../secrets/ca-config.json
+  elasticsearch_credenciais:
+    file: ../secrets/elasticsearch_credenciais.txt
+
 
 networks:
   frontend-network:

@@ -15,6 +15,10 @@ if [ -f /run/secrets/grafana_credenciais ]; then
   export GF_SECURITY_ADMIN_PASSWORD=$(sed -n '2p' /run/secrets/grafana_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
+if [ -f /run/secrets/elasticsearch_credenciais ]; then
+  export GF_ELASTICSEARCH_PASSWORD=$(grep "^ELASTIC_PASSWORD=" /run/secrets/elasticsearch_credenciais | cut -d'=' -f2- | tr -d '\r')
+fi
+
 export GF_PATHS_DATA="${GF_PATHS_DATA:-/var/lib/grafana}"
 export GF_PATHS_LOGS="${GF_PATHS_LOGS:-/var/log/grafana}"
 export GF_SERVER_HTTP_PORT="${GF_SERVER_HTTP_PORT:-3001}"
