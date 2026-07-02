@@ -35,9 +35,13 @@ fi
 
 if [ -f /run/secrets/backend_credenciais ]; then
     SECRET_KEY=\$(sed -n '1p' /run/secrets/backend_credenciais | cut -d'=' -f2 | tr -d '\r')
-    EMAIL_USER=\$(sed -n '2p' /run/secrets/backend_credenciais | cut -d'=' -f2 | tr -d '\r')
-    EMAIL_PASSWORD=\$(sed -n '3p' /run/secrets/backend_credenciais | cut -d'=' -f2 | tr -d '\r')
-    export SECRET_KEY EMAIL_USER EMAIL_PASSWORD
+    export SECRET_KEY
+fi
+
+if [ -f /run/secrets/email_credenciais ]; then
+    EMAIL_USER=\$(sed -n '1p' /run/secrets/email_credenciais | cut -d'=' -f2 | tr -d '\r')
+    EMAIL_PASSWORD=\$(sed -n '2p' /run/secrets/email_credenciais | cut -d'=' -f2 | tr -d '\r')
+    export EMAIL_USER EMAIL_PASSWORD
 fi
 
 if [ -f /run/secrets/42_credenciais ]; then

@@ -297,37 +297,16 @@ LOGGING = {
         "standard": {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
         },
-        "json": {
-            "()": "common.logging.JSONFormatter",
-        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        "logstash": {
-            "class": "common.logging.LogstashTCPHandler",
-            "host": env("LOGSTASH_HOST", default="logstash"),
-            "port": env.int("LOGSTASH_PORT", default=5000),
-            "formatter": "json",
-        },
     },
     "root": {
-        "handlers": ["console", "logstash"],
+        "handlers": ["console"],
         "level": "INFO",
-    },
-    "loggers": {
-        "django.request": {
-            "handlers": ["console", "logstash"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "apps": {
-            "handlers": ["console", "logstash"],
-            "level": "INFO",
-            "propagate": False,
-        },
     },
 }
 
@@ -336,15 +315,4 @@ LIVEKIT_URL = env("LIVEKIT_URL", default="")
 LIVEKIT_PUBLIC_URL = env("LIVEKIT_PUBLIC_URL", default="")
 LIVEKIT_API_KEY = env("LIVEKIT_API_KEY", default="")
 LIVEKIT_API_SECRET = env("LIVEKIT_API_SECRET", default="")
-
-# Email Configuration
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
-EMAIL_HOST = env("EMAIL_HOST", default="localhost")
-EMAIL_PORT = env.int("EMAIL_PORT", default=25)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
-EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default=env("EMAIL_USER", default=""))
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=env("EMAIL_PASSWORD", default=""))
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
-
 
