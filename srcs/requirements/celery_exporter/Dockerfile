@@ -1,4 +1,4 @@
-FROM danihodovic/celery-exporter:latest
+FROM danihodovic/celery-exporter:0.12.2
 
 USER root
 
