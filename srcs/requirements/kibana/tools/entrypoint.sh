@@ -16,6 +16,9 @@ until curl -s http://elasticsearch:9200/_cluster/health > /dev/null 2>&1; do
 done
 echo "✅ Elasticsearch is ready."
 
+# Import dashboards in background (waits for Kibana to be ready internally)
+/usr/local/bin/setup-dashboards.sh &
+
 echo "Starting Kibana..."
 
 # Configure Kibana HTTPS using generated certificates
@@ -25,4 +28,3 @@ export SERVER_SSL_KEY=/etc/ssl/private/server.key
 
 # Drop to kibana user and start
 exec runuser -u kibana -- /usr/local/bin/kibana-docker "$@"
-
