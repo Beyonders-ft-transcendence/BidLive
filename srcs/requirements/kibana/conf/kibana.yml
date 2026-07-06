@@ -12,3 +12,8 @@ telemetry.allowChangingOptInStatus: false
 
 # Logging
 logging.root.level: info
+
+# Encryption Keys (min 32 characters)
+xpack.encryptedSavedObjects.encryptionKey: "bidlive_encryption_key_for_saved_objects_must_be_32_bytes_at_least"
+xpack.security.encryptionKey: "bidlive_encryption_key_for_security_must_be_32_bytes_at_least"
+xpack.reporting.encryptionKey: "bidlive_encryption_key_for_reporting_must_be_32_bytes_at_least"
