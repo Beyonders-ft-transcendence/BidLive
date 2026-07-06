@@ -22,9 +22,8 @@ done
 echo "✅ Elasticsearch is ready."
 
 echo "Setting password for kibana_system user..."
-curl -sk -u "elastic:${ELASTIC_PASSWORD}" -X POST "https://elasticsearch:9200/_security/user/kibana_system/_password" \
-     -H "Content-Type: application/json" \
-     -d "{\"password\":\"${ELASTIC_PASSWORD}\"}"
+curl -sk -u "elastic:${ELASTIC_PASSWORD}" -X POST "https://elasticsearch:9200/_security/user/kibana_system/_password" -H "Content-Type: application/json" -d "{\"password\": \"${ELASTIC_PASSWORD}\"}"
+echo "✅ kibana_system password set"
 
 # Import dashboards in background (waits for Kibana to be ready internally)
 /usr/local/bin/setup-dashboards.sh &

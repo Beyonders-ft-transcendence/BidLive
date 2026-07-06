@@ -11,7 +11,7 @@ telemetry.optIn: false
 telemetry.allowChangingOptInStatus: false
 
 # Logging
-logging.root.level: info
+elasticsearch.username: "elastic"
 
 # Encryption Keys (min 32 characters)
 xpack.encryptedSavedObjects.encryptionKey: "bidlive_encryption_key_for_saved_objects_must_be_32_bytes_at_least"
