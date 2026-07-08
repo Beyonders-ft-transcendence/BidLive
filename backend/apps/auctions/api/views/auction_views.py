@@ -131,7 +131,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     def featured(self, request):
         queryset = self.filter_queryset(self.get_queryset().filter(is_featured=True))
         if not queryset.exists():
-            queryset = self.filter_queryset(self.get_queryset().filter(status=AuctionStatus.LIVE)[:4])
+            queryset = self.filter_queryset(self.get_queryset().filter(status__in=[AuctionStatus.LIVE, AuctionStatus.ACTIVE])[:4])
         if not queryset.exists():
             queryset = self.filter_queryset(self.get_queryset()[:4])
         
