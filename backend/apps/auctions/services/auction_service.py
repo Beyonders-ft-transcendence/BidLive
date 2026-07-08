@@ -180,7 +180,7 @@ def create_auction(*, seller, data: dict, image_urls=None, ip_address: str = "")
     if status == AuctionStatus.SCHEDULED:
         schedule_auction_activation(auction_id=auction.id, start_time=auction.start_time)
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
-    if status == AuctionStatus.LIVE:
+    if status in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
 
     publish_auction_event(
@@ -268,7 +268,7 @@ def update_auction(
     if auction.status == AuctionStatus.SCHEDULED:
         schedule_auction_activation(auction_id=auction.id, start_time=auction.start_time)
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
-    if auction.status == AuctionStatus.LIVE:
+    if auction.status in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
 
     publish_auction_event(
@@ -430,7 +430,7 @@ def place_bid(
 
 @transaction.atomic
 def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
-    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.LIVE):
+    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         raise ValidationError({"status": ["Auction is not available for buy now."]})
     if auction.item.buy_now_price is None:
         raise ValidationError({"buy_now_price": ["Buy now is not available."]})
