@@ -15,7 +15,7 @@ def close_expired_auctions(self) -> int:
     from apps.auctions.services.auction_service import close_auction_by_id
 
     now = timezone.now()
-    auctions = Auction.objects.filter(status=AuctionStatus.LIVE, end_time__lte=now)
+    auctions = Auction.objects.filter(status__in=[AuctionStatus.LIVE, AuctionStatus.ACTIVE], end_time__lte=now)
     count = 0
     for auction in auctions:
         close_auction_by_id(auction_id=auction.id)
