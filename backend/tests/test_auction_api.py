@@ -52,7 +52,15 @@ def _valid_create_payload(*, category_id, start_time=None, end_time=None, **over
 def _assert_field_error(response, field, expected_fragment):
     assert response.status_code == 400
     assert response.data["success"] is False
-    errors = response.data["errors"][0]
+    errors = response.data["errors"]
+    
+    if isinstance(errors, list):
+        flat_errors = {}
+        for err in errors:
+            if isinstance(err, dict):
+                flat_errors.update(err)
+        errors = flat_errors
+        
     assert field in errors
     assert expected_fragment in str(errors[field][0])
 
