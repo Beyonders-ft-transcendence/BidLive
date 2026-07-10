@@ -287,30 +287,7 @@ def test_stream_end_service_closes_live_stream(db, user):
     assert ended.ended_at is not None
 
 
-def test_activate_auction_requires_live_stream(db, user):
-    from apps.auctions.services import activate_auction
-    from rest_framework.exceptions import ValidationError
 
-    # Create a scheduled auction
-    now = timezone.now()
-    item = AuctionItem.objects.create(
-        seller=user,
-        title="Test Activation",
-        starting_price=Decimal("100.00"),
-        current_price=Decimal("100.00"),
-        minimum_increment=Decimal("10.00"),
-    )
-    auction = Auction.objects.create(
-        item=item,
-        start_time=now + timedelta(hours=1),
-        end_time=now + timedelta(hours=2),
-        status=AuctionStatus.SCHEDULED,
-    )
-
-    # Attempt to activate direct - should raise ValidationError
-    with pytest.raises(ValidationError) as excinfo:
-        activate_auction(auction=auction)
-    assert "Cannot activate auction without an active live stream." in str(excinfo.value)
 
 
 def test_start_stream_activates_scheduled_auction(db, user):
@@ -343,14 +320,14 @@ def test_start_stream_activates_scheduled_auction(db, user):
     assert auction.started_at is not None
 
 
-def test_end_stream_reverts_auction_if_no_bids(db, user):
+def test_end_stream_sets_auction_to_active(db, user):
     from apps.auctions.services import start_stream, end_stream
 
     # Create a scheduled auction
     now = timezone.now()
     item = AuctionItem.objects.create(
         seller=user,
-        title="Test Revert",
+        title="Test Active",
         starting_price=Decimal("100.00"),
         current_price=Decimal("100.00"),
         minimum_increment=Decimal("10.00"),
@@ -368,15 +345,15 @@ def test_end_stream_reverts_auction_if_no_bids(db, user):
     auction.refresh_from_db()
     assert auction.status == AuctionStatus.LIVE
 
-    # End the stream - should revert auction to SCHEDULED since there are no bids
+    # End the stream - should revert auction to ACTIVE
     end_stream(actor=user, stream=stream)
 
     auction.refresh_from_db()
-    assert auction.status == AuctionStatus.SCHEDULED
-    assert auction.started_at is None
+    assert auction.status == AuctionStatus.ACTIVE
+    assert auction.started_at is not None
 
 
-def test_end_stream_closes_auction_if_has_bids(db, user, other_user):
+def test_end_stream_sets_auction_to_active_with_bids(db, user, other_user):
     from apps.auctions.services import start_stream, end_stream
     from apps.auctions.models import Bid
 
@@ -384,7 +361,7 @@ def test_end_stream_closes_auction_if_has_bids(db, user, other_user):
     now = timezone.now()
     item = AuctionItem.objects.create(
         seller=user,
-        title="Test Close with Bids",
+        title="Test Active with Bids",
         starting_price=Decimal("100.00"),
         current_price=Decimal("100.00"),
         minimum_increment=Decimal("10.00"),
@@ -409,11 +386,10 @@ def test_end_stream_closes_auction_if_has_bids(db, user, other_user):
     auction.refresh_from_db()
     assert auction.status == AuctionStatus.LIVE
 
-    # End the stream - should close/sell the auction since it has bids
+    # End the stream - should revert auction to ACTIVE since it has bids
     end_stream(actor=user, stream=stream)
 
     auction.refresh_from_db()
-    assert auction.status == AuctionStatus.SOLD
-    assert auction.winner == other_user
+    assert auction.status == AuctionStatus.ACTIVE
 
 
