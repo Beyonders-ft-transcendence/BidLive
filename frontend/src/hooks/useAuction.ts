@@ -70,7 +70,7 @@ export function useAuctionBidsQuery(id: number, params?: Record<string, any>) {
   });
 }
 
-export function useAuctionStreamsQuery(id: number, enabled = true) {
+export function useAuctionStreamsQuery(id: number, enabled = true, refetchIntervalMs: number | false = false) {
   return useQuery({
     queryKey: ["auctionStreams", id],
     queryFn: async () => {
@@ -79,6 +79,8 @@ export function useAuctionStreamsQuery(id: number, enabled = true) {
       return res.data;
     },
     enabled: !!id && !isNaN(id) && enabled,
+    // Permite detectar quando o leiloeiro inicia/encerra a live sem recarregar a página
+    refetchInterval: refetchIntervalMs,
   });
 }
 

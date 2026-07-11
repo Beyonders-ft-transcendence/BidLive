@@ -6,13 +6,15 @@ import { useAuthStore } from "@/shared/stores/auth.store";
 import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageMutation } from "@/hooks/useChat";
 import {
     ChevronLeft, Clock, Gavel, CheckCircle2, Shield, AlertCircle,
-    Tag, User, CalendarDays, TrendingUp, Video, ShoppingBag, MessageSquare,
+    Tag, User, CalendarDays, TrendingUp, ShoppingBag, MessageSquare,
     Send, Heart, AlertOctagon
 } from "lucide-react";
 import auctionService from "@/services/auction.service";
 import { toast } from "sonner";
 import ReportModal from "@/components/common/ReportModal";
 import { ReportTargetType } from "@/shared/types/report.types";
+import LiveStreamViewerPlayer from "@/components/livestream/LiveStreamViewerPlayer";
+import { useStreamViewersQuery } from "@/hooks/useLiveKit";
 
 // Condition label map
 const conditionLabels: Record<string, string> = {
@@ -97,6 +99,16 @@ export default function AuctionDetailPage() {
     } = useAuctionRealtime(auctionId);
 
     const countdown = useCountdown(auction?.end_time, auction?.status || "");
+
+    // Contagem de espectadores via GET /auctions/:id/streams/:pk/viewers/
+    // (fallback para as conexões do WebSocket enquanto o polling não responde)
+    const { data: streamViewersData } = useStreamViewersQuery(
+        auctionId,
+        activeStream?.id,
+        !!activeStream,
+        10000
+    );
+    const liveViewerCount = streamViewersData?.count ?? viewerCount;
 
     const [isFavorite, setIsFavorite] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -286,7 +298,7 @@ export default function AuctionDetailPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {viewerCount} assistindo
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {liveViewerCount} assistindo
                             </div>
                             <button onClick={() => setShowChat(!showChat)} className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1.5 text-white hover:bg-black/60 transition-colors cursor-pointer">
                                 <MessageSquare size={12} /> {showChat ? "Ocultar Chat" : "Chat"}
@@ -294,11 +306,9 @@ export default function AuctionDetailPage() {
                         </div>
                     </div>
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950/20 via-slate-900 to-slate-950">
-                        <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 animate-pulse mb-3">
-                            <Video size={24} className="text-white" />
-                        </div>
-                        <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">Transmissão em Andamento</p>
+                    {/* Player LiveKit do participante */}
+                    <div className="absolute inset-0">
+                        <LiveStreamViewerPlayer auctionId={auctionId} stream={activeStream} />
                     </div>
 
                     <div className="flex items-center justify-between z-10 w-full pt-2">
