@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.auctions.models import LiveStream, StreamViewer
 from apps.auctions.models.streaming import LiveStreamStatus, LiveStreamVisibility
 from apps.auctions.serializers.common import FileBriefSerializer
+from common.fields import LocalDateTimeField
 from apps.storage.models import File
 from apps.storage.services import is_http_url
 
@@ -183,6 +184,6 @@ class StreamLiveKitTokenResponseSerializer(serializers.Serializer):
     role = serializers.CharField()
     can_publish = serializers.BooleanField()
     can_subscribe = serializers.BooleanField()
-    expires_at = serializers.DateTimeField()
+    expires_at = LocalDateTimeField()
     stream_id = serializers.IntegerField()
     auction_id = serializers.IntegerField()

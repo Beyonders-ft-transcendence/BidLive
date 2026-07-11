@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.auctions.models import Auction, AuctionCategory, AuctionImage, AuctionItem
 from apps.auctions.serializers.category_serializers import AuctionCategorySerializer
 from apps.storage.services import is_http_url
+from common.fields import LocalDateTimeField
 
 
 class AuctionImageSerializer(serializers.ModelSerializer):
@@ -87,8 +88,8 @@ class AuctionCreateSerializer(serializers.Serializer):
     minimum_increment = serializers.DecimalField(max_digits=12, decimal_places=2)
     reserve_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     buy_now_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
-    start_time = serializers.DateTimeField()
-    end_time = serializers.DateTimeField()
+    start_time = LocalDateTimeField()
+    end_time = LocalDateTimeField()
     is_draft = serializers.BooleanField(required=False, default=False)
     rules = serializers.JSONField(required=False)
     image_urls = serializers.ListField(child=serializers.URLField(), required=False)
@@ -116,8 +117,8 @@ class AuctionUpdateSerializer(serializers.Serializer):
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=AuctionCategory.objects.all(), source="category", allow_null=True, required=False
     )
-    start_time = serializers.DateTimeField(required=False)
-    end_time = serializers.DateTimeField(required=False)
+    start_time = LocalDateTimeField(required=False)
+    end_time = LocalDateTimeField(required=False)
     buy_now_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     reserve_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     rules = serializers.JSONField(required=False)

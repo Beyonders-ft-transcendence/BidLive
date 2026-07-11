@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.auctions.models import Bid
+from common.fields import LocalDateTimeField
 
 
 class BidderSummarySerializer(serializers.Serializer):
@@ -13,7 +14,7 @@ class BidSerializer(serializers.ModelSerializer):
     bidder = BidderSummarySerializer(read_only=True)
     bidder_id = serializers.IntegerField(read_only=True)
     auction_id = serializers.IntegerField(read_only=True)
-    timestamp = serializers.DateTimeField(source="created_at", read_only=True)
+    timestamp = LocalDateTimeField(source="created_at", read_only=True)
 
     class Meta:
         model = Bid
