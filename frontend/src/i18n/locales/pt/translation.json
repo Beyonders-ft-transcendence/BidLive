@@ -1,0 +1,32 @@
+{
+  "common": {
+    "loading": "A carregar...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Apagar",
+    "confirm": "Confirmar"
+  },
+  "header": {
+    "home": "Início",
+    "auctions": "Leilões",
+    "notifications": "Notificações",
+    "no_notifications": "Sem notificações",
+    "new_notifications": "novas",
+    "mark_read": "Marcar como lida",
+    "login_register": "Registrar / Entrar",
+    "language": "Idioma",
+    "menu": "Menu"
+  },
+  "backoffice_header": {
+    "admin_title": "BidLive Admin",
+    "dashboard": "Dashboard",
+    "users": "Gestão de Utilizadores",
+    "roles": "Perfis e Permissões",
+    "auctions": "Leilões Ativos",
+    "domains": "Domínios",
+    "admin": "Administração",
+    "role_admin": "Administrador",
+    "super_admin": "Super Admin"
+  }
+}
