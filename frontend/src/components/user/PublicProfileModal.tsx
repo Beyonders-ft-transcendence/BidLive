@@ -89,19 +89,12 @@ export default function PublicProfileModal({
                         </span>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                        <div className="bg-muted border border-border rounded-lg py-3 flex flex-col items-center justify-center">
+                    <div className="mt-6 flex justify-center">
+                        <div className="bg-muted border border-border rounded-lg py-3 px-8 flex flex-col items-center justify-center">
                             <Gavel size={16} className="text-muted-foreground mb-1" />
                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Membro desde</span>
                             <span className="text-sm font-semibold text-foreground">
                                 {details?.date_joined ? new Date(details.date_joined).getFullYear() : new Date().getFullYear()}
-                            </span>
-                        </div>
-                        <div className="bg-muted border border-border rounded-lg py-3 flex flex-col items-center justify-center">
-                            <Award size={16} className="text-amber-500 mb-1" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Avaliação</span>
-                            <span className="text-sm font-semibold text-foreground">
-                                Positiva
                             </span>
                         </div>
                     </div>
