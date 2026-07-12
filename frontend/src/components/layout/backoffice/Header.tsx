@@ -1,11 +1,24 @@
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Avatar from '@/components/common/Avatar';
+import { useNotificationsQuery } from '@/hooks/useNotification';
+import { useNotificationRealtime } from '@/hooks/useNotificationRealtime';
 
 export default function Header() {
   const location = useLocation();
   const { user } = useAuthStore();
+
+  // Ativa a conexão WS para receber notificações em tempo real
+  useNotificationRealtime();
+
+  // Consulta as notificações para obter o contador
+  const { data: notificationsData } = useNotificationsQuery();
+  const notificationsList = Array.isArray(notificationsData) 
+    ? notificationsData 
+    : (notificationsData?.results || notificationsData?.data?.results || []);
+    
+  const unreadCount = notificationsList.filter((n: any) => !n.is_read).length;
 
   const getPageTitle = () => {
     const path = location.pathname;
@@ -13,49 +26,44 @@ export default function Header() {
     if (path.includes('/users')) return 'Gestão de Utilizadores';
     if (path.includes('/roles')) return 'Perfis e Permissões';
     if (path.includes('/auctions')) return 'Leilões Ativos';
+    if (path.includes('/domains')) return 'Domínios';
     return 'Administração';
   };
 
   return (
-    <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-30 flex items-center justify-between px-6 transition-all duration-300">
+    <header className="h-16 bg-black border-b border-zinc-800 sticky top-0 z-30 flex items-center justify-between px-6">
       
       {/* Breadcrumbs / Title */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground font-medium">BidLive Admin</span>
-        <ChevronRight size={14} className="text-muted-foreground/50" />
-        <span className="font-bold text-foreground">{getPageTitle()}</span>
+        <span className="text-zinc-500 font-medium">BidLive Admin</span>
+        <ChevronRight size={14} className="text-zinc-600" />
+        <span className="font-semibold text-zinc-100">{getPageTitle()}</span>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4">
         
-        {/* Simple Search */}
-        <div className="relative hidden md:block">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input 
-            type="text" 
-            placeholder="Pesquisa global..." 
-            className="pl-9 pr-4 py-1.5 text-xs bg-muted/50 border border-border rounded-full focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all w-48 focus:w-64"
-          />
-        </div>
-
         {/* Notifications */}
-        <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted">
+        <button className="relative p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50">
           <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 flex items-center justify-center min-w-[14px] h-[14px] bg-red-600 text-white text-[9px] font-bold rounded-full px-1 border-2 border-black">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
 
-        <div className="w-px h-6 bg-border mx-1"></div>
+        <div className="w-px h-6 bg-zinc-800 mx-2"></div>
 
         {/* Admin Profile */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex flex-col items-end text-xs">
-            <span className="font-bold text-foreground leading-tight">{user?.full_name || 'Super Admin'}</span>
-            <span className="text-primary font-medium">
+            <span className="font-medium text-zinc-200">{user?.full_name || 'Super Admin'}</span>
+            <span className="text-zinc-500">
               {typeof user?.roles?.[0] === 'object' ? (user.roles[0] as any).name : user?.roles?.[0] || 'Administrador'}
             </span>
           </div>
-          <div className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background rounded-full">
+          <div className="rounded-full ring-1 ring-zinc-800">
             <Avatar name={user?.full_name || 'Admin'} src={user?.avatar_url} size="sm" />
           </div>
         </div>
