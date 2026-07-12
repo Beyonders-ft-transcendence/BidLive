@@ -1,0 +1,217 @@
+import { useState } from 'react';
+import Container from '@/components/layout/backoffice/Container';
+import PageHeader from '@/components/layout/backoffice/PageHeader';
+import Toolbar from '@/components/layout/backoffice/Toolbar';
+import { useAuctionsQuery, useCancelAuctionMutation } from '@/hooks/useAuction';
+import Avatar from '@/components/common/Avatar';
+import { 
+  Gavel,
+  Search, 
+  Ban, 
+  ExternalLink,
+  DollarSign,
+  Calendar
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+export default function AdminAuctionsPage() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  
+  const { data, isLoading } = useAuctionsQuery({ 
+    page, 
+    search: search || undefined,
+    status: statusFilter || undefined,
+    // By not passing a specific seller, an admin with auction.manage gets all
+  });
+  
+  const { mutate: cancelAuction, isPending: isCanceling } = useCancelAuctionMutation();
+
+  const handleCancelAuction = (id: number) => {
+    if (window.confirm('Tem a certeza que deseja cancelar este leilão? Esta ação é irreversível.')) {
+      cancelAuction({ id, payload: { reason: 'Cancelado pela administração.' } });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'LIVE':
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">Ativo</span>;
+      case 'COMPLETED':
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-blue-400 border border-zinc-700/50">Concluído</span>;
+      case 'CANCELLED':
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-red-400 border border-zinc-700/50">Cancelado</span>;
+      case 'DRAFT':
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">Rascunho</span>;
+      default:
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">{status}</span>;
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
+  };
+
+  const auctions = data?.results || [];
+
+  return (
+    <Container>
+      <PageHeader 
+        title="Gestão de Leilões"
+        description="Visualize e gira todos os leilões a decorrer na plataforma. Os administradores têm a capacidade de cancelar leilões que infrinjam as regras."
+        icon={<Gavel size={20} />}
+      />
+
+      <div className="flex flex-col gap-6 max-w-[1400px] w-full relative">
+        <Toolbar>
+          <div className="relative w-full md:w-80">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <input 
+              type="text" 
+              placeholder="Pesquisar título do item..." 
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
+            />
+          </div>
+          
+          <div className="flex items-center gap-3 w-full md:w-auto mt-3 md:mt-0">
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              className="bg-black border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 transition-all appearance-none"
+            >
+              <option value="">Todos os Estados</option>
+              <option value="LIVE">Ativos (Live)</option>
+              <option value="COMPLETED">Concluídos</option>
+              <option value="CANCELLED">Cancelados</option>
+              <option value="DRAFT">Rascunhos</option>
+            </select>
+          </div>
+        </Toolbar>
+
+        {/* Data Table */}
+        <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Vendedor</th>
+                  <th className="px-6 py-4 font-medium">Item & Preço</th>
+                  <th className="px-6 py-4 font-medium">Estado</th>
+                  <th className="px-6 py-4 font-medium">Datas</th>
+                  <th className="px-6 py-4 text-right font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-6 py-4"><div className="h-10 w-48 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-10 w-48 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-16 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-8 w-24 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-6 w-8 bg-zinc-800/50 rounded ml-auto"></div></td>
+                    </tr>
+                  ))
+                ) : auctions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-16 text-center text-zinc-500">
+                      Nenhum leilão encontrado.
+                    </td>
+                  </tr>
+                ) : (
+                  auctions.map((auction: any) => (
+                    <tr key={auction.id} className="hover:bg-zinc-900/30 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={auction.seller?.full_name || 'Vendedor'} src={auction.seller?.avatar_url} size="md" />
+                          <div>
+                            <div className="font-medium text-zinc-100">{auction.seller?.full_name || 'Desconhecido'}</div>
+                            <div className="text-xs text-zinc-500">@{auction.seller?.username || 'user'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-zinc-100 truncate max-w-[200px]">{auction.item?.title}</span>
+                          <span className="text-xs text-emerald-400 font-mono mt-1 flex items-center gap-1">
+                            <DollarSign size={10} />
+                            {formatCurrency(auction.item?.current_price || auction.item?.starting_price || 0)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {getStatusBadge(auction.status)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col text-xs text-zinc-400 gap-1">
+                          <div className="flex items-center gap-1.5" title="Início">
+                            <Calendar size={12} className="text-zinc-500" />
+                            {new Date(auction.start_time).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-1.5" title="Fim">
+                            <Calendar size={12} className="text-zinc-500" />
+                            {new Date(auction.end_time).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link 
+                            to={`/auction/${auction.id}`}
+                            className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
+                            title="Ver Leilão na Plataforma"
+                            target="_blank"
+                          >
+                            <ExternalLink size={16} />
+                          </Link>
+                          {auction.status !== 'CANCELLED' && auction.status !== 'COMPLETED' && (
+                            <button 
+                              onClick={() => handleCancelAuction(auction.id)}
+                              disabled={isCanceling}
+                              className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors rounded-md hover:bg-zinc-800"
+                              title="Cancelar Leilão"
+                            >
+                              <Ban size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          {data && data.count > 10 && (
+            <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
+              <span className="text-xs text-zinc-500">
+                Total: <span className="font-medium text-zinc-300">{data.count}</span> leilões
+              </span>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={!data.previous}
+                  className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
+                >
+                  Anterior
+                </button>
+                <button 
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={!data.next}
+                  className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Container>
+  );
+}

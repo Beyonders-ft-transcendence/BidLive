@@ -12,6 +12,7 @@ import {
     ReportsPage,
     DomainsPage,
     DomainConfigPage,
+    AdminAuctionsPage,
 } from "@/pages/index";
 import { UserRole } from "@/shared/types/auth.types";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -53,6 +54,7 @@ export default function IndexRoot() {
                         <Route path="/backoffice/reports" element={<ReportsPage />} />
                         <Route path="/backoffice/domains" element={<DomainsPage />} />
                         <Route path="/backoffice/domains/:id" element={<DomainConfigPage />} />
+                        <Route path="/backoffice/auctions" element={<AdminAuctionsPage />} />
                     </Route>
                 </Route>
 
