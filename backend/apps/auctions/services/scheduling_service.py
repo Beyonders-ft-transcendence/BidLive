@@ -1,6 +1,11 @@
 from django.conf import settings
 from django.utils import timezone
 
+
+def _is_eager() -> bool:
+    return getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False)
+
+
 def schedule_auction_activation(*, auction_id: int, start_time) -> None:
     from apps.auctions.tasks.activate_auction import activate_auction_task
 
@@ -8,7 +13,9 @@ def schedule_auction_activation(*, auction_id: int, start_time) -> None:
     if start_time <= now:
         activate_auction_task.delay(auction_id)
         return
-    if not getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+    # In eager mode apply_async ignores eta and runs immediately,
+    # so skip — the periodic beat task will activate it when due.
+    if not _is_eager():
         activate_auction_task.apply_async(args=[auction_id], eta=start_time)
 
 
@@ -19,5 +26,7 @@ def schedule_auction_close(*, auction_id: int, end_time) -> None:
     if end_time <= now:
         close_auction_task.delay(auction_id)
         return
-    if not getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+    # In eager mode apply_async ignores eta and runs immediately,
+    # so skip — the periodic beat task will close it when due.
+    if not _is_eager():
         close_auction_task.apply_async(args=[auction_id], eta=end_time)

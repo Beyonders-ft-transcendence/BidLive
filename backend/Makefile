@@ -8,6 +8,9 @@ uv-sync:
 	$(UV) sync
 
 dev:
+	@echo "Starting worker, beat, and gunicorn..."
+	$(UV) run celery -A config worker -l info &
+	$(UV) run celery -A config beat -l info &
 	$(UV) run gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -c tools/gunicorn.conf.py
 
 container:

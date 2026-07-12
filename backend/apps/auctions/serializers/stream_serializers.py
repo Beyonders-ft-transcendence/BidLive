@@ -3,12 +3,12 @@ from rest_framework import serializers
 from apps.auctions.models import LiveStream, StreamViewer
 from apps.auctions.models.streaming import LiveStreamStatus, LiveStreamVisibility
 from apps.auctions.serializers.common import FileBriefSerializer
-from common.fields import LocalDateTimeField
+from common.fields import LocalDateTimeField, LocalizedModelSerializer
 from apps.storage.models import File
 from apps.storage.services import is_http_url
 
 
-class StreamViewerSerializer(serializers.ModelSerializer):
+class StreamViewerSerializer(LocalizedModelSerializer):
     viewer = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,7 +23,7 @@ class StreamViewerSerializer(serializers.ModelSerializer):
         }
 
 
-class LiveStreamBaseSerializer(serializers.ModelSerializer):
+class LiveStreamBaseSerializer(LocalizedModelSerializer):
     auction_id = serializers.IntegerField(read_only=True)
     streamer = serializers.SerializerMethodField()
     thumbnail = FileBriefSerializer(read_only=True)

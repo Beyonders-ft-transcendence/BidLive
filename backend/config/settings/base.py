@@ -128,29 +128,22 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# DRF datetime format with local timezone offset
-REST_FRAMEWORK = {
-    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S.%f%z",
-    "DATETIME_INPUT_FORMATS": [
-        "%Y-%m-%dT%H:%M:%S.%f%z",
-        "%Y-%m-%dT%H:%M:%S%z",
-        "%Y-%m-%dT%H:%M:%S.%fZ",
-        "%Y-%m-%dT%H:%M:%SZ",
-    ],
-}
-
 # drf-spectacular: generate OpenAPI docs with local timezone (Africa/Luanda, UTC+1)
 SPECTACULAR_SETTINGS = {
+    "TITLE": "BidLive API",
+    "DESCRIPTION": "BidLive public API",
+    "VERSION": "1.0.0",
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S.%f%z",
     "SCHEMA_COERCE_PATH_PK": True,
     "COMPONENT_SPLIT_REQUEST": True,
+    "SERVE_INCLUDE_SCHEMA": False,
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
     ],
     "SWAGGER_UI_SETTINGS": {
         "displayRequestDuration": True,
+        "persistAuthorization": True,
     },
-    # Custom example for datetime fields showing Luanda offset
     "EXTENSIONS_INFO": {},
     "DATETIME_FIELD_EXAMPLE": "2026-07-11T20:00:00.000+01:00",
 }
@@ -235,16 +228,12 @@ REST_FRAMEWORK = {
         "bid_ip": "60/minute",
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "BidLive API",
-    "DESCRIPTION": "BidLive public API",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-    "SWAGGER_UI_SETTINGS": {
-        "persistAuthorization": True,
-    },
+    "DATETIME_INPUT_FORMATS": [
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%SZ",
+    ],
 }
 
 JWT_ACCESS_MINUTES = env.int("JWT_ACCESS_MINUTES", default=15)

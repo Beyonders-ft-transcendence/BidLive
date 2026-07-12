@@ -2,38 +2,39 @@ from rest_framework import serializers
 
 from apps.chat.models import ChatRoom, Message, PrivateConversation, PrivateMessage
 from apps.users.models import User
+from common.fields import LocalizedModelSerializer
 
 
-class ChatUserSerializer(serializers.ModelSerializer):
+class ChatUserSerializer(LocalizedModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id", 
-            "username", 
-            "full_name", 
-            "avatar_url", 
+            "id",
+            "username",
+            "full_name",
+            "avatar_url",
             "is_online"
         )
         read_only_fields = fields
 
 
-class PrivateMessageSerializer(serializers.ModelSerializer):
+class PrivateMessageSerializer(LocalizedModelSerializer):
     sender = ChatUserSerializer(read_only=True)
 
     class Meta:
         model = PrivateMessage
         fields = (
-            "id", 
-            "conversation", 
-            "sender", 
-            "message", 
-            "is_read", 
+            "id",
+            "conversation",
+            "sender",
+            "message",
+            "is_read",
             "created_at"
         )
         read_only_fields = fields
 
 
-class PrivateConversationSerializer(serializers.ModelSerializer):
+class PrivateConversationSerializer(LocalizedModelSerializer):
     user_one = ChatUserSerializer(read_only=True)
     user_two = ChatUserSerializer(read_only=True)
     last_message = serializers.SerializerMethodField()
@@ -42,11 +43,11 @@ class PrivateConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrivateConversation
         fields = (
-            "id", 
-            "user_one", 
-            "user_two", 
-            "last_message", 
-            "unread_count", 
+            "id",
+            "user_one",
+            "user_two",
+            "last_message",
+            "unread_count",
             "created_at"
         )
         read_only_fields = fields
@@ -80,25 +81,25 @@ class SendPrivateMessageSerializer(serializers.Serializer):
             raise serializers.ValidationError("Utilizador não encontrado.")
 
 
-class RoomMessageSerializer(serializers.ModelSerializer):
+class RoomMessageSerializer(LocalizedModelSerializer):
     sender = ChatUserSerializer(read_only=True)
 
     class Meta:
         model = Message
         fields = (
-            "id", 
-            "room", 
-            "sender", 
-            "message", 
-            "is_deleted", 
+            "id",
+            "room",
+            "sender",
+            "message",
+            "is_deleted",
             "created_at"
         )
         read_only_fields = fields
 
 
-class ChatRoomSerializer(serializers.ModelSerializer):
+class ChatRoomSerializer(LocalizedModelSerializer):
     auction = serializers.IntegerField(source="auction_id", read_only=True)
-    
+
     class Meta:
         model = ChatRoom
         fields = ("id", "auction", "name", "created_at")
