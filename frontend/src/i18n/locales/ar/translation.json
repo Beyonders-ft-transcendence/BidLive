@@ -1,0 +1,32 @@
+{
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "confirm": "تأكيد"
+  },
+  "header": {
+    "home": "الرئيسية",
+    "auctions": "المزادات",
+    "notifications": "الإشعارات",
+    "no_notifications": "لا توجد إشعارات",
+    "new_notifications": "جديد",
+    "mark_read": "تحديد كمقروء",
+    "login_register": "تسجيل / دخول",
+    "language": "اللغة",
+    "menu": "القائمة"
+  },
+  "backoffice_header": {
+    "admin_title": "إدارة BidLive",
+    "dashboard": "لوحة القيادة",
+    "users": "إدارة المستخدمين",
+    "roles": "الأدوار والصلاحيات",
+    "auctions": "المزادات النشطة",
+    "domains": "النطاقات",
+    "admin": "الإدارة",
+    "role_admin": "مسؤول",
+    "super_admin": "مسؤول متميز"
+  }
+}

@@ -4,10 +4,13 @@ import { useAuthStore } from '@/shared/stores/auth.store';
 import Avatar from '@/components/common/Avatar';
 import { useNotificationsQuery } from '@/hooks/useNotification';
 import { useNotificationRealtime } from '@/hooks/useNotificationRealtime';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
   const location = useLocation();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   // Ativa a conexão WS para receber notificações em tempo real
   useNotificationRealtime();
@@ -22,12 +25,12 @@ export default function Header() {
 
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === '/backoffice') return 'Dashboard';
-    if (path.includes('/users')) return 'Gestão de Utilizadores';
-    if (path.includes('/roles')) return 'Perfis e Permissões';
-    if (path.includes('/auctions')) return 'Leilões Ativos';
-    if (path.includes('/domains')) return 'Domínios';
-    return 'Administração';
+    if (path === '/backoffice') return t('backoffice_header.dashboard');
+    if (path.includes('/users')) return t('backoffice_header.users');
+    if (path.includes('/roles')) return t('backoffice_header.roles');
+    if (path.includes('/auctions')) return t('backoffice_header.auctions');
+    if (path.includes('/domains')) return t('backoffice_header.domains');
+    return t('backoffice_header.admin');
   };
 
   return (
@@ -35,14 +38,16 @@ export default function Header() {
       
       {/* Breadcrumbs / Title */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-zinc-500 font-medium">BidLive Admin</span>
-        <ChevronRight size={14} className="text-zinc-600" />
+        <span className="text-zinc-500 font-medium">{t('backoffice_header.admin_title')}</span>
+        <ChevronRight size={14} className="text-zinc-600 rtl:rotate-180" />
         <span className="font-semibold text-zinc-100">{getPageTitle()}</span>
       </div>
 
       {/* Right Actions */}
       <div className="flex items-center gap-4">
         
+        <LanguageSwitcher />
+
         {/* Notifications */}
         <button className="relative p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50">
           <Bell size={18} />
@@ -57,10 +62,10 @@ export default function Header() {
 
         {/* Admin Profile */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex flex-col items-end text-xs">
-            <span className="font-medium text-zinc-200">{user?.full_name || 'Super Admin'}</span>
+          <div className="hidden md:flex flex-col items-end text-xs rtl:items-start">
+            <span className="font-medium text-zinc-200">{user?.full_name || t('backoffice_header.super_admin')}</span>
             <span className="text-zinc-500">
-              {typeof user?.roles?.[0] === 'object' ? (user.roles[0] as any).name : user?.roles?.[0] || 'Administrador'}
+              {typeof user?.roles?.[0] === 'object' ? (user.roles[0] as any).name : user?.roles?.[0] || t('backoffice_header.role_admin')}
             </span>
           </div>
           <div className="rounded-full ring-1 ring-zinc-800">

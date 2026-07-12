@@ -9,12 +9,14 @@ import Avatar from "../common/Avatar";
 import UserDrawer from "./UserDrawer";
 import { useNotificationsQuery, useMarkNotificationReadMutation } from "@/hooks/useNotification";
 import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
+    const { t } = useTranslation();
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
-    const [language, setLanguage] = useState("PT"); // PT, EN, AR
 
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -55,11 +57,11 @@ export default function Header() {
                 <div className="hidden md:flex items-center gap-8 flex-1 justify-center px-4">
                     <nav className="flex items-center gap-8 text-sm font-semibold text-foreground/70">
                         <Link to="/" className="relative hover:text-primary transition-colors group">
-                            Início
+                            {t("header.home")}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
                         </Link>
                         <Link to="/leiloes" className="relative hover:text-primary transition-colors group">
-                            Leilões
+                            {t("header.auctions")}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
                         </Link>
                     </nav>
@@ -69,20 +71,7 @@ export default function Header() {
                 <div className="hidden md:flex items-center gap-4">
                     
                     {/* Language Dropdown */}
-                    <div className="relative group">
-                        <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors h-full py-2 text-sm font-medium">
-                            <Globe size={18} />
-                            {language}
-                            <ChevronDown size={14} />
-                        </button>
-                        <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                            <div className="w-32 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col py-1">
-                                <button onClick={() => setLanguage("PT")} className="px-4 py-2 hover:bg-muted text-sm text-left transition-colors text-foreground">Português</button>
-                                <button onClick={() => setLanguage("EN")} className="px-4 py-2 hover:bg-muted text-sm text-left transition-colors text-foreground">Inglês</button>
-                                <button onClick={() => setLanguage("AR")} className="px-4 py-2 hover:bg-muted text-sm text-left transition-colors text-foreground">Árabe</button>
-                            </div>
-                        </div>
-                    </div>
+                    <LanguageSwitcher />
  
                     <button onClick={handleToggleTheme} title="Mudar Tema" className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
@@ -100,14 +89,14 @@ export default function Header() {
                             <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                 <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
                                     <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
-                                        <span className="text-xs font-bold uppercase tracking-wider">Notificações</span>
-                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{unreadCount} novas</span>}
+                                        <span className="text-xs font-bold uppercase tracking-wider">{t("header.notifications")}</span>
+                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{unreadCount} {t("header.new_notifications")}</span>}
                                     </div>
                                     <div className="overflow-y-auto flex-1">
                                         {notifications.length === 0 ? (
                                             <div className="p-6 text-center text-muted-foreground">
                                                 <Bell size={24} className="mx-auto mb-2 opacity-50" />
-                                                <p className="text-xs">Sem notificações</p>
+                                                <p className="text-xs">{t("header.no_notifications")}</p>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-border">
@@ -126,7 +115,7 @@ export default function Header() {
                                                                 <button 
                                                                     onClick={() => markReadMutation.mutate(notif.id)}
                                                                     className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
-                                                                    title="Marcar como lida"
+                                                                    title={t("header.mark_read")}
                                                                 >
                                                                     <CheckCircle2 size={14} />
                                                                 </button>
@@ -154,7 +143,7 @@ export default function Header() {
                         </button>
                     ) : (
                         <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm text-center">
-                            Registrar / Entrar
+                            {t("header.login_register")}
                         </Link>
                     )}
                 </div>
@@ -183,7 +172,7 @@ export default function Header() {
                 {/* Drawer */}
                 <div className="relative w-[80%] max-w-sm h-full bg-background shadow-2xl flex flex-col">
                     <div className="flex items-center justify-between p-4 border-b border-border">
-                        <span className="font-semibold text-lg">Menu</span>
+                        <span className="font-semibold text-lg">{t("header.menu")}</span>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-foreground rounded-md hover:bg-muted transition-colors">
                             <X size={24} />
                         </button>
@@ -192,17 +181,13 @@ export default function Header() {
                     <div className="p-4 overflow-y-auto space-y-6 flex-1">
 
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
-                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Início</Link>
-                            <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">Leilões</Link>
+                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.home")}</Link>
+                            <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.auctions")}</Link>
                             
                             {/* Mobile Language Selection */}
-                            <div className="py-4 border-b border-border/50">
-                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> Idioma</p>
-                                <div className="flex gap-2">
-                                    <button onClick={() => { setLanguage("PT"); setIsMobileMenuOpen(false); }} className={`flex-1 py-1.5 text-sm rounded border ${language === "PT" ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}>PT</button>
-                                    <button onClick={() => { setLanguage("EN"); setIsMobileMenuOpen(false); }} className={`flex-1 py-1.5 text-sm rounded border ${language === "EN" ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}>EN</button>
-                                    <button onClick={() => { setLanguage("AR"); setIsMobileMenuOpen(false); }} className={`flex-1 py-1.5 text-sm rounded border ${language === "AR" ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}>AR</button>
-                                </div>
+                            <div className="py-4 border-b border-border/50 flex flex-col items-start gap-2">
+                                <p className="text-muted-foreground text-sm mb-1 flex items-center gap-2"><Globe size={16} /> {t("header.language")}</p>
+                                <LanguageSwitcher />
                             </div>
                         </nav>
                     </div>
@@ -224,7 +209,7 @@ export default function Header() {
                             </button>
                         ) : (
                             <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm text-center">
-                                Registrar / Entrar
+                                {t("header.login_register")}
                             </Link>
                         )}
                     </div>
