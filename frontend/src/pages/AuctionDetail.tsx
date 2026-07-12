@@ -12,6 +12,7 @@ import {
 import auctionService from "@/services/auction.service";
 import { toast } from "sonner";
 import ReportModal from "@/components/common/ReportModal";
+import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { ReportTargetType } from "@/shared/types/report.types";
 
 // Condition label map
@@ -100,6 +101,14 @@ export default function AuctionDetailPage() {
 
     const [isFavorite, setIsFavorite] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [selectedProfile, setSelectedProfile] = useState<{ id: number, username: string } | null>(null);
+
+    // Tempo atual contínuo para atualizações otimistas de estado
+    const [nowTime, setNowTime] = useState(Date.now());
+    useEffect(() => {
+        const timer = setInterval(() => setNowTime(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         try {
@@ -249,7 +258,14 @@ export default function AuctionDetailPage() {
     const minIncrement = Number(auction.item.minimum_increment || 1);
     const hasBids = bids && bids.length > 0;
     const minBid = hasBids ? currentPrice + minIncrement : Number(auction.item.starting_price);
-    const isLive = auction.status === "LIVE" && !!activeStream;
+    
+    // Verificações de tempo para mudanças de estado otimistas
+    const isTimeStarted = nowTime >= new Date(auction.start_time).getTime();
+    const isTimeEnded = nowTime >= new Date(auction.end_time).getTime();
+
+    // Um leilão é considerado LIVE se o status for LIVE, OU se for SCHEDULED e a hora de início já tiver chegado (otimista).
+    const isLive = auction.status === "LIVE" || (auction.status === "SCHEDULED" && isTimeStarted && !isTimeEnded);
+    
     const images = auction.item.images || [];
 
 
@@ -573,7 +589,16 @@ export default function AuctionDetailPage() {
                                     {bid.bidder ? bid.bidder.username.charAt(0).toUpperCase() : "A"}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-foreground leading-tight">{bid.bidder ? bid.bidder.username : "Anônimo"}</p>
+                                    {bid.bidder ? (
+                                        <button 
+                                            onClick={() => setSelectedProfile({ id: bid.bidder!.id, username: bid.bidder!.username })}
+                                            className="text-sm font-semibold text-foreground leading-tight hover:text-primary transition-colors cursor-pointer text-left"
+                                        >
+                                            {bid.bidder.username}
+                                        </button>
+                                    ) : (
+                                        <span className="text-sm font-semibold text-foreground leading-tight text-left">Anônimo</span>
+                                    )}
                                     <p className="text-[10px] text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}</p>
                                 </div>
                             </div>
@@ -612,7 +637,18 @@ export default function AuctionDetailPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5">
                     {[
                         { icon: <Shield size={13} className="text-primary" />, label: "Condição", value: conditionLabels[auction.item.condition_type] || auction.item.condition_type || "—" },
-                        { icon: <User size={13} className="text-primary" />, label: "Vendedor", value: `ID #${auction.item.seller}` },
+                        { 
+                          icon: <User size={13} className="text-primary" />, 
+                          label: "Vendedor", 
+                          value: (
+                              <button 
+                                  onClick={() => setSelectedProfile({ id: auction.item.seller, username: "Vendedor" })}
+                                  className="hover:text-primary transition-colors cursor-pointer"
+                              >
+                                  ID #{auction.item.seller}
+                              </button>
+                          ) 
+                        },
                         { icon: <Tag size={13} className="text-primary" />, label: "Preço Inicial", value: formatCurrency(auction.item.starting_price) },
                         { icon: <TrendingUp size={13} className="text-primary" />, label: "Incremento Mín.", value: formatCurrency(auction.item.minimum_increment) },
                         { icon: <CalendarDays size={13} className="text-primary" />, label: "Abertura", value: new Date(auction.start_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
@@ -745,6 +781,15 @@ export default function AuctionDetailPage() {
                 targetType={ReportTargetType.AUCTION}
                 targetId={auctionId}
             />
+
+            {selectedProfile && (
+                <PublicProfileModal
+                    isOpen={true}
+                    onClose={() => setSelectedProfile(null)}
+                    userId={selectedProfile.id}
+                    username={selectedProfile.username}
+                />
+            )}
         </div>
     );
 }
