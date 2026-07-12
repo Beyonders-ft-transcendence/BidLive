@@ -10,9 +10,9 @@ import {
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
 } from "@/hooks/useAuction";
-import { AuctionStatus } from "@/shared/types/auction.types";
-import { useCategoriesQuery } from "@/hooks/useCategory";
 import { AlertCircle } from "lucide-react";
+import { useCategoriesQuery } from "@/hooks/useCategory";
+import { AuctionStatus } from "@/shared/types/auction.types";
 
 // Subcomponents
 import ChatTab from "@/components/user/ChatTab";
