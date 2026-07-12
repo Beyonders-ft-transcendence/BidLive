@@ -525,6 +525,9 @@ def activate_auction(*, auction: Auction) -> Auction:
     if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.ACTIVE):
         return auction
 
+    if auction.start_time > timezone.now():
+        return auction
+
     if auction.streams.filter(status=LiveStreamStatus.LIVE).exists():
         new_status = AuctionStatus.LIVE
     else:
@@ -556,6 +559,9 @@ def activate_auction(*, auction: Auction) -> Auction:
 @transaction.atomic
 def close_auction(*, auction: Auction) -> Auction:
     if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
+        return auction
+
+    if auction.end_time > timezone.now():
         return auction
 
     winner_id, winning_bid, reserve_met = determine_winner(auction=auction)

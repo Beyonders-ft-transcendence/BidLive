@@ -13,18 +13,42 @@ def _local_tz():
 
 class LocalDateTimeField(serializers.DateTimeField):
     """
-    Input field: accepts datetime strings in the configured local timezone
-    (Africa/Luanda, UTC+1) and converts to UTC for storage.
+    Input field: treats every incoming datetime string as LOCAL time
+    (Africa/Luanda, UTC+1), regardless of offset suffix.
+
+    Swagger sends ``"2026-07-12T11:26:48.228Z"`` (UTC) when the user
+    types 11:26 expecting local time.  This field strips the UTC offset
+    and re-attaches the local timezone so Django stores the correct UTC
+    equivalent (10:26 UTC → stored as 10:26 UTC → returned as 11:26+0100).
     """
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("format", "%Y-%m-%dT%H:%M:%S.%f%z")
         super().__init__(*args, **kwargs)
 
+    def to_internal_value(self, value):
+        parsed = super().to_internal_value(value)
+        if parsed is None:
+            return parsed
+
+        local_tz = _local_tz()
+
+        # Naive → assume local timezone
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=local_tz)
+
+        # UTC (Z, +00:00, etc.) → user meant local time, re-interpret
+        utc_offset = parsed.utcoffset()
+        if utc_offset is not None and utc_offset.total_seconds() == 0:
+            return parsed.replace(tzinfo=None).replace(tzinfo=local_tz)
+
+        # Already in local or another timezone → keep as-is
+        return parsed
+
     def to_representation(self, value):
         if value is not None:
             if value.tzinfo is None:
-                value = value.replace(tzinfo=_local_tz())
+                value = value.replace(tzinfo=dt_timezone.utc)
             value = timezone.localtime(value, _local_tz())
         return super().to_representation(value)
 
