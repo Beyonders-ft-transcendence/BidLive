@@ -266,7 +266,7 @@ export default function AuctionsPage() {
 
                     {/* Desktop Sidebar */}
                     <aside className="hidden lg:block w-[300px] flex-shrink-0">
-                        <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-sm sticky top-[160px]">
+                        <div className="bg-card border border-border/60 rounded-md p-6 shadow-sm sticky top-[160px]">
                             <div className="flex items-center justify-between pb-5 mb-6 border-b border-border/40">
                                 <h2 className="font-black text-lg tracking-tight flex items-center gap-2 text-foreground">
                                     <SlidersHorizontal className="w-5 h-5 text-primary" /> {t('auctions.filters')}
@@ -289,7 +289,7 @@ export default function AuctionsPage() {
                                     <span className="font-bold tracking-wider uppercase text-xs">{t('auctions.fetching')}</span>
                                 </div>
                             ) : auctions.length === 0 ? (
-                                <div className="py-32 flex flex-col items-center justify-center text-center bg-card border border-dashed border-border/80 rounded-2xl col-span-full px-6">
+                                <div className="py-32 flex flex-col items-center justify-center text-center bg-card border border-dashed border-border/80 rounded-md col-span-full px-6">
                                     <Search className="w-12 h-12 text-muted-foreground/30 mb-4" />
                                     <h3 className="text-lg font-bold text-foreground mb-1">Nenhum leilão encontrado</h3>
                                     <p className="text-sm text-muted-foreground max-w-md">{t('auctions.no_auctions')}</p>
@@ -450,11 +450,11 @@ export default function AuctionsPage() {
                             <FilterPanel />
                         </div>
                         <div className="p-5 border-t border-border/50 flex flex-col gap-3 flex-shrink-0 bg-muted/10">
-                            <button onClick={() => setIsFilterDrawerOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all shadow-md shadow-primary/20">
+                            <button onClick={() => setIsFilterDrawerOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 rounded-md text-sm font-black uppercase tracking-wider transition-all shadow-md shadow-primary/20">
                                 {t('auctions.apply')}
                             </button>
                             {hasActiveFilters && (
-                                <button onClick={handleClearFilters} className="w-full border border-border/80 bg-background text-foreground py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-muted transition-all">
+                                <button onClick={handleClearFilters} className="w-full border border-border/80 bg-background text-foreground py-3.5 rounded-md text-sm font-bold uppercase tracking-wider hover:bg-muted transition-all">
                                     {t('auctions.clear')}
                                 </button>
                             )}
