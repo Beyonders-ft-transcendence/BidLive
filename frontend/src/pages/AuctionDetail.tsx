@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import ReportModal from "@/components/common/ReportModal";
 import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { ReportTargetType } from "@/shared/types/report.types";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 // Condition label map
 const conditionLabels: Record<string, string> = {
@@ -109,6 +110,9 @@ export default function AuctionDetailPage() {
         const timer = setInterval(() => setNowTime(Date.now()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Atualiza o título da página com base no leilão
+    useDocumentTitle(auction ? `${auction.item.title}` : "Detalhes do Leilão");
 
     useEffect(() => {
         try {

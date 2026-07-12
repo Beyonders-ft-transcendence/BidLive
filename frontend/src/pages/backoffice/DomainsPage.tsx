@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/components/layout/backoffice/Container';
@@ -8,6 +9,8 @@ import { Search, Plus, Edit, Trash2, Globe, CheckCircle, Clock, PauseCircle, Arc
 import type { DomainStatus } from '@/shared/types/domain.types';
 
 export default function DomainsPage() {
+  useDocumentTitle("Domínios");
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isCreating, setIsCreating] = useState(false);

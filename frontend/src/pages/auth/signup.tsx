@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -292,6 +293,8 @@ function SignupForm() {
 }
 
 export default function Signup() {
+  useDocumentTitle("Registo");
+
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
     return (

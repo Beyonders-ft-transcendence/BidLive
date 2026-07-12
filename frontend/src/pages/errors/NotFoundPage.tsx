@@ -1,7 +1,10 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export function NotFoundPage() {
+  useDocumentTitle("Página Não Encontrada");
+
     return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
             <h1 className="text-9xl font-extrabold text-primary tracking-tighter">404</h1>

@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +9,8 @@ import { forgotPasswordSchema, type ForgotPasswordInput } from '@/shared/schema/
 import Logo from "@/assets/images/logo2.png";
 
 export default function ForgotPassword() {
+  useDocumentTitle("Recuperar Senha");
+
   const { forgotPassword, isLoading, error, clearError } = useAuthStore();
   const [success, setSuccess] = useState(false);
 

@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
@@ -226,6 +227,8 @@ function SigninForm() {
 }
 
 export default function Signin() {
+  useDocumentTitle("Login");
+
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
     
     if (!googleClientId) {

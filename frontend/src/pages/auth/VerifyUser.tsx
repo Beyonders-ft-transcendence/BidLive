@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Loader2, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
@@ -5,6 +6,8 @@ import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png";
 
 export default function VerifyUser() {
+  useDocumentTitle("Verificar Conta");
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const uid = searchParams.get('uid');

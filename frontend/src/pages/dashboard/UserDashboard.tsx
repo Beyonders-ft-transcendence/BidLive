@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,6 +32,8 @@ import ProfileTab from "@/components/user/ProfileTab";
 import ConfirmModal from "@/components/common/ConfirmModal";
 
 export function UserDashboard() {
+  useDocumentTitle("Painel do Utilizador");
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
