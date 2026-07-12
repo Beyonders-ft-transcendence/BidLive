@@ -1,7 +1,7 @@
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare, Heart, Radio, UserCog } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp, 
+  PlusCircle, MessageSquare, Heart, Radio, UserCog } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { User } from "@/shared/types/auth.types";
-import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
   activeTab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
@@ -13,7 +13,6 @@ interface UserSidebarProps {
 export default function UserSidebar({
   activeTab,
   setActiveTab,
-  user,
   onLogout,
 }: UserSidebarProps) {
   const { t } = useTranslation();
@@ -31,28 +30,6 @@ export default function UserSidebar({
 
   return (
     <aside className="sticky top-24 self-start hidden md:flex w-64 shrink-0 flex-col gap-6 select-none bg-card border border-border rounded-sm p-5 shadow-sm text-foreground transition-all duration-300">
-      {/* Profile summary header */}
-      <div className="flex flex-col items-center text-center px-1 py-3">
-        <div className="relative group cursor-pointer">
-          <Avatar name={user.full_name || user.username} src={user.avatar_url} size="lg" />
-          <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 group-hover:scale-125 transition duration-300"></div>
-        </div>
-        
-        <h3 className="text-xs font-black text-foreground mt-4 truncate max-w-full leading-tight">
-          {user.full_name || user.username}
-        </h3>
-        <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-full mt-1">
-          {user.email}
-        </span>
-        
-        <span className="inline-block bg-primary/10 text-primary px-3 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-wider mt-3">
-          {typeof user.roles?.[0] === "object" && user.roles[0] !== null
-            ? (user.roles[0] as any).name || "USER"
-            : (user.roles?.[0] as any) || "USER"}
-        </span>
-      </div>
-
-      <hr className="border-border w-full m-0" />
 
       {/* Navigation menu list */}
       <nav className="flex flex-col gap-1 w-full">
