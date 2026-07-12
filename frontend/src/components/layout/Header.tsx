@@ -56,7 +56,7 @@ export default function Header() {
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
                     </div>
                     <span className="text-zinc-300 font-medium tracking-wide text-[11px] sm:text-xs">
-                        Descubra lotes exclusivos. <span className="font-bold text-white ml-1">Leilões premium em Angola!</span>
+                        Encontre as melhores oportunidades. <span className="font-bold text-white ml-1">Leilões a decorrer agora!</span>
                     </span>
                 </div>
 
