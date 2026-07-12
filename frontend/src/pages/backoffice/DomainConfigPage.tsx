@@ -155,7 +155,7 @@ export default function DomainConfigPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="max-w-md px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 transition-colors"
+                      className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
                     />
                   </div>
 
@@ -167,8 +167,8 @@ export default function DomainConfigPage() {
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
-                      rows={3}
-                      className="max-w-lg px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
+                      rows={4}
+                      className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all resize-none"
                     />
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function DomainConfigPage() {
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <h2 className="text-lg font-semibold text-zinc-100 mb-4">Controlo & Orçamento</h2>
               <form onSubmit={handleSaveBudget} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="p-6 flex flex-col gap-6">
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="status" className="text-sm font-medium text-zinc-300">Estado Operacional</label>
                     <p className="text-xs text-zinc-500 mb-1">Define o ciclo de vida atual do projeto.</p>
@@ -199,7 +199,7 @@ export default function DomainConfigPage() {
                       name="status"
                       value={formData.status}
                       onChange={handleChange}
-                      className="max-w-[200px] px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 appearance-none"
+                      className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 appearance-none transition-all"
                     >
                       <option value="draft">Rascunho</option>
                       <option value="active">Ativo</option>
@@ -211,8 +211,8 @@ export default function DomainConfigPage() {
                   <div className="flex flex-col gap-2">
                     <label htmlFor="budget" className="text-sm font-medium text-zinc-300">Orçamento Máximo</label>
                     <p className="text-xs text-zinc-500 mb-1">O limite de alocação financeira (opcional).</p>
-                    <div className="relative max-w-[200px]">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                    <div className="relative w-full">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium">$</span>
                       <input 
                         id="budget"
                         name="budget"
@@ -220,7 +220,7 @@ export default function DomainConfigPage() {
                         step="0.01"
                         value={formData.budget}
                         onChange={handleChange}
-                        className="pl-8 pr-3 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500"
+                        className="pl-8 pr-3 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
                       />
                     </div>
                   </div>
