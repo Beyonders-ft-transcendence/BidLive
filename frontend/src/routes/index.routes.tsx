@@ -39,7 +39,9 @@ export default function IndexRoot() {
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Alias do email */}
                     <Route path="/auth/verify-user" element={<VerifyUserPage />} />
+                    <Route path="/verify-user" element={<VerifyUserPage />} /> {/* Alias do email */}
                 </Route>
 
                 {/* Rotas Autenticadas (Plataforma/Backoffice) */}
