@@ -1,8 +1,11 @@
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export function NotFoundPage() {
+  const { t } = useTranslation();
+
   useDocumentTitle("Página Não Encontrada");
 
     return (
@@ -17,7 +20,7 @@ export function NotFoundPage() {
             </p>
             <div className="mt-8 flex gap-4">
                 <Button asChild variant="default" size="lg">
-                    <Link to="/">Voltar ao Início</Link>
+                    <Link to="/">{t('not_found.back_home')}</Link>
                 </Button>
             </div>
         </div>

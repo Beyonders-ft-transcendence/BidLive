@@ -1,4 +1,5 @@
 import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare, Heart, Radio, UserCog } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { User } from "@/shared/types/auth.types";
 import Avatar from "@/components/common/Avatar";
 
@@ -15,15 +16,17 @@ export default function UserSidebar({
   user,
   onLogout,
 }: UserSidebarProps) {
+  const { t } = useTranslation();
+
   const sidebarItems = [
-    { id: "overview", label: "Visão Geral", icon: <LayoutDashboard size={16} /> },
-    { id: "profile", label: "Meu Perfil", icon: <UserCog size={16} /> },
-    { id: "my-auctions", label: "Meus Leilões", icon: <Gavel size={16} /> },
-    { id: "create-auction", label: "Criar Leilão", icon: <PlusCircle size={16} /> },
-    { id: "my-bids", label: "Meus Lances", icon: <TrendingUp size={16} /> },
-    { id: "favorites", label: "Meus Favoritos", icon: <Heart size={16} /> },
-    { id: "live-stream", label: "Transmitir Live", icon: <Radio size={16} /> },
-    { id: "chat", label: "Mensagens", icon: <MessageSquare size={16} /> },
+    { id: "overview", label: t('user_dashboard.overview'), icon: <LayoutDashboard size={16} /> },
+    { id: "profile", label: t('user_dashboard.profile'), icon: <UserCog size={16} /> },
+    { id: "my-auctions", label: t('user_dashboard.my_auctions'), icon: <Gavel size={16} /> },
+    { id: "create-auction", label: t('user_dashboard.create_auction'), icon: <PlusCircle size={16} /> },
+    { id: "my-bids", label: t('user_dashboard.my_bids'), icon: <TrendingUp size={16} /> },
+    { id: "favorites", label: t('user_dashboard.favorites'), icon: <Heart size={16} /> },
+    { id: "live-stream", label: t('user_dashboard.live_stream'), icon: <Radio size={16} /> },
+    { id: "chat", label: t('user_dashboard.chat'), icon: <MessageSquare size={16} /> },
   ] as const;
 
   return (

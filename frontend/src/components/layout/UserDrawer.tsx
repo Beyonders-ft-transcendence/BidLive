@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { UserRole } from "@/shared/types/auth.types";
 import SideDrawer from "../common/SideDrawer";
+import { useTranslation } from "react-i18next";
 import { 
   LogOut, 
   Gavel, 
@@ -20,6 +21,8 @@ interface UserDrawerProps {
 }
 
 export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -115,7 +118,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
       title={
         <div className="flex items-center gap-2">
           <ShieldCheck size={18} className="text-primary" />
-          <span className="font-bold text-sm text-foreground uppercase tracking-wider">Minha Conta</span>
+          <span className="font-bold text-sm text-foreground uppercase tracking-wider">{t('user_drawer.my_account')}</span>
         </div>
       }
       footer={

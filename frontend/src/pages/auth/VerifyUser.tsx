@@ -6,6 +6,7 @@ import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png";
 
 export default function VerifyUser() {
+    
   useDocumentTitle("Verificar Conta");
 
   const [searchParams] = useSearchParams();
