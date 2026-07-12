@@ -76,32 +76,36 @@ export default function RolesPage() {
             <div 
               key={role.id}
               onClick={() => handleEditRole(role)}
-              className={`bg-black border rounded-xl p-5 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg group ${
+              className={`relative overflow-hidden bg-gradient-to-br from-zinc-900/80 to-black border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] group ${
                 activeRole?.id === role.id 
-                  ? 'border-indigo-500 ring-1 ring-indigo-500/30' 
-                  : 'border-zinc-800 hover:border-zinc-500'
+                  ? 'border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30' 
+                  : 'border-zinc-800 hover:border-zinc-600'
               }`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg ${
-                  role.name === 'SUPER_ADMIN' ? 'bg-red-500/10 text-red-400' :
-                  role.name === 'ADMIN' ? 'bg-indigo-500/10 text-indigo-400' :
-                  role.name === 'MODERATOR' ? 'bg-amber-500/10 text-amber-400' :
-                  'bg-zinc-800 text-zinc-400'
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-zinc-800/20 to-transparent rounded-bl-full opacity-50 pointer-events-none group-hover:from-zinc-700/30 transition-colors"></div>
+              
+              <div className="flex items-center justify-between mb-5 relative z-10">
+                <div className={`p-2.5 rounded-xl border ${
+                  role.name === 'SUPER_ADMIN' ? 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_15px_rgba(248,113,113,0.1)]' :
+                  role.name === 'ADMIN' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]' :
+                  role.name === 'MODERATOR' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(251,191,36,0.1)]' :
+                  'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'
                 }`}>
-                  {role.name === 'SUPER_ADMIN' ? <ShieldAlert size={20} /> :
-                   role.name === 'ADMIN' ? <ShieldCheck size={20} /> :
-                   role.name === 'MODERATOR' ? <Activity size={20} /> :
-                   <UserCog size={20} />}
+                  {role.name === 'SUPER_ADMIN' ? <ShieldAlert size={22} /> :
+                   role.name === 'ADMIN' ? <ShieldCheck size={22} /> :
+                   role.name === 'MODERATOR' ? <Activity size={22} /> :
+                   <UserCog size={22} />}
                 </div>
-                <span className="text-[10px] uppercase font-bold text-zinc-500">ID: {role.id}</span>
               </div>
-              <h3 className="text-lg font-bold text-zinc-100 uppercase mb-1">{role.name}</h3>
-              <p className="text-xs text-zinc-400 mb-4 line-clamp-2 min-h-[32px]">{role.description || 'Sem descrição.'}</p>
-              <div className="flex items-center gap-2 pt-3 border-t border-zinc-800/80">
-                <KeyRound size={12} className="text-zinc-500" />
-                <span className="text-xs font-medium text-zinc-500">
-                  <strong className="text-zinc-300">{role.permissions?.length || 0}</strong> permissões
+              <h3 className="text-xl font-black text-zinc-100 uppercase tracking-tight mb-2 relative z-10">{role.name}</h3>
+              <p className="text-sm text-zinc-400 mb-6 line-clamp-2 min-h-[40px] leading-relaxed relative z-10">{role.description || 'Perfil sem descrição associada. As permissões definem o acesso.'}</p>
+              
+              <div className="flex items-center gap-2 pt-4 border-t border-zinc-800/80 relative z-10">
+                <div className="p-1.5 bg-zinc-800/80 rounded-md text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                  <KeyRound size={14} />
+                </div>
+                <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                  <strong className="text-zinc-100">{role.permissions?.length || 0}</strong> permissões ativas
                 </span>
               </div>
             </div>
