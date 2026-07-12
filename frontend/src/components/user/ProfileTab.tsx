@@ -97,7 +97,7 @@ export default function ProfileTab() {
           <div className="space-y-8">
             <div className="flex items-center gap-6">
               <div className="relative group cursor-pointer">
-                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="xl" />
+                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="lg" />
                 <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
                   Alterar
                 </div>

@@ -43,13 +43,13 @@ export function UserDashboard() {
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "reports"].includes(tab)) {
-      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
+    if (tab && ["overview", "profile", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "reports"].includes(tab)) {
+      return tab as "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
     }
     return "overview";
   }, [searchParams]);
 
-  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => {
+  const setActiveTab = (tab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => {
     setSearchParams({ tab });
   };
 
