@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
@@ -32,6 +33,8 @@ const AuctionLiveText = ({ auctionId, status, viewType }: { auctionId: number, s
 };
 
 export default function AuctionsPage() {
+  useDocumentTitle("Leilões");
+
     const [page, setPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);

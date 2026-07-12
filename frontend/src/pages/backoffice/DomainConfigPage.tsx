@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Container from '@/components/layout/backoffice/Container';
@@ -9,6 +10,8 @@ import { Globe, Settings, DollarSign, ShieldAlert } from 'lucide-react';
 type Tab = 'general' | 'budget' | 'danger';
 
 export default function DomainConfigPage() {
+  useDocumentTitle("Configuração de Domínio");
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const domainId = Number(id);

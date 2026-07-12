@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
@@ -22,6 +23,8 @@ import {
 import type { Report, ReportActionType } from '@/shared/types/admin.types';
 
 export default function ReportsPage() {
+  useDocumentTitle("Gestão de Denúncias");
+
   const [selectedTargetType, setSelectedTargetType] = useState<string>('');
   const [activeReport, setActiveReport] = useState<Report | null>(null);
   const [actionNote, setActionNote] = useState('');

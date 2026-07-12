@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +9,8 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/shared/schema/au
 import Logo from "@/assets/images/logo2.png";
 
 export default function ResetPassword() {
+  useDocumentTitle("Nova Senha");
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const uid = searchParams.get('uid');

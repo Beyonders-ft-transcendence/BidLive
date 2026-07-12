@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
@@ -15,6 +16,8 @@ import {
 import { Link } from 'react-router-dom';
 
 export default function AdminAuctionsPage() {
+  useDocumentTitle("Gestão de Leilões");
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');

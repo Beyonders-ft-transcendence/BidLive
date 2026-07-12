@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState, useEffect } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
@@ -7,6 +8,8 @@ import Avatar from '@/components/common/Avatar';
 import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save } from 'lucide-react';
 
 export default function UsersPage() {
+  useDocumentTitle("Gestão de Utilizadores");
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   

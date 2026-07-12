@@ -1,7 +1,10 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 import Header from "@/components/layout/Header";
 
 export default function HomePage() {
+  useDocumentTitle("Início");
+
 
 
   return (

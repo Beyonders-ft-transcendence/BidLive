@@ -1,3 +1,4 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState, useMemo } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
@@ -5,6 +6,8 @@ import { useRolesQuery, usePermissionsQuery, useUpdateRoleMutation } from '@/hoo
 import { ShieldCheck, ShieldAlert, KeyRound, Save, X, Activity, UserCog } from 'lucide-react';
 
 export default function RolesPage() {
+  useDocumentTitle("Cargos e Permissões");
+
   const { data: rolesData, isLoading: isLoadingRoles } = useRolesQuery();
   const { data: permissionsData } = usePermissionsQuery();
   const { mutate: updateRole, isPending: isUpdating } = useUpdateRoleMutation();

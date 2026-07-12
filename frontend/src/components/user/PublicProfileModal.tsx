@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Gavel, Award, Shield } from "lucide-react";
+import { X, Gavel, Shield } from "lucide-react";
 import Avatar from "@/components/common/Avatar";
 import socialService from "@/services/social.service";
 
