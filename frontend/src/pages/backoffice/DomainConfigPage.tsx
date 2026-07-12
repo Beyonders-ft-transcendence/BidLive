@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Container from '@/components/layout/backoffice/Container';
+import PageHeader from '@/components/layout/backoffice/PageHeader';
 import { useDomainQuery, useUpdateDomainMutation } from '@/hooks/useDomain';
 import type { DomainStatus } from '@/shared/types/domain.types';
-import { ArrowLeft, Save, Globe } from 'lucide-react';
+import { Save, Globe, Settings, DollarSign, ShieldAlert } from 'lucide-react';
 
 export default function DomainConfigPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,23 +44,27 @@ export default function DomainConfigPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSaveGeneral = (e: React.FormEvent) => {
     e.preventDefault();
-    updateDomain(
-      { id: domainId, payload: formData },
-      {
-        onSuccess: () => {
-          navigate('/backoffice/domains');
-        }
-      }
-    );
+    updateDomain({ id: domainId, payload: { name: formData.name, description: formData.description } });
+  };
+
+  const handleSaveBudget = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateDomain({ id: domainId, payload: { status: formData.status, budget: formData.budget } });
+  };
+
+  const handleToggleArchive = () => {
+    const newValue = !formData.is_archived;
+    setFormData(prev => ({ ...prev, is_archived: newValue }));
+    updateDomain({ id: domainId, payload: { is_archived: newValue } });
   };
 
   if (isLoading) {
     return (
       <Container>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-500"></div>
         </div>
       </Container>
     );
@@ -69,10 +74,10 @@ export default function DomainConfigPage() {
     return (
       <Container>
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <p className="text-muted-foreground">Domínio não encontrado.</p>
+          <p className="text-zinc-500">Domínio não encontrado.</p>
           <button 
             onClick={() => navigate('/backoffice/domains')}
-            className="text-primary hover:underline"
+            className="text-zinc-300 hover:text-zinc-50 hover:underline"
           >
             Voltar para a lista
           </button>
@@ -83,123 +88,165 @@ export default function DomainConfigPage() {
 
   return (
     <Container>
-      <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
+      <PageHeader 
+        title="Configurar Domínio"
+        description="Faça a gestão das definições avançadas, orçamento e estado operacional do seu domínio."
+        icon={<Globe size={20} />}
+        backUrl="/backoffice/domains"
+        actions={
+           <button 
+             onClick={() => navigate('/backoffice/domains')}
+             className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-zinc-50 transition-colors border border-zinc-800 rounded-md hover:bg-zinc-800/50"
+           >
+             Concluído
+           </button>
+        }
+      />
+
+      <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto w-full">
         
-        {/* Header */}
-        <div className="flex items-center gap-4 border-b border-border pb-4">
-          <Link 
-            to="/backoffice/domains"
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Globe size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Configurar Domínio</h1>
-              <p className="text-sm text-muted-foreground">{domain?.name}</p>
-            </div>
-          </div>
+        {/* Left Nav (Settings Tabs Style) */}
+        <div className="w-full lg:w-64 shrink-0">
+          <nav className="flex flex-col gap-1 sticky top-24">
+            <a href="#general" className="px-3 py-2 text-sm font-medium rounded-md bg-zinc-800/50 text-zinc-50 flex items-center gap-2">
+              <Settings size={16} className="text-zinc-400" />
+              Geral
+            </a>
+            <a href="#budget" className="px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200 transition-colors flex items-center gap-2">
+              <DollarSign size={16} className="text-zinc-400" />
+              Controlo & Orçamento
+            </a>
+            <a href="#danger" className="px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200 transition-colors flex items-center gap-2">
+              <ShieldAlert size={16} className="text-zinc-400" />
+              Zona de Perigo
+            </a>
+          </nav>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl shadow-sm p-6 flex flex-col gap-6">
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col gap-8 pb-20">
           
-          <div className="flex flex-col gap-2">
-            <label htmlFor="name" className="text-sm font-medium text-foreground">Nome</label>
-            <input 
-              id="name"
-              name="name"
-              type="text" 
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:border-primary"
-            />
-          </div>
+          {/* Section: General */}
+          <section id="general" className="scroll-mt-24">
+            <h2 className="text-lg font-semibold text-zinc-100 mb-4">Configurações Gerais</h2>
+            <form onSubmit={handleSaveGeneral} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="p-6 flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="name" className="text-sm font-medium text-zinc-300">Nome do Domínio</label>
+                  <p className="text-xs text-zinc-500 mb-1">O identificador principal do projeto.</p>
+                  <input 
+                    id="name"
+                    name="name"
+                    type="text" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="max-w-md px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 transition-colors"
+                  />
+                </div>
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="description" className="text-sm font-medium text-foreground">Descrição</label>
-            <textarea 
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              className="px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:border-primary resize-none"
-            />
-          </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="description" className="text-sm font-medium text-zinc-300">Descrição</label>
+                  <p className="text-xs text-zinc-500 mb-1">Uma breve explicação do propósito deste domínio.</p>
+                  <textarea 
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    className="max-w-lg px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
+                  />
+                </div>
+              </div>
+              <div className="px-6 py-4 bg-zinc-900 border-t border-zinc-800 flex justify-end">
+                <button 
+                  type="submit" 
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-zinc-100 text-zinc-900 text-sm rounded-lg font-medium hover:bg-zinc-300 transition-colors disabled:opacity-50"
+                >
+                  {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+                </button>
+              </div>
+            </form>
+          </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="status" className="text-sm font-medium text-foreground">Estado</label>
-              <select 
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:border-primary appearance-none"
-              >
-                <option value="draft">Rascunho</option>
-                <option value="active">Ativo</option>
-                <option value="paused">Pausado</option>
-                <option value="completed">Concluído</option>
-              </select>
-            </div>
+          {/* Section: Budget & Status */}
+          <section id="budget" className="scroll-mt-24">
+            <h2 className="text-lg font-semibold text-zinc-100 mb-4">Controlo & Orçamento</h2>
+            <form onSubmit={handleSaveBudget} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="p-6 flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="status" className="text-sm font-medium text-zinc-300">Estado Operacional</label>
+                  <p className="text-xs text-zinc-500 mb-1">Define o ciclo de vida atual do projeto.</p>
+                  <select 
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="max-w-[200px] px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 appearance-none"
+                  >
+                    <option value="draft">Rascunho</option>
+                    <option value="active">Ativo</option>
+                    <option value="paused">Pausado</option>
+                    <option value="completed">Concluído</option>
+                  </select>
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="budget" className="text-sm font-medium text-foreground">Orçamento</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                <input 
-                  id="budget"
-                  name="budget"
-                  type="number" 
-                  step="0.01"
-                  value={formData.budget}
-                  onChange={handleChange}
-                  className="pl-8 pr-4 py-2 w-full bg-background border border-border rounded-lg focus:outline-none focus:border-primary"
-                />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="budget" className="text-sm font-medium text-zinc-300">Orçamento Máximo</label>
+                  <p className="text-xs text-zinc-500 mb-1">O limite de alocação financeira (opcional).</p>
+                  <div className="relative max-w-[200px]">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                    <input 
+                      id="budget"
+                      name="budget"
+                      type="number" 
+                      step="0.01"
+                      value={formData.budget}
+                      onChange={handleChange}
+                      className="pl-8 pr-3 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-4 bg-zinc-900 border-t border-zinc-800 flex justify-end">
+                <button 
+                  type="submit" 
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-zinc-100 text-zinc-900 text-sm rounded-lg font-medium hover:bg-zinc-300 transition-colors disabled:opacity-50"
+                >
+                  {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          {/* Section: Danger Zone */}
+          <section id="danger" className="scroll-mt-24">
+            <h2 className="text-lg font-semibold text-red-500 mb-4">Zona de Perigo</h2>
+            <div className="border border-red-900/50 rounded-xl overflow-hidden">
+              <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-red-950/10">
+                <div>
+                  <h3 className="text-sm font-medium text-zinc-100">Arquivar Domínio</h3>
+                  <p className="text-xs text-zinc-400 mt-1">Oculta o domínio das listagens principais, mas não apaga os dados.</p>
+                </div>
+                <button 
+                  type="button" 
+                  disabled={isUpdating}
+                  onClick={handleToggleArchive}
+                  className={`shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors border disabled:opacity-50 ${
+                    formData.is_archived 
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700' 
+                      : 'bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20'
+                  }`}
+                >
+                  {isUpdating ? 'A Processar...' : (formData.is_archived ? 'Desarquivar Domínio' : 'Arquivar Domínio')}
+                </button>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="flex items-center gap-2 pt-2 border-t border-border mt-2">
-            <input 
-              id="is_archived"
-              name="is_archived"
-              type="checkbox" 
-              checked={formData.is_archived}
-              onChange={handleChange}
-              className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-            />
-            <label htmlFor="is_archived" className="text-sm font-medium text-foreground">
-              Arquivar Domínio
-            </label>
-            <span className="text-xs text-muted-foreground ml-2">(Oculta o domínio das listagens principais)</span>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-6 border-t border-border">
-            <Link 
-              to="/backoffice/domains"
-              className="px-4 py-2 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
-            >
-              Cancelar
-            </Link>
-            <button 
-              type="submit" 
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              <Save size={18} />
-              {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
-            </button>
-          </div>
-
-        </form>
-
+        </div>
       </div>
     </Container>
   );
