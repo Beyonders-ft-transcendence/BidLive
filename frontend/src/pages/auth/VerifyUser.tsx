@@ -3,7 +3,6 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Loader2, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png";
-import AbstractBg from "@/assets/images/abstract-bg.jpg";
 
 export default function VerifyUser() {
   const [searchParams] = useSearchParams();
@@ -52,8 +51,8 @@ export default function VerifyUser() {
       {/* Left Panel - Image/Brand */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 bg-zinc-900 overflow-hidden">
         <div className="absolute inset-0">
-          <img src={AbstractBg} alt="Background" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+          <div className="w-[400px] h-[400px] bg-primary/20 blur-[100px] absolute -top-20 -left-20 rounded-full mix-blend-screen pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
         </div>
         
         <div className="relative z-10">
