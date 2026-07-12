@@ -4,9 +4,11 @@ import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
 import { useRolesQuery, usePermissionsQuery, useUpdateRoleMutation } from '@/hooks/useRbac';
 import { ShieldCheck, ShieldAlert, KeyRound, Save, X, Activity, UserCog } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function RolesPage() {
-  useDocumentTitle("Cargos e Permissões");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_roles.title'));
 
   const { data: rolesData, isLoading: isLoadingRoles } = useRolesQuery();
   const { data: permissionsData } = usePermissionsQuery();
@@ -84,8 +86,8 @@ export default function RolesPage() {
   return (
     <Container>
       <PageHeader 
-        title="Perfis e Acessos"
-        description="Controle as permissões granulares dos utilizadores da plataforma selecionando um dos perfis abaixo."
+        title={t('backoffice_roles.title')}
+        description={t('backoffice_roles.description')}
         icon={<ShieldCheck size={20} />}
       />
 

@@ -14,15 +14,17 @@ import {
   Calendar
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminAuctionsPage() {
-  useDocumentTitle("Gestão de Leilões");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_auctions.title'));
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [auctionToCancel, setAuctionToCancel] = useState<number | null>(null);
-  const [cancelReason, setCancelReason] = useState('Cancelado pela administração.');
+  const [cancelReason, setCancelReason] = useState(t('backoffice_auctions.default_cancel_reason'));
   
   const { data, isLoading } = useAuctionsQuery({ 
     page, 
@@ -40,7 +42,7 @@ export default function AdminAuctionsPage() {
         {
           onSuccess: () => {
             setAuctionToCancel(null);
-            setCancelReason('Cancelado pela administração.');
+            setCancelReason(t('backoffice_auctions.default_cancel_reason'));
           }
         }
       );
@@ -50,13 +52,13 @@ export default function AdminAuctionsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'LIVE':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">Ativo</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">{t('backoffice_auctions.status_live')}</span>;
       case 'COMPLETED':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-blue-400 border border-zinc-700/50">Concluído</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-blue-400 border border-zinc-700/50">{t('backoffice_auctions.status_completed')}</span>;
       case 'CANCELLED':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-red-400 border border-zinc-700/50">Cancelado</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-red-400 border border-zinc-700/50">{t('backoffice_auctions.status_cancelled')}</span>;
       case 'DRAFT':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">Rascunho</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">{t('backoffice_auctions.status_draft')}</span>;
       default:
         return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">{status}</span>;
     }
@@ -71,8 +73,8 @@ export default function AdminAuctionsPage() {
   return (
     <Container>
       <PageHeader 
-        title="Gestão de Leilões"
-        description="Visualize e gira todos os leilões a decorrer na plataforma. Os administradores têm a capacidade de cancelar leilões que infrinjam as regras."
+        title={t('backoffice_auctions.title')}
+        description={t('backoffice_auctions.description')}
         icon={<Gavel size={20} />}
       />
 
@@ -82,7 +84,7 @@ export default function AdminAuctionsPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input 
               type="text" 
-              placeholder="Pesquisar título do item..." 
+              placeholder={t('backoffice_auctions.search_placeholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
@@ -95,11 +97,11 @@ export default function AdminAuctionsPage() {
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="bg-black border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 transition-all appearance-none"
             >
-              <option value="">Todos os Estados</option>
-              <option value="LIVE">Ativos (Live)</option>
-              <option value="COMPLETED">Concluídos</option>
-              <option value="CANCELLED">Cancelados</option>
-              <option value="DRAFT">Rascunhos</option>
+              <option value="">{t('backoffice_auctions.filter_all')}</option>
+              <option value="LIVE">{t('backoffice_auctions.filter_live')}</option>
+              <option value="COMPLETED">{t('backoffice_auctions.filter_completed')}</option>
+              <option value="CANCELLED">{t('backoffice_auctions.filter_cancelled')}</option>
+              <option value="DRAFT">{t('backoffice_auctions.filter_draft')}</option>
             </select>
           </div>
         </Toolbar>
@@ -110,11 +112,11 @@ export default function AdminAuctionsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Vendedor</th>
-                  <th className="px-6 py-4 font-medium">Item & Preço</th>
-                  <th className="px-6 py-4 font-medium">Estado</th>
-                  <th className="px-6 py-4 font-medium">Datas</th>
-                  <th className="px-6 py-4 text-right font-medium">Ações</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_auctions.th_seller')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_auctions.th_item_price')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_auctions.th_status')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_auctions.th_dates')}</th>
+                  <th className="px-6 py-4 text-right font-medium">{t('backoffice_auctions.th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50">
@@ -131,7 +133,7 @@ export default function AdminAuctionsPage() {
                 ) : auctions.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-16 text-center text-zinc-500">
-                      Nenhum leilão encontrado.
+                      {t('backoffice_auctions.no_auctions')}
                     </td>
                   </tr>
                 ) : (
@@ -139,9 +141,9 @@ export default function AdminAuctionsPage() {
                     <tr key={auction.id} className="hover:bg-zinc-900/30 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <Avatar name={auction.seller?.full_name || 'Vendedor'} src={auction.seller?.avatar_url} size="md" />
+                          <Avatar name={auction.seller?.full_name || t('backoffice_auctions.unknown_seller')} src={auction.seller?.avatar_url} size="md" />
                           <div>
-                            <div className="font-medium text-zinc-100">{auction.seller?.full_name || 'Desconhecido'}</div>
+                            <div className="font-medium text-zinc-100">{auction.seller?.full_name || t('backoffice_auctions.unknown_seller')}</div>
                             <div className="text-xs text-zinc-500">@{auction.seller?.username || 'user'}</div>
                           </div>
                         </div>
@@ -175,7 +177,7 @@ export default function AdminAuctionsPage() {
                           <Link 
                             to={`/auction/${auction.id}`}
                             className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
-                            title="Ver Leilão na Plataforma"
+                            title={t('backoffice_auctions.view_auction')}
                             target="_blank"
                           >
                             <ExternalLink size={16} />
@@ -185,7 +187,7 @@ export default function AdminAuctionsPage() {
                               onClick={() => setAuctionToCancel(auction.id)}
                               disabled={isCanceling}
                               className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors rounded-md hover:bg-zinc-800"
-                              title="Cancelar Leilão"
+                              title={t('backoffice_auctions.cancel_auction')}
                             >
                               <Ban size={16} />
                             </button>
@@ -203,7 +205,7 @@ export default function AdminAuctionsPage() {
           {data && data.count > 10 && (
             <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
               <span className="text-xs text-zinc-500">
-                Total: <span className="font-medium text-zinc-300">{data.count}</span> leilões
+                {t('backoffice_auctions.total_auctions')}<span className="font-medium text-zinc-300">{data.count}</span>{t('backoffice_auctions.total_auctions_suffix')}
               </span>
               <div className="flex gap-2">
                 <button 
@@ -211,14 +213,14 @@ export default function AdminAuctionsPage() {
                   disabled={!data.previous}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Anterior
+                  {t('backoffice_auctions.btn_prev')}
                 </button>
                 <button 
                   onClick={() => setPage(p => p + 1)}
                   disabled={!data.next}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Próxima
+                  {t('backoffice_auctions.btn_next')}
                 </button>
               </div>
             </div>
@@ -241,20 +243,20 @@ export default function AdminAuctionsPage() {
               <div className="p-3 bg-red-400/10 rounded-full">
                 <Ban size={24} />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-100">Cancelar Leilão</h3>
+              <h3 className="text-lg font-semibold text-zinc-100">{t('backoffice_auctions.cancel_modal_title')}</h3>
             </div>
             
             <p className="text-zinc-400 text-sm mb-5">
-              Tem a certeza que deseja cancelar este leilão? Esta ação é <strong className="text-zinc-300">irreversível</strong> e o item deixará de estar disponível para lances.
+              {t('backoffice_auctions.cancel_modal_desc')}
             </p>
 
             <div className="mb-6">
-              <label className="text-xs font-medium text-zinc-500 mb-2 block uppercase tracking-wider">Motivo (Visível ao Vendedor)</label>
+              <label className="text-xs font-medium text-zinc-500 mb-2 block uppercase tracking-wider">{t('backoffice_auctions.cancel_modal_reason')}</label>
               <input
                 type="text"
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Ex: Violação dos termos de uso..."
+                placeholder={t('backoffice_auctions.cancel_modal_reason_placeholder')}
                 className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-red-500/50 transition-colors"
               />
             </div>
@@ -265,14 +267,14 @@ export default function AdminAuctionsPage() {
                 disabled={isCanceling}
                 className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 rounded-lg transition-colors"
               >
-                Manter Leilão
+                {t('backoffice_auctions.cancel_modal_keep')}
               </button>
               <button 
                 onClick={confirmCancelAuction}
                 disabled={isCanceling}
                 className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {isCanceling ? 'A Cancelar...' : 'Sim, Cancelar'}
+                {isCanceling ? t('backoffice_auctions.cancel_modal_canceling') : t('backoffice_auctions.cancel_modal_confirm')}
               </button>
             </div>
           </div>

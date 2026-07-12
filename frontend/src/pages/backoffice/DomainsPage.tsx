@@ -6,10 +6,12 @@ import PageHeader from '@/components/layout/backoffice/PageHeader';
 import Toolbar from '@/components/layout/backoffice/Toolbar';
 import { useDomainsQuery, useDeleteDomainMutation, useCreateDomainMutation } from '@/hooks/useDomain';
 import { Search, Plus, Edit, Trash2, Globe, CheckCircle, Clock, PauseCircle, Archive } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { DomainStatus } from '@/shared/types/domain.types';
 
 export default function DomainsPage() {
-  useDocumentTitle("Domínios");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_domains.title'));
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -22,7 +24,7 @@ export default function DomainsPage() {
   const { mutate: createDomain, isPending: isCreatingMut } = useCreateDomainMutation();
 
   const handleDelete = (id: number, name: string) => {
-    if (window.confirm(`Tem a certeza que deseja eliminar o domínio "${name}"? Esta ação não pode ser desfeita.`)) {
+    if (window.confirm(t('backoffice_domains.confirm_delete', { name }))) {
       deleteDomain(id);
     }
   };
@@ -45,7 +47,7 @@ export default function DomainsPage() {
     if (isArchived) {
       return (
         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
-          <Archive size={10} /> Arquivado
+          <Archive size={10} /> {t('backoffice_domains.status.archived')}
         </span>
       );
     }
@@ -53,25 +55,25 @@ export default function DomainsPage() {
       case 'active':
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">
-            <CheckCircle size={10} /> Ativo
+            <CheckCircle size={10} /> {t('backoffice_domains.status.active')}
           </span>
         );
       case 'draft':
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-blue-400 border border-zinc-700/50">
-            <Clock size={10} /> Rascunho
+            <Clock size={10} /> {t('backoffice_domains.status.draft')}
           </span>
         );
       case 'paused':
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-yellow-500 border border-zinc-700/50">
-            <PauseCircle size={10} /> Pausado
+            <PauseCircle size={10} /> {t('backoffice_domains.status.paused')}
           </span>
         );
       case 'completed':
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-purple-400 border border-zinc-700/50">
-            <CheckCircle size={10} /> Concluído
+            <CheckCircle size={10} /> {t('backoffice_domains.status.completed')}
           </span>
         );
       default:
@@ -88,15 +90,15 @@ export default function DomainsPage() {
   return (
     <Container>
       <PageHeader 
-        title="Domínios"
-        description="Faça a gestão dos seus projetos e contextos na plataforma."
+        title={t('backoffice_domains.title')}
+        description={t('backoffice_domains.description')}
         icon={<Globe size={20} />}
         actions={
           <button 
             onClick={() => setIsCreating(true)}
             className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors"
           >
-            <Plus size={16} /> Novo Domínio
+            <Plus size={16} /> {t('backoffice_domains.new_domain')}
           </button>
         }
       />

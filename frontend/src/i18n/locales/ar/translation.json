@@ -28,5 +28,120 @@
     "admin": "الإدارة",
     "role_admin": "مسؤول",
     "super_admin": "مسؤول متميز"
+  },
+  "backoffice_users": {
+    "title": "المستخدمين",
+    "description": "إدارة مستخدمي المنصة، ملفات الوصول الخاصة بهم وحالة حساباتهم.",
+    "search_placeholder": "البحث بالبريد الإلكتروني / الاسم...",
+    "th_user": "المستخدم",
+    "th_profile": "الملف الشخصي",
+    "th_status": "الحالة",
+    "th_registered_at": "تاريخ التسجيل",
+    "th_actions": "إجراءات",
+    "no_users": "لم يتم العثور على مستخدمين.",
+    "status_active": "نشط",
+    "status_banned": "محظور",
+    "total_users": "الإجمالي: ",
+    "total_users_suffix": " مستخدمين",
+    "btn_prev": "السابق",
+    "btn_next": "التالي",
+    "manage_user": "إدارة المستخدم",
+    "full_name": "الاسم الكامل",
+    "account_status": "حالة الحساب",
+    "banned_suspended": "محظور / موقوف",
+    "access_profile": "ملف الوصول (الدور)",
+    "select_profile": "اختر ملفاً...",
+    "profile_help": "يحدد الملف الشخصي صلاحيات المستخدم على المنصة.",
+    "btn_save": "حفظ التغييرات",
+    "btn_saving": "جاري الحفظ..."
+  },
+  "backoffice_reports": {
+    "title": "البلاغات",
+    "description": "تحليل واتخاذ إجراءات بشأن البلاغات المقدمة من المستخدمين.",
+    "no_reports": "لا توجد بلاغات."
+  },
+  "backoffice_roles": {
+    "title": "الأدوار والصلاحيات",
+    "description": "إدارة مستويات الوصول والصلاحيات على المنصة."
+  },
+  "backoffice_auctions": {
+    "title": "إدارة المزادات",
+    "description": "عرض وإدارة جميع المزادات الجارية. يمكن للمسؤولين إلغاء المزادات التي تنتهك القواعد.",
+    "search_placeholder": "البحث عن عنوان العنصر...",
+    "filter_all": "جميع الحالات",
+    "filter_live": "نشط (مباشر)",
+    "filter_completed": "مكتمل",
+    "filter_cancelled": "ملغى",
+    "filter_draft": "مسودات",
+    "th_seller": "البائع",
+    "th_item_price": "العنصر والسعر",
+    "th_status": "الحالة",
+    "th_dates": "التواريخ",
+    "th_actions": "إجراءات",
+    "no_auctions": "لم يتم العثور على مزادات.",
+    "status_live": "نشط",
+    "status_completed": "مكتمل",
+    "status_cancelled": "ملغى",
+    "status_draft": "مسودة",
+    "unknown_seller": "مجهول",
+    "btn_prev": "السابق",
+    "btn_next": "التالي",
+    "total_auctions": "الإجمالي: ",
+    "total_auctions_suffix": " مزادات",
+    "view_auction": "عرض المزاد في المنصة",
+    "cancel_auction": "إلغاء المزاد",
+    "cancel_modal_title": "إلغاء المزاد",
+    "cancel_modal_desc": "هل أنت متأكد أنك تريد إلغاء هذا المزاد؟ هذا الإجراء لا رجعة فيه ولن يكون العنصر متاحًا للمزايدة.",
+    "cancel_modal_reason": "السبب (مرئي للبائع)",
+    "cancel_modal_reason_placeholder": "مثال: انتهاك شروط الاستخدام...",
+    "cancel_modal_keep": "الاحتفاظ بالمزاد",
+    "cancel_modal_confirm": "نعم، إلغاء",
+    "cancel_modal_canceling": "جاري الإلغاء...",
+    "default_cancel_reason": "تم الإلغاء بواسطة الإدارة."
+  },
+  "backoffice_domains": {
+    "title": "النطاقات",
+    "description": "إدارة النطاقات المسموح بها للوصول إلى المنصة عبر عزل المستأجرين.",
+    "new_domain": "نطاق جديد",
+    "confirm_delete": "هل أنت متأكد أنك تريد حذف النطاق '{{name}}'؟ لا يمكن التراجع عن هذا الإجراء.",
+    "status": {
+      "active": "نشط",
+      "draft": "مسودة",
+      "paused": "موقوف",
+      "completed": "مكتمل",
+      "archived": "مؤرشف"
+    }
+  },
+  "backoffice_domain_config": {
+    "title": "تكوين النطاق",
+    "description": "إدارة الإعدادات المتقدمة، الميزانية والحالة التشغيلية للنطاق الخاص بك.",
+    "btn_done": "تم",
+    "tab_general": "عام",
+    "tab_budget": "الميزانية والتحكم",
+    "tab_danger": "منطقة الخطر",
+    "general": {
+      "title": "الإعدادات العامة",
+      "name_label": "اسم النطاق",
+      "name_desc": "المعرف الأساسي للمشروع.",
+      "desc_label": "الوصف",
+      "desc_desc": "شرح موجز للغرض من هذا النطاق.",
+      "btn_save": "حفظ التغييرات",
+      "btn_saving": "جاري الحفظ..."
+    },
+    "budget": {
+      "title": "الميزانية والتحكم",
+      "status_label": "الحالة التشغيلية",
+      "status_desc": "يحدد دورة الحياة الحالية للمشروع.",
+      "budget_label": "الحد الأقصى للميزانية",
+      "budget_desc": "حد التخصيص المالي (اختياري)."
+    },
+    "danger": {
+      "title": "منطقة الخطر",
+      "archive_title": "أرشفة النطاق",
+      "archive_desc": "يخفي النطاق من القوائم الرئيسية، لكنه لا يحذف البيانات.",
+      "btn_archive": "أرشفة النطاق",
+      "btn_unarchive": "إلغاء أرشفة النطاق",
+      "btn_processing": "جاري المعالجة..."
+    }
   }
 }

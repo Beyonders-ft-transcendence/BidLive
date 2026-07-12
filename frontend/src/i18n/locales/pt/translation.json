@@ -28,5 +28,120 @@
     "admin": "Administração",
     "role_admin": "Administrador",
     "super_admin": "Super Admin"
+  },
+  "backoffice_users": {
+    "title": "Utilizadores",
+    "description": "Gerencie os utilizadores da plataforma, os seus perfis de acesso e estados de conta.",
+    "search_placeholder": "Pesquisar por email/nome...",
+    "th_user": "Utilizador",
+    "th_profile": "Perfil",
+    "th_status": "Estado",
+    "th_registered_at": "Registado a",
+    "th_actions": "Ações",
+    "no_users": "Nenhum utilizador encontrado.",
+    "status_active": "Ativo",
+    "status_banned": "Banido",
+    "total_users": "Total: ",
+    "total_users_suffix": " utilizadores",
+    "btn_prev": "Anterior",
+    "btn_next": "Próxima",
+    "manage_user": "Gerir Utilizador",
+    "full_name": "Nome Completo",
+    "account_status": "Estado da Conta",
+    "banned_suspended": "Banido / Suspenso",
+    "access_profile": "Perfil de Acesso (Role)",
+    "select_profile": "Selecione um perfil...",
+    "profile_help": "O perfil define as permissões do utilizador na plataforma.",
+    "btn_save": "Guardar Alterações",
+    "btn_saving": "A Guardar..."
+  },
+  "backoffice_reports": {
+    "title": "Denúncias",
+    "description": "Analise e tome ações sobre denúncias reportadas pelos utilizadores.",
+    "no_reports": "Nenhuma denúncia."
+  },
+  "backoffice_roles": {
+    "title": "Cargos e Permissões",
+    "description": "Gerencie os níveis de acesso e permissões na plataforma."
+  },
+  "backoffice_auctions": {
+    "title": "Gestão de Leilões",
+    "description": "Visualize e gira todos os leilões a decorrer na plataforma. Os administradores têm a capacidade de cancelar leilões que infrinjam as regras.",
+    "search_placeholder": "Pesquisar título do item...",
+    "filter_all": "Todos os Estados",
+    "filter_live": "Ativos (Live)",
+    "filter_completed": "Concluídos",
+    "filter_cancelled": "Cancelados",
+    "filter_draft": "Rascunhos",
+    "th_seller": "Vendedor",
+    "th_item_price": "Item & Preço",
+    "th_status": "Estado",
+    "th_dates": "Datas",
+    "th_actions": "Ações",
+    "no_auctions": "Nenhum leilão encontrado.",
+    "status_live": "Ativo",
+    "status_completed": "Concluído",
+    "status_cancelled": "Cancelado",
+    "status_draft": "Rascunho",
+    "unknown_seller": "Desconhecido",
+    "btn_prev": "Anterior",
+    "btn_next": "Próxima",
+    "total_auctions": "Total: ",
+    "total_auctions_suffix": " leilões",
+    "view_auction": "Ver Leilão na Plataforma",
+    "cancel_auction": "Cancelar Leilão",
+    "cancel_modal_title": "Cancelar Leilão",
+    "cancel_modal_desc": "Tem a certeza que deseja cancelar este leilão? Esta ação é irreversível e o item deixará de estar disponível para lances.",
+    "cancel_modal_reason": "Motivo (Visível ao Vendedor)",
+    "cancel_modal_reason_placeholder": "Ex: Violação dos termos de uso...",
+    "cancel_modal_keep": "Manter Leilão",
+    "cancel_modal_confirm": "Sim, Cancelar",
+    "cancel_modal_canceling": "A Cancelar...",
+    "default_cancel_reason": "Cancelado pela administração."
+  },
+  "backoffice_domains": {
+    "title": "Domínios",
+    "description": "Gira os domínios permitidos para acesso à plataforma via tenant isolation.",
+    "new_domain": "Novo Domínio",
+    "confirm_delete": "Tem a certeza que deseja eliminar o domínio '{{name}}'? Esta ação não pode ser desfeita.",
+    "status": {
+      "active": "Ativo",
+      "draft": "Rascunho",
+      "paused": "Pausado",
+      "completed": "Concluído",
+      "archived": "Arquivado"
+    }
+  },
+  "backoffice_domain_config": {
+    "title": "Configurar Domínio",
+    "description": "Faça a gestão das definições avançadas, orçamento e estado operacional do seu domínio.",
+    "btn_done": "Concluído",
+    "tab_general": "Geral",
+    "tab_budget": "Controlo & Orçamento",
+    "tab_danger": "Zona de Perigo",
+    "general": {
+      "title": "Configurações Gerais",
+      "name_label": "Nome do Domínio",
+      "name_desc": "O identificador principal do projeto.",
+      "desc_label": "Descrição",
+      "desc_desc": "Uma breve explicação do propósito deste domínio.",
+      "btn_save": "Guardar Alterações",
+      "btn_saving": "A Guardar..."
+    },
+    "budget": {
+      "title": "Controlo & Orçamento",
+      "status_label": "Estado Operacional",
+      "status_desc": "Define o ciclo de vida atual do projeto.",
+      "budget_label": "Orçamento Máximo",
+      "budget_desc": "O limite de alocação financeira (opcional)."
+    },
+    "danger": {
+      "title": "Zona de Perigo",
+      "archive_title": "Arquivar Domínio",
+      "archive_desc": "Oculta o domínio das listagens principais, mas não apaga os dados.",
+      "btn_archive": "Arquivar Domínio",
+      "btn_unarchive": "Desarquivar Domínio",
+      "btn_processing": "A Processar..."
+    }
   }
 }
