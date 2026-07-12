@@ -1,4 +1,5 @@
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +10,8 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/shared/schema/au
 import Logo from "@/assets/images/logo2.png";
 
 export default function ResetPassword() {
+    const { t } = useTranslation();
+
   useDocumentTitle("Nova Senha");
 
   const [searchParams] = useSearchParams();
@@ -76,7 +79,7 @@ export default function ResetPassword() {
         </div>
 
         <div className="relative z-10 max-w-md">
-          <h2 className="text-4xl font-bold mb-4 tracking-tight">Nova Senha</h2>
+          <h2 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.new_password')}</h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
             Crie uma nova senha forte e memorável para proteger a sua conta e voltar a ter acesso a todos os recursos exclusivos da BidLive.
           </p>
@@ -93,7 +96,7 @@ export default function ResetPassword() {
                 <img src={Logo} alt="BidLive" className="h-8 object-contain" />
               </Link>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Redefinir Senha</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">{t('auth.reset_password')}</h1>
             <p className="text-zinc-400">
               {success ? 'Senha alterada com sucesso.' : 'Escolha a sua nova senha de acesso.'}
             </p>

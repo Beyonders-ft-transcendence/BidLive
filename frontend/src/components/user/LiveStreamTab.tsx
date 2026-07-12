@@ -18,6 +18,7 @@ interface LiveStreamTabProps {
 }
 
 export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNewClick }: LiveStreamTabProps) {
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeAuction, setActiveAuction] = useState<Auction | null>(null);
 

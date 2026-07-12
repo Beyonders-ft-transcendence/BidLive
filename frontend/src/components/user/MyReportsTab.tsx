@@ -1,8 +1,11 @@
 import { AlertTriangle, Clock, CheckCircle2, ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useMyReports } from "@/hooks/useReport";
 import { ReportStatus, ReportTargetType } from "@/shared/types/report.types";
 
 export default function MyReportsTab() {
+  const { t } = useTranslation();
+
   const { data: reportsResponse, isLoading } = useMyReports();
   const reports = reportsResponse?.data || [];
 
@@ -61,7 +64,7 @@ export default function MyReportsTab() {
                 <tr>
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Alvo</th>
-                  <th className="px-4 py-3">Motivo</th>
+                  <th className="px-4 py-3">{t('reports_tab.reason')}</th>
                   <th className="px-4 py-3">Data</th>
                   <th className="px-4 py-3 text-right">Estado</th>
                 </tr>

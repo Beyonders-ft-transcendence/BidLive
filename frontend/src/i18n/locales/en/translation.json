@@ -8,15 +8,13 @@
     "confirm": "Confirm"
   },
   "header": {
-    "home": "Home",
     "auctions": "Auctions",
-    "notifications": "Notifications",
-    "no_notifications": "No notifications",
-    "new_notifications": "new",
-    "mark_read": "Mark as read",
-    "login_register": "Register / Login",
-    "language": "Language",
-    "menu": "Menu"
+    "how_it_works": "How It Works",
+    "about": "About Us",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "backoffice": "Backoffice"
   },
   "backoffice_header": {
     "admin_title": "BidLive Admin",
@@ -280,5 +278,160 @@
     "reached": "Reached",
     "not_reached": "Not Reached",
     "explore_lots": "Explore Lots"
+  },
+  "home": {
+    "title": "Home",
+    "hero_title_1": "Exclusive",
+    "hero_title_2": "Auctions,",
+    "hero_title_3": "Extraordinary",
+    "hero_title_4": "Results",
+    "hero_desc": "The leading platform for collectors and enthusiasts. Discover rare items, participate in real time and expand your collection.",
+    "explore_auctions": "Explore Auctions",
+    "how_it_works": "How It Works",
+    "how_it_works_desc": "Three simple steps to start bidding or selling your items securely.",
+    "step1_title": "1. Register",
+    "step1_desc": "Create your account in seconds and gain immediate access to hundreds of exclusive lots.",
+    "step2_title": "2. Discover & Bid",
+    "step2_desc": "Explore the catalog, set alerts, and place live bids on auctions of interest.",
+    "step3_title": "3. Win & Receive",
+    "step3_desc": "Track your wins, make secure payments, and receive your lot at home.",
+    "featured_auctions": "Featured Auctions",
+    "view_all": "View all auctions",
+    "no_featured": "No featured auctions at the moment.",
+    "upcoming_auctions": "Upcoming Auctions",
+    "start_bidding": "Start Bidding Today",
+    "start_bidding_desc": "Join thousands of collectors and find the best opportunities in the market.",
+    "create_account": "Create Free Account",
+    "view_catalog": "View Catalog"
+  },
+  "not_found": {
+    "title": "Page not found",
+    "error": "404 Error",
+    "desc": "Sorry, we couldn't find the page you're looking for.",
+    "back_home": "Back to Home",
+    "contact_support": "Contact Support"
+  },
+  "user_drawer": {
+    "my_account": "My Account",
+    "logout": "Logout"
+  },
+  "user_dashboard": {
+    "title": "User Dashboard",
+    "overview": "Overview",
+    "profile": "My Profile",
+    "my_auctions": "My Auctions",
+    "create_auction": "Create Auction",
+    "my_bids": "My Bids",
+    "favorites": "My Favorites",
+    "live_stream": "Live Stream",
+    "chat": "Messages",
+    "logout": "Logout"
+  },
+  "overview_tab": {
+    "profile_photo": "Profile Photo",
+    "change_photo": "Change Photo",
+    "uploading": "Uploading...",
+    "account_settings": "Account Settings",
+    "update_info": "Update your personal information.",
+    "full_name": "Full Name",
+    "bio": "Bio (Optional)",
+    "save_changes": "Save Changes",
+    "change_password": "Change Password",
+    "security": "Keep your account secure.",
+    "current_password": "Current Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "recent_auctions": "Recent Auctions",
+    "recent_bids": "Recent Bids",
+    "no_auctions": "You haven't created any auctions yet.",
+    "create_first": "Create my first auction",
+    "view_all": "View All",
+    "no_bids": "You haven't placed any bids yet.",
+    "explore_auctions": "Explore active auctions"
+  },
+  "favorites_tab": {
+    "title": "My Favorites",
+    "desc": "Auctions you are watching.",
+    "no_favorites": "No favorites yet",
+    "no_favorites_desc": "You haven't added any auctions to your favorites yet."
+  },
+  "reports_tab": {
+    "title": "My Reports",
+    "desc": "History of reports made by you.",
+    "no_reports": "No reports found.",
+    "status": "Status",
+    "reason": "Reason"
+  },
+  "my_auctions_tab": {
+    "title": "My Auctions",
+    "desc": "Manage the auctions you created.",
+    "new_auction": "New Auction",
+    "no_auctions": "No auctions created.",
+    "no_auctions_desc": "You haven't created any auctions yet. Click the button above to start."
+  },
+  "my_bids_tab": {
+    "title": "My Bids",
+    "desc": "Track all the bids you've made.",
+    "no_bids": "No bids made.",
+    "no_bids_desc": "You haven't participated in any auctions yet."
+  },
+  "create_auction_tab": {
+    "title": "Create New Auction",
+    "desc": "Fill in the details of the item you want to auction.",
+    "item_details": "Item Details",
+    "item_name": "Item Name",
+    "item_desc": "Description",
+    "category": "Category",
+    "select_category": "Select a category",
+    "condition": "Condition",
+    "select_condition": "Select condition",
+    "condition_new": "New",
+    "condition_used": "Used",
+    "condition_refurbished": "Refurbished",
+    "condition_parts": "For Parts",
+    "images": "Item Images",
+    "upload_images": "Upload Images",
+    "auction_config": "Auction Configuration",
+    "start_price": "Start Price (Kz)",
+    "reserve_price": "Reserve Price (Optional)",
+    "buy_now_price": "Buy Now Price (Optional)",
+    "dates": "Auction Dates",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "submit": "Create Auction",
+    "submitting": "Creating..."
+  },
+  "auction_detail_tab": {
+    "title": "Auction Details",
+    "back": "Back to My Auctions",
+    "edit": "Edit Auction",
+    "delete": "Delete",
+    "cancel": "Cancel Auction",
+    "start_stream": "Start Stream",
+    "bids_history": "Bids History",
+    "no_bids": "No bids received yet.",
+    "item_info": "Item Information"
+  },
+  "live_stream_tab": {
+    "title": "My Streams",
+    "desc": "Broadcast your active auctions live to your audience.",
+    "no_streams": "No auctions available for streaming.",
+    "no_streams_desc": "You need to have auctions with status 'Awaiting Payment' (Approved and not finished) or 'Active' to start a stream."
+  },
+  "modals": {
+    "confirm_title": "Confirmation",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "report_title": "Report Item / User",
+    "report_desc": "Provide the details of your report below. False reports may result in account suspension.",
+    "report_reason": "Reason for Report",
+    "report_details": "Additional Details",
+    "send_report": "Submit Report",
+    "sending": "Sending..."
+  },
+  "chat_tab": {
+    "title": "Messages",
+    "desc": "Chat with other users.",
+    "no_chats": "No active conversations."
   }
 }

@@ -1,4 +1,5 @@
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +10,8 @@ import { forgotPasswordSchema, type ForgotPasswordInput } from '@/shared/schema/
 import Logo from "@/assets/images/logo2.png";
 
 export default function ForgotPassword() {
+    const { t } = useTranslation();
+
   useDocumentTitle("Recuperar Senha");
 
   const { forgotPassword, isLoading, error, clearError } = useAuthStore();
@@ -128,8 +131,7 @@ export default function ForgotPassword() {
           <div className="mt-8 text-center text-sm text-zinc-500">
             Lembrou-se da senha?{' '}
             <Link to="/auth/signin" className="text-white hover:underline font-medium inline-flex items-center gap-1 transition-colors">
-              <ArrowLeft size={14} /> Voltar ao Login
-            </Link>
+              <ArrowLeft size={14} />{t('auth.back_to_login')}</Link>
           </div>
 
         </div>

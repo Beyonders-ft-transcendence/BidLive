@@ -1,4 +1,5 @@
 import { Eye, Ban, Trash2, CheckCircle, Gavel, PlusCircle, Video } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Auction } from "@/shared/types/auction.types";
 import { AuctionStatus } from "@/shared/types/auction.types";
 import { formatCurrency, auctionStatusColor, getAuctionStatusLabel } from "@/shared/utils/auction.utils";
@@ -33,12 +34,14 @@ export default function MyAuctionsTab({
   onCreateNewClick,
   onManageStreamClick,
 }: MyAuctionsTabProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none text-foreground">
       <div className="bg-card border border-border p-5 rounded-sm shadow-sm flex flex-col justify-between">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-black tracking-tight">Meus Leilões</h2>
+            <h2 className="text-xl font-black tracking-tight">{t('my_auctions_tab.title')}</h2>
             <p className="text-xs text-muted-foreground mt-1 font-normal">
               Crie novos lotes, gerencie seus rascunhos, publique itens ou cancele leilões criados.
             </p>

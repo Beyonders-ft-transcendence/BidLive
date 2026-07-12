@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,8 @@ interface SelectedFile {
 }
 
 export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctionTabProps) {
+  const { t } = useTranslation();
+
   const createAuctionMutation = useCreateAuctionMutation();
 
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
@@ -219,7 +222,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Categoria</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.category')}</label>
                   <select
                     {...register("category_id")}
                     className={`w-full px-3.5 py-2.5 border rounded-sm text-xs bg-background text-foreground outline-none transition duration-150 h-[38px] ${
@@ -276,7 +279,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Preço Inicial (Kz)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.start_price')}</label>
                   <input
                     type="text"
                     {...register("starting_price")}
@@ -312,7 +315,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Preço de Reserva (Opcional)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.reserve_price')}</label>
                   <input
                     type="text"
                     {...register("reserve_price")}

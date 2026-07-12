@@ -8,15 +8,13 @@
     "confirm": "Confirmar"
   },
   "header": {
-    "home": "Início",
     "auctions": "Leilões",
-    "notifications": "Notificações",
-    "no_notifications": "Sem notificações",
-    "new_notifications": "novas",
-    "mark_read": "Marcar como lida",
-    "login_register": "Registrar / Entrar",
-    "language": "Idioma",
-    "menu": "Menu"
+    "how_it_works": "Como Funciona",
+    "about": "Sobre Nós",
+    "login": "Entrar",
+    "register": "Criar Conta",
+    "dashboard": "Dashboard",
+    "backoffice": "Backoffice"
   },
   "backoffice_header": {
     "admin_title": "BidLive Admin",
@@ -280,5 +278,160 @@
     "reached": "Atingido",
     "not_reached": "Não Atingido",
     "explore_lots": "Explorar Lotes"
+  },
+  "home": {
+    "title": "Página Inicial",
+    "hero_title_1": "Leilões",
+    "hero_title_2": "Exclusivos,",
+    "hero_title_3": "Resultados",
+    "hero_title_4": "Extraordinários",
+    "hero_desc": "A plataforma líder para colecionadores e entusiastas em Angola. Descubra itens raros, participe em tempo real e expanda sua coleção.",
+    "explore_auctions": "Explorar Leilões",
+    "how_it_works": "Como Funciona",
+    "how_it_works_desc": "Três passos simples para você começar a arrematar ou vender seus itens com total segurança.",
+    "step1_title": "1. Registe-se",
+    "step1_desc": "Crie a sua conta em segundos e ganhe acesso imediato a centenas de lotes exclusivos.",
+    "step2_title": "2. Descubra e Ofereça",
+    "step2_desc": "Explore o catálogo, defina seus alertas e dê lances ao vivo nos leilões do seu interesse.",
+    "step3_title": "3. Vença e Receba",
+    "step3_desc": "Acompanhe as suas vitórias no painel, faça o pagamento seguro e receba o lote em casa.",
+    "featured_auctions": "Leilões em Destaque",
+    "view_all": "Ver todos os leilões",
+    "no_featured": "Nenhum leilão em destaque no momento.",
+    "upcoming_auctions": "Próximos Leilões",
+    "start_bidding": "Comece a Licitar Hoje",
+    "start_bidding_desc": "Junte-se a milhares de colecionadores e encontre as melhores oportunidades do mercado.",
+    "create_account": "Criar Conta Gratuita",
+    "view_catalog": "Ver Catálogo"
+  },
+  "not_found": {
+    "title": "Página não encontrada",
+    "error": "Erro 404",
+    "desc": "Desculpe, não conseguimos encontrar a página que procura.",
+    "back_home": "Voltar ao Início",
+    "contact_support": "Contactar Suporte"
+  },
+  "user_drawer": {
+    "my_account": "Minha Conta",
+    "logout": "Terminar Sessão"
+  },
+  "user_dashboard": {
+    "title": "Painel do Utilizador",
+    "overview": "Visão Geral",
+    "profile": "Meu Perfil",
+    "my_auctions": "Meus Leilões",
+    "create_auction": "Criar Leilão",
+    "my_bids": "Meus Lances",
+    "favorites": "Meus Favoritos",
+    "live_stream": "Transmitir Live",
+    "chat": "Mensagens",
+    "logout": "Sair"
+  },
+  "overview_tab": {
+    "profile_photo": "Foto do Perfil",
+    "change_photo": "Alterar Foto",
+    "uploading": "Enviando...",
+    "account_settings": "Configurações da Conta",
+    "update_info": "Atualize os seus dados pessoais.",
+    "full_name": "Nome Completo",
+    "bio": "Biografia (Opcional)",
+    "save_changes": "Salvar Alterações",
+    "change_password": "Mudar Senha",
+    "security": "Mantenha a sua conta segura.",
+    "current_password": "Senha Atual",
+    "new_password": "Nova Senha",
+    "confirm_password": "Confirmar Senha",
+    "recent_auctions": "Leilões Recentes",
+    "recent_bids": "Lances Recentes",
+    "no_auctions": "Você ainda não criou nenhum leilão.",
+    "create_first": "Criar o meu primeiro leilão",
+    "view_all": "Ver Todos",
+    "no_bids": "Você ainda não deu nenhum lance.",
+    "explore_auctions": "Explorar leilões ativos"
+  },
+  "favorites_tab": {
+    "title": "Meus Favoritos",
+    "desc": "Leilões que você está acompanhando.",
+    "no_favorites": "Nenhum favorito ainda",
+    "no_favorites_desc": "Você ainda não adicionou nenhum leilão aos seus favoritos."
+  },
+  "reports_tab": {
+    "title": "Minhas Denúncias",
+    "desc": "Histórico de denúncias feitas por você.",
+    "no_reports": "Nenhuma denúncia encontrada.",
+    "status": "Status",
+    "reason": "Motivo"
+  },
+  "my_auctions_tab": {
+    "title": "Meus Leilões",
+    "desc": "Gerencie os leilões que você criou.",
+    "new_auction": "Novo Leilão",
+    "no_auctions": "Nenhum leilão criado.",
+    "no_auctions_desc": "Você ainda não criou nenhum leilão. Clique no botão acima para começar."
+  },
+  "my_bids_tab": {
+    "title": "Meus Lances",
+    "desc": "Acompanhe todos os lances que você fez.",
+    "no_bids": "Nenhum lance feito.",
+    "no_bids_desc": "Você ainda não participou de nenhum leilão."
+  },
+  "create_auction_tab": {
+    "title": "Criar Novo Leilão",
+    "desc": "Preencha os detalhes do item que deseja leiloar.",
+    "item_details": "Detalhes do Item",
+    "item_name": "Nome do Item",
+    "item_desc": "Descrição",
+    "category": "Categoria",
+    "select_category": "Selecione uma categoria",
+    "condition": "Condição",
+    "select_condition": "Selecione a condição",
+    "condition_new": "Novo",
+    "condition_used": "Usado",
+    "condition_refurbished": "Renovado",
+    "condition_parts": "Para Peças",
+    "images": "Imagens do Item",
+    "upload_images": "Adicionar Imagens",
+    "auction_config": "Configuração do Leilão",
+    "start_price": "Preço Inicial (Kz)",
+    "reserve_price": "Preço de Reserva (Opcional)",
+    "buy_now_price": "Preço de Compra Imediata (Opcional)",
+    "dates": "Datas do Leilão",
+    "start_time": "Data de Início",
+    "end_time": "Data de Fim",
+    "submit": "Criar Leilão",
+    "submitting": "Criando..."
+  },
+  "auction_detail_tab": {
+    "title": "Detalhes do Leilão",
+    "back": "Voltar para Meus Leilões",
+    "edit": "Editar Leilão",
+    "delete": "Apagar",
+    "cancel": "Cancelar Leilão",
+    "start_stream": "Iniciar Transmissão",
+    "bids_history": "Histórico de Lances",
+    "no_bids": "Nenhum lance recebido ainda.",
+    "item_info": "Informações do Item"
+  },
+  "live_stream_tab": {
+    "title": "Minhas Transmissões",
+    "desc": "Transmita os seus leilões ativos ao vivo para o seu público.",
+    "no_streams": "Nenhum leilão disponível para transmissão.",
+    "no_streams_desc": "Você precisa ter leilões com o status 'Aguardando Pagamento' (Aprovados e não finalizados) ou 'Ativos' para iniciar uma transmissão."
+  },
+  "modals": {
+    "confirm_title": "Confirmação",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "report_title": "Denunciar Item / Usuário",
+    "report_desc": "Forneça os detalhes da sua denúncia abaixo. Falsas denúncias podem resultar na suspensão da conta.",
+    "report_reason": "Motivo da Denúncia",
+    "report_details": "Detalhes Adicionais",
+    "send_report": "Enviar Denúncia",
+    "sending": "Enviando..."
+  },
+  "chat_tab": {
+    "title": "Mensagens",
+    "desc": "Converse com outros utilizadores.",
+    "no_chats": "Nenhuma conversa ativa."
   }
 }
