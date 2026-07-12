@@ -47,7 +47,7 @@ export default function Header() {
     return (
         <>
         {/* Top Bar: Non-sticky, creative dark banner */}
-        <div className="w-full bg-linear-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white border-b border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+        <div className="relative z-[60] w-full bg-linear-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white border-b border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5 sm:py-1 flex justify-between items-center text-xs">
                 
                 {/* Left Side: Information / Slogan */}
