@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import {
   useAuctionsQuery,
   useAuctionQuery,
