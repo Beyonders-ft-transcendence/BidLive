@@ -24,7 +24,7 @@ export default function PageHeader({ title, description, backUrl, icon, actions 
         )}
         <div className="flex gap-3">
           {icon && (
-            <div className="p-2 bg-zinc-800/50 rounded-lg text-zinc-300 mt-1">
+            <div className="flex items-center justify-center shrink-0 h-10 w-10 bg-zinc-800/50 rounded-lg text-zinc-300">
               {icon}
             </div>
           )}
