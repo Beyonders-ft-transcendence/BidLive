@@ -8,7 +8,7 @@ const languages = [
   { code: 'ar', name: 'العربية', flag: '🇦🇪', dir: 'rtl' },
 ];
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ variant = 'default' }: { variant?: 'topbar' | 'default' }) {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -38,10 +38,14 @@ export default function LanguageSwitcher() {
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-md hover:bg-muted transition-colors focus:outline-none"
+        className={
+          variant === 'topbar'
+            ? "flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-bold text-zinc-300 bg-transparent rounded-md hover:bg-white/10 hover:text-white transition-all focus:outline-none"
+            : "flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-md hover:bg-muted transition-colors focus:outline-none"
+        }
       >
-        <Globe size={16} className="text-muted-foreground" />
-        <span className="hidden sm:inline-block">{currentLang.flag} {currentLang.name}</span>
+        <Globe size={variant === 'topbar' ? 14 : 16} className={variant === 'topbar' ? "" : "text-muted-foreground"} />
+        <span className="hidden sm:inline-block tracking-wide">{currentLang.flag} {currentLang.name}</span>
         <span className="sm:hidden">{currentLang.flag}</span>
       </button>
 

@@ -48,7 +48,7 @@ export default function Header() {
         <>
         {/* Top Bar: Non-sticky, creative dark banner */}
         <div className="w-full bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white border-b border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-1.5 flex justify-between items-center text-xs">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5 sm:py-1 flex justify-between items-center text-xs">
                 
                 {/* Left Side: Information / Slogan */}
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -63,7 +63,7 @@ export default function Header() {
                 {/* Right Side: Settings (Theme, Language) */}
                 <div className="flex items-center gap-3 sm:gap-5">
                     <div className="opacity-90 hover:opacity-100 transition-opacity">
-                        <LanguageSwitcher />
+                        <LanguageSwitcher variant="topbar" />
                     </div>
                     
                     <div className="w-px h-4 bg-white/20"></div>
