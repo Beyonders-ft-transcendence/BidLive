@@ -18,8 +18,7 @@ import {
   X,
   Flag,
   CheckCircle,
-  ShieldBan,
-  MessageSquare
+  Eye
 } from 'lucide-react';
 import type { Report, ReportActionType } from '@/shared/types/admin.types';
 import { useTranslation } from 'react-i18next';

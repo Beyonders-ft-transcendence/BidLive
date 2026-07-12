@@ -15,9 +15,12 @@ import ReportModal from "@/components/common/ReportModal";
 import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { ReportTargetType } from "@/shared/types/report.types";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 
 // Condition label map
-const conditionLabels: Record<string, string> = {
+// Note: we will use translation inside the component for conditionLabels, but if needed globally we can map keys
+// @ts-ignore
+const conditionLabels: any = {
     NEW: "Novo",
     USED: "Usado",
     REFURBISHED: "Recondicionado",
@@ -55,13 +58,13 @@ function useCountdown(endTime: string | null | undefined, status: string) {
         return () => clearInterval(timer);
     }, [endTime, status]);
 
-    if (status === "ENDED" || status === "SOLD") return "Encerrado";
-    if (status === "CANCELLED") return "Cancelado";
+    if (status === "ENDED" || status === "SOLD") return "ended"; // handled below
+    if (status === "CANCELLED") return "cancelled";
     if (!endTime) return null;
 
     const end = new Date(endTime).getTime();
     const diff = end - now;
-    if (diff <= 0) return "Encerrado";
+    if (diff <= 0) return "ended";
 
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
@@ -74,6 +77,7 @@ function useCountdown(endTime: string | null | undefined, status: string) {
 }
 
 export default function AuctionDetailPage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const auctionId = Number(id);
     const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
@@ -98,7 +102,8 @@ export default function AuctionDetailPage() {
         submittingBuyNow,
     } = useAuctionRealtime(auctionId);
 
-    const countdown = useCountdown(auction?.end_time, auction?.status || "");
+    const countdownRaw: any = useCountdown(auction?.end_time, auction?.status || "");
+    const countdown = typeof countdownRaw === "string" ? (countdownRaw === "ended" ? t('auction_detail.status.ended') : t('auction_detail.status.cancelled')) : (countdownRaw ? (countdownRaw.days !== undefined ? `${countdownRaw.days}${t('auction_detail.days')} ${countdownRaw.hours}${t('auction_detail.hours')}` : countdownRaw.hours !== undefined ? `${countdownRaw.hours}${t('auction_detail.hours')} ${countdownRaw.minutes}${t('auction_detail.minutes')}` : `${countdownRaw.minutes}${t('auction_detail.minutes')} ${countdownRaw.seconds}${t('auction_detail.seconds')}`) : null);
 
     const [isFavorite, setIsFavorite] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -112,7 +117,7 @@ export default function AuctionDetailPage() {
     }, []);
 
     // Atualiza o título da página com base no leilão
-    useDocumentTitle(auction ? `${auction.item.title}` : "Detalhes do Leilão");
+    useDocumentTitle(auction ? `${auction.item.title}` : t('auction_detail.title'));
 
     useEffect(() => {
         try {
@@ -137,7 +142,7 @@ export default function AuctionDetailPage() {
                 localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
                 setIsFavorite(false);
                 window.dispatchEvent(new Event("storage"));
-                toast.success("Removido dos favoritos.");
+                toast.success(t('auction_detail.fav_removed'));
                 
                 // Tenta sincronizar com o backend se autenticado
                 if (isAuthenticated) {
@@ -151,7 +156,7 @@ export default function AuctionDetailPage() {
                 localStorage.setItem("bidlive_watched_auctions", JSON.stringify(ids));
                 setIsFavorite(true);
                 window.dispatchEvent(new Event("storage"));
-                toast.success("Adicionado aos favoritos.");
+                toast.success(t('auction_detail.fav_added'));
                 
                 // Tenta sincronizar com o backend se autenticado
                 if (isAuthenticated) {
@@ -160,7 +165,7 @@ export default function AuctionDetailPage() {
             }
         } catch (err) {
             console.error("Erro ao favoritar localmente:", err);
-            toast.error("Ocorreu um erro ao atualizar os favoritos.");
+            toast.error(t('auction_detail.fav_error'));
         }
     };
 
@@ -208,7 +213,7 @@ export default function AuctionDetailPage() {
             try {
                 await sendMsgMutation.mutateAsync({ auctionId, message: msg });
             } catch (err) {
-                console.error("Falha ao enviar mensagem de chat", err);
+                console.error(t('auction_detail.chat_fail'), err);
             }
         }
     };
@@ -222,9 +227,9 @@ export default function AuctionDetailPage() {
     const handleBuyNowSubmit = async () => {
         const res = await buyNow();
         if (res && res.success) {
-            toast.success("Compra imediata efetuada com sucesso!");
+            toast.success(t('auction_detail.buy_now_success'));
         } else if (res) {
-            toast.error(res.message || "Não foi possível concluir a compra.");
+            toast.error(res.message || t('auction_detail.buy_now_error'));
         }
     };
 
@@ -234,7 +239,7 @@ export default function AuctionDetailPage() {
                 <Header />
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="w-9 h-9 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-muted-foreground font-medium tracking-wide mt-4">Carregando lote...</p>
+                    <p className="text-sm text-muted-foreground font-medium tracking-wide mt-4">{t('auction_detail.loading')}</p>
                 </div>
             </div>
         );
@@ -246,12 +251,12 @@ export default function AuctionDetailPage() {
                 <Header />
                 <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
                     <AlertCircle size={44} className="text-red-400" />
-                    <h2 className="text-xl font-bold text-foreground">Lote não encontrado</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('auction_detail.not_found_title')}</h2>
                     <p className="text-sm text-muted-foreground text-center max-w-sm">
-                        {auctionError || "O leilão que você está procurando não existe ou foi removido."}
+                        {auctionError || t('auction_detail.not_found_desc')}
                     </p>
                     <Link to="/leiloes" className="mt-2 bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
-                        Voltar para Leilões
+                        {t('auction_detail.back_to_auctions')}
                     </Link>
                 </div>
             </div>
@@ -283,14 +288,14 @@ export default function AuctionDetailPage() {
                         onClick={() => setIsWatchingStream(false)}
                         className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream ? "text-primary bg-card border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"}`}
                     >
-                        Galeria de Fotos
+                        {t('auction_detail.gallery')}
                     </button>
                     <button
                         onClick={() => setIsWatchingStream(true)}
                         className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream ? "text-red-500 bg-card border-b-2 border-red-500" : "text-muted-foreground hover:text-red-500"}`}
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        Transmissão Ao Vivo (LIVE)
+                        {t('auction_detail.live_stream')}
                     </button>
                 </div>
             )}
@@ -306,10 +311,10 @@ export default function AuctionDetailPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {viewerCount} assistindo
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {viewerCount} {t('auction_detail.watching')}
                             </div>
                             <button onClick={() => setShowChat(!showChat)} className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1.5 text-white hover:bg-black/60 transition-colors cursor-pointer">
-                                <MessageSquare size={12} /> {showChat ? "Ocultar Chat" : "Chat"}
+                                <MessageSquare size={12} /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.chat')}
                             </button>
                         </div>
                     </div>
@@ -318,12 +323,12 @@ export default function AuctionDetailPage() {
                         <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 animate-pulse mb-3">
                             <Video size={24} className="text-white" />
                         </div>
-                        <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">Transmissão em Andamento</p>
+                        <p className="text-xs font-bold text-slate-100 uppercase tracking-widest leading-none">{t('auction_detail.stream_in_progress')}</p>
                     </div>
 
                     <div className="flex items-center justify-between z-10 w-full pt-2">
                         <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                            Streamer: @{activeStream.streamer?.username || "Vendedor"}
+                            {t('auction_detail.streamer')} @{activeStream.streamer?.username || t('auction_detail.seller')}
                         </span>
                     </div>
                 </div>
@@ -335,24 +340,24 @@ export default function AuctionDetailPage() {
                         ) : (
                             <div className="flex flex-col items-center justify-center text-muted-foreground">
                                 <Gavel size={44} className="mb-2" />
-                                <span className="text-sm">Sem imagem</span>
+                                <span className="text-sm">{t('auction_detail.no_image')}</span>
                             </div>
                         )}
 
                         <div className="absolute top-3 left-3 flex gap-2">
                             <span className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-md shadow-black/20">
-                                Lote #{auction.id}
+                                {t('auction_detail.lot')}{auction.id}
                             </span>
                             {isLive && (
                                 <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> Ao Vivo
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> {t('auctions.live')}
                                 </span>
                             )}
                         </div>
 
                         <div className="absolute top-3 right-3 flex gap-2">
                             <button onClick={() => setShowChat(!showChat)} className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm shadow-md shadow-black/20 flex items-center gap-1.5 hover:bg-muted transition-colors cursor-pointer">
-                                <MessageSquare size={12} /> {showChat ? "Ocultar Chat" : "Mostrar Chat"}
+                                <MessageSquare size={12} /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.show_chat')}
                             </button>
                         </div>
                     </div>
@@ -379,14 +384,14 @@ export default function AuctionDetailPage() {
         <>
             <div className="px-4 py-3 border-b border-border bg-muted flex items-center gap-2 shrink-0">
                 <MessageSquare size={16} className="text-primary" /> 
-                <span className="text-xs font-bold uppercase tracking-wider text-foreground">Chat Público</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-foreground">{t('auction_detail.public_chat')}</span>
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-muted">
                 {chatMessages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center">
                         <MessageSquare size={24} className="text-muted-foreground mb-2" />
-                        <p className="text-xs text-muted-foreground font-medium">Chat vazio.</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">Mande a primeira mensagem!</p>
+                        <p className="text-xs text-muted-foreground font-medium">{t('auction_detail.empty_chat')}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{t('auction_detail.empty_chat_desc')}</p>
                     </div>
                 ) : (
                     chatMessages.map((msg) => {
@@ -414,7 +419,7 @@ export default function AuctionDetailPage() {
                             type="text"
                             value={chatInput}
                             onChange={e => setChatInput(e.target.value)}
-                            placeholder="Digite..."
+                            placeholder={t('auction_detail.chat_placeholder')}
                             className="w-full bg-muted border border-border rounded-full pl-4 pr-10 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 text-foreground"
                         />
                         <button 
@@ -427,7 +432,7 @@ export default function AuctionDetailPage() {
                     </form>
                 ) : (
                     <div className="text-center py-1">
-                        <p className="text-[10px] text-muted-foreground">Faça <Link to="/signin" className="text-primary hover:underline font-medium">login</Link> para conversar</p>
+                        <p className="text-[10px] text-muted-foreground">{t('auction_detail.login_to_chat').split('<1>')[0]}<Link to="/signin" className="text-primary hover:underline font-medium">{t('auction_detail.login_to_chat').split('<1>')[1].split('</1>')[0]}</Link>{t('auction_detail.login_to_chat').split('</1>')[1]}</p>
                     </div>
                 )}
             </div>
@@ -438,7 +443,7 @@ export default function AuctionDetailPage() {
         <>
             <div className="px-6 pt-6 pb-4 border-b border-border">
                 <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-sm mb-3">
-                    {auction.item.category?.name || "Leilão"}
+                    {auction.item.category?.name || t('auction_detail.auction_category_default')}
                 </span>
                 <div className="flex items-start justify-between gap-4">
                     <h1 className="text-xl font-extrabold text-foreground leading-snug">{auction.item.title}</h1>
@@ -447,7 +452,7 @@ export default function AuctionDetailPage() {
                             <button
                                 onClick={() => setIsReportModalOpen(true)}
                                 className="p-2 border rounded-sm transition cursor-pointer bg-background text-muted-foreground border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
-                                title="Denunciar Leilão"
+                                title={t('auction_detail.report_auction')}
                             >
                                 <AlertOctagon size={18} />
                             </button>
@@ -458,7 +463,7 @@ export default function AuctionDetailPage() {
                                         ? "bg-red-50 text-red-500 border-red-200 hover:bg-red-100"
                                         : "bg-background text-muted-foreground border-border hover:bg-muted"
                                 }`}
-                                title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                                title={isFavorite ? t('auction_detail.remove_favorite') : t('auction_detail.add_favorite')}
                             >
                                 <Heart size={18} className={isFavorite ? "fill-current" : ""} />
                             </button>
@@ -469,13 +474,13 @@ export default function AuctionDetailPage() {
 
             <div className="px-6 py-5 flex items-end justify-between border-b border-border bg-muted">
                 <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Lance Atual</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.current_bid')}</p>
                     <p className={`text-3xl font-black tracking-tight ${isLive ? "text-primary" : "text-foreground"}`}>
                         {formatCurrency(currentPrice, true)}
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Tempo Restante</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.time_left')}</p>
                     <p className={`text-sm font-bold flex items-center justify-end gap-1 ${isLive ? "text-red-500" : "text-muted-foreground"}`}>
                         <Clock size={13} /> {countdown}
                     </p>
@@ -487,7 +492,7 @@ export default function AuctionDetailPage() {
                     isAuthenticated ? (
                         <div className="flex flex-col gap-4">
                             <div className="space-y-1.5">
-                                <span className="text-[9px] text-muted-foreground font-mono font-medium block">Incremento rápido (+ sob lance atual):</span>
+                                <span className="text-[9px] text-muted-foreground font-mono font-medium block">{t('auction_detail.fast_increment')}</span>
                                 <div className="grid grid-cols-3 gap-2">
                                     {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
                                         <button
@@ -503,7 +508,7 @@ export default function AuctionDetailPage() {
                             </div>
 
                             <form onSubmit={handlePlaceBid} className="flex flex-col gap-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Valor do Lance Customizado</label>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('auction_detail.custom_bid_label')}</label>
                                 <div className="relative flex items-center">
                                     <span className="absolute left-3.5 text-xs font-bold text-muted-foreground select-none">Kz</span>
                                     <input
@@ -518,12 +523,12 @@ export default function AuctionDetailPage() {
                                     />
                                     <div className="absolute right-1.5 top-1.5 flex gap-1.5">
                                         <button type="submit" disabled={submittingBid} className="h-8 px-4 bg-primary hover:bg-primary/90 disabled:bg-slate-700 disabled:text-muted-foreground text-white rounded-sm text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-black/20 cursor-pointer">
-                                            {submittingBid ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Gavel className="h-3.5 w-3.5" /> Ofertar</>}
+                                            {submittingBid ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Gavel className="h-3.5 w-3.5" /> {t('auction_detail.place_bid')}</>}
                                         </button>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between mt-1">
-                                    <p className="text-[10px] text-muted-foreground">Lance mínimo: <span className="font-semibold text-foreground">{formatCurrency(minBid)}</span></p>
+                                    <p className="text-[10px] text-muted-foreground">{t('auction_detail.min_bid_label')} <span className="font-semibold text-foreground">{formatCurrency(minBid)}</span></p>
                                     {bidError && <p className="text-[10px] text-red-500 font-bold">{bidError}</p>}
                                 </div>
                             </form>
@@ -531,13 +536,13 @@ export default function AuctionDetailPage() {
                                 <div className="pt-4 border-t border-border flex flex-col gap-3">
                                     <div className="flex items-center justify-between gap-4">
                                         <div>
-                                            <span className="text-[10px] text-muted-foreground font-mono block">Arremate Imediato:</span>
-                                            <span className="text-foreground text-xs font-bold block">Adquira agora sem disputas</span>
+                                            <span className="text-[10px] text-muted-foreground font-mono block">{t('auction_detail.buy_now_label')}</span>
+                                            <span className="text-foreground text-xs font-bold block">{t('auction_detail.buy_now_desc')}</span>
                                         </div>
                                         <button type="button" onClick={handleBuyNowSubmit} disabled={submittingBuyNow} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-black/20 disabled:opacity-50 shrink-0">
                                             <ShoppingBag className="h-4 w-4 shrink-0" />
                                             <span>
-                                                {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `Comprar por ${formatCurrency(auction.item.buy_now_price, true)}`}
+                                                {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `${t('auction_detail.buy_now_btn')}${formatCurrency(auction.item.buy_now_price, true)}`}
                                             </span>
                                         </button>
                                     </div>
@@ -547,27 +552,27 @@ export default function AuctionDetailPage() {
                     ) : (
                         <div className="bg-muted border border-border rounded-sm text-center py-6 flex flex-col items-center gap-3">
                             <User size={28} className="text-muted-foreground" />
-                            <p className="text-sm font-semibold text-foreground">Faça login para participar</p>
-                            <p className="text-xs text-muted-foreground max-w-[240px]">Você precisa estar autenticado para dar lances ou arrematar este lote.</p>
+                            <p className="text-sm font-semibold text-foreground">{t('auction_detail.login_required')}</p>
+                            <p className="text-xs text-muted-foreground max-w-[240px]">{t('auction_detail.login_required_desc')}</p>
                             <Link to="/signin" className="mt-2 bg-primary text-white text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-sm hover:bg-primary/90 transition-colors">
-                                Fazer Login
+                                {t('auction_detail.login_btn')}
                             </Link>
                         </div>
                     )
                 ) : (
                     <div className="bg-muted border border-border rounded-sm text-center py-5 flex flex-col items-center gap-3">
                         <p className="text-sm font-semibold text-muted-foreground">
-                            Este leilão está {
-                                auction.status === "SOLD" ? "Vendido" 
-                                : auction.status === "ENDED" ? "Encerrado" 
-                                : auction.status === "LIVE" ? (hasEndedStream ? "Transmissão Encerrada" : "Aguardando Início da Stream") 
-                                : auction.status === "SCHEDULED" ? "Agendado" 
-                                : "Inativo"
+                            {t('auction_detail.status_msg_start')} {
+                                auction.status === "SOLD" ? t('auction_detail.status_msg_sold') 
+                                : auction.status === "ENDED" ? t('auction_detail.status_msg_ended') 
+                                : auction.status === "LIVE" ? (hasEndedStream ? t('auction_detail.status_msg_stream_ended') : t('auction_detail.status_msg_waiting_stream')) 
+                                : auction.status === "SCHEDULED" ? t('auction_detail.status_msg_scheduled') 
+                                : t('auction_detail.status_msg_inactive')
                             }.
                         </p>
                         {isAuthenticated && currentUser && auction.winner === currentUser.id && (
                             <div className="mt-1 bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 text-sm rounded-sm font-semibold flex items-center gap-2">
-                                <CheckCircle2 size={16} /> Você venceu este leilão!
+                                <CheckCircle2 size={16} /> {t('auction_detail.you_won')}
                             </div>
                         )}
                     </div>
@@ -581,7 +586,7 @@ export default function AuctionDetailPage() {
             <div className="px-6 py-3 border-b border-border flex items-center gap-2 bg-muted">
                 <Gavel size={14} className="text-muted-foreground" />
                 <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                    Histórico de Lances ({auction.bids_count || bids.length})
+                    {t('auction_detail.bids_history')} ({auction.bids_count || bids.length})
                 </span>
             </div>
             <div className="divide-y divide-slate-800/60 max-h-[300px] overflow-y-auto bg-muted">
@@ -601,21 +606,21 @@ export default function AuctionDetailPage() {
                                             {bid.bidder.username}
                                         </button>
                                     ) : (
-                                        <span className="text-sm font-semibold text-foreground leading-tight text-left">Anônimo</span>
+                                        <span className="text-sm font-semibold text-foreground leading-tight text-left">{t('auction_detail.anonymous')}</span>
                                     )}
                                     <p className="text-[10px] text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}</p>
                                 </div>
                             </div>
                             <div className="text-right">
                                 <span className={`text-sm font-black ${i === 0 ? "text-primary" : "text-foreground"}`}>{formatCurrency(bid.amount, true)}</span>
-                                {bid.is_buy_now && <span className="block text-[9px] text-green-500 font-bold uppercase">Compra Direta</span>}
+                                {bid.is_buy_now && <span className="block text-[9px] text-green-500 font-bold uppercase">{t('auction_detail.direct_buy')}</span>}
                             </div>
                         </div>
                     ))
                 ) : (
                     <div className="px-6 py-8 text-center">
                         <Gavel size={24} className="text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground font-medium">Nenhum lance ainda.</p>
+                        <p className="text-sm text-muted-foreground font-medium">{t('auction_detail.no_bids')}</p>
                     </div>
                 )}
             </div>
@@ -625,38 +630,38 @@ export default function AuctionDetailPage() {
     const renderDetails = () => (
         <>
             <div className="p-6 lg:p-8">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Descrição</p>
-                <h2 className="text-base font-bold text-foreground mb-3">Visão Geral do Lote</h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.description_label')}</p>
+                <h2 className="text-base font-bold text-foreground mb-3">{t('auction_detail.overview_title')}</h2>
                 {auction.item.description ? (
                     <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{auction.item.description}</p>
                 ) : (
-                    <p className="text-sm italic text-muted-foreground">O vendedor não forneceu uma descrição detalhada.</p>
+                    <p className="text-sm italic text-muted-foreground">{t('auction_detail.no_description')}</p>
                 )}
             </div>
 
             <div className="border-t border-border" />
 
             <div className="p-6 lg:p-8">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Informações do Lote</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">{t('auction_detail.lot_info')}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5">
                     {[
-                        { icon: <Shield size={13} className="text-primary" />, label: "Condição", value: conditionLabels[auction.item.condition_type] || auction.item.condition_type || "—" },
+                        { icon: <Shield size={13} className="text-primary" />, label: t('auction_detail.condition_label'), value: t(`auction_detail.condition.${auction.item.condition_type?.toLowerCase()}`) || auction.item.condition_type || "—" },
                         { 
                           icon: <User size={13} className="text-primary" />, 
-                          label: "Vendedor", 
+                          label: t('auction_detail.seller_label'), 
                           value: (
                               <button 
-                                  onClick={() => setSelectedProfile({ id: auction.item.seller, username: "Vendedor" })}
+                                  onClick={() => setSelectedProfile({ id: auction.item.seller, username: t('auction_detail.seller_label') })}
                                   className="hover:text-primary transition-colors cursor-pointer font-bold underline underline-offset-2"
                               >
-                                  Ver Perfil
+                                  {t('auction_detail.view_profile')}
                               </button>
                           ) 
                         },
-                        { icon: <Tag size={13} className="text-primary" />, label: "Preço Inicial", value: formatCurrency(auction.item.starting_price) },
-                        { icon: <TrendingUp size={13} className="text-primary" />, label: "Incremento Mín.", value: formatCurrency(auction.item.minimum_increment) },
-                        { icon: <CalendarDays size={13} className="text-primary" />, label: "Abertura", value: new Date(auction.start_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
-                        { icon: <CalendarDays size={13} className="text-primary" />, label: "Encerramento", value: new Date(auction.end_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
+                        { icon: <Tag size={13} className="text-primary" />, label: t('auction_detail.starting_price'), value: formatCurrency(auction.item.starting_price) },
+                        { icon: <TrendingUp size={13} className="text-primary" />, label: t('auction_detail.min_increment'), value: formatCurrency(auction.item.minimum_increment) },
+                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.opening'), value: new Date(auction.start_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
+                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.closing'), value: new Date(auction.end_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
                     ].map((item) => (
                         <div key={item.label} className="flex flex-col gap-1">
                             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{item.label}</p>
@@ -670,21 +675,21 @@ export default function AuctionDetailPage() {
                 <>
                     <div className="border-t border-border" />
                     <div className="p-6 lg:p-8">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Valores Adicionais</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">{t('auction_detail.additional_values')}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {auction.item.buy_now_price && (
                                 <div className="border border-border rounded-sm p-4 bg-muted">
-                                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Comprar Agora</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.buy_now')}</p>
                                     <p className="text-lg font-black text-primary">{formatCurrency(auction.item.buy_now_price, true)}</p>
                                 </div>
                             )}
                             {auction.item.reserve_price && (
                                 <div className="border border-border rounded-sm p-4 bg-muted">
-                                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Preço de Reserva</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.reserve_price')}</p>
                                     <p className="text-sm font-semibold text-foreground flex items-center gap-1">
                                         {auction.reserve_met ? (
-                                            <><CheckCircle2 size={13} className="text-green-500" /><span className="text-green-400">Atingido</span></>
-                                        ) : ("Não Atingido")}
+                                            <><CheckCircle2 size={13} className="text-green-500" /><span className="text-green-400">{t('auction_detail.reached')}</span></>
+                                        ) : ("{t('auction_detail.not_reached')}")}
                                     </p>
                                 </div>
                             )}
@@ -703,7 +708,7 @@ export default function AuctionDetailPage() {
                 {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
                     <Link to="/leiloes" className="flex items-center gap-1 hover:text-primary transition-colors font-medium">
-                        <ChevronLeft size={14} /> Explorar Lotes
+                        <ChevronLeft size={14} /> {t('auction_detail.explore_lots')}
                     </Link>
                     <span>/</span>
                     <span className="text-foreground font-semibold truncate max-w-xs">{auction.item.title}</span>
