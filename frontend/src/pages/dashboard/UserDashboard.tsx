@@ -25,6 +25,7 @@ import AuctionDetailTab from "@/components/user/AuctionDetailTab";
 import FavoritesTab from "@/components/user/FavoritesTab";
 import LiveStreamTab from "@/components/user/LiveStreamTab";
 import MyReportsTab from "@/components/user/MyReportsTab";
+import ProfileTab from "@/components/user/ProfileTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
@@ -239,6 +240,8 @@ export function UserDashboard() {
               onViewAllBidsClick={() => setActiveTab("my-bids")}
             />
           )}
+
+          {activeTab === "profile" && <ProfileTab />}
 
           {activeTab === "my-auctions" && (
             <MyAuctionsTab

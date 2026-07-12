@@ -2,6 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import {
     SigninPage,
     SignupPage,
+    ForgotPasswordPage,
+    ResetPasswordPage,
+    VerifyUserPage,
     HomePage,
     AuctionsPage,
     AuctionDetailPage,
@@ -32,7 +35,11 @@ export default function IndexRoot() {
                     <Route path="/leiloes" element={<AuctionsPage />} />
                     <Route path="/auction/:id" element={<AuctionDetailPage />} />
                     <Route path="/signin" element={<SigninPage />} />
+                    <Route path="/auth/signin" element={<SigninPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/auth/verify-user" element={<VerifyUserPage />} />
                 </Route>
 
                 {/* Rotas Autenticadas (Plataforma/Backoffice) */}

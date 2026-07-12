@@ -185,9 +185,9 @@ function SigninForm() {
                                 </div>
 
                                 <div className="flex items-center justify-end text-sm">
-                                    <a href="#" className="text-primary font-semibold hover:text-primary/80 transition-colors">
+                                    <Link to="/auth/forgot-password" className="text-primary font-semibold hover:text-primary/80 transition-colors">
                                         Esqueceu a palavra-passe?
-                                    </a>
+                                    </Link>
                                 </div>
 
                                 <div className="pt-2">
