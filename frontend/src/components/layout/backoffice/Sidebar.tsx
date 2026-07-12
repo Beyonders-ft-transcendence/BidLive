@@ -23,7 +23,6 @@ export default function Sidebar() {
     { name: 'Denúncias', path: '/backoffice/reports', icon: ShieldAlert },
     { name: 'Leilões (Admin)', path: '/backoffice/auctions', icon: Gavel },
     { name: 'Perfis & Acessos', path: '/backoffice/roles', icon: ShieldCheck },
-    { name: 'Configurações', path: '/backoffice/settings', icon: Settings },
   ];
 
   return (
