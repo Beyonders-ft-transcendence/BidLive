@@ -1,6 +1,9 @@
 // PAGE AUTH
 export { default as SigninPage } from "./auth/signin";
 export { default as SignupPage } from "./auth/signup";
+export { default as ForgotPasswordPage } from "./auth/ForgotPassword";
+export { default as ResetPasswordPage } from "./auth/ResetPassword";
+export { default as VerifyUserPage } from "./auth/VerifyUser";
 export { default as HomePage } from "./Home";
 export { default as AuctionsPage } from "./Auctions";
 export { default as AuctionDetailPage } from "./AuctionDetail";
