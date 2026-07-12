@@ -9,31 +9,35 @@ import {
     Clock, DollarSign, Activity,
     SlidersHorizontal, X
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number, status: string }) => {
+    const { t } = useTranslation();
     const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
     const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
     
     if (isActuallyLive) {
-        return <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase shadow-md">Ao Vivo</div>;
+        return <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase shadow-md">{t('auctions.live')}</div>;
     }
     return null;
 };
 
 const AuctionLiveText = ({ auctionId, status, viewType }: { auctionId: number, status: string, viewType?: 'list' | 'grid' }) => {
+    const { t } = useTranslation();
     const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
     const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
     
     return (
         <span className={`inline-flex items-center gap-1 ${viewType === 'list' ? 'text-[9px] sm:text-[10px]' : 'text-[9px] sm:text-[10px]'} font-semibold uppercase ${isActuallyLive ? 'text-red-500' : 'text-muted-foreground'}`}>
             <Activity className={viewType === 'list' ? "w-2.5 h-2.5 sm:w-3 sm:h-3" : "w-2.5 h-2.5"} />
-            {isActuallyLive ? 'Ao Vivo' : status === 'LIVE' ? 'Agendado' : status === 'SCHEDULED' ? 'Agendado' : 'Encerrado'}
+            {isActuallyLive ? t('auctions.live') : status === 'LIVE' ? t('auctions.scheduled') : status === 'SCHEDULED' ? t('auctions.scheduled') : t('auctions.ended')}
         </span>
     );
 };
 
 export default function AuctionsPage() {
-  useDocumentTitle("Leilões");
+    const { t } = useTranslation();
+    useDocumentTitle(t('auctions.title'));
 
     const [page, setPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -97,11 +101,11 @@ export default function AuctionsPage() {
     const FilterPanel = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-sm font-semibold mb-3 text-foreground">Buscar</h3>
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.search_title')}</h3>
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Termo de busca..."
+                        placeholder={t('auctions.search_placeholder')}
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                         className="w-full border border-input bg-background rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-foreground"
@@ -110,9 +114,9 @@ export default function AuctionsPage() {
                 </div>
             </div>
             <div className="border-t border-border pt-5">
-                <h3 className="text-sm font-semibold mb-3 text-foreground">Status</h3>
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.status')}</h3>
                 <div className="flex flex-col gap-2.5">
-                    {[{ value: 'LIVE', label: 'Ao Vivo' }, { value: 'SCHEDULED', label: 'Agendados' }, { value: 'ENDED', label: 'Encerrados' }].map((status) => (
+                    {[{ value: 'LIVE', label: t('auctions.live') }, { value: 'SCHEDULED', label: t('auctions.scheduled_pl') }, { value: 'ENDED', label: t('auctions.ended_pl') }].map((status) => (
                         <label key={status.value} className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0 ${selectedStatus === status.value ? 'bg-primary border-primary text-primary-foreground' : 'border-input bg-background group-hover:border-primary/50'}`}>
                                 {selectedStatus === status.value && <span className="text-xs">✓</span>}
@@ -124,7 +128,7 @@ export default function AuctionsPage() {
                 </div>
             </div>
             <div className="border-t border-border pt-5">
-                <h3 className="text-sm font-semibold mb-3 text-foreground">Categorias</h3>
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.categories')}</h3>
                 <div className="flex flex-col gap-2.5">
                     {categories.map((cat) => (
                         <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
@@ -135,7 +139,7 @@ export default function AuctionsPage() {
                             <input type="checkbox" className="hidden" checked={selectedCategory === cat.id} onChange={() => handleCategoryClick(cat.id)} />
                         </label>
                     ))}
-                    {categories.length === 0 && <div className="text-xs text-muted-foreground">Nenhuma categoria</div>}
+                    {categories.length === 0 && <div className="text-xs text-muted-foreground">{t('auctions.no_categories')}</div>}
                 </div>
             </div>
             <div className="border-t border-border pt-5">
@@ -143,28 +147,28 @@ export default function AuctionsPage() {
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0 ${isFeatured ? 'bg-primary border-primary text-primary-foreground' : 'border-input bg-background group-hover:border-primary/50'}`}>
                         {isFeatured && <span className="text-xs">✓</span>}
                     </div>
-                    <span className={`text-sm ${isFeatured ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>Apenas Destaques</span>
+                    <span className={`text-sm ${isFeatured ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>{t('auctions.only_featured')}</span>
                     <input type="checkbox" className="hidden" checked={isFeatured} onChange={(e) => { setIsFeatured(e.target.checked); setPage(1); }} />
                 </label>
             </div>
             <div className="border-t border-border pt-5">
-                <h3 className="text-sm font-semibold mb-3 text-foreground">Faixa de Preço (Kz)</h3>
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.price_range')}</h3>
                 <div className="flex items-center gap-2">
-                    <input type="number" placeholder="Min" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
+                    <input type="number" placeholder={t('auctions.min')} value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
                     <span className="text-muted-foreground">-</span>
-                    <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
+                    <input type="number" placeholder={t('auctions.max')} value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
                 </div>
             </div>
             <div className="border-t border-border pt-5">
-                <h3 className="text-sm font-semibold mb-3 text-foreground">Período (Inicia / Termina)</h3>
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.period')}</h3>
                 <div className="flex flex-col gap-2">
-                    <input type="datetime-local" value={startsAfter} onChange={(e) => { setStartsAfter(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" title="Inicia depois de" />
-                    <input type="datetime-local" value={endsBefore} onChange={(e) => { setEndsBefore(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" title="Termina antes de" />
+                    <input type="datetime-local" value={startsAfter} onChange={(e) => { setStartsAfter(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" title={t('auctions.starts_after')} />
+                    <input type="datetime-local" value={endsBefore} onChange={(e) => { setEndsBefore(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" title={t('auctions.ends_before')} />
                 </div>
             </div>
             <div className="border-t border-border pt-5">
-                <h3 className="text-sm font-semibold mb-3 text-foreground">ID do Vendedor</h3>
-                <input type="number" placeholder="ID do Vendedor" value={sellerId} onChange={(e) => { setSellerId(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
+                <h3 className="text-sm font-semibold mb-3 text-foreground">{t('auctions.seller_id')}</h3>
+                <input type="number" placeholder={t('auctions.seller_id')} value={sellerId} onChange={(e) => { setSellerId(e.target.value); setPage(1); }} className="w-full border border-input bg-background rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary text-foreground" />
             </div>
         </div>
     );
@@ -177,9 +181,9 @@ export default function AuctionsPage() {
             <div className="w-full bg-card border-b border-border">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
                     <div className="flex items-center text-sm text-muted-foreground gap-1 min-w-0">
-                        <Link to="/" className="text-primary hover:underline whitespace-nowrap">Início</Link>
+                        <Link to="/" className="text-primary hover:underline whitespace-nowrap">{t('auctions.home')}</Link>
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span className="text-primary font-medium whitespace-nowrap">Leilões</span>
+                        <span className="text-primary font-medium whitespace-nowrap">{t('auctions.title')}</span>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <select
@@ -187,17 +191,17 @@ export default function AuctionsPage() {
                             onChange={(e) => { setOrdering(e.target.value); setPage(1); }}
                             className="hidden sm:block border border-border rounded px-2 py-1 text-xs bg-muted/50 outline-none hover:border-primary/50 transition-colors text-foreground"
                         >
-                            <option value="">Relevância</option>
-                            <option value="-created_at">Mais Recentes</option>
-                            <option value="current_price">Menor Preço</option>
-                            <option value="-current_price">Maior Preço</option>
-                            <option value="end_time">Terminando em Breve</option>
+                            <option value="">{t('auctions.order_relevance')}</option>
+                            <option value="-created_at">{t('auctions.order_recent')}</option>
+                            <option value="current_price">{t('auctions.order_price_asc')}</option>
+                            <option value="-current_price">{t('auctions.order_price_desc')}</option>
+                            <option value="end_time">{t('auctions.order_ending_soon')}</option>
                         </select>
                         <div className="flex items-center gap-0.5 border border-border rounded p-0.5 bg-muted/50">
-                            <button onClick={() => setViewType("list")} className={`p-1.5 rounded ${viewType === 'list' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`} title="Lista">
+                            <button onClick={() => setViewType("list")} className={`p-1.5 rounded ${viewType === 'list' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`} title={t('auctions.view_list')}>
                                 <List className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => setViewType("grid")} className={`p-1.5 rounded ${viewType === 'grid' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`} title="Grelha">
+                            <button onClick={() => setViewType("grid")} className={`p-1.5 rounded ${viewType === 'grid' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`} title={t('auctions.view_grid')}>
                                 <Grid2X2 className="w-3.5 h-3.5" />
                             </button>
                         </div>
@@ -206,7 +210,7 @@ export default function AuctionsPage() {
                             className={`lg:hidden flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border transition-colors ${hasActiveFilters ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-foreground hover:bg-muted'}`}
                         >
                             <SlidersHorizontal className="w-3.5 h-3.5" />
-                            Filtros
+                            {t('auctions.filters')}
                             {hasActiveFilters && <span className="bg-primary-foreground/20 text-[10px] font-bold px-1 rounded-full leading-none">!</span>}
                         </button>
                     </div>
@@ -216,11 +220,11 @@ export default function AuctionsPage() {
             {/* Mobile Sort bar */}
             <div className="sm:hidden bg-card border-b border-border px-4 py-2">
                 <select value={ordering} onChange={(e) => { setOrdering(e.target.value); setPage(1); }} className="w-full border border-border rounded px-3 py-1.5 text-sm bg-background outline-none text-foreground">
-                    <option value="">Ordenar: Relevância</option>
-                    <option value="-created_at">Mais Recentes</option>
-                    <option value="current_price">Menor Preço</option>
-                    <option value="-current_price">Maior Preço</option>
-                    <option value="end_time">Terminando em Breve</option>
+                    <option value="">{t('auctions.order_relevance_mobile')}</option>
+                    <option value="-created_at">{t('auctions.order_recent')}</option>
+                    <option value="current_price">{t('auctions.order_price_asc')}</option>
+                    <option value="-current_price">{t('auctions.order_price_desc')}</option>
+                    <option value="end_time">{t('auctions.order_ending_soon')}</option>
                 </select>
             </div>
 
@@ -231,16 +235,16 @@ export default function AuctionsPage() {
                     <div className="flex-1 min-w-0 flex flex-col gap-4">
                         {!isLoading && auctions.length > 0 && (
                             <p className="text-sm text-muted-foreground">
-                                <span className="font-semibold text-foreground">{totalCount}</span> leilões encontrados
+                                <span className="font-semibold text-foreground">{totalCount}</span> {t('auctions.auctions_found')}
                             </p>
                         )}
 
                         <div className={viewType === 'list' ? "space-y-3" : "grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"}>
                             {isLoading ? (
-                                <div className="py-20 text-center text-muted-foreground animate-pulse col-span-full">Buscando leilões...</div>
+                                <div className="py-20 text-center text-muted-foreground animate-pulse col-span-full">{t('auctions.fetching')}</div>
                             ) : auctions.length === 0 ? (
                                 <div className="py-20 text-center text-muted-foreground bg-card border border-border rounded-xl col-span-full">
-                                    Nenhum leilão encontrado.
+                                    {t('auctions.no_auctions')}
                                 </div>
                             ) : auctions.map((auction) => {
                                 const item = auction.item;
@@ -253,7 +257,7 @@ export default function AuctionsPage() {
                                             {item.images?.[0]?.image_url ? (
                                                 <img src={item.images[0].image_url} alt={item.title} className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="text-muted-foreground text-xs p-2 text-center">Sem foto</div>
+                                                <div className="text-muted-foreground text-xs p-2 text-center">{t('auctions.no_photo')}</div>
                                             )}
                                             <AuctionLiveBadge auctionId={auction.id} status={auction.status} />
                                             {viewType === 'grid' && item.category?.name && (
@@ -272,7 +276,7 @@ export default function AuctionsPage() {
                                                         <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
                                                             {item.description 
                                                                 ? (item.description.length > 120 ? item.description.substring(0, 120) + "..." : item.description) 
-                                                                : "Sem descrição disponível."
+                                                                : t('auctions.no_description')
                                                             }
                                                         </p>
                                                     </div>
@@ -286,17 +290,17 @@ export default function AuctionsPage() {
                                                         )}
                                                         <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                                                             <DollarSign className="w-3 h-3" />
-                                                            Mín: {item.starting_price} Kz
+                                                            {t('auctions.min_bid')} {item.starting_price} Kz
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className="flex-shrink-0 p-2.5 sm:p-4 border-l border-border flex flex-col justify-center items-center bg-muted/10 w-[100px] sm:w-[140px] md:w-[170px]">
-                                                    <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-0.5">Lance Atual</p>
+                                                    <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-0.5">{t('auctions.current_bid_label')}</p>
                                                     <div className="text-sm sm:text-lg md:text-xl font-bold text-primary text-center leading-tight">
                                                         {currentPrice}<span className="text-[10px] sm:text-xs font-medium"> Kz</span>
                                                     </div>
                                                     {item.buy_now_price && (
-                                                        <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5 text-center hidden sm:block">Já: {item.buy_now_price} Kz</p>
+                                                        <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5 text-center hidden sm:block">{t('auctions.buy_now_already')} {item.buy_now_price} Kz</p>
                                                     )}
                                                     <Link to={`/auction/${auction.id}`} className="mt-2 sm:mt-3 w-full bg-primary hover:bg-primary/90 text-primary-foreground py-1.5 rounded text-center text-[10px] sm:text-xs font-semibold transition-colors">
                                                         Ver Leilão
@@ -338,9 +342,9 @@ export default function AuctionsPage() {
                         {totalCount > 10 && (
                             <div className="flex items-center justify-center mt-6">
                                 <div className="flex border border-border rounded-md overflow-hidden bg-card shadow-sm">
-                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-2 text-sm text-muted-foreground hover:bg-muted border-r border-border disabled:opacity-50 transition-colors">&lt; Ant</button>
+                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-2 text-sm text-muted-foreground hover:bg-muted border-r border-border disabled:opacity-50 transition-colors">&lt; {t('auctions.btn_prev')}</button>
                                     <button className="px-4 py-2 text-sm text-primary font-bold bg-primary/10 border-r border-border">{page}</button>
-                                    <button onClick={() => setPage(p => p + 1)} disabled={page * 10 >= totalCount} className="px-3 py-2 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors">Próx &gt;</button>
+                                    <button onClick={() => setPage(p => p + 1)} disabled={page * 10 >= totalCount} className="px-3 py-2 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors">{t('auctions.btn_next')} &gt;</button>
                                 </div>
                             </div>
                         )}
@@ -351,10 +355,10 @@ export default function AuctionsPage() {
                         <div className="bg-card border border-border rounded-lg p-5 shadow-sm dark:shadow-none sticky top-20">
                             <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
                                 <h2 className="font-semibold text-base flex items-center gap-2 text-foreground">
-                                    <SlidersHorizontal className="w-4 h-4" /> Filtros
+                                    <SlidersHorizontal className="w-4 h-4" /> {t('auctions.filters')}
                                 </h2>
                                 {hasActiveFilters && (
-                                    <button onClick={handleClearFilters} className="text-xs text-primary font-medium hover:underline">Limpar</button>
+                                    <button onClick={handleClearFilters} className="text-xs text-primary font-medium hover:underline">{t('auctions.clear')}</button>
                                 )}
                             </div>
                             <FilterPanel />
@@ -370,7 +374,7 @@ export default function AuctionsPage() {
                     <div className="relative w-[85%] max-w-xs h-full bg-background shadow-2xl flex flex-col">
                         <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
                             <h2 className="font-semibold text-base flex items-center gap-2">
-                                <SlidersHorizontal className="w-4 h-4" /> Filtros
+                                <SlidersHorizontal className="w-4 h-4" /> {t('auctions.filters')}
                             </h2>
                             <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 text-foreground hover:bg-muted rounded-md transition-colors">
                                 <X size={20} />
@@ -381,9 +385,9 @@ export default function AuctionsPage() {
                         </div>
                         <div className="p-4 border-t border-border flex gap-2 flex-shrink-0">
                             {hasActiveFilters && (
-                                <button onClick={handleClearFilters} className="flex-1 border border-border text-foreground py-2.5 rounded-md text-sm font-semibold hover:bg-muted transition-colors">Limpar</button>
+                                <button onClick={handleClearFilters} className="flex-1 border border-border text-foreground py-2.5 rounded-md text-sm font-semibold hover:bg-muted transition-colors">{t('auctions.clear')}</button>
                             )}
-                            <button onClick={() => setIsFilterDrawerOpen(false)} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2.5 rounded-md text-sm font-semibold transition-colors">Aplicar</button>
+                            <button onClick={() => setIsFilterDrawerOpen(false)} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2.5 rounded-md text-sm font-semibold transition-colors">{t('auctions.apply')}</button>
                         </div>
                     </div>
                 </div>
