@@ -8,7 +8,7 @@ interface ContainerProps {
 
 export default function Container({ children }: ContainerProps) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-foreground flex">
+    <div className="min-h-screen bg-black text-zinc-50 flex">
         {/* Fixed Sidebar */}
         <Sidebar />
         
