@@ -54,7 +54,6 @@ export default function AuctionsPage() {
     const [maxPrice, setMaxPrice] = useState<string>("");
     const [startsAfter, setStartsAfter] = useState<string>("");
     const [endsBefore, setEndsBefore] = useState<string>("");
-    const [sellerId, setSellerId] = useState<string>("");
     const [viewType, setViewType] = useState<"grid" | "list">("grid");
     const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
@@ -70,7 +69,6 @@ export default function AuctionsPage() {
         max_price: maxPrice ? Number(maxPrice) : undefined,
         starts_after: startsAfter ? new Date(startsAfter).toISOString() : undefined,
         ends_before: endsBefore ? new Date(endsBefore).toISOString() : undefined,
-        seller_id: sellerId ? Number(sellerId) : undefined,
     });
 
     const { data: categoriesData } = useCategoriesQuery();
@@ -79,7 +77,7 @@ export default function AuctionsPage() {
     const totalCount = auctionsData?.count || 0;
     const categories = categoriesData || [];
 
-    const hasActiveFilters = !!(selectedCategory || selectedStatus || search || minPrice || maxPrice || startsAfter || endsBefore || isFeatured || sellerId);
+    const hasActiveFilters = !!(selectedCategory || selectedStatus || search || minPrice || maxPrice || startsAfter || endsBefore || isFeatured);
 
     const handleCategoryClick = (id: number) => {
         setSelectedCategory(prev => prev === id ? null : id);
@@ -99,7 +97,6 @@ export default function AuctionsPage() {
         setMaxPrice("");
         setStartsAfter("");
         setEndsBefore("");
-        setSellerId("");
         setPage(1);
     };
 
@@ -114,7 +111,7 @@ export default function AuctionsPage() {
                         placeholder={t('auctions.search_placeholder')}
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        className="w-full border border-border/80 bg-background/50 backdrop-blur-sm rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-foreground shadow-sm group-hover:border-primary/50"
+                        className="w-full border border-border/80 bg-background/50 backdrop-blur-sm rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-foreground shadow-sm group-hover:border-primary/50"
                     />
                     <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-primary transition-colors" />
                 </div>
@@ -155,7 +152,7 @@ export default function AuctionsPage() {
 
             {/* Featured */}
             <div className="border-t border-border/40 pt-6">
-                <label className="flex items-center gap-3 cursor-pointer group bg-gradient-to-r from-yellow-500/10 to-transparent p-3 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-all">
+                <label className="flex items-center gap-3 cursor-pointer group bg-gradient-to-r from-yellow-500/10 to-transparent p-3 rounded-md border border-yellow-500/20 hover:border-yellow-500/40 transition-all">
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 flex-shrink-0 ${isFeatured ? 'bg-yellow-500 border-yellow-500 text-white shadow-[0_0_10px_rgba(234,179,8,0.4)] scale-110' : 'border-yellow-500/50 bg-background group-hover:border-yellow-500'}`}>
                         {isFeatured && <span className="text-[10px] font-black">✓</span>}
                     </div>
@@ -168,9 +165,9 @@ export default function AuctionsPage() {
             <div className="border-t border-border/40 pt-6">
                 <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-foreground/80">{t('auctions.price_range')}</h3>
                 <div className="flex items-center gap-3">
-                    <input type="number" placeholder={t('auctions.min')} value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
+                    <input type="number" placeholder={t('auctions.min')} value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
                     <span className="text-muted-foreground/50 font-light">-</span>
-                    <input type="number" placeholder={t('auctions.max')} value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
+                    <input type="number" placeholder={t('auctions.max')} value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
                 </div>
             </div>
 
@@ -178,15 +175,9 @@ export default function AuctionsPage() {
             <div className="border-t border-border/40 pt-6">
                 <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-foreground/80">{t('auctions.period')}</h3>
                 <div className="flex flex-col gap-3">
-                    <input type="datetime-local" value={startsAfter} onChange={(e) => { setStartsAfter(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground text-muted-foreground" title={t('auctions.starts_after')} />
-                    <input type="datetime-local" value={endsBefore} onChange={(e) => { setEndsBefore(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground text-muted-foreground" title={t('auctions.ends_before')} />
+                    <input type="datetime-local" value={startsAfter} onChange={(e) => { setStartsAfter(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground text-muted-foreground dark:[color-scheme:dark]" title={t('auctions.starts_after')} />
+                    <input type="datetime-local" value={endsBefore} onChange={(e) => { setEndsBefore(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground text-muted-foreground dark:[color-scheme:dark]" title={t('auctions.ends_before')} />
                 </div>
-            </div>
-            
-            {/* Seller */}
-            <div className="border-t border-border/40 pt-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-foreground/80">{t('auctions.seller_id')}</h3>
-                <input type="number" placeholder={t('auctions.seller_id')} value={sellerId} onChange={(e) => { setSellerId(e.target.value); setPage(1); }} className="w-full border border-border/80 bg-background/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
             </div>
         </div>
     );
@@ -231,7 +222,7 @@ export default function AuctionsPage() {
                         <select
                             value={ordering}
                             onChange={(e) => { setOrdering(e.target.value); setPage(1); }}
-                            className="hidden sm:block border border-border/80 rounded-lg px-3 py-1.5 text-xs font-semibold bg-muted/30 outline-none hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground cursor-pointer"
+                            className="hidden sm:block border border-border/80 rounded-md px-3 py-1.5 text-xs font-semibold bg-muted/30 outline-none hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground cursor-pointer"
                         >
                             <option value="">{t('auctions.order_relevance')}</option>
                             <option value="-created_at">{t('auctions.order_recent')}</option>
@@ -239,7 +230,7 @@ export default function AuctionsPage() {
                             <option value="-current_price">{t('auctions.order_price_desc')}</option>
                             <option value="end_time">{t('auctions.order_ending_soon')}</option>
                         </select>
-                        <div className="flex items-center gap-1 border border-border/80 rounded-lg p-1 bg-muted/30">
+                        <div className="flex items-center gap-1 border border-border/80 rounded-md p-1 bg-muted/30">
                             <button onClick={() => setViewType("list")} className={`p-1.5 rounded-md transition-all ${viewType === 'list' ? 'text-primary bg-background shadow-sm' : 'text-muted-foreground hover:bg-muted/80'}`} title={t('auctions.view_list')}>
                                 <List className="w-4 h-4" />
                             </button>
@@ -249,7 +240,7 @@ export default function AuctionsPage() {
                         </div>
                         <button
                             onClick={() => setIsFilterDrawerOpen(true)}
-                            className={`lg:hidden flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg border transition-all shadow-sm ${hasActiveFilters ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-foreground hover:bg-muted'}`}
+                            className={`lg:hidden flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-md border transition-all shadow-sm ${hasActiveFilters ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-foreground hover:bg-muted'}`}
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {t('auctions.filters')}
@@ -261,7 +252,7 @@ export default function AuctionsPage() {
 
             {/* Mobile Sort bar */}
             <div className="sm:hidden bg-background border-b border-border/60 px-4 py-3">
-                <select value={ordering} onChange={(e) => { setOrdering(e.target.value); setPage(1); }} className="w-full border border-border/80 rounded-lg px-3 py-2.5 text-sm font-semibold bg-muted/30 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground cursor-pointer">
+                <select value={ordering} onChange={(e) => { setOrdering(e.target.value); setPage(1); }} className="w-full border border-border/80 rounded-md px-3 py-2.5 text-sm font-semibold bg-muted/30 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-foreground cursor-pointer">
                     <option value="">{t('auctions.order_relevance_mobile')}</option>
                     <option value="-created_at">{t('auctions.order_recent')}</option>
                     <option value="current_price">{t('auctions.order_price_asc')}</option>
@@ -303,7 +294,7 @@ export default function AuctionsPage() {
                                     <h3 className="text-lg font-bold text-foreground mb-1">Nenhum leilão encontrado</h3>
                                     <p className="text-sm text-muted-foreground max-w-md">{t('auctions.no_auctions')}</p>
                                     {hasActiveFilters && (
-                                        <button onClick={handleClearFilters} className="mt-6 px-6 py-2.5 bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider rounded-lg hover:bg-primary/20 transition-colors">
+                                        <button onClick={handleClearFilters} className="mt-6 px-6 py-2.5 bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider rounded-md hover:bg-primary/20 transition-colors">
                                             Limpar Filtros
                                         </button>
                                     )}
@@ -312,7 +303,7 @@ export default function AuctionsPage() {
                                 const item = auction.item;
                                 const currentPrice = item.current_price || item.starting_price;
                                 return (
-                                    <Link key={auction.id} to={`/auction/${auction.id}`} className={`group bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 dark:shadow-none transition-all duration-500 flex ${viewType === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}>
+                                    <Link key={auction.id} to={`/auction/${auction.id}`} className={`group bg-card border border-border/50 rounded-md overflow-hidden hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 dark:shadow-none transition-all duration-500 flex ${viewType === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}>
 
                                         {/* Image Container */}
                                         <div className={`${viewType === 'list' ? 'w-full sm:w-[240px] md:w-[280px] h-[200px] sm:h-auto flex-shrink-0 border-b sm:border-b-0 sm:border-r' : 'w-full h-[220px] sm:h-[240px] border-b'} bg-muted relative flex items-center justify-center border-border/50 overflow-hidden`}>
@@ -378,7 +369,7 @@ export default function AuctionsPage() {
                                                         <p className="text-xs font-semibold text-muted-foreground mt-1 text-center bg-background border border-border px-3 py-1 rounded-full">{t('auctions.buy_now_already')} {item.buy_now_price} Kz</p>
                                                     )}
                                                     
-                                                    <div className="mt-5 w-full bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground py-3 rounded-lg text-center text-sm font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                                                    <div className="mt-5 w-full bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground py-3 rounded-md text-center text-sm font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
                                                         Entrar no Leilão <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
                                                     </div>
                                                 </div>
@@ -421,17 +412,17 @@ export default function AuctionsPage() {
                                     <button 
                                         onClick={() => setPage(p => Math.max(1, p - 1))} 
                                         disabled={page === 1} 
-                                        className="h-10 px-4 flex items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground hover:bg-muted hover:border-border/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                                        className="h-10 px-4 flex items-center justify-center rounded-md border border-border bg-card text-sm font-bold text-foreground hover:bg-muted hover:border-border/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                                     >
                                         &lt; {t('auctions.btn_prev')}
                                     </button>
-                                    <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-black text-sm shadow-md shadow-primary/20">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-md bg-primary text-primary-foreground font-black text-sm shadow-md shadow-primary/20">
                                         {page}
                                     </div>
                                     <button 
                                         onClick={() => setPage(p => p + 1)} 
                                         disabled={page * 10 >= totalCount} 
-                                        className="h-10 px-4 flex items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground hover:bg-muted hover:border-border/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                                        className="h-10 px-4 flex items-center justify-center rounded-md border border-border bg-card text-sm font-bold text-foreground hover:bg-muted hover:border-border/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                                     >
                                         {t('auctions.btn_next')} &gt;
                                     </button>
