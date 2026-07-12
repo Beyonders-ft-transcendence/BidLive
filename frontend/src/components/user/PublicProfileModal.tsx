@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Gavel, Award, Shield } from "lucide-react";
 import Avatar from "@/components/common/Avatar";
-import adminService from "@/services/admin.service";
+import socialService from "@/services/social.service";
 
 interface PublicProfileModalProps {
     isOpen: boolean;
@@ -34,10 +34,9 @@ export default function PublicProfileModal({
         const fetchUserDetails = async () => {
             setIsLoading(true);
             try {
-                // Tentativa de obter detalhes públicos do utilizador (pode não existir na API ainda)
-                // Se o endpoint não existir, usamos mock de dados ou mostramos apenas o que foi passado nas Props.
-                const res = await adminService.getUserById(userId); 
-                setDetails(res);
+                // Tentativa de obter detalhes públicos do utilizador
+                const res = await socialService.getUserProfile(userId); 
+                setDetails(res.data);
             } catch (error) {
                 console.error("Erro ao carregar detalhes do utilizador:", error);
                 // Não mostramos erro ao utilizador, apenas usamos as props básicas
