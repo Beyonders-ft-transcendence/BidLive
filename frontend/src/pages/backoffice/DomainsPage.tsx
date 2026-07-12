@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '@/components/layout/backoffice/Container';
+import PageHeader from '@/components/layout/backoffice/PageHeader';
+import Toolbar from '@/components/layout/backoffice/Toolbar';
 import { useDomainsQuery, useDeleteDomainMutation, useCreateDomainMutation } from '@/hooks/useDomain';
 import { Search, Plus, Edit, Trash2, Globe, CheckCircle, Clock, PauseCircle, Archive } from 'lucide-react';
 import type { DomainStatus } from '@/shared/types/domain.types';
@@ -39,39 +41,39 @@ export default function DomainsPage() {
   const renderStatus = (status: DomainStatus, isArchived: boolean) => {
     if (isArchived) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-500/10 text-gray-500">
-          <Archive size={12} /> Arquivado
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
+          <Archive size={10} /> Arquivado
         </span>
       );
     }
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-green-500/10 text-green-500">
-            <CheckCircle size={12} /> Ativo
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">
+            <CheckCircle size={10} /> Ativo
           </span>
         );
       case 'draft':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-500/10 text-blue-500">
-            <Clock size={12} /> Rascunho
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-blue-400 border border-zinc-700/50">
+            <Clock size={10} /> Rascunho
           </span>
         );
       case 'paused':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-yellow-500/10 text-yellow-500">
-            <PauseCircle size={12} /> Pausado
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-yellow-500 border border-zinc-700/50">
+            <PauseCircle size={10} /> Pausado
           </span>
         );
       case 'completed':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-500/10 text-purple-500">
-            <CheckCircle size={12} /> Concluído
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-purple-400 border border-zinc-700/50">
+            <CheckCircle size={10} /> Concluído
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-500/10 text-gray-500">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/50">
             {status}
           </span>
         );
@@ -82,136 +84,134 @@ export default function DomainsPage() {
 
   return (
     <Container>
-      <div className="flex flex-col gap-6">
-        
-        {/* Header and Toolbar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Globe size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Domínios</h1>
-              <p className="text-sm text-muted-foreground">Faça a gestão dos seus projetos e contextos</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input 
-                type="text" 
-                placeholder="Pesquisar domínios..." 
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="pl-10 pr-4 py-2 w-full md:w-64 bg-card border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-              />
-            </div>
-            <button 
-              onClick={() => setIsCreating(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-            >
-              <Plus size={18} /> Novo Domínio
-            </button>
-          </div>
-        </div>
+      <PageHeader 
+        title="Domínios"
+        description="Faça a gestão dos seus projetos e contextos na plataforma."
+        icon={<Globe size={20} />}
+        actions={
+          <button 
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors"
+          >
+            <Plus size={16} /> Novo Domínio
+          </button>
+        }
+      />
 
+      <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
+        
         {/* Create Domain Inline Form */}
         {isCreating && (
-          <form onSubmit={handleCreate} className="bg-card border border-primary/30 p-4 rounded-xl flex items-center gap-4">
+          <form onSubmit={handleCreate} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center gap-4 animate-in fade-in slide-in-from-top-2">
             <input 
               type="text" 
               placeholder="Nome do novo domínio..." 
               value={newDomainName}
               onChange={(e) => setNewDomainName(e.target.value)}
-              className="flex-1 px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:border-primary"
+              className="flex-1 px-4 py-2 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-500 text-zinc-100"
               autoFocus
             />
-            <button 
-              type="submit" 
-              disabled={isCreatingMut || !newDomainName.trim()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              {isCreatingMut ? 'A Criar...' : 'Guardar'}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => setIsCreating(false)}
-              className="px-4 py-2 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
-            >
-              Cancelar
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                type="submit" 
+                disabled={isCreatingMut || !newDomainName.trim()}
+                className="px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50"
+              >
+                {isCreatingMut ? 'A Criar...' : 'Guardar'}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setIsCreating(false)}
+                className="px-4 py-2 bg-transparent text-zinc-400 border border-zinc-800 rounded-lg font-medium hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
           </form>
         )}
 
+        <Toolbar>
+          <div className="relative w-full md:w-80">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <input 
+              type="text" 
+              placeholder="Pesquisar domínios..." 
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
+            />
+          </div>
+          {/* Add future filters here */}
+        </Toolbar>
+
         {/* Data Table */}
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-muted/50 border-b border-border text-xs uppercase font-semibold text-muted-foreground">
+              <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4">Nome</th>
-                  <th className="px-6 py-4">Proprietário</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Orçamento</th>
-                  <th className="px-6 py-4">Criado em</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
+                  <th className="px-6 py-4 font-medium">Nome</th>
+                  <th className="px-6 py-4 font-medium">Proprietário</th>
+                  <th className="px-6 py-4 font-medium">Estado</th>
+                  <th className="px-6 py-4 font-medium">Orçamento</th>
+                  <th className="px-6 py-4 font-medium">Criado em</th>
+                  <th className="px-6 py-4 text-right font-medium">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-zinc-800/50">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4"><div className="h-6 w-32 bg-muted rounded"></div></td>
-                      <td className="px-6 py-4"><div className="h-6 w-48 bg-muted rounded"></div></td>
-                      <td className="px-6 py-4"><div className="h-6 w-20 bg-muted rounded"></div></td>
-                      <td className="px-6 py-4"><div className="h-6 w-16 bg-muted rounded"></div></td>
-                      <td className="px-6 py-4"><div className="h-6 w-24 bg-muted rounded"></div></td>
-                      <td className="px-6 py-4"><div className="h-8 w-16 bg-muted rounded ml-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-32 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-48 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-20 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-16 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-5 w-24 bg-zinc-800/50 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-6 w-12 bg-zinc-800/50 rounded ml-auto"></div></td>
                     </tr>
                   ))
                 ) : domains.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-16 text-center text-zinc-500">
                       Nenhum domínio encontrado.
                     </td>
                   </tr>
                 ) : (
                   domains.map((domain: any) => (
-                    <tr key={domain.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4 font-semibold text-foreground">
-                        <Link to={`/backoffice/domains/${domain.id}`} className="hover:text-primary transition-colors">
+                    <tr key={domain.id} className="hover:bg-zinc-900/30 transition-colors group">
+                      <td className="px-6 py-4 font-medium text-zinc-100">
+                        <Link to={`/backoffice/domains/${domain.id}`} className="hover:text-white transition-colors">
                           {domain.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-muted-foreground">
+                      <td className="px-6 py-4 text-zinc-400">
                         {domain.owner_email}
                       </td>
                       <td className="px-6 py-4">
                         {renderStatus(domain.status, domain.is_archived)}
                       </td>
-                      <td className="px-6 py-4 text-muted-foreground">
+                      <td className="px-6 py-4 text-zinc-400 font-mono text-xs">
                         {domain.budget ? `$${parseFloat(domain.budget).toLocaleString()}` : '-'}
                       </td>
-                      <td className="px-6 py-4 text-muted-foreground">
+                      <td className="px-6 py-4 text-zinc-400">
                         {new Date(domain.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
                             onClick={() => navigate(`/backoffice/domains/${domain.id}`)}
-                            className="p-2 text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-muted"
+                            className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
                             title="Configurar Domínio"
                           >
-                            <Edit size={18} />
+                            <Edit size={16} />
                           </button>
                           <button 
                             onClick={() => handleDelete(domain.id, domain.name)}
                             disabled={isDeleting}
-                            className="p-2 text-muted-foreground hover:text-red-500 transition-colors rounded-md hover:bg-muted disabled:opacity-50"
+                            className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors rounded-md hover:bg-zinc-800 disabled:opacity-50"
                             title="Eliminar Domínio"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -224,22 +224,22 @@ export default function DomainsPage() {
           
           {/* Pagination */}
           {data && data.count > 10 && (
-            <div className="px-6 py-4 border-t border-border flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Total: <span className="font-semibold text-foreground">{data.count}</span> domínios
+            <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
+              <span className="text-xs text-zinc-500">
+                <span className="font-medium text-zinc-300">{data.count}</span> domínios
               </span>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={!data.previous}
-                  className="px-3 py-1 text-sm border border-border rounded-md disabled:opacity-50 hover:bg-muted"
+                  className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
                   Anterior
                 </button>
                 <button 
                   onClick={() => setPage(p => p + 1)}
                   disabled={!data.next}
-                  className="px-3 py-1 text-sm border border-border rounded-md disabled:opacity-50 hover:bg-muted"
+                  className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
                   Próxima
                 </button>
