@@ -18,6 +18,8 @@ export default function AdminAuctionsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [auctionToCancel, setAuctionToCancel] = useState<number | null>(null);
+  const [cancelReason, setCancelReason] = useState('Cancelado pela administração.');
   
   const { data, isLoading } = useAuctionsQuery({ 
     page, 
@@ -28,9 +30,17 @@ export default function AdminAuctionsPage() {
   
   const { mutate: cancelAuction, isPending: isCanceling } = useCancelAuctionMutation();
 
-  const handleCancelAuction = (id: number) => {
-    if (window.confirm('Tem a certeza que deseja cancelar este leilão? Esta ação é irreversível.')) {
-      cancelAuction({ id, payload: { reason: 'Cancelado pela administração.' } });
+  const confirmCancelAuction = () => {
+    if (auctionToCancel !== null) {
+      cancelAuction(
+        { id: auctionToCancel, payload: { reason: cancelReason } },
+        {
+          onSuccess: () => {
+            setAuctionToCancel(null);
+            setCancelReason('Cancelado pela administração.');
+          }
+        }
+      );
     }
   };
 
@@ -169,7 +179,7 @@ export default function AdminAuctionsPage() {
                           </Link>
                           {auction.status !== 'CANCELLED' && auction.status !== 'COMPLETED' && (
                             <button 
-                              onClick={() => handleCancelAuction(auction.id)}
+                              onClick={() => setAuctionToCancel(auction.id)}
                               disabled={isCanceling}
                               className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors rounded-md hover:bg-zinc-800"
                               title="Cancelar Leilão"
@@ -212,6 +222,59 @@ export default function AdminAuctionsPage() {
           )}
         </div>
       </div>
+
+      {/* Cancel Modal Backdrop */}
+      {auctionToCancel !== null && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => !isCanceling && setAuctionToCancel(null)}
+        >
+          {/* Modal Content */}
+          <div 
+            className="bg-black border border-zinc-800 w-full max-w-md rounded-2xl shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4 text-red-400">
+              <div className="p-3 bg-red-400/10 rounded-full">
+                <Ban size={24} />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-100">Cancelar Leilão</h3>
+            </div>
+            
+            <p className="text-zinc-400 text-sm mb-5">
+              Tem a certeza que deseja cancelar este leilão? Esta ação é <strong className="text-zinc-300">irreversível</strong> e o item deixará de estar disponível para lances.
+            </p>
+
+            <div className="mb-6">
+              <label className="text-xs font-medium text-zinc-500 mb-2 block uppercase tracking-wider">Motivo (Visível ao Vendedor)</label>
+              <input
+                type="text"
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Ex: Violação dos termos de uso..."
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-red-500/50 transition-colors"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setAuctionToCancel(null)}
+                disabled={isCanceling}
+                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 rounded-lg transition-colors"
+              >
+                Manter Leilão
+              </button>
+              <button 
+                onClick={confirmCancelAuction}
+                disabled={isCanceling}
+                className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isCanceling ? 'A Cancelar...' : 'Sim, Cancelar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Container>
   );
 }
