@@ -28,6 +28,27 @@ export default function RolesPage() {
     );
   };
 
+  const toggleAllPermissions = () => {
+    if (selectedPermissions.length === permissions.length) {
+      setSelectedPermissions([]); // Deselect all
+    } else {
+      setSelectedPermissions(permissions.map((p: any) => p.name)); // Select all
+    }
+  };
+
+  const toggleGroupPermissions = (groupName: string) => {
+    const groupPerms = groupedPermissions[groupName].map((p: any) => p.name);
+    const allGroupActive = groupPerms.every((permName: string) => selectedPermissions.includes(permName));
+    
+    if (allGroupActive) {
+      // Remove all group perms
+      setSelectedPermissions(prev => prev.filter(p => !groupPerms.includes(p)));
+    } else {
+      // Add all group perms
+      setSelectedPermissions(prev => Array.from(new Set([...prev, ...groupPerms])));
+    }
+  };
+
   const handleSave = () => {
     if (!activeRole) return;
     updateRole(
@@ -132,7 +153,15 @@ export default function RolesPage() {
             <h2 className="text-xl font-bold text-zinc-100 flex items-center gap-2 uppercase">
               {activeRole?.name}
             </h2>
-            <p className="text-xs text-zinc-400 mt-1">Gerir permissões ativas</p>
+            <div className="flex items-center justify-between mt-1 gap-4">
+              <p className="text-xs text-zinc-400">Gerir permissões ativas</p>
+              <button 
+                onClick={toggleAllPermissions}
+                className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                {selectedPermissions.length === permissions.length ? 'Desativar Todas' : 'Ativar Todas'}
+              </button>
+            </div>
           </div>
           <button 
             onClick={() => setActiveRole(null)}
@@ -143,13 +172,25 @@ export default function RolesPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
-          {Object.entries(groupedPermissions).map(([groupName, perms]) => (
-            <div key={groupName} className="bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-4">
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 border-b border-zinc-800/50 pb-2">
-                Módulo: {groupName}
-              </h3>
-              <div className="space-y-4">
-                {perms.map((perm: any) => {
+          {Object.entries(groupedPermissions).map(([groupName, perms]) => {
+            const groupPerms = perms.map((p: any) => p.name);
+            const allGroupActive = groupPerms.every((permName: string) => selectedPermissions.includes(permName));
+
+            return (
+              <div key={groupName} className="bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-4 border-b border-zinc-800/50 pb-2">
+                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                    Módulo: {groupName}
+                  </h3>
+                  <button 
+                    onClick={() => toggleGroupPermissions(groupName)}
+                    className="text-[10px] font-bold text-zinc-400 hover:text-zinc-200 transition-colors bg-zinc-800/50 hover:bg-zinc-700/50 px-2 py-1 rounded"
+                  >
+                    {allGroupActive ? 'Desativar Módulo' : 'Ativar Módulo'}
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {perms.map((perm: any) => {
                   const isActive = selectedPermissions.includes(perm.name);
                   return (
                     <div key={perm.id} className="flex items-center justify-between group">
@@ -180,7 +221,8 @@ export default function RolesPage() {
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer Actions */}
