@@ -10,16 +10,17 @@ from apps.reports.models import (
     ReportTargetType,
 )
 from apps.users.models import User
+from common.fields import LocalizedModelSerializer
 
 
-class ReportReporterSerializer(serializers.ModelSerializer):
+class ReportReporterSerializer(LocalizedModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "full_name", "avatar_url")
         read_only_fields = fields
 
 
-class ReportActionSerializer(serializers.ModelSerializer):
+class ReportActionSerializer(LocalizedModelSerializer):
     admin = ReportReporterSerializer(read_only=True)
 
     class Meta:
@@ -28,14 +29,14 @@ class ReportActionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class ReportEvidenceSerializer(serializers.ModelSerializer):
+class ReportEvidenceSerializer(LocalizedModelSerializer):
     class Meta:
         model = ReportEvidence
         fields = ("id", "file", "created_at")
         read_only_fields = fields
 
 
-class ReportSerializer(serializers.ModelSerializer):
+class ReportSerializer(LocalizedModelSerializer):
     reporter = ReportReporterSerializer(read_only=True)
     actions = ReportActionSerializer(many=True, read_only=True)
     evidence = ReportEvidenceSerializer(many=True, read_only=True)
@@ -58,7 +59,7 @@ class ReportSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class ReportListSerializer(serializers.ModelSerializer):
+class ReportListSerializer(LocalizedModelSerializer):
     reporter = ReportReporterSerializer(read_only=True)
 
     class Meta:

@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from apps.domain.models import Domain
+from common.fields import LocalizedModelSerializer
 
 
-class DomainSerializer(serializers.ModelSerializer):
+class DomainSerializer(LocalizedModelSerializer):
     owner_email = serializers.EmailField(source="owner.email", read_only=True)
 
     class Meta:

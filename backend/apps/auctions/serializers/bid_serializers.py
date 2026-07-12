@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.auctions.models import Bid
-from common.fields import LocalDateTimeField
+from common.fields import LocalDateTimeField, LocalDateTimeOutputField, LocalizedModelSerializer
 
 
 class BidderSummarySerializer(serializers.Serializer):
@@ -10,11 +10,12 @@ class BidderSummarySerializer(serializers.Serializer):
     full_name = serializers.CharField(read_only=True)
 
 
-class BidSerializer(serializers.ModelSerializer):
+class BidSerializer(LocalizedModelSerializer):
     bidder = BidderSummarySerializer(read_only=True)
     bidder_id = serializers.IntegerField(read_only=True)
     auction_id = serializers.IntegerField(read_only=True)
     timestamp = LocalDateTimeField(source="created_at", read_only=True)
+    created_at = LocalDateTimeOutputField(read_only=True)
 
     class Meta:
         model = Bid
@@ -58,10 +59,11 @@ class BidCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Bid must be > 0.")
         return value
 
-class ActivitySerializer(serializers.ModelSerializer):
+class ActivitySerializer(LocalizedModelSerializer):
     bidder = BidderSummarySerializer(read_only=True)
     auction_title = serializers.CharField(source="auction.item.title", read_only=True)
-    
+    created_at = LocalDateTimeOutputField(read_only=True)
+
     class Meta:
         model = Bid
         fields = (
