@@ -4,7 +4,7 @@ import PageHeader from '@/components/layout/backoffice/PageHeader';
 import Toolbar from '@/components/layout/backoffice/Toolbar';
 import { useAdminUsersQuery, useUpdateUserMutation, useAdminRolesQuery, useAdminUserDetailQuery } from '@/hooks/useAdmin';
 import Avatar from '@/components/common/Avatar';
-import { Search, ShieldBan, CheckCircle, ShieldAlert, Users, X, Edit, Save } from 'lucide-react';
+import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save } from 'lucide-react';
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);

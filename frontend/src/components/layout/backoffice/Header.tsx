@@ -16,7 +16,7 @@ export default function Header() {
   const { data: notificationsData } = useNotificationsQuery();
   const notificationsList = Array.isArray(notificationsData) 
     ? notificationsData 
-    : (notificationsData?.results || notificationsData?.data?.results || []);
+    : (notificationsData as any)?.results || (notificationsData as any)?.data?.results || [];
     
   const unreadCount = notificationsList.filter((n: any) => !n.is_read).length;
 

@@ -4,7 +4,7 @@ import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
 import { useDomainQuery, useUpdateDomainMutation } from '@/hooks/useDomain';
 import type { DomainStatus } from '@/shared/types/domain.types';
-import { Save, Globe, Settings, DollarSign, ShieldAlert } from 'lucide-react';
+import { Globe, Settings, DollarSign, ShieldAlert } from 'lucide-react';
 
 type Tab = 'general' | 'budget' | 'danger';
 
