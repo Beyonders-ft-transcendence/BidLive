@@ -51,12 +51,13 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5 sm:py-1 flex justify-between items-center text-xs">
                 
                 {/* Left Side: Information / Slogan */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="hidden sm:flex items-center justify-center w-5 h-5 rounded-full bg-white/10 border border-white/10 shadow-inner">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 mr-2">
+                    <div className="hidden sm:flex items-center justify-center w-5 h-5 rounded-full bg-white/10 border border-white/10 shadow-inner shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
                     </div>
-                    <span className="text-zinc-300 font-medium tracking-wide text-[11px] sm:text-xs">
-                        Encontre as melhores oportunidades. <span className="font-bold text-white ml-1">Leilões a decorrer agora!</span>
+                    <span className="text-zinc-300 font-medium tracking-wide text-[10px] sm:text-xs truncate">
+                        <span className="hidden sm:inline">Encontre as melhores oportunidades. </span>
+                        <span className="font-bold text-white">Leilões a decorrer agora!</span>
                     </span>
                 </div>
 
