@@ -6,11 +6,13 @@ import PageHeader from '@/components/layout/backoffice/PageHeader';
 import { useDomainQuery, useUpdateDomainMutation } from '@/hooks/useDomain';
 import type { DomainStatus } from '@/shared/types/domain.types';
 import { Globe, Settings, DollarSign, ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type Tab = 'general' | 'budget' | 'danger';
 
 export default function DomainConfigPage() {
-  useDocumentTitle("Configuração de Domínio");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_domain_config.title'));
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -96,8 +98,8 @@ export default function DomainConfigPage() {
   return (
     <Container>
       <PageHeader 
-        title="Configurar Domínio"
-        description="Faça a gestão das definições avançadas, orçamento e estado operacional do seu domínio."
+        title={t('backoffice_domain_config.title')}
+        description={t('backoffice_domain_config.description')}
         icon={<Globe size={20} />}
         backUrl="/backoffice/domains"
         actions={
@@ -105,7 +107,7 @@ export default function DomainConfigPage() {
              onClick={() => navigate('/backoffice/domains')}
              className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-zinc-50 transition-colors border border-zinc-800 rounded-md hover:bg-zinc-800/50"
            >
-             Concluído
+             {t('backoffice_domain_config.btn_done')}
            </button>
         }
       />
@@ -120,21 +122,21 @@ export default function DomainConfigPage() {
               className={`px-3 py-2 text-sm font-medium rounded-md flex items-center justify-start gap-2 transition-colors w-full ${activeTab === 'general' ? 'bg-zinc-800 text-zinc-50' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
             >
               <Settings size={16} className={activeTab === 'general' ? 'text-zinc-50' : 'text-zinc-500'} />
-              Geral
+              {t('backoffice_domain_config.tab_general')}
             </button>
             <button 
               onClick={() => setActiveTab('budget')}
               className={`px-3 py-2 text-sm font-medium rounded-md flex items-center justify-start gap-2 transition-colors w-full ${activeTab === 'budget' ? 'bg-zinc-800 text-zinc-50' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
             >
               <DollarSign size={16} className={activeTab === 'budget' ? 'text-zinc-50' : 'text-zinc-500'} />
-              Controlo & Orçamento
+              {t('backoffice_domain_config.tab_budget')}
             </button>
             <button 
               onClick={() => setActiveTab('danger')}
               className={`px-3 py-2 text-sm font-medium rounded-md flex items-center justify-start gap-2 transition-colors w-full ${activeTab === 'danger' ? 'bg-zinc-800 text-zinc-50' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
             >
               <ShieldAlert size={16} className={activeTab === 'danger' ? 'text-zinc-50' : 'text-zinc-500'} />
-              Zona de Perigo
+              {t('backoffice_domain_config.tab_danger')}
             </button>
           </nav>
         </div>
@@ -145,12 +147,12 @@ export default function DomainConfigPage() {
           {/* Section: General */}
           {activeTab === 'general' && (
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <h2 className="text-lg font-semibold text-zinc-100 mb-4">Configurações Gerais</h2>
+              <h2 className="text-lg font-semibold text-zinc-100 mb-4">{t('backoffice_domain_config.general.title')}</h2>
               <form onSubmit={handleSaveGeneral} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
                 <div className="p-6 flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="name" className="text-sm font-medium text-zinc-300">Nome do Domínio</label>
-                    <p className="text-xs text-zinc-500 mb-1">O identificador principal do projeto.</p>
+                    <label htmlFor="name" className="text-sm font-medium text-zinc-300">{t('backoffice_domain_config.general.name_label')}</label>
+                    <p className="text-xs text-zinc-500 mb-1">{t('backoffice_domain_config.general.name_desc')}</p>
                     <input 
                       id="name"
                       name="name"
@@ -163,8 +165,8 @@ export default function DomainConfigPage() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="description" className="text-sm font-medium text-zinc-300">Descrição</label>
-                    <p className="text-xs text-zinc-500 mb-1">Uma breve explicação do propósito deste domínio.</p>
+                    <label htmlFor="description" className="text-sm font-medium text-zinc-300">{t('backoffice_domain_config.general.desc_label')}</label>
+                    <p className="text-xs text-zinc-500 mb-1">{t('backoffice_domain_config.general.desc_desc')}</p>
                     <textarea 
                       id="description"
                       name="description"
@@ -181,7 +183,7 @@ export default function DomainConfigPage() {
                     disabled={isUpdating}
                     className="px-4 py-2 bg-zinc-100 text-zinc-900 text-sm rounded-lg font-medium hover:bg-zinc-300 transition-colors disabled:opacity-50"
                   >
-                    {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+                    {isUpdating ? t('backoffice_domain_config.general.btn_saving') : t('backoffice_domain_config.general.btn_save')}
                   </button>
                 </div>
               </form>
@@ -191,12 +193,12 @@ export default function DomainConfigPage() {
           {/* Section: Budget & Status */}
           {activeTab === 'budget' && (
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <h2 className="text-lg font-semibold text-zinc-100 mb-4">Controlo & Orçamento</h2>
+              <h2 className="text-lg font-semibold text-zinc-100 mb-4">{t('backoffice_domain_config.budget.title')}</h2>
               <form onSubmit={handleSaveBudget} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="status" className="text-sm font-medium text-zinc-300">Estado Operacional</label>
-                    <p className="text-xs text-zinc-500 mb-1">Define o ciclo de vida atual do projeto.</p>
+                    <label htmlFor="status" className="text-sm font-medium text-zinc-300">{t('backoffice_domain_config.budget.status_label')}</label>
+                    <p className="text-xs text-zinc-500 mb-1">{t('backoffice_domain_config.budget.status_desc')}</p>
                     <select 
                       id="status"
                       name="status"
@@ -212,8 +214,8 @@ export default function DomainConfigPage() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="budget" className="text-sm font-medium text-zinc-300">Orçamento Máximo</label>
-                    <p className="text-xs text-zinc-500 mb-1">O limite de alocação financeira (opcional).</p>
+                    <label htmlFor="budget" className="text-sm font-medium text-zinc-300">{t('backoffice_domain_config.budget.budget_label')}</label>
+                    <p className="text-xs text-zinc-500 mb-1">{t('backoffice_domain_config.budget.budget_desc')}</p>
                     <div className="relative w-full">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium">$</span>
                       <input 
@@ -234,7 +236,7 @@ export default function DomainConfigPage() {
                     disabled={isUpdating}
                     className="px-4 py-2 bg-zinc-100 text-zinc-900 text-sm rounded-lg font-medium hover:bg-zinc-300 transition-colors disabled:opacity-50"
                   >
-                    {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+                    {isUpdating ? t('backoffice_domain_config.general.btn_saving') : t('backoffice_domain_config.general.btn_save')}
                   </button>
                 </div>
               </form>
@@ -244,12 +246,12 @@ export default function DomainConfigPage() {
           {/* Section: Danger Zone */}
           {activeTab === 'danger' && (
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <h2 className="text-lg font-semibold text-red-500 mb-4">Zona de Perigo</h2>
+              <h2 className="text-lg font-semibold text-red-500 mb-4">{t('backoffice_domain_config.danger.title')}</h2>
               <div className="border border-red-900/50 rounded-xl overflow-hidden">
                 <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-red-950/10">
                   <div>
-                    <h3 className="text-sm font-medium text-zinc-100">Arquivar Domínio</h3>
-                    <p className="text-xs text-zinc-400 mt-1">Oculta o domínio das listagens principais, mas não apaga os dados.</p>
+                    <h3 className="text-sm font-medium text-zinc-100">{t('backoffice_domain_config.danger.archive_title')}</h3>
+                    <p className="text-xs text-zinc-400 mt-1">{t('backoffice_domain_config.danger.archive_desc')}</p>
                   </div>
                   <button 
                     type="button" 
@@ -261,7 +263,7 @@ export default function DomainConfigPage() {
                         : 'bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20'
                     }`}
                   >
-                    {isUpdating ? 'A Processar...' : (formData.is_archived ? 'Desarquivar Domínio' : 'Arquivar Domínio')}
+                    {isUpdating ? t('backoffice_domain_config.danger.btn_processing') : (formData.is_archived ? t('backoffice_domain_config.danger.btn_unarchive') : t('backoffice_domain_config.danger.btn_archive'))}
                   </button>
                 </div>
               </div>

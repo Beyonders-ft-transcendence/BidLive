@@ -6,9 +6,11 @@ import Toolbar from '@/components/layout/backoffice/Toolbar';
 import { useAdminUsersQuery, useUpdateUserMutation, useAdminRolesQuery, useAdminUserDetailQuery } from '@/hooks/useAdmin';
 import Avatar from '@/components/common/Avatar';
 import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function UsersPage() {
-  useDocumentTitle("Gestão de Utilizadores");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_users.title'));
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -56,8 +58,8 @@ export default function UsersPage() {
   return (
     <Container>
       <PageHeader 
-        title="Utilizadores"
-        description="Gerencie os utilizadores da plataforma, os seus perfis de acesso e estados de conta."
+        title={t('backoffice_users.title')}
+        description={t('backoffice_users.description')}
         icon={<Users size={20} />}
       />
 
@@ -67,7 +69,7 @@ export default function UsersPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input 
               type="text" 
-              placeholder="Pesquisar por email/nome..." 
+              placeholder={t('backoffice_users.search_placeholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
@@ -81,11 +83,11 @@ export default function UsersPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Utilizador</th>
-                  <th className="px-6 py-4 font-medium">Perfil</th>
-                  <th className="px-6 py-4 font-medium">Estado</th>
-                  <th className="px-6 py-4 font-medium">Registado a</th>
-                  <th className="px-6 py-4 text-right font-medium">Ações</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_users.th_user')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_users.th_profile')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_users.th_status')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_users.th_registered_at')}</th>
+                  <th className="px-6 py-4 text-right font-medium">{t('backoffice_users.th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50">
@@ -102,7 +104,7 @@ export default function UsersPage() {
                 ) : users.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-16 text-center text-zinc-500">
-                      Nenhum utilizador encontrado.
+                      {t('backoffice_users.no_users')}
                     </td>
                   </tr>
                 ) : (
@@ -125,11 +127,11 @@ export default function UsersPage() {
                       <td className="px-6 py-4">
                         {user.status === 'ACTIVE' ? (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50">
-                            <CheckCircle size={10} /> Ativo
+                            <CheckCircle size={10} /> {t('backoffice_users.status_active')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-red-400 border border-zinc-700/50">
-                            <ShieldBan size={10} /> Banido
+                            <ShieldBan size={10} /> {t('backoffice_users.status_banned')}
                           </span>
                         )}
                       </td>
@@ -141,7 +143,7 @@ export default function UsersPage() {
                           <button 
                             onClick={() => setSelectedUserId(user.id)}
                             className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
-                            title="Gerir Utilizador"
+                            title={t('backoffice_users.manage_user')}
                           >
                             <Edit size={16} />
                           </button>
@@ -158,7 +160,7 @@ export default function UsersPage() {
           {data && data.count > 10 && (
             <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
               <span className="text-xs text-zinc-500">
-                Total: <span className="font-medium text-zinc-300">{data.count}</span> utilizadores
+                {t('backoffice_users.total_users')} <span className="font-medium text-zinc-300">{data.count}</span> {t('backoffice_users.total_users_suffix')}
               </span>
               <div className="flex gap-2">
                 <button 
@@ -166,14 +168,14 @@ export default function UsersPage() {
                   disabled={!data.previous}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Anterior
+                  {t('backoffice_users.btn_prev')}
                 </button>
                 <button 
                   onClick={() => setPage(p => p + 1)}
                   disabled={!data.next}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Próxima
+                  {t('backoffice_users.btn_next')}
                 </button>
               </div>
             </div>
@@ -197,7 +199,7 @@ export default function UsersPage() {
         }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-semibold text-zinc-100">Gerir Utilizador</h2>
+          <h2 className="text-xl font-semibold text-zinc-100">{t('backoffice_users.manage_user')}</h2>
           <button 
             onClick={() => setSelectedUserId(null)}
             className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50"
@@ -226,7 +228,7 @@ export default function UsersPage() {
               {/* Form Fields */}
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-300">Nome Completo</label>
+                  <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.full_name')}</label>
                   <input 
                     type="text" 
                     value={formData.full_name}
@@ -236,32 +238,32 @@ export default function UsersPage() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-300">Estado da Conta</label>
+                  <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.account_status')}</label>
                   <select 
                     value={formData.status}
                     onChange={(e) => setFormData(p => ({ ...p, status: e.target.value }))}
                     className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 appearance-none transition-all"
                   >
-                    <option value="ACTIVE">Ativo</option>
-                    <option value="BANNED">Banido / Suspenso</option>
+                    <option value="ACTIVE">{t('backoffice_users.status_active')}</option>
+                    <option value="BANNED">{t('backoffice_users.banned_suspended')}</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-300">Perfil de Acesso (Role)</label>
+                  <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.access_profile')}</label>
                   <select 
                     value={formData.role_names[0] || ''}
                     onChange={(e) => setFormData(p => ({ ...p, role_names: [e.target.value] }))}
                     className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 appearance-none transition-all"
                   >
-                    <option value="" disabled>Selecione um perfil...</option>
+                    <option value="" disabled>{t('backoffice_users.select_profile')}</option>
                     {roles.map((role: any) => (
                       <option key={role.id} value={role.name}>{role.name}</option>
                     ))}
                     <option value="USER">USER (Padrão)</option>
                     <option value="ADMIN">ADMIN</option>
                   </select>
-                  <p className="text-xs text-zinc-500 mt-1">O perfil define as permissões do utilizador na plataforma.</p>
+                  <p className="text-xs text-zinc-500 mt-1">{t('backoffice_users.profile_help')}</p>
                 </div>
               </div>
             </form>
@@ -276,7 +278,7 @@ export default function UsersPage() {
             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50"
           >
             <Save size={18} />
-            {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+            {isUpdating ? t('backoffice_users.btn_saving') : t('backoffice_users.btn_save')}
           </button>
         </div>
       </div>

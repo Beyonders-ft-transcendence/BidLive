@@ -28,5 +28,120 @@
     "admin": "Administration",
     "role_admin": "Administrator",
     "super_admin": "Super Admin"
+  },
+  "backoffice_users": {
+    "title": "Users",
+    "description": "Manage platform users, their access profiles and account statuses.",
+    "search_placeholder": "Search by email/name...",
+    "th_user": "User",
+    "th_profile": "Profile",
+    "th_status": "Status",
+    "th_registered_at": "Registered at",
+    "th_actions": "Actions",
+    "no_users": "No users found.",
+    "status_active": "Active",
+    "status_banned": "Banned",
+    "total_users": "Total: ",
+    "total_users_suffix": " users",
+    "btn_prev": "Previous",
+    "btn_next": "Next",
+    "manage_user": "Manage User",
+    "full_name": "Full Name",
+    "account_status": "Account Status",
+    "banned_suspended": "Banned / Suspended",
+    "access_profile": "Access Profile (Role)",
+    "select_profile": "Select a profile...",
+    "profile_help": "The profile defines the user's permissions on the platform.",
+    "btn_save": "Save Changes",
+    "btn_saving": "Saving..."
+  },
+  "backoffice_reports": {
+    "title": "Reports",
+    "description": "Analyze and take actions on reports submitted by users.",
+    "no_reports": "No reports."
+  },
+  "backoffice_roles": {
+    "title": "Roles & Permissions",
+    "description": "Manage access levels and permissions on the platform."
+  },
+  "backoffice_auctions": {
+    "title": "Auction Management",
+    "description": "View and manage all ongoing auctions. Administrators can cancel auctions that violate rules.",
+    "search_placeholder": "Search item title...",
+    "filter_all": "All Statuses",
+    "filter_live": "Live",
+    "filter_completed": "Completed",
+    "filter_cancelled": "Cancelled",
+    "filter_draft": "Drafts",
+    "th_seller": "Seller",
+    "th_item_price": "Item & Price",
+    "th_status": "Status",
+    "th_dates": "Dates",
+    "th_actions": "Actions",
+    "no_auctions": "No auctions found.",
+    "status_live": "Live",
+    "status_completed": "Completed",
+    "status_cancelled": "Cancelled",
+    "status_draft": "Draft",
+    "unknown_seller": "Unknown",
+    "btn_prev": "Previous",
+    "btn_next": "Next",
+    "total_auctions": "Total: ",
+    "total_auctions_suffix": " auctions",
+    "view_auction": "View Auction on Platform",
+    "cancel_auction": "Cancel Auction",
+    "cancel_modal_title": "Cancel Auction",
+    "cancel_modal_desc": "Are you sure you want to cancel this auction? This action is irreversible and the item will no longer be available for bidding.",
+    "cancel_modal_reason": "Reason (Visible to Seller)",
+    "cancel_modal_reason_placeholder": "Ex: Terms of use violation...",
+    "cancel_modal_keep": "Keep Auction",
+    "cancel_modal_confirm": "Yes, Cancel",
+    "cancel_modal_canceling": "Canceling...",
+    "default_cancel_reason": "Cancelled by administration."
+  },
+  "backoffice_domains": {
+    "title": "Domains",
+    "description": "Manage allowed domains for platform access via tenant isolation.",
+    "new_domain": "New Domain",
+    "confirm_delete": "Are you sure you want to delete the domain '{{name}}'? This action cannot be undone.",
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "paused": "Paused",
+      "completed": "Completed",
+      "archived": "Archived"
+    }
+  },
+  "backoffice_domain_config": {
+    "title": "Domain Configuration",
+    "description": "Manage advanced settings, budget and operational status of your domain.",
+    "btn_done": "Done",
+    "tab_general": "General",
+    "tab_budget": "Budget & Control",
+    "tab_danger": "Danger Zone",
+    "general": {
+      "title": "General Settings",
+      "name_label": "Domain Name",
+      "name_desc": "The primary identifier of the project.",
+      "desc_label": "Description",
+      "desc_desc": "A brief explanation of this domain's purpose.",
+      "btn_save": "Save Changes",
+      "btn_saving": "Saving..."
+    },
+    "budget": {
+      "title": "Budget & Control",
+      "status_label": "Operational Status",
+      "status_desc": "Defines the current lifecycle of the project.",
+      "budget_label": "Maximum Budget",
+      "budget_desc": "The financial allocation limit (optional)."
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "archive_title": "Archive Domain",
+      "archive_desc": "Hides the domain from main listings, but does not delete the data.",
+      "btn_archive": "Archive Domain",
+      "btn_unarchive": "Unarchive Domain",
+      "btn_processing": "Processing..."
+    }
   }
 }

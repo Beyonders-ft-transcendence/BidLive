@@ -16,14 +16,17 @@ import {
   Clock, 
   XCircle,
   X,
-  MessageSquareWarning,
-  Eye,
-  CheckCircle
+  Flag,
+  CheckCircle,
+  ShieldBan,
+  MessageSquare
 } from 'lucide-react';
 import type { Report, ReportActionType } from '@/shared/types/admin.types';
+import { useTranslation } from 'react-i18next';
 
 export default function ReportsPage() {
-  useDocumentTitle("Gestão de Denúncias");
+  const { t } = useTranslation();
+  useDocumentTitle(t('backoffice_reports.title'));
 
   const [selectedTargetType, setSelectedTargetType] = useState<string>('');
   const [activeReport, setActiveReport] = useState<Report | null>(null);
@@ -107,7 +110,7 @@ export default function ReportsPage() {
             ))
           ) : columnReports.length === 0 ? (
             <div className="text-center p-6 text-zinc-600 text-sm font-medium border border-dashed border-zinc-800/50 rounded-lg">
-              Nenhuma denúncia.
+              {t('backoffice_reports.no_reports')}
             </div>
           ) : (
             columnReports.map(report => (
@@ -144,9 +147,9 @@ export default function ReportsPage() {
   return (
     <Container>
       <PageHeader 
-        title="Moderação de Denúncias"
-        description="Analise, reveja e tome ações sobre conteúdo denunciado pelos utilizadores num formato de quadro Kanban."
-        icon={<MessageSquareWarning size={20} />}
+        title={t('backoffice_reports.title')}
+        description={t('backoffice_reports.description')}
+        icon={<Flag size={20} />}
       />
 
       <div className="flex flex-col gap-6 max-w-[1400px] w-full relative">
