@@ -2,6 +2,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import {
@@ -462,6 +463,8 @@ export default function AuctionsPage() {
                     </div>
                 </div>
             )}
+
+            <Footer />
         </div>
     );
 }

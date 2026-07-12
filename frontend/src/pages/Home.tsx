@@ -1,6 +1,7 @@
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 export default function HomePage() {
   useDocumentTitle("Início");
@@ -10,7 +11,7 @@ export default function HomePage() {
       {/* Reused Global Header */}
       <Header />
 
-  
+      <Footer />
     </div>
   );
 }
