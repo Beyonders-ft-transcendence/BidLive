@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Container from '@/components/layout/backoffice/Container';
+import PageHeader from '@/components/layout/backoffice/PageHeader';
+import Toolbar from '@/components/layout/backoffice/Toolbar';
 import { 
   useAdminReportsQuery, 
   useUpdateReportStatusMutation, 
@@ -9,24 +11,26 @@ import Avatar from '@/components/common/Avatar';
 import { 
   ShieldAlert, 
   AlertTriangle, 
-  Eye, 
   AlertOctagon, 
   Clock, 
   XCircle,
   FileText,
-  ExternalLink
+  ExternalLink,
+  X,
+  MessageSquareWarning,
+  Eye,
+  CheckCircle
 } from 'lucide-react';
 import type { Report, ReportStatus, ReportActionType } from '@/shared/types/admin.types';
 
 export default function ReportsPage() {
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedTargetType, setSelectedTargetType] = useState<string>('');
   const [activeReport, setActiveReport] = useState<Report | null>(null);
   const [actionNote, setActionNote] = useState('');
   const [actionType, setActionType] = useState<ReportActionType>('COMMENT');
 
   const { data: reports = [], isLoading } = useAdminReportsQuery(
-    selectedStatus || undefined, 
+    undefined, // We load all statuses to populate the Kanban board
     selectedTargetType || undefined
   );
 
@@ -36,7 +40,7 @@ export default function ReportsPage() {
   const handleUpdateStatus = (id: number, status: 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED' | 'IGNORED') => {
     updateStatus({
       id,
-      payload: { status, note: `Status alterado manualmente para ${status}` }
+      payload: { status, note: `Estado alterado manualmente para ${status}` }
     }, {
       onSuccess: (data) => {
         if (activeReport?.id === id) {
@@ -66,329 +70,280 @@ export default function ReportsPage() {
     });
   };
 
-  const getStatusBadge = (status: ReportStatus) => {
-    const styles: Record<ReportStatus, string> = {
-      OPEN: 'bg-red-500/10 text-red-500 border border-red-500/20',
-      UNDER_REVIEW: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
-      RESOLVED: 'bg-green-500/10 text-green-500 border border-green-500/20',
-      REJECTED: 'bg-slate-500/10 text-slate-500 border border-slate-500/20',
-      IGNORED: 'bg-gray-500/10 text-gray-500 border border-gray-500/20',
-    };
-    const labels: Record<ReportStatus, string> = {
-      OPEN: 'Aberto',
-      UNDER_REVIEW: 'Em Revisão',
-      RESOLVED: 'Resolvido',
-      REJECTED: 'Rejeitado',
-      IGNORED: 'Ignorado',
-    };
-    return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
-  };
-
   const getReasonLabel = (reason: string) => {
     const reasons: Record<string, string> = {
-      SPAM: 'Spam / Mensagens repetitivas',
-      HARASSMENT: 'Assédio / Ofensas',
-      SCAM: 'Burla / Golpe',
-      HATE_SPEECH: 'Discurso de Ódio',
-      FRAUD: 'Fraude / Manipulação',
-      INAPPROPRIATE_CONTENT: 'Conteúdo Inapropriado',
-      COPYRIGHT: 'Direitos de Autor',
-      OTHER: 'Outro Motivo',
+      SPAM: 'Spam',
+      HARASSMENT: 'Assédio',
+      SCAM: 'Burla',
+      HATE_SPEECH: 'Ódio',
+      FRAUD: 'Fraude',
+      INAPPROPRIATE_CONTENT: 'Inapropriado',
+      COPYRIGHT: 'Copyright',
+      OTHER: 'Outro',
     };
     return reasons[reason] || reason;
   };
 
-  return (
-    <Container>
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-        
-        {/* LEFT/MIDDLE: List of Reports */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Filters Bar */}
-          <div className="bg-card border border-border p-4 rounded-xl shadow-sm flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="text-primary" size={20} />
-              <h2 className="font-bold text-foreground">Moderação de Denúncias</h2>
-            </div>
-            
-            <div className="flex flex-wrap gap-3">
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-background border border-border text-foreground px-3 py-1.5 rounded-lg text-xs font-medium focus:outline-none focus:border-primary"
-              >
-                <option value="">Todos os Estados</option>
-                <option value="OPEN">Abertos</option>
-                <option value="UNDER_REVIEW">Em Revisão</option>
-                <option value="RESOLVED">Resolvidos</option>
-                <option value="REJECTED">Rejeitados</option>
-                <option value="IGNORED">Ignorados</option>
-              </select>
-
-              <select
-                value={selectedTargetType}
-                onChange={(e) => setSelectedTargetType(e.target.value)}
-                className="bg-background border border-border text-foreground px-3 py-1.5 rounded-lg text-xs font-medium focus:outline-none focus:border-primary"
-              >
-                <option value="">Todos os Alvos</option>
-                <option value="USER">Utilizador</option>
-                <option value="AUCTION">Leilão</option>
-                <option value="STREAM">Transmissão</option>
-                <option value="MESSAGE">Mensagem de Chat</option>
-                <option value="BID">Lance</option>
-              </select>
-            </div>
+  const KanbanColumn = ({ title, icon, statusList, accentColor }: { title: string, icon: any, statusList: string[], accentColor: string }) => {
+    const columnReports = reports.filter(r => statusList.includes(r.status));
+    
+    return (
+      <div className="flex flex-col bg-zinc-900/30 border border-zinc-800/80 rounded-xl overflow-hidden h-[calc(100vh-220px)] min-w-[320px]">
+        <div className={`p-4 border-b border-zinc-800/80 bg-zinc-900/50 flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <span className={accentColor}>{icon}</span>
+            <h3 className="font-semibold text-zinc-100">{title}</h3>
           </div>
-
-          {/* List Table */}
-          <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 border-b border-border text-xs uppercase font-semibold text-muted-foreground">
-                  <tr>
-                    <th className="px-6 py-4">Denunciante</th>
-                    <th className="px-6 py-4">Alvo</th>
-                    <th className="px-6 py-4">Motivo</th>
-                    <th className="px-6 py-4">Estado</th>
-                    <th className="px-6 py-4">Criado em</th>
-                    <th className="px-6 py-4 text-right">Ação</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {isLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <tr key={i} className="animate-pulse">
-                        <td className="px-6 py-4"><div className="h-5 w-32 bg-muted rounded"></div></td>
-                        <td className="px-6 py-4"><div className="h-5 w-24 bg-muted rounded"></div></td>
-                        <td className="px-6 py-4"><div className="h-5 w-28 bg-muted rounded"></div></td>
-                        <td className="px-6 py-4"><div className="h-5 w-16 bg-muted rounded"></div></td>
-                        <td className="px-6 py-4"><div className="h-5 w-20 bg-muted rounded"></div></td>
-                        <td className="px-6 py-4"><div className="h-8 w-8 bg-muted rounded ml-auto"></div></td>
-                      </tr>
-                    ))
-                  ) : reports.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                        Nenhuma denúncia registada ou encontrada com estes filtros.
-                      </td>
-                    </tr>
-                  ) : (
-                    reports.map((report) => (
-                      <tr 
-                        key={report.id} 
-                        className={`hover:bg-muted/30 transition-colors cursor-pointer ${activeReport?.id === report.id ? 'bg-primary/5' : ''}`}
-                        onClick={() => {
-                          setActiveReport(report);
-                          setActionNote('');
-                        }}
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <Avatar name={report.reporter.full_name} src={report.reporter.avatar_url} size="sm" />
-                            <div>
-                              <div className="font-semibold text-foreground">{report.reporter.full_name}</div>
-                              <div className="text-[10px] text-muted-foreground">@{report.reporter.username}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="font-bold text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground uppercase">
-                            {report.target_type} ({report.target_id})
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-foreground font-medium">
-                          {getReasonLabel(report.reason)}
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(report.status)}
-                        </td>
-                        <td className="px-6 py-4 text-muted-foreground text-xs">
-                          {new Date(report.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => {
-                              setActiveReport(report);
-                              setActionNote('');
-                            }}
-                            className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition"
-                            title="Ver detalhes"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <span className="bg-black border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full text-xs font-bold">
+            {columnReports.length}
+          </span>
         </div>
-
-        {/* RIGHT: Selected Report Details & Action Panel */}
-        <div className="xl:col-span-1">
-          {activeReport ? (
-            <div className="bg-card border border-border rounded-xl shadow-sm p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-border pb-4">
-                <h3 className="font-bold text-foreground flex items-center gap-1.5">
-                  <AlertTriangle className="text-amber-500" size={16} />
-                  Denúncia #{activeReport.id}
-                </h3>
-                {getStatusBadge(activeReport.status)}
-              </div>
-
-              {/* Reporter Info */}
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Denunciante</span>
-                <div className="flex items-center gap-3 bg-muted/40 p-3 rounded-lg border border-border/50">
-                  <Avatar name={activeReport.reporter.full_name} src={activeReport.reporter.avatar_url} size="md" />
-                  <div>
-                    <h4 className="font-bold text-sm text-foreground">{activeReport.reporter.full_name}</h4>
-                    <p className="text-xs text-muted-foreground">@{activeReport.reporter.username}</p>
-                  </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+          {isLoading ? (
+             Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-zinc-800/50 h-24 rounded-lg"></div>
+            ))
+          ) : columnReports.length === 0 ? (
+            <div className="text-center p-6 text-zinc-600 text-sm font-medium border border-dashed border-zinc-800/50 rounded-lg">
+              Nenhuma denúncia.
+            </div>
+          ) : (
+            columnReports.map(report => (
+              <div 
+                key={report.id}
+                onClick={() => {
+                  setActiveReport(report);
+                  setActionNote('');
+                }}
+                className={`bg-black border p-4 rounded-lg cursor-pointer transition-all hover:border-zinc-500 hover:shadow-md group
+                  ${activeReport?.id === report.id ? 'border-zinc-500 ring-1 ring-zinc-500/50' : 'border-zinc-800'}`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-900 text-zinc-300 border border-zinc-800 uppercase">
+                    {report.target_type}
+                  </span>
+                  <span className="text-[10px] text-zinc-500">#{report.id}</span>
+                </div>
+                
+                <h4 className="text-sm font-medium text-zinc-100 mb-1">{getReasonLabel(report.reason)}</h4>
+                
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-zinc-900">
+                  <Avatar name={report.reporter.full_name} src={report.reporter.avatar_url} size="sm" />
+                  <span className="text-xs text-zinc-500 truncate">{report.reporter.full_name}</span>
                 </div>
               </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
 
-              {/* Target & Details */}
-              <div className="space-y-3">
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Alvo da Denúncia</span>
-                  <p className="text-sm font-semibold mt-1">
-                    Elemento: <span className="text-primary font-bold">{activeReport.target_type}</span> (ID: {activeReport.target_id})
-                  </p>
+  return (
+    <Container>
+      <PageHeader 
+        title="Moderação de Denúncias"
+        description="Analise, reveja e tome ações sobre conteúdo denunciado pelos utilizadores num formato de quadro Kanban."
+        icon={<MessageSquareWarning size={20} />}
+      />
+
+      <div className="flex flex-col gap-6 max-w-[1400px] w-full relative">
+        <Toolbar>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <span className="text-sm font-medium text-zinc-400">Filtrar Alvo:</span>
+            <select
+              value={selectedTargetType}
+              onChange={(e) => setSelectedTargetType(e.target.value)}
+              className="bg-black border border-zinc-800 text-zinc-100 px-3 py-1.5 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all appearance-none"
+            >
+              <option value="">Todos</option>
+              <option value="USER">Utilizador</option>
+              <option value="AUCTION">Leilão</option>
+              <option value="STREAM">Transmissão</option>
+              <option value="MESSAGE">Mensagem de Chat</option>
+              <option value="BID">Lance</option>
+            </select>
+          </div>
+        </Toolbar>
+
+        {/* Kanban Board */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-x-auto pb-4">
+          <KanbanColumn 
+            title="Em Fila (Novas)" 
+            icon={<AlertTriangle size={16} />} 
+            statusList={['OPEN']} 
+            accentColor="text-red-400"
+          />
+          <KanbanColumn 
+            title="Em Revisão" 
+            icon={<Eye size={16} />} 
+            statusList={['UNDER_REVIEW']} 
+            accentColor="text-amber-400"
+          />
+          <KanbanColumn 
+            title="Fechadas" 
+            icon={<CheckCircle size={16} />} 
+            statusList={['RESOLVED', 'REJECTED', 'IGNORED']} 
+            accentColor="text-zinc-500"
+          />
+        </div>
+
+      </div>
+
+      {/* Right Drawer Backdrop */}
+      {activeReport && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in"
+          onClick={() => setActiveReport(null)}
+        />
+      )}
+
+      {/* Right Drawer Panel */}
+      <div 
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-black border-l border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col ${
+          activeReport ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800 bg-zinc-900/20">
+          <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
+            <ShieldAlert className="text-zinc-400" size={20} />
+            Detalhes #{activeReport?.id}
+          </h2>
+          <button 
+            onClick={() => setActiveReport(null)}
+            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {activeReport ? (
+            <div className="p-6 flex flex-col gap-8">
+              
+              {/* Target & Reason */}
+              <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="inline-flex items-center px-2 py-1 rounded bg-zinc-800 text-[10px] font-bold text-zinc-300 border border-zinc-700/50 uppercase">
+                    Alvo: {activeReport.target_type} ({activeReport.target_id})
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    Estado: <span className="text-zinc-300">{activeReport.status}</span>
+                  </span>
                 </div>
                 
                 <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Motivo</span>
-                  <p className="text-sm font-bold text-destructive mt-0.5">{getReasonLabel(activeReport.reason)}</p>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">Motivo Principal</span>
+                  <p className="text-lg font-semibold text-red-400">{getReasonLabel(activeReport.reason)}</p>
                 </div>
 
                 {activeReport.description && (
-                  <div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Descrição Adicional</span>
-                    <p className="text-xs bg-muted/40 p-3 border border-border/30 rounded-lg text-foreground mt-1 whitespace-pre-wrap leading-relaxed">
+                  <div className="mt-4 pt-4 border-t border-zinc-800/50">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">Descrição</span>
+                    <p className="text-sm bg-black p-3 border border-zinc-800 rounded-lg text-zinc-300 whitespace-pre-wrap leading-relaxed">
                       {activeReport.description}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Evidence Section */}
-              {activeReport.evidence && activeReport.evidence.length > 0 && (
-                <div className="space-y-2 border-t border-border pt-4">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Evidências Anexadas</span>
-                  <div className="grid grid-cols-2 gap-2">
-                    {activeReport.evidence.map((ev) => (
-                      <a 
-                        key={ev.id} 
-                        href={ev.file} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 p-2 bg-muted/50 border border-border hover:border-primary/50 text-muted-foreground hover:text-primary transition rounded-lg text-xs font-semibold"
-                      >
-                        <FileText size={14} />
-                        Ficheiro Anexo
-                        <ExternalLink size={10} className="ml-auto" />
-                      </a>
-                    ))}
+              {/* Reporter Info */}
+              <div>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">Denunciante</span>
+                <div className="flex items-center gap-3 bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
+                  <Avatar name={activeReport.reporter.full_name} src={activeReport.reporter.avatar_url} size="md" />
+                  <div>
+                    <h4 className="font-semibold text-sm text-zinc-100">{activeReport.reporter.full_name}</h4>
+                    <p className="text-xs text-zinc-500">@{activeReport.reporter.username}</p>
                   </div>
-                </div>
-              )}
-
-              {/* History / Actions Timeline */}
-              {activeReport.actions && activeReport.actions.length > 0 && (
-                <div className="space-y-2 border-t border-border pt-4">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Histórico de Ações</span>
-                  <div className="space-y-3">
-                    {activeReport.actions.map((act) => (
-                      <div key={act.id} className="text-xs bg-muted/30 p-2.5 rounded-lg border border-border/20">
-                        <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground">
-                          <span>{act.admin.full_name} (@{act.admin.username})</span>
-                          <span>{new Date(act.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <p className="mt-1 font-semibold text-primary uppercase text-[9px]">{act.action}</p>
-                        {act.note && <p className="mt-1 text-foreground/80 font-medium italic">"{act.note}"</p>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Status Update Quick Buttons */}
-              <div className="space-y-2 border-t border-border pt-4">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Alterar Estado</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    disabled={isUpdatingStatus}
-                    onClick={() => handleUpdateStatus(activeReport.id, 'UNDER_REVIEW')}
-                    className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-lg text-xs font-bold transition cursor-pointer"
-                  >
-                    <Clock size={12} /> Rever
-                  </button>
-                  <button 
-                    disabled={isUpdatingStatus}
-                    onClick={() => handleUpdateStatus(activeReport.id, 'IGNORED')}
-                    className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 border border-gray-500/20 rounded-lg text-xs font-bold transition cursor-pointer"
-                  >
-                    <XCircle size={12} /> Ignorar
-                  </button>
                 </div>
               </div>
 
+              {/* Status Actions */}
+              <div className="flex gap-2 pb-4 border-b border-zinc-800/50">
+                <button 
+                  disabled={isUpdatingStatus || activeReport.status === 'UNDER_REVIEW'}
+                  onClick={() => handleUpdateStatus(activeReport.id, 'UNDER_REVIEW')}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                >
+                  <Clock size={14} /> Rever
+                </button>
+                <button 
+                  disabled={isUpdatingStatus || activeReport.status === 'IGNORED'}
+                  onClick={() => handleUpdateStatus(activeReport.id, 'IGNORED')}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border border-zinc-700/50 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                >
+                  <XCircle size={14} /> Ignorar
+                </button>
+              </div>
+
               {/* Take Administrative Action Form */}
-              <form onSubmit={handleApplyAction} className="space-y-3 border-t border-border pt-4">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Ação Administrativa</span>
+              <form onSubmit={handleApplyAction} className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-zinc-100 mb-1">Ação Administrativa</h3>
+                  <p className="text-xs text-zinc-500 mb-4">Alique uma penalização ou adicione uma nota à moderação.</p>
+                </div>
                 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-muted-foreground font-bold">Tipo de Ação</label>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-zinc-300">Tipo de Ação</label>
                   <select
                     value={actionType}
                     onChange={(e) => setActionType(e.target.value as ReportActionType)}
-                    className="w-full bg-background border border-border text-foreground px-3 py-2 rounded-lg text-xs font-semibold focus:outline-none focus:border-primary"
+                    className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all appearance-none"
                   >
-                    <option value="COMMENT">Adicionar Comentário</option>
-                    <option value="WARN_USER">Notificar / Alertar Utilizador</option>
-                    <option value="BAN_USER">Banir Utilizador</option>
-                    <option value="DELETE_CONTENT">Remover Conteúdo Denunciado</option>
-                    <option value="ESCALATE">Escalar Denúncia</option>
+                    <option value="COMMENT">📝 Adicionar Comentário Interno</option>
+                    <option value="WARN_USER">⚠️ Alertar Utilizador</option>
+                    <option value="BAN_USER">🔨 Banir Utilizador (Resolve Denúncia)</option>
+                    <option value="DELETE_CONTENT">🗑️ Remover Conteúdo (Resolve Denúncia)</option>
+                    <option value="ESCALATE">↗️ Escalar Denúncia</option>
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-muted-foreground font-bold">Nota / Justificação Interna</label>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-zinc-300">Nota / Justificação</label>
                   <textarea
                     required
                     rows={3}
-                    placeholder="Indique a justificação da ação tomada..."
+                    placeholder="Escreve a justificação para a ação tomada..."
                     value={actionNote}
                     onChange={(e) => setActionNote(e.target.value)}
-                    className="w-full bg-background border border-border text-foreground p-3 rounded-lg text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                    className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-100 p-3 rounded-lg text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isApplyingAction}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-black transition cursor-pointer border-none"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-zinc-100 hover:bg-white text-black rounded-lg text-sm font-semibold transition cursor-pointer disabled:opacity-50 mt-4"
                 >
-                  <AlertOctagon size={14} /> Aplicar Ação
+                  <AlertOctagon size={16} /> 
+                  {isApplyingAction ? 'A Aplicar...' : 'Aplicar Ação'}
                 </button>
               </form>
 
-            </div>
-          ) : (
-            <div className="bg-card border border-border rounded-xl shadow-sm p-8 text-center text-muted-foreground">
-              <ShieldAlert className="mx-auto text-muted-foreground/30 mb-3" size={36} />
-              <p className="text-sm font-semibold">Selecione uma denúncia da lista para ver os detalhes completos e aplicar ações corretivas.</p>
-            </div>
-          )}
-        </div>
+              {/* History / Actions Timeline */}
+              {activeReport.actions && activeReport.actions.length > 0 && (
+                <div className="space-y-3 pt-6 border-t border-zinc-800/50">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Histórico de Ações</span>
+                  <div className="space-y-3">
+                    {activeReport.actions.map((act) => (
+                      <div key={act.id} className="text-xs bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/50 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-zinc-800 before:rounded-r">
+                        <div className="flex items-center justify-between text-[10px] font-bold text-zinc-500 mb-1.5 ml-2">
+                          <span>{act.admin.full_name}</span>
+                          <span>{new Date(act.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="font-semibold text-zinc-300 uppercase text-[10px] ml-2 mb-1">{act.action}</p>
+                        {act.note && <p className="text-zinc-400 italic ml-2">"{act.note}"</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
+            </div>
+          ) : null}
+        </div>
       </div>
     </Container>
   );
