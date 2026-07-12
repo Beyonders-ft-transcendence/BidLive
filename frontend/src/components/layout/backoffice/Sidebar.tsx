@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Users, 
   ShieldCheck, 
-  Settings, 
   LogOut,
   Gavel,
   ShieldAlert,
