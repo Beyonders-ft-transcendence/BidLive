@@ -643,9 +643,9 @@ export default function AuctionDetailPage() {
                           value: (
                               <button 
                                   onClick={() => setSelectedProfile({ id: auction.item.seller, username: "Vendedor" })}
-                                  className="hover:text-primary transition-colors cursor-pointer"
+                                  className="hover:text-primary transition-colors cursor-pointer font-bold underline underline-offset-2"
                               >
-                                  ID #{auction.item.seller}
+                                  Ver Perfil
                               </button>
                           ) 
                         },

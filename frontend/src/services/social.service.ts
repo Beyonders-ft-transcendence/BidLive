@@ -62,6 +62,11 @@ class SocialService {
     const response = await api.get<ApiResponse<{ results: PublicUser[] }>>(`/users/?search=${encodeURIComponent(query)}`);
     return response.data;
   }
+
+  async getUserProfile(userId: number): Promise<ApiResponse<PublicUser>> {
+    const response = await api.get<ApiResponse<PublicUser>>(`/users/${userId}/`);
+    return response.data;
+  }
 }
 
 const socialService = new SocialService();
