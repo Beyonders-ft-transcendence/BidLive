@@ -14,7 +14,31 @@
     "login": "Entrar",
     "register": "Criar Conta",
     "dashboard": "Dashboard",
-    "backoffice": "Backoffice"
+    "backoffice": "Backoffice",
+    "pt": {
+      "home": "Início",
+      "login_register": "Entrar / Criar Conta",
+      "notifications": "Notificações",
+      "new_notifications": "Novas",
+      "no_notifications": "Sem novas notificações",
+      "mark_read": "Marcar como lida"
+    },
+    "en": {
+      "home": "Home",
+      "login_register": "Login / Register",
+      "notifications": "Notifications",
+      "new_notifications": "New",
+      "no_notifications": "No new notifications",
+      "mark_read": "Mark as read"
+    },
+    "ar": {
+      "home": "الرئيسية",
+      "login_register": "تسجيل الدخول / إنشاء حساب",
+      "notifications": "الإشعارات",
+      "new_notifications": "جديدة",
+      "no_notifications": "لا توجد إشعارات جديدة",
+      "mark_read": "تحديد كمقروء"
+    }
   },
   "backoffice_header": {
     "admin_title": "BidLive Admin",
