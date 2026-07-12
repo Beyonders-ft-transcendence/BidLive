@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageMutation } from "@/hooks/useChat";
@@ -799,6 +800,8 @@ export default function AuctionDetailPage() {
                     username={selectedProfile.username}
                 />
             )}
+
+            <Footer />
         </div>
     );
 }

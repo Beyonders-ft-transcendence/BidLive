@@ -395,7 +395,7 @@ export function UserDashboard() {
         </div>
       )}
 
-
+      <Footer />
     </div>
   );
 }
