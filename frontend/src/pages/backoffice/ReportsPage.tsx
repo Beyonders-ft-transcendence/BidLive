@@ -14,14 +14,12 @@ import {
   AlertOctagon, 
   Clock, 
   XCircle,
-  FileText,
-  ExternalLink,
   X,
   MessageSquareWarning,
   Eye,
   CheckCircle
 } from 'lucide-react';
-import type { Report, ReportStatus, ReportActionType } from '@/shared/types/admin.types';
+import type { Report, ReportActionType } from '@/shared/types/admin.types';
 
 export default function ReportsPage() {
   const [selectedTargetType, setSelectedTargetType] = useState<string>('');
