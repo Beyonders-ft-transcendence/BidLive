@@ -9,10 +9,8 @@ import {
   LayoutDashboard, 
   TrendingUp, 
   PlusCircle, 
-  MessageSquare,
   ShieldCheck,
-  ChevronRight,
-  ShieldAlert
+  ChevronRight
 } from "lucide-react";
 
 interface UserDrawerProps {
@@ -56,16 +54,6 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
   const isAdminOrMonitor = hasRole(UserRole.SUPER_ADMIN) || hasRole(UserRole.MONITOR);
 
   const navItems = [
-    ...(isAdminOrMonitor ? [{
-      id: "backoffice",
-      title: "Painel Backoffice",
-      subtitle: "Gestão da plataforma",
-      icon: <ShieldCheck size={14} className="text-primary" />,
-      action: () => {
-        onClose();
-        navigate("/backoffice");
-      }
-    }] : []),
     {
       id: "overview",
       title: "Visão Geral",
@@ -93,20 +81,6 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
       subtitle: "Cadastrar um novo item para venda",
       icon: <PlusCircle size={14} />,
       action: () => navigateToTab("create-auction")
-    },
-    {
-      id: "chat",
-      title: "Mensagens & Social",
-      subtitle: "Conversas e rede de amigos",
-      icon: <MessageSquare size={14} />,
-      action: () => navigateToTab("chat")
-    },
-    {
-      id: "reports",
-      title: "Minhas Denúncias",
-      subtitle: "Acompanhar estado das denúncias",
-      icon: <ShieldAlert size={14} />,
-      action: () => navigateToTab("reports")
     }
   ];
 
@@ -129,7 +103,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
     >
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 text-left items-start h-full">
         
-        {/* LEFT COLUMN: Profile Details Card (Inspired by mockup left column) */}
+        {/* LEFT COLUMN */}
         <div className="space-y-5 w-full shrink-0">
           <div className="w-full aspect-[4/5] bg-muted border border-border rounded-sm overflow-hidden relative group shadow-sm">
             {user.avatar_url ? (
@@ -159,25 +133,10 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Endereço de Email</span>
               <span className="text-xs text-foreground font-bold truncate block">{user.email}</span>
             </div>
-
-            {/* Platform stats */}
-            <div className="space-y-1.5 pt-3 border-t border-border/50 text-left">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Redes Sociais</span>
-              <div className="flex gap-1.5">
-                {["ln", "tw", "ig"].map((soc) => (
-                  <span
-                    key={soc}
-                    className="w-6 h-6 rounded-sm bg-muted/60 border border-border/60 hover:border-primary hover:text-primary transition flex items-center justify-center text-[10px] font-bold text-muted-foreground cursor-pointer uppercase"
-                  >
-                    {soc}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Identity, Description & Action/Navigation List (Inspired by mockup right column) */}
+        {/* RIGHT COLUMN */}
         <div className="space-y-6 flex-1 min-w-0">
           
           {/* Identity */}
@@ -222,7 +181,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
             </p>
           </div>
 
-          {/* Platform Navigation Options (JobHuntly Experience List Style) */}
+          {/* Platform Navigation Options */}
           <div className="space-y-3">
             <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block text-left">Navegação Rápida</span>
             
