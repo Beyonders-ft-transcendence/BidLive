@@ -355,9 +355,24 @@ def start_stream(
     stream.is_live = True
     stream.started_at = stream.started_at or timezone.now()
     stream.save(update_fields=["status", "is_live", "started_at", "updated_at"])
-    
-    from apps.auctions.services.auction_service import activate_auction
-    activate_auction(auction=stream.auction)
+
+    auction = stream.auction
+    auction.refresh_from_db(fields=["status", "started_at"])
+    if auction.status == AuctionStatus.ACTIVE:
+        auction.status = AuctionStatus.LIVE
+        auction.save(update_fields=["status", "updated_at"])
+        from apps.auctions.events import AUCTION_UPDATED
+        from apps.auctions.services.realtime_service import publish_auction_event, publish_auction_snapshot, build_auction_snapshot
+        publish_auction_event(
+            auction_id=auction.id,
+            event_type=AUCTION_UPDATED,
+            payload={"auction_id": auction.id, "status": auction.status},
+        )
+        publish_auction_snapshot(
+            auction_id=auction.id,
+            snapshot=build_auction_snapshot(auction=auction),
+            broadcast=True,
+        )
 
     ensure_livekit_room(stream=stream)
 

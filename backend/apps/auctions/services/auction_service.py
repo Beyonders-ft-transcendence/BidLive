@@ -525,10 +525,7 @@ def activate_auction(*, auction: Auction) -> Auction:
     if auction.start_time > timezone.now():
         return auction
 
-    if auction.streams.filter(status=LiveStreamStatus.LIVE).exists():
-        new_status = AuctionStatus.LIVE
-    else:
-        new_status = AuctionStatus.ACTIVE
+    new_status = AuctionStatus.ACTIVE
 
     if auction.status == new_status:
         return auction
