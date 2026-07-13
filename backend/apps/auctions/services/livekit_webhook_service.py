@@ -171,8 +171,12 @@ def _set_stream_live(*, stream: LiveStream) -> None:
     if updates:
         stream.save(update_fields=[*updates, "updated_at"])
 
-    from apps.auctions.services.auction_service import activate_auction
-    activate_auction(auction=stream.auction)
+    from apps.auctions.models import AuctionStatus
+    auction = stream.auction
+    auction.refresh_from_db(fields=["status"])
+    if auction.status == AuctionStatus.ACTIVE:
+        auction.status = AuctionStatus.LIVE
+        auction.save(update_fields=["status", "updated_at"])
 
 
 def _update_stream_meta(*, stream: LiveStream, event_name: str, extra: dict | None = None) -> None:
