@@ -13,5 +13,3 @@ class AuctionManager(models.Manager):
     def scheduled(self):
         return self.get_queryset().scheduled()
 
-    def active(self):
-        return self.get_queryset().active()
