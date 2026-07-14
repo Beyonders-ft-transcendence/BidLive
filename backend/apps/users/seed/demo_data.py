@@ -774,38 +774,6 @@ DEMO_ANALYTICS_EVENTS: tuple[DemoAnalyticsSpec, ...] = (
 )
 
 
-DEMO_DOMAINS: tuple[dict, ...] = (
-    {
-        "owner_key": "seller",
-        "name": "Colecao Primavera 2026",
-        "description": "Leiloes tematicos de artes e relogios vintage.",
-        "status": "active",
-        "budget": Decimal("50000.00"),
-    },
-    {
-        "owner_key": "manager",
-        "name": "Tech Drops Semanais",
-        "description": "Hardware de alto desempenho e setups gamer.",
-        "status": "active",
-        "budget": Decimal("25000.00"),
-    },
-    {
-        "owner_key": "buyer_1",
-        "name": "Galeria Exclusiva Luiza",
-        "description": "Aquisicoes de alta costura e obras de arte contemporanea.",
-        "status": "active",
-        "budget": Decimal("150000.00"),
-    },
-    {
-        "owner_key": "buyer_2",
-        "name": "Garagem de Classicos Marcos",
-        "description": "Investimentos em carros esportivos de luxo e colecionaveis de pista.",
-        "status": "active",
-        "budget": Decimal("900000.00"),
-    },
-)
-
-
 DEMO_FRIENDSHIPS: tuple[tuple[str, str], ...] = (
     ("seller", "manager"),
     ("seller", "admin"),

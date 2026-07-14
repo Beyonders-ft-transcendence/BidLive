@@ -16,7 +16,6 @@ def test_schema_route_returns_openapi_document(api_client):
     assert "/api/users/" in response.data["paths"]
     assert "/api/roles/" in response.data["paths"]
     assert "/api/permissions/" in response.data["paths"]
-    assert "/api/domain/" in response.data["paths"]
 
 
 def _request_schema_for(schema, path):
