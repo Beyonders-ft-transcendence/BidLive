@@ -107,11 +107,6 @@ class UserMeResponseSerializer(serializers.Serializer):
     data = UserSerializer()
 
 
-class ErrorResponseSerializer(serializers.Serializer):
-    success = serializers.BooleanField(default=False)
-    message = serializers.CharField(required=False)
-    errors = serializers.ListField(child=serializers.DictField())
-
 
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(

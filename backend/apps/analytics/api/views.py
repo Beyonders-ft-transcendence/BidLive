@@ -15,6 +15,7 @@ from apps.analytics.models import AnalyticsEvent
 from apps.auctions.models import Auction, AuctionStatus, Bid
 
 User = get_user_model()
+from apps.users.selectors import active_users
 
 
 def _client_ip(request) -> str:
@@ -111,7 +112,7 @@ class AnalyticsStatsView(APIView):
         )
 
         # Bidder engagement rate (users who have placed bids vs active users)
-        total_active_users = User.objects.filter(is_active=True).count()
+        total_active_users = active_users().count()
         unique_bidders = Bid.objects.values("bidder").distinct().count()
         bidder_engagement_rate = (
             round((unique_bidders / total_active_users) * 100.0, 2)
