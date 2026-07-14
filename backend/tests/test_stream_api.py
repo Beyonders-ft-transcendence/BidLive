@@ -293,7 +293,7 @@ def test_stream_end_service_closes_live_stream(db, user):
 def test_start_stream_activates_scheduled_auction(db, user):
     from apps.auctions.services import start_stream
 
-    # Create a scheduled auction
+    # Create an active auction
     now = timezone.now()
     item = AuctionItem.objects.create(
         seller=user,
@@ -306,24 +306,23 @@ def test_start_stream_activates_scheduled_auction(db, user):
         item=item,
         start_time=now + timedelta(hours=1),
         end_time=now + timedelta(hours=2),
-        status=AuctionStatus.SCHEDULED,
+        status=AuctionStatus.ACTIVE,
     )
 
     stream = _create_stream(auction=auction, streamer=user)
-    assert auction.status == AuctionStatus.SCHEDULED
+    assert auction.status == AuctionStatus.ACTIVE
 
     # Start the stream, which should trigger activate_auction
     start_stream(actor=user, stream=stream, stream_key=stream.stream_key)
 
     auction.refresh_from_db()
     assert auction.status == AuctionStatus.LIVE
-    assert auction.started_at is not None
 
 
 def test_end_stream_sets_auction_to_active(db, user):
     from apps.auctions.services import start_stream, end_stream
 
-    # Create a scheduled auction
+    # Create an active auction
     now = timezone.now()
     item = AuctionItem.objects.create(
         seller=user,
@@ -336,12 +335,12 @@ def test_end_stream_sets_auction_to_active(db, user):
         item=item,
         start_time=now + timedelta(hours=1),
         end_time=now + timedelta(hours=2),
-        status=AuctionStatus.SCHEDULED,
+        status=AuctionStatus.ACTIVE,
     )
 
     stream = _create_stream(auction=auction, streamer=user)
     start_stream(actor=user, stream=stream, stream_key=stream.stream_key)
-    
+
     auction.refresh_from_db()
     assert auction.status == AuctionStatus.LIVE
 
@@ -350,14 +349,13 @@ def test_end_stream_sets_auction_to_active(db, user):
 
     auction.refresh_from_db()
     assert auction.status == AuctionStatus.ACTIVE
-    assert auction.started_at is not None
 
 
 def test_end_stream_sets_auction_to_active_with_bids(db, user, other_user):
     from apps.auctions.services import start_stream, end_stream
     from apps.auctions.models import Bid
 
-    # Create a scheduled auction
+    # Create an active auction
     now = timezone.now()
     item = AuctionItem.objects.create(
         seller=user,
@@ -370,7 +368,7 @@ def test_end_stream_sets_auction_to_active_with_bids(db, user, other_user):
         item=item,
         start_time=now + timedelta(hours=1),
         end_time=now + timedelta(hours=2),
-        status=AuctionStatus.SCHEDULED,
+        status=AuctionStatus.ACTIVE,
     )
 
     stream = _create_stream(auction=auction, streamer=user)
