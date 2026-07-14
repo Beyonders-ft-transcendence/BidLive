@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "apps.users",
-    "apps.domain",
     "apps.auctions",
     "apps.chat",
     "apps.notifications",
@@ -280,10 +279,6 @@ CELERY_BEAT_SCHEDULE = {
     "auctions-close-expired": {
         "task": "apps.auctions.tasks.close_auction.close_expired_auctions",
         "schedule": timedelta(minutes=1),
-    },
-    "healthcheck-ping": {
-        "task": "apps.domain.tasks.sample_heartbeat",
-        "schedule": 60.0,
     },
 }
 

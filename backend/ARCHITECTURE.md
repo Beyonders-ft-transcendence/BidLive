@@ -22,7 +22,6 @@ backend/
     analytics/
     auctions/
     chat/
-    domain/
     notifications/
     reports/
     social/
@@ -52,7 +51,7 @@ Responsavel pelo bootstrap da aplicacao:
 
 Camada fina de roteamento global da API.
 
-- `api/urls.py` agrega endpoints como `health/`, `auth/`, `domain/`, `users/`, `roles/` e `permissions/`
+- `api/urls.py` agrega endpoints como `health/`, `auth/`, `users/`, `roles/` e `permissions/`
 - `api/health.py` expoe o healthcheck
 
 Essa pasta deve apenas conectar rotas aos apps corretos, sem concentrar regra de negocio.
@@ -64,7 +63,6 @@ Cada app representa um dominio do sistema.
 Exemplos atuais:
 
 - `apps.users`: autenticacao, usuarios, roles, permissions e OAuth
-- `apps.domain`: projetos
 - `apps.auctions`: leiloes, itens, lances e livestreams
 - `apps.access`, `apps.social`, `apps.chat`, `apps.notifications`, `apps.storage`, `apps.analytics`, `apps.reports`: dominios auxiliares ou em expansao
 
@@ -111,16 +109,6 @@ Concentra:
 - RBAC com usuarios, roles e permissions
 - auditoria de autorizacao
 
-### `apps/domain`
-
-Concentra o fluxo principal de projetos:
-
-- entidades do dominio
-- serializers e views do recurso
-- regras de criacao e atualizacao
-- filtros e permissoes
-- tarefas assicronas relacionadas ao dominio
-
 ### `apps/auctions`
 
 Concentra a logica de leiloes:
@@ -157,7 +145,6 @@ Exemplos de rotas atuais:
 - `/api/auth/refresh/`
 - `/api/auth/google/`
 - `/api/auth/42/`
-- `/api/domain/`
 - `/api/users/`
 - `/api/roles/`
 - `/api/permissions/`
@@ -212,7 +199,6 @@ Rotas disponiveis:
 ## Como navegar no codigo
 
 - autenticacao e usuarios: `apps/users/`
-- projetos: `apps/domain/`
 - leiloes: `apps/auctions/`
 - respostas e excecoes padronizadas: `common/`
 - configuracao e bootstrap: `config/`

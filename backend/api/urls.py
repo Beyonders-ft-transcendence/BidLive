@@ -34,7 +34,6 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path("", include("apps.domain.api.urls")),
     path("", include("apps.users.api.urls")),
 	path("", include("apps.social.api.urls")),
     path("", include("apps.auctions.api.urls")),

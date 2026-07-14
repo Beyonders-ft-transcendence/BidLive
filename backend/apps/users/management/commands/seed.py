@@ -58,7 +58,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Seed demo concluido:"))
         self.stdout.write(f"  - usuarios: {result['users']}")
         self.stdout.write(f"  - leiloes novos: {result['auctions']}")
-        self.stdout.write(f"  - dominios novos: {result['domains']}")
         self.stdout.write(f"  - amizades novas: {result['friendships']}")
         self.stdout.write(f"  - notificacoes novas: {result['notifications']}")
         self.stdout.write(f"  - mensagens de chat novas: {result['messages']}")
