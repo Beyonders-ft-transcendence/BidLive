@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Hero from "@/components/home/Hero";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
+import FAQSection from "@/components/home/FAQSection";
 import AboutSection from "@/components/home/AboutSection";
 import Footer from "@/components/layout/Footer";
 import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
 import {
-    List, Grid2X2, Search, Clock, DollarSign, Activity,
-    ArrowRight, PlayCircle, Shield, Zap, HeadphonesIcon,
-    Trophy, ChevronRight
+    List, Grid2X2, Search, Clock, Activity,
+    ArrowRight, PlayCircle, ChevronRight
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/shared/utils/auction.utils";
@@ -55,14 +55,14 @@ function AuctionCard({ auction, viewType }: { auction: any; viewType: "grid" | "
             className={`group bg-card border border-border/50 rounded-md overflow-hidden hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 dark:shadow-none transition-all duration-500 flex ${viewType === "list" ? "flex-col sm:flex-row" : "flex-col"}`}
         >
             {/* Image Container */}
-            <div className={`${viewType === "list" ? "w-full sm:w-[240px] md:w-[280px] h-[200px] sm:h-auto flex-shrink-0 border-b sm:border-b-0 sm:border-r" : "w-full h-[220px] sm:h-[240px] border-b"} bg-muted relative flex items-center justify-center border-border/50 overflow-hidden`}>
+            <div className={`${viewType === "list" ? "w-full sm:w-[240px] md:w-[280px] h-[200px] sm:h-auto shrink-0 border-b sm:border-b-0 sm:border-r" : "w-full h-[220px] sm:h-[240px] border-b"} bg-muted relative flex items-center justify-center border-border/50 overflow-hidden`}>
                 {item.images?.[0]?.image_url ? (
                     <img src={item.images[0].image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
                 ) : (
                     <div className="text-muted-foreground font-semibold text-sm p-4 text-center">{t("auctions.no_photo")}</div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 sm:opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60 sm:opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
 
                 <AuctionLiveBadge auctionId={auction.id} status={auction.status} />
 
@@ -188,9 +188,8 @@ export default function HomePage() {
                 )}
             </section>
             <HowItWorksSection />
+            <FAQSection />
             
-         
-
             <Footer />
         </div>
     );
