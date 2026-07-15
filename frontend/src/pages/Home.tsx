@@ -189,23 +189,7 @@ export default function HomePage() {
             </section>
             <HowItWorksSection />
             
-            <section className="w-full bg-primary">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18 lg:py-20">
-                    <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left">
-                        <div className="max-w-xl">
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-primary-foreground mb-3">{t("home.cta_title")}</h2>
-                            <p className="text-sm sm:text-base text-primary-foreground/80 font-medium">{t("home.cta_desc")}</p>
-                        </div>
-                        <Link
-                            to="/signup"
-                            className="bg-white hover:bg-white/90 text-primary px-8 py-3.5 rounded-md text-sm font-bold transition-all shadow-lg uppercase tracking-wider flex items-center gap-2 flex-shrink-0"
-                        >
-                            {t("home.cta_button")}
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
+         
 
             <Footer />
         </div>
