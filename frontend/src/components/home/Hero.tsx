@@ -49,7 +49,7 @@ export default function Hero() {
   const slide = slides[current];
 
   return (
-    <section id="home" className="relative h-[520px] lg:h-[600px] w-full overflow-hidden border-b border-border/50">
+    <section id="home" className="relative h-[520px] lg:h-[600px] w-7xl mx-auto mt-4 rounded-xl overflow-hidden border-b border-border/50">
       
       {/* Background */}
       <div className="absolute inset-0 bg-muted">
@@ -58,30 +58,30 @@ export default function Hero() {
           alt="Hero background"
           className="w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent dark:from-background/98 dark:via-background/80" />
+
       </div>
 
       {/* Hero Card */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-7xl px-4 sm:px-6 lg:px-8 z-10 flex justify-start">
-        <div className="bg-card/95 backdrop-blur-md rounded-xl shadow-2xl px-6 lg:px-10 py-8 lg:py-10 flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center overflow-hidden min-h-[220px] border border-border/50 relative max-w-3xl">
+      <div className="absolute inset-x-0 bottom-8 sm:bottom-12 z-10 flex justify-center px-4 sm:px-6 pointer-events-none">
+        <div className="bg-card/95 backdrop-blur-md rounded-xl shadow-2xl px-6 lg:px-8 py-6 lg:py-7 flex flex-col items-center text-center overflow-hidden border border-border/50 relative max-w-xl w-full pointer-events-auto">
           
           <div
-            className={`flex flex-col lg:flex-row gap-8 lg:gap-10 items-start lg:items-center w-full transition-all duration-300 ease-in-out ${animating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"}`}
+            className={`flex flex-col items-center w-full transition-all duration-300 ease-in-out ${animating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"}`}
           >
             {/* Content: tagline + title + description + CTA */}
-            <div className="flex flex-col gap-4 min-w-0">
-              <div>
-                  <p className="text-[11px] font-bold tracking-[1.8px] uppercase text-primary mb-2">
+            <div className="flex flex-col items-center gap-3.5 min-w-0">
+              <div className="flex flex-col items-center">
+                  <p className="text-[10px] sm:text-[11px] font-bold tracking-[1.8px] uppercase text-primary mb-1.5">
                     {slide.tagline}
                   </p>
-                  <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-black leading-tight text-foreground tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black leading-tight text-foreground tracking-tight">
                     {slide.title}
                   </h1>
               </div>
 
-              <div className="w-12 h-1 bg-primary/20 rounded-full my-1" />
+              <div className="w-10 h-1 bg-primary/20 rounded-full my-0.5" />
 
-              <p className="text-sm sm:text-base text-muted-foreground font-medium leading-relaxed max-w-xl">
+              <p className="text-[13px] sm:text-sm text-muted-foreground font-medium leading-relaxed max-w-md">
                 {slide.description}
               </p>
 
