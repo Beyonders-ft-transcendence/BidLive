@@ -1,0 +1,108 @@
+import pytest
+
+from apps.access.models import ApiKey, OAuthAccount, OAuthProvider, Session
+from apps.access.serializers import ApiKeySerializer, OAuthAccountSerializer, SessionSerializer
+from apps.notifications.models import Notification, NotificationType
+from apps.notifications.serializers import NotificationSerializer
+from apps.reports.models import (
+    Report,
+    ReportAction,
+    ReportActionType,
+    ReportEvidence,
+    ReportReason,
+    ReportTargetType,
+)
+from apps.reports.serializers import (
+    ReportActionSerializer,
+    ReportEvidenceSerializer,
+    ReportSerializer,
+)
+from apps.storage.models import File
+from apps.storage.serializers import FileSerializer
+
+@pytest.mark.django_db
+def test_notifications_serializer_includes_expected_fields(user):
+    notification = Notification.objects.create(
+        user=user,
+        type=NotificationType.NEW_BID,
+        title="New bid",
+        content="Your item received a new bid.",
+        is_read=False,
+    )
+
+    data = NotificationSerializer(notification).data
+
+    assert data["id"] == notification.id
+    assert data["user"] == user.id
+    assert data["type"] == NotificationType.NEW_BID
+    assert data["title"] == "New bid"
+    assert data["content"] == "Your item received a new bid."
+    assert data["is_read"] is False
+    assert "created_at" in data
+
+
+@pytest.mark.django_db
+def test_storage_serializer_includes_expected_fields(user):
+    file_obj = File.objects.create(
+        uploader=user,
+        file_name="stored.jpg",
+        original_name="upload.jpg",
+        mime_type="image/jpeg",
+        size=1024,
+        url="https://cdn.example.com/stored.jpg",
+    )
+
+    data = FileSerializer(file_obj).data
+
+    assert data["id"] == file_obj.id
+    assert data["uploader"] == user.id
+    assert data["file_name"] == "stored.jpg"
+    assert data["original_name"] == "upload.jpg"
+    assert data["mime_type"] == "image/jpeg"
+    assert data["size"] == 1024
+    assert data["url"] == "https://cdn.example.com/stored.jpg"
+    assert "created_at" in data
+
+
+@pytest.mark.django_db
+def test_reports_serializers_include_expected_fields(user):
+    target_file = File.objects.create(
+        uploader=user,
+        file_name="evidence.png",
+        original_name="evidence.png",
+        mime_type="image/png",
+        size=2048,
+        url="https://cdn.example.com/evidence.png",
+    )
+    report = Report.objects.create(
+        reporter=user,
+        target_type=ReportTargetType.USER,
+        target_id=123,
+        reason=ReportReason.SPAM,
+    )
+    action = ReportAction.objects.create(
+        report=report,
+        admin=user,
+        action=ReportActionType.COMMENT,
+        note="Investigating",
+    )
+    evidence = ReportEvidence.objects.create(report=report, file=target_file)
+
+    report_data = ReportSerializer(report).data
+    action_data = ReportActionSerializer(action).data
+    evidence_data = ReportEvidenceSerializer(evidence).data
+
+    assert report_data["id"] == report.id
+    assert report_data["reporter"]["id"] == user.id
+    assert report_data["target_type"] == ReportTargetType.USER
+    assert report_data["target_id"] == 123
+    assert report_data["reason"] == ReportReason.SPAM
+    assert report_data["status"] == report.status
+
+    assert action_data["id"] == action.id
+    assert action_data["admin"]["id"] == user.id
+    assert action_data["action"] == ReportActionType.COMMENT
+    assert action_data["note"] == "Investigating"
+
+    assert evidence_data["id"] == evidence.id
+    assert evidence_data["file"] == target_file.id
