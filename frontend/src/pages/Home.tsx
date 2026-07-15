@@ -3,12 +3,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Hero from "@/components/home/Hero";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
+import AboutSection from "@/components/home/AboutSection";
 import Footer from "@/components/layout/Footer";
 import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
 import {
     List, Grid2X2, Search, Clock, DollarSign, Activity,
     ArrowRight, PlayCircle, Shield, Zap, HeadphonesIcon,
-    UserPlus, Search as SearchIcon, Trophy, ChevronRight
+    Trophy, ChevronRight
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/shared/utils/auction.utils";
@@ -77,45 +79,7 @@ function AuctionCard({ auction, viewType }: { auction: any; viewType: "grid" | "
                 </div>
             </div>
 
-            {viewType === "list" ? (
-                <>
-                    <div className="flex-1 min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-start justify-between gap-4 mb-2">
-                                <h3 className="text-foreground font-black text-lg sm:text-xl line-clamp-2 group-hover:text-primary transition-colors" title={item.title}>{item.title}</h3>
-                                {item.category?.name && (
-                                    <span className="hidden sm:inline-flex flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted border border-border px-2.5 py-1 rounded-full">{item.category.name}</span>
-                                )}
-                            </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-3 leading-relaxed mb-4">
-                                {item.description || t("auctions.no_description")}
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4 border-t border-border/50">
-                            <AuctionLiveText auctionId={auction.id} status={auction.status} />
-                            {auction.end_time && (
-                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                                    <Clock className="w-4 h-4" />
-                                    {new Date(auction.end_time).toLocaleDateString()}
-                                </span>
-                            )}
-                            <span className="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                                <DollarSign className="w-4 h-4" />
-                                {t("home.min_bid")} {formatCurrency(item.starting_price)}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex-shrink-0 p-5 sm:p-6 sm:border-l border-t sm:border-t-0 border-border/50 flex flex-col justify-center items-center bg-muted/5 w-full sm:w-[200px] xl:w-[240px]">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">{t("home.current_bid")}</p>
-                        <div className="text-2xl sm:text-3xl font-black text-primary text-center tracking-tight mb-1">
-                            {formatCurrency(currentPrice)}
-                        </div>
-                        <div className="mt-5 w-full bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground py-3 rounded-md text-center text-sm font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
-                            {t("home.enter_auction")} <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
-                        </div>
-                    </div>
-                </>
-            ) : (
+          
                 <div className="flex flex-col flex-1">
                     <div className="p-5 flex-1">
                         <h3 className="text-foreground font-black text-base line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug" title={item.title}>{item.title}</h3>
@@ -141,7 +105,7 @@ function AuctionCard({ auction, viewType }: { auction: any; viewType: "grid" | "
                         </div>
                     </div>
                 </div>
-            )}
+            
         </Link>
     );
 }
@@ -169,23 +133,11 @@ export default function HomePage() {
     const displayAuctions = liveAuctions.length > 0 ? liveAuctions : featuredAuctions;
     const isLoading = isLoadingLive || isLoadingFeatured;
 
-    const benefits = [
-        { icon: Trophy, titleKey: "home.benefit_1_title", descKey: "home.benefit_1_desc", color: "text-yellow-500", bg: "bg-yellow-500/10" },
-        { icon: Shield, titleKey: "home.benefit_2_title", descKey: "home.benefit_2_desc", color: "text-green-500", bg: "bg-green-500/10" },
-        { icon: Zap, titleKey: "home.benefit_3_title", descKey: "home.benefit_3_desc", color: "text-blue-500", bg: "bg-blue-500/10" },
-        { icon: HeadphonesIcon, titleKey: "home.benefit_4_title", descKey: "home.benefit_4_desc", color: "text-purple-500", bg: "bg-purple-500/10" },
-    ];
-
-    const steps = [
-        { icon: UserPlus, titleKey: "home.step_1_title", descKey: "home.step_1_desc", num: "01" },
-        { icon: SearchIcon, titleKey: "home.step_2_title", descKey: "home.step_2_desc", num: "02" },
-        { icon: Trophy, titleKey: "home.step_3_title", descKey: "home.step_3_desc", num: "03" },
-    ];
-
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-white">
             <Header />
             <Hero />
+            <AboutSection />
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                     <div>
@@ -235,48 +187,8 @@ export default function HomePage() {
                     </div>
                 )}
             </section>
-            <section className="w-full bg-card border-y border-border/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-                    <div className="text-center mb-10 sm:mb-12">
-                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mb-3">{t("home.benefits_title")}</h2>
-                        <p className="text-sm sm:text-base text-muted-foreground font-medium max-w-xl mx-auto">{t("home.benefits_desc")}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-                        {benefits.map((benefit) => (
-                            <div key={benefit.titleKey} className="bg-background border border-border/50 rounded-md p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group">
-                                <div className={`w-12 h-12   rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                                    <benefit.icon className={`w-6 h-6 `} />
-                                </div>
-                                <h3 className="font-black text-base text-foreground mb-2 tracking-tight">{t(benefit.titleKey)}</h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">{t(benefit.descKey)}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-                <div className="text-center mb-10 sm:mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mb-3">{t("home.how_title")}</h2>
-                    <p className="text-sm sm:text-base text-muted-foreground font-medium max-w-xl mx-auto">{t("home.how_desc")}</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 relative">
-                    {/* Connecting line (desktop) */}
-                    <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-border" />
-
-                    {steps.map((step) => (
-                        <div key={step.titleKey} className="relative flex flex-col items-center text-center">
-                            <div className="relative z-10 w-16 h-16 bg-card border-2 border-primary/20 rounded-full flex items-center justify-center mb-5 group-hover:border-primary/40 transition-colors shadow-sm">
-                                <step.icon className="w-7 h-7 text-primary" />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-2">{t("home.step_" + step.num.replace("0", "") + "_title").split(" ")[0]}</span>
-                            <h3 className="font-black text-lg text-foreground mb-2 tracking-tight">{t(step.titleKey)}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">{t(step.descKey)}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <HowItWorksSection />
+            
             <section className="w-full bg-primary">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18 lg:py-20">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left">
