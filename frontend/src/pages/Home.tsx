@@ -7,108 +7,14 @@ import HowItWorksSection from "@/components/home/HowItWorksSection";
 import FAQSection from "@/components/home/FAQSection";
 import AboutSection from "@/components/home/AboutSection";
 import Footer from "@/components/layout/Footer";
-import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
+import { useAuctionsQuery } from "@/hooks/useAuction";
 import {
-    List, Grid2X2, Search, Clock, Activity,
-    ArrowRight, PlayCircle, ChevronRight
+    List, Grid2X2, Search, ChevronRight
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatCurrency } from "@/shared/utils/auction.utils";
 
 
-
-const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number; status: string }) => {
-    const { t } = useTranslation();
-    const { data: streams } = useAuctionStreamsQuery(auctionId, status === "LIVE");
-    const isActuallyLive = status === "LIVE" && streams?.some((s: any) => s.status === "LIVE");
-
-    if (isActuallyLive) {
-        return (
-            <div className="absolute top-3 left-3 bg-red-500/90 backdrop-blur-md border border-red-400/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center gap-1.5 z-10">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                {t("home.live_badge")}
-            </div>
-        );
-    }
-    return null;
-};
-const AuctionLiveText = ({ auctionId, status }: { auctionId: number; status: string }) => {
-    const { t } = useTranslation();
-    const { data: streams } = useAuctionStreamsQuery(auctionId, status === "LIVE");
-    const isActuallyLive = status === "LIVE" && streams?.some((s: any) => s.status === "LIVE");
-
-    return (
-        <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${isActuallyLive ? "text-red-500" : "text-primary/70"}`}>
-            <Activity className="w-3 h-3" />
-            {isActuallyLive ? t("home.live_badge") : status === "LIVE" ? t("auctions.scheduled") : status === "SCHEDULED" ? t("auctions.scheduled") : t("auctions.ended")}
-        </span>
-    );
-};
-function AuctionCard({ auction, viewType }: { auction: any; viewType: "grid" | "list" }) {
-    const { t } = useTranslation();
-    const item = auction.item;
-    const currentPrice = item.current_price || item.starting_price;
-
-    return (
-        <Link
-            to={`/auction/${auction.id}`}
-            className={`group bg-card border border-border/50 rounded-md overflow-hidden hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 dark:shadow-none transition-all duration-500 flex ${viewType === "list" ? "flex-col sm:flex-row" : "flex-col"}`}
-        >
-            {/* Image Container */}
-            <div className={`${viewType === "list" ? "w-full sm:w-[240px] md:w-[280px] h-[200px] sm:h-auto shrink-0 border-b sm:border-b-0 sm:border-r" : "w-full h-[220px] sm:h-[240px] border-b"} bg-muted relative flex items-center justify-center border-border/50 overflow-hidden`}>
-                {item.images?.[0]?.image_url ? (
-                    <img src={item.images[0].image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
-                ) : (
-                    <div className="text-muted-foreground font-semibold text-sm p-4 text-center">{t("auctions.no_photo")}</div>
-                )}
-
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60 sm:opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
-
-                <AuctionLiveBadge auctionId={auction.id} status={auction.status} />
-
-                {viewType === "grid" && item.category?.name && (
-                    <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-md border border-border/50 text-[10px] font-bold px-2.5 py-1 rounded-full text-foreground uppercase tracking-wider shadow-sm z-10">
-                        {item.category.name}
-                    </div>
-                )}
-
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                    <div className="w-14 h-14 bg-primary/90 text-primary-foreground rounded-full flex items-center justify-center shadow-lg backdrop-blur-md">
-                        {auction.status === "LIVE" ? <PlayCircle className="w-6 h-6" /> : <ArrowRight className="w-6 h-6" />}
-                    </div>
-                </div>
-            </div>
-
-          
-                <div className="flex flex-col flex-1">
-                    <div className="p-5 flex-1">
-                        <h3 className="text-foreground font-black text-base line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug" title={item.title}>{item.title}</h3>
-                        <div className="flex flex-wrap items-center gap-3">
-                            <AuctionLiveText auctionId={auction.id} status={auction.status} />
-                            {auction.end_time && (
-                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                                    <Clock className="w-3 h-3" />
-                                    {new Date(auction.end_time).toLocaleDateString()}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    <div className="px-5 py-4 border-t border-border/50 bg-muted/5 flex items-center justify-between gap-4">
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{t("home.current_bid")}</p>
-                            <div className="text-lg font-black text-primary tracking-tight">
-                                {formatCurrency(currentPrice)}
-                            </div>
-                        </div>
-                        <div className="bg-background border border-border text-foreground group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 flex-shrink-0 shadow-sm group-hover:shadow-md">
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                        </div>
-                    </div>
-                </div>
-            
-        </Link>
-    );
-}
+import AuctionCard from "@/components/home/AuctionCard";
 
 
 export default function HomePage() {
