@@ -2,6 +2,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
+import Hero from "@/components/home/Hero";
 import Footer from "@/components/layout/Footer";
 import { useAuctionsQuery, useAuctionStreamsQuery } from "@/hooks/useAuction";
 import {
@@ -184,45 +185,7 @@ export default function HomePage() {
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-white">
             <Header />
-            <section className="relative overflow-hidden bg-card border-b border-border/50">
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 via-background to-background pointer-events-none" />
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
-                    <div className="max-w-3xl">
-
-
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 text-foreground leading-[1.1]">
-                            <span className="text-foreground">{t("home.hero_title_1")}</span>{" "}
-                            <span className="text-primary">{t("home.hero_title_2")}</span>
-                            <br />
-                            <span className="text-foreground">{t("home.hero_title_3")}</span>{" "}
-                            <span className="text-primary">{t("home.hero_title_4")}</span>
-                        </h1>
-
-                        <p className="text-base sm:text-lg lg:text-xl text-muted-foreground font-medium leading-relaxed mb-8 max-w-2xl">
-                            {t("home.hero_desc")}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-start gap-4">
-                            <Link
-                                to="/leiloes"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3.5 rounded-md text-sm font-bold transition-all shadow-md shadow-primary/20 uppercase tracking-wider flex items-center gap-2"
-                            >
-                                {t("home.hero_cta_auctions")}
-                                <ArrowRight className="w-4 h-4" />
-                            </Link>
-                            <Link
-                                to="/signup"
-                                className="bg-background border border-border hover:bg-muted text-foreground px-8 py-3.5 rounded-md text-sm font-bold transition-all uppercase tracking-wider"
-                            >
-                                {t("home.hero_cta_register")}
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <Hero />
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                     <div>
