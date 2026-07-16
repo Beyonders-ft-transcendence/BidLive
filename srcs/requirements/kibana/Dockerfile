@@ -16,8 +16,8 @@ RUN chmod +x /usr/local/bin/generate_cert.sh
 # Copy configuration
 COPY ./conf/kibana.yml /usr/share/kibana/config/kibana.yml
 
-# Copy pre-built dashboards
-COPY ./conf/dashboards.ndjson /usr/share/kibana/dashboards/dashboards.ndjson
+# Copy pre-built dashboards (all NDJSON files)
+COPY ./conf/*.ndjson /usr/share/kibana/dashboards/
 
 # Copy dashboard setup script
 COPY ./tools/setup-dashboards.sh /usr/local/bin/setup-dashboards.sh

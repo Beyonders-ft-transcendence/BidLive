@@ -4,7 +4,7 @@
 set -e
 
 KIBANA_URL="https://localhost:5601/kibana"
-DASHBOARDS_FILE="/usr/share/kibana/dashboards/dashboards.ndjson"
+DASHBOARDS_DIR="/usr/share/kibana/dashboards"
 
 # Load Elasticsearch password from Secret (line 2 = password)
 # Always use 'elastic' superuser for Kibana API operations
@@ -37,12 +37,28 @@ fi
 sleep 10
 
 echo "[Dashboards] Importing saved objects..."
-RESPONSE=$(curl $CURL_OPTS -X POST "${KIBANA_URL}/api/saved_objects/_import?overwrite=true" \
-    -H "kbn-xsrf: true" \
-    --form file=@"${DASHBOARDS_FILE}" 2>&1)
 
-if echo "$RESPONSE" | grep -q '"success":true'; then
-    echo "[Dashboards] ✅ Dashboards imported successfully!"
+# Import all NDJSON files in the dashboards directory
+IMPORT_SUCCESS=true
+for DASHBOARDS_FILE in "${DASHBOARDS_DIR}"/*.ndjson; do
+    if [ -f "$DASHBOARDS_FILE" ]; then
+        FILENAME=$(basename "$DASHBOARDS_FILE")
+        echo "[Dashboards] Importing ${FILENAME}..."
+        RESPONSE=$(curl $CURL_OPTS -X POST "${KIBANA_URL}/api/saved_objects/_import?overwrite=true" \
+            -H "kbn-xsrf: true" \
+            --form file=@"${DASHBOARDS_FILE}" 2>&1)
+
+        if echo "$RESPONSE" | grep -q '"success":true'; then
+            echo "[Dashboards] ✅ ${FILENAME} imported successfully!"
+        else
+            echo "[Dashboards] ⚠️  ${FILENAME} import response: $RESPONSE"
+            IMPORT_SUCCESS=false
+        fi
+    fi
+done
+
+if [ "$IMPORT_SUCCESS" = true ]; then
+    echo "[Dashboards] ✅ All dashboards imported successfully!"
 else
-    echo "[Dashboards] ⚠️  Import response: $RESPONSE"
+    echo "[Dashboards] ⚠️  Some dashboards had import issues. Check logs above."
 fi
