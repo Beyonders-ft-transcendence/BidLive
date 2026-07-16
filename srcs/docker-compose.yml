@@ -83,7 +83,7 @@ services:
       - celery_worker
       - celery_beat
       - livekit
-      - postgres-exporter
+      - postgres_exporter
       - redis-exporter
       - nginx_exporter
       - celery-exporter
@@ -342,13 +342,13 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres-exporter:
-    image: postgres-exporter:0.0.1
+  postgres_exporter:
+    image: postgres_exporter:0.0.1
     pull_policy: never
     build:
       context: ./requirements/postgres_exporter
       dockerfile: Dockerfile
-    container_name: postgres-exporter
+    container_name: postgres_exporter
     depends_on:
       postgres:
         condition: service_healthy

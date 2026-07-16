@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-/usr/local/bin/generate_cert.sh postgres-exporter "postgres-exporter,localhost,127.0.0.1"
+/usr/local/bin/generate_cert.sh postgres_exporter "postgres_exporter,localhost,127.0.0.1"
 
 if [ ! -f /run/secrets/db_credenciais ]; then
   echo "Postgres exporter credentials not found" >&2
