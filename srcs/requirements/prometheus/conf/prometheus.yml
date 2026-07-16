@@ -53,13 +53,13 @@ scrape_configs:
           kubernetes_namespace: "bidlive"
           statefulset_kubernetes_io_pod_name: "redis-0"
 
-  - job_name: "nginx-exporter"
+  - job_name: "nginx_exporter"
     metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
     static_configs:
-      - targets: ["nginx-exporter:9113"]
+      - targets: ["nginx_exporter:9113"]
         labels:
           namespace: "bidlive"
           app: "nginx"

@@ -26,13 +26,13 @@ services:
         gelf-address: "udp://localhost:12201"
         tag: "nginx"
 
-  nginx-exporter:
-    image: nginx-exporter:0.0.1
+  nginx_exporter:
+    image: nginx_exporter:0.0.1
     pull_policy: never
     build:
       context: ./requirements/nginx_exporter
       dockerfile: Dockerfile
-    container_name: nginx-exporter
+    container_name: nginx_exporter
     depends_on:
       - nginx
     networks:
@@ -85,7 +85,7 @@ services:
       - livekit
       - postgres-exporter
       - redis-exporter
-      - nginx-exporter
+      - nginx_exporter
       - celery-exporter
       - alertmanager
     networks:

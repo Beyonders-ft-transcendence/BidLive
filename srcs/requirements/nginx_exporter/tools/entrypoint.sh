@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-/usr/local/bin/generate_cert.sh nginx-exporter "nginx-exporter,localhost,127.0.0.1"
+/usr/local/bin/generate_cert.sh nginx_exporter "nginx_exporter,localhost,127.0.0.1"
 
 NGINX_EXPORTER_SCRAPE_URI="${NGINX_EXPORTER_SCRAPE_URI:-https://nginx:8080/nginx_status}"
 
