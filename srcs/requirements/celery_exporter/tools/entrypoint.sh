@@ -2,7 +2,7 @@
 set -e
 
 # Generate dynamic TLS certificates for HTTPS support
-/usr/local/bin/generate_cert.sh celery-exporter "celery-exporter,localhost,127.0.0.1"
+/usr/local/bin/generate_cert.sh celery_exporter "celery_exporter,localhost,127.0.0.1"
 
 if [ ! -f /run/secrets/redis_credenciais ]; then
   echo "Redis exporter credentials not found" >&2

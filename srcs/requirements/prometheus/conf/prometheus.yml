@@ -64,10 +64,10 @@ scrape_configs:
           namespace: "bidlive"
           app: "nginx"
 
-  - job_name: "celery-exporter"
+  - job_name: "celery_exporter"
     metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
     static_configs:
-      - targets: ["celery-exporter:9808"]
+      - targets: ["celery_exporter:9808"]

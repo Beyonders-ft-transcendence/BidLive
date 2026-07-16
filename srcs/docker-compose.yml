@@ -86,7 +86,7 @@ services:
       - postgres_exporter
       - redis_exporter
       - nginx_exporter
-      - celery-exporter
+      - celery_exporter
       - alertmanager
     networks:
       - backend-network
@@ -405,13 +405,13 @@ services:
     env_file:
       - ./.env.redis
 
-  celery-exporter:
-    image: celery-exporter:0.0.1
+  celery_exporter:
+    image: celery_exporter:0.0.1
     pull_policy: never
     build:
       context: ./requirements/celery_exporter
       dockerfile: Dockerfile
-    container_name: celery-exporter
+    container_name: celery_exporter
     depends_on:
       redis:
         condition: service_started
