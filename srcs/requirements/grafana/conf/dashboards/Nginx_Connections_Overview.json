@@ -39,7 +39,7 @@
       }
     ]
   },
-  "description": "Shows stats built from the Prometheus Nginx status page exporter rebuy-de/nginx-exporter or ndiazg/nginx-prometheus-exporter.",
+  "description": "Shows stats from nginx/nginx-prometheus-exporter (official). Adapted from gnetId 9512.",
   "editable": true,
   "gnetId": 9512,
   "graphTooltip": 0,
@@ -181,24 +181,24 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "irate(nginx_connections_processed_total{instance=~\"$instance\", app=~\"$app\", stage=\"handled\", namespace=~\"$namespace\"}[5m])",
+          "expr": "irate(nginx_connections_handled{instance=~\"$instance\", app=~\"$app\", namespace=~\"$namespace\"}[5m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{stage}} (Handled connections)",
+          "legendFormat": "[{{app}}] Handled connections",
           "refId": "C"
         },
         {
-          "expr": "irate(nginx_connections_processed_total{instance=~\"$instance\", app=~\"$app\", stage=\"accepted\", namespace=~\"$namespace\"}[5m])",
+          "expr": "irate(nginx_connections_accepted{instance=~\"$instance\", app=~\"$app\", namespace=~\"$namespace\"}[5m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{stage}} (Accepted client connections.)",
+          "legendFormat": "[{{app}}] Accepted connections",
           "refId": "B"
         },
         {
-          "expr": "irate(nginx_connections_processed_total{instance=~\"$instance\", app=~\"$app\", stage=\"any\", namespace=~\"$namespace\"}[5m])",
+          "expr": "irate(nginx_http_requests_total{instance=~\"$instance\", app=~\"$app\", namespace=~\"$namespace\"}[5m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{stage}} (Client requests)",
+          "legendFormat": "[{{app}}] HTTP requests",
           "refId": "A"
         }
       ],
@@ -304,7 +304,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "time() - process_start_time_seconds{job=~\"kubernetes-pods\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
+          "expr": "time() - process_start_time_seconds{job=\"nginx_exporter\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -369,32 +369,31 @@
       "targets": [
         {
           "alias": "",
-          "expr": "nginx_connections_current{state=\"active\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
+          "expr": "nginx_connections_active{app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{state}} (Active client connections including Waiting connections)",
-          "rawSql": "SELECT\n  $__time(time_column),\n  value1\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
+          "legendFormat": "[{{app}}] Active connections",
           "refId": "A"
         },
         {
-          "expr": "nginx_connections_current{state=\"reading\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
+          "expr": "nginx_connections_reading{app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{state}} (Connections where nginx is reading the request header)",
+          "legendFormat": "[{{app}}] Reading (request header)",
           "refId": "B"
         },
         {
-          "expr": "nginx_connections_current{state=\"writing\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
+          "expr": "nginx_connections_writing{app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{state}} (Connections where nginx is writing the response back to the client)",
+          "legendFormat": "[{{app}}] Writing (response)",
           "refId": "D"
         },
         {
-          "expr": "nginx_connections_current{state=\"waiting\", app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
+          "expr": "nginx_connections_waiting{app=~\"$app\", instance=~\"$instance\", namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "[{{app}}] {{state}} (Idle client connections waiting for a request)",
+          "legendFormat": "[{{app}}] Waiting (idle)",
           "refId": "C"
         }
       ],
@@ -561,5 +560,5 @@
   "timezone": "browser",
   "title": "a Nginx Connections Overview",
   "uid": "InCH_PPiz",
-  "version": 1
+  "version": 2
 }

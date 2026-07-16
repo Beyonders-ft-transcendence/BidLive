@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'Django Dashboards'
+  - name: 'BidLive Dashboards'
     orgId: 1
-    folder: 'Django'
+    folder: 'BidLive'
     type: file
     disableDeletion: false
     editable: true
