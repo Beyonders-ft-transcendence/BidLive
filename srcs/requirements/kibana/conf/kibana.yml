@@ -10,8 +10,9 @@ elasticsearch.hosts: ["https://elasticsearch:9200"]
 telemetry.optIn: false
 telemetry.allowChangingOptInStatus: false
 
-# Logging
-elasticsearch.username: "elastic"
+# Elasticsearch connection (set via env vars in entrypoint)
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 
 # Encryption Keys (min 32 characters)
 xpack.encryptedSavedObjects.encryptionKey: "bidlive_encryption_key_for_saved_objects_must_be_32_bytes_at_least"
