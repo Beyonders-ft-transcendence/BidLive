@@ -155,7 +155,7 @@ services:
       dockerfile: Dockerfile
     container_name: celery_beat
     depends_on:
-      postgresql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -197,7 +197,7 @@ services:
       dockerfile: Dockerfile
     container_name: celery_worker
     depends_on:
-      postgresql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -239,7 +239,7 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     depends_on:
-      postgresql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -309,7 +309,7 @@ services:
       dockerfile: Dockerfile
     container_name: adminer
     depends_on:
-      postgresql:
+      postgres:
         condition: service_healthy
     networks:
       - frontend-network
@@ -320,13 +320,13 @@ services:
       - ca_key
       - ca_config
 
-  postgresql:
-    image: postgresql:0.0.1
+  postgres:
+    image: postgres:0.0.1
     pull_policy: never
     build:
-      context: ./requirements/postgresql
+      context: ./requirements/postgres
       dockerfile: Dockerfile
-    container_name: postgresql
+    container_name: postgres
     networks:
       - backend-network
     restart: always
@@ -335,7 +335,7 @@ services:
     secrets:
       - db_credenciais
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$DATABASE_USER"]
       interval: 10s
@@ -350,7 +350,7 @@ services:
       dockerfile: Dockerfile
     container_name: postgres-exporter
     depends_on:
-      postgresql:
+      postgres:
         condition: service_healthy
     networks:
       - backend-network
@@ -565,7 +565,7 @@ volumes:
   redis_data:
     driver: local
 
-  postgresql_data:
+  postgres_data:
     driver: local
 
   prometheus_data:
