@@ -42,13 +42,13 @@ scrape_configs:
     static_configs:
       - targets: ["postgres_exporter:9187"]
 
-  - job_name: "redis-exporter"
+  - job_name: "redis_exporter"
     metrics_path: "/metrics"
     scheme: https
     tls_config:
       insecure_skip_verify: true
     static_configs:
-      - targets: ["redis-exporter:9121"]
+      - targets: ["redis_exporter:9121"]
         labels:
           kubernetes_namespace: "bidlive"
           statefulset_kubernetes_io_pod_name: "redis-0"

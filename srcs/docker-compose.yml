@@ -84,7 +84,7 @@ services:
       - celery_beat
       - livekit
       - postgres_exporter
-      - redis-exporter
+      - redis_exporter
       - nginx_exporter
       - celery-exporter
       - alertmanager
@@ -382,13 +382,13 @@ services:
     volumes:
       - redis_data:/data
 
-  redis-exporter:
-    image: redis-exporter:0.0.1
+  redis_exporter:
+    image: redis_exporter:0.0.1
     pull_policy: never
     build:
       context: ./requirements/redis_exporter
       dockerfile: Dockerfile
-    container_name: redis-exporter
+    container_name: redis_exporter
     depends_on:
       redis:
         condition: service_started

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-/usr/local/bin/generate_cert.sh redis-exporter "redis-exporter,localhost,127.0.0.1"
+/usr/local/bin/generate_cert.sh redis_exporter "redis_exporter,localhost,127.0.0.1"
 
 if [ ! -f /run/secrets/redis_credenciais ]; then
   echo "Redis exporter credentials not found" >&2
