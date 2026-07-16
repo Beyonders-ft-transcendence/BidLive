@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "apps.users",
-    "apps.domain",
     "apps.auctions",
     "apps.chat",
     "apps.notifications",
@@ -116,7 +115,7 @@ PASSWORD_HASHERS = [
 ]
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Luanda"
 USE_I18N = True
 USE_TZ = True
 
@@ -127,6 +126,27 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# drf-spectacular: generate OpenAPI docs with local timezone (Africa/Luanda, UTC+1)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BidLive API",
+    "DESCRIPTION": "BidLive public API",
+    "VERSION": "1.0.0",
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S.%f%z",
+    "SCHEMA_COERCE_PATH_PK": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SERVE_INCLUDE_SCHEMA": False,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "displayRequestDuration": True,
+        "persistAuthorization": True,
+    },
+    "EXTENSIONS_INFO": {},
+    "DATETIME_FIELD_EXAMPLE": "2026-07-11T20:00:00.000+01:00",
+}
+
 
 AUTH_USER_MODEL = "users.User"
 SITE_ID = 1
@@ -207,16 +227,12 @@ REST_FRAMEWORK = {
         "bid_ip": "60/minute",
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "BidLive API",
-    "DESCRIPTION": "BidLive public API",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-    "SWAGGER_UI_SETTINGS": {
-        "persistAuthorization": True,
-    },
+    "DATETIME_INPUT_FORMATS": [
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%SZ",
+    ],
 }
 
 JWT_ACCESS_MINUTES = env.int("JWT_ACCESS_MINUTES", default=15)
@@ -263,10 +279,6 @@ CELERY_BEAT_SCHEDULE = {
     "auctions-close-expired": {
         "task": "apps.auctions.tasks.close_auction.close_expired_auctions",
         "schedule": timedelta(minutes=1),
-    },
-    "healthcheck-ping": {
-        "task": "apps.domain.tasks.sample_heartbeat",
-        "schedule": 60.0,
     },
 }
 
@@ -346,4 +358,3 @@ EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default=env("EMAIL_USER", default=""))
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=env("EMAIL_PASSWORD", default=""))
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
-

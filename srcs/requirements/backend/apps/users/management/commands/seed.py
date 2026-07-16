@@ -26,6 +26,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # Override EMAIL_BACKEND to avoid trying to send real emails to demo users
+        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
         if options["clear"]:
             counts = clear_demo_data()
             if not counts:
@@ -55,7 +58,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Seed demo concluido:"))
         self.stdout.write(f"  - usuarios: {result['users']}")
         self.stdout.write(f"  - leiloes novos: {result['auctions']}")
-        self.stdout.write(f"  - dominios novos: {result['domains']}")
         self.stdout.write(f"  - amizades novas: {result['friendships']}")
         self.stdout.write(f"  - notificacoes novas: {result['notifications']}")
         self.stdout.write(f"  - mensagens de chat novas: {result['messages']}")

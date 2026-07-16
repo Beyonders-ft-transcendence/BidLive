@@ -1012,6 +1012,3 @@ class FortyTwoCallbackView(APIView):
         return success_response(payload, message="Login realizado com sucesso.")
 
 
-class AdminProtectedView(APIView):
-    permission_classes = [IsAuthenticated, HasRBACPermission]
-    required_permissions = ["admin.manage"]

@@ -8,5 +8,3 @@ class AuctionQuerySet(models.QuerySet):
     def scheduled(self):
         return self.filter(status="SCHEDULED")
 
-    def active(self):
-        return self.filter(status__in=["SCHEDULED", "LIVE"])

@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from apps.chat.models import Message, PrivateMessage
 from apps.chat.selectors import get_or_create_auction_room, get_or_create_private_conversation
+from apps.social.selectors import get_blocked_user_ids, is_blocked
 from apps.users.models import User
 
 logger = logging.getLogger(__name__)
@@ -91,6 +92,14 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             return
 
         recipient = await sync_to_async(User.objects.get)(id=self.recipient_id)
+
+        blocked = await sync_to_async(is_blocked)(
+            user=self.user, other_user=recipient
+        )
+        if blocked:
+            await self.send_json({"error": "Não podes enviar mensagem a este utilizador."})
+            return
+
         conversation, _ = await sync_to_async(get_or_create_private_conversation)(
             user_one=self.user,
             user_two=recipient,
@@ -180,6 +189,7 @@ class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
                 return
 
             self.user = user
+            self.blocked_user_ids = await sync_to_async(get_blocked_user_ids)(user=user)
 
             if self.channel_layer is None:
                 logger.error("WS AuctionChat — channel_layer é None (Redis offline?)")
@@ -251,6 +261,10 @@ class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def chat_message(self, event: dict):
+        sender_id = event.get("sender_id")
+        if sender_id and sender_id in getattr(self, "blocked_user_ids", set()):
+            return
+
         await self.send_json({
             "type": "chat.message",
             "message_id": event["message_id"],

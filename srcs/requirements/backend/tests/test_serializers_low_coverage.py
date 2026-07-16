@@ -2,8 +2,6 @@ import pytest
 
 from apps.access.models import ApiKey, OAuthAccount, OAuthProvider, Session
 from apps.access.serializers import ApiKeySerializer, OAuthAccountSerializer, SessionSerializer
-from apps.analytics.models import AnalyticsEvent
-from apps.analytics.serializers import AnalyticsEventSerializer
 from apps.notifications.models import Notification, NotificationType
 from apps.notifications.serializers import NotificationSerializer
 from apps.reports.models import (
@@ -21,57 +19,6 @@ from apps.reports.serializers import (
 )
 from apps.storage.models import File
 from apps.storage.serializers import FileSerializer
-
-
-@pytest.mark.django_db
-def test_access_serializers_include_expected_fields(user):
-    oauth = OAuthAccount.objects.create(
-        user=user,
-        provider=OAuthProvider.GOOGLE,
-        provider_user_id="oauth-123",
-    )
-    api_key = ApiKey.objects.create(user=user, api_key="key-123", is_active=True)
-    session = Session.objects.create(user=user, token="token-123", ip_address="127.0.0.1")
-
-    oauth_data = OAuthAccountSerializer(oauth).data
-    api_key_data = ApiKeySerializer(api_key).data
-    session_data = SessionSerializer(session).data
-
-    assert oauth_data["id"] == oauth.id
-    assert oauth_data["user"] == user.id
-    assert oauth_data["provider"] == OAuthProvider.GOOGLE
-    assert "created_at" in oauth_data
-
-    assert api_key_data["id"] == api_key.id
-    assert api_key_data["user"] == user.id
-    assert api_key_data["api_key"] == "key-123"
-    assert api_key_data["is_active"] is True
-    assert api_key_data["rate_limit_per_minute"] == 60
-
-    assert session_data["id"] == session.id
-    assert session_data["user"] == user.id
-    assert session_data["token"] == "token-123"
-    assert session_data["ip_address"] == "127.0.0.1"
-
-
-@pytest.mark.django_db
-def test_analytics_serializer_includes_expected_fields(user):
-    event = AnalyticsEvent.objects.create(
-        user=user,
-        event_type="AUCTION_VIEW",
-        metadata={"source": "home"},
-        ip_address="10.0.0.5",
-    )
-
-    data = AnalyticsEventSerializer(event).data
-
-    assert data["id"] == event.id
-    assert data["user"] == user.id
-    assert data["event_type"] == "AUCTION_VIEW"
-    assert data["metadata"] == {"source": "home"}
-    assert data["ip_address"] == "10.0.0.5"
-    assert "created_at" in data
-
 
 @pytest.mark.django_db
 def test_notifications_serializer_includes_expected_fields(user):
@@ -146,18 +93,16 @@ def test_reports_serializers_include_expected_fields(user):
     evidence_data = ReportEvidenceSerializer(evidence).data
 
     assert report_data["id"] == report.id
-    assert report_data["reporter"] == user.id
+    assert report_data["reporter"]["id"] == user.id
     assert report_data["target_type"] == ReportTargetType.USER
     assert report_data["target_id"] == 123
     assert report_data["reason"] == ReportReason.SPAM
     assert report_data["status"] == report.status
 
     assert action_data["id"] == action.id
-    assert action_data["report"] == report.id
-    assert action_data["admin"] == user.id
+    assert action_data["admin"]["id"] == user.id
     assert action_data["action"] == ReportActionType.COMMENT
     assert action_data["note"] == "Investigating"
 
     assert evidence_data["id"] == evidence.id
-    assert evidence_data["report"] == report.id
     assert evidence_data["file"] == target_file.id

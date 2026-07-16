@@ -2,15 +2,16 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from apps.users.models import Permission, Role, User
+from common.fields import LocalizedModelSerializer
 
 
-class PermissionSerializer(serializers.ModelSerializer):
+class PermissionSerializer(LocalizedModelSerializer):
     class Meta:
         model = Permission
         fields = ("id", "name")
 
 
-class RoleSerializer(serializers.ModelSerializer):
+class RoleSerializer(LocalizedModelSerializer):
     permissions = PermissionSerializer(many=True, read_only=True)
 
     class Meta:
@@ -18,7 +19,7 @@ class RoleSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "permissions")
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(LocalizedModelSerializer):
     roles = RoleSerializer(many=True, read_only=True)
 
     class Meta:
@@ -35,7 +36,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class AuthUserSerializer(serializers.ModelSerializer):
+class AuthUserSerializer(LocalizedModelSerializer):
     roles = serializers.ListField(child=serializers.CharField(), read_only=True)
     permissions = serializers.ListField(child=serializers.CharField(), read_only=True)
 
@@ -105,11 +106,6 @@ class UserMeResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     data = UserSerializer()
 
-
-class ErrorResponseSerializer(serializers.Serializer):
-    success = serializers.BooleanField(default=False)
-    message = serializers.CharField(required=False)
-    errors = serializers.ListField(child=serializers.DictField())
 
 
 class RegisterSerializer(serializers.Serializer):

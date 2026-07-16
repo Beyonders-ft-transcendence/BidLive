@@ -32,10 +32,13 @@ urlpatterns = [
     path("auth/42/", FortyTwoAuthorizeView.as_view(), name="auth-42"),
     path("auth/42/callback/", FortyTwoCallbackView.as_view(), name="auth-42-callback"),
 ]
+
 urlpatterns += [
-    path("", include("apps.domain.api.urls")),
     path("", include("apps.users.api.urls")),
 	path("", include("apps.social.api.urls")),
     path("", include("apps.auctions.api.urls")),
     path("", include("apps.chat.api.urls")),
+    path("", include("apps.notifications.api.urls")),
+    path("", include("apps.analytics.api.urls")),
+    path("", include("apps.reports.api.urls")),
 ]

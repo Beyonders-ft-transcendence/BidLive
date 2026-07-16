@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from apps.users.models import Permission, Role, User, UserStatus
+from common.fields import LocalizedModelSerializer
 
 
-class UserListSerializer(serializers.ModelSerializer):
+class UserListSerializer(LocalizedModelSerializer):
     roles = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
     class Meta:
@@ -22,7 +23,7 @@ class UserListSerializer(serializers.ModelSerializer):
         )
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(LocalizedModelSerializer):
     roles = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
     role_names = serializers.ListField(
         child=serializers.CharField(),
@@ -76,7 +77,7 @@ class UserBanSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=UserStatus.choices)
 
 
-class RoleSerializer(serializers.ModelSerializer):
+class RoleSerializer(LocalizedModelSerializer):
     permissions = serializers.SerializerMethodField()
     permission_names = serializers.ListField(
         child=serializers.CharField(),
@@ -118,7 +119,7 @@ class RoleWriteSerializer(serializers.Serializer):
     permission_names = serializers.ListField(child=serializers.CharField(), required=False)
 
 
-class PermissionSerializer(serializers.ModelSerializer):
+class PermissionSerializer(LocalizedModelSerializer):
     roles = serializers.SerializerMethodField()
 
     class Meta:

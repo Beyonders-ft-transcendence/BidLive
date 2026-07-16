@@ -1,13 +1,3 @@
-"""
-Custom logging utilities for sending structured JSON logs to Logstash.
-
-Provides:
-- JSONFormatter: Formats log records as JSON with metadata (timestamp, level, logger,
-  request_id, user_id, service_name).
-- LogstashTCPHandler: Sends JSON-formatted logs to Logstash via TCP socket with
-  automatic reconnection on failure.
-"""
-
 import json
 import logging
 import socket
@@ -17,14 +7,6 @@ from datetime import datetime, timezone
 
 
 class JSONFormatter(logging.Formatter):
-    """
-    Formats log records as JSON objects for structured logging.
-
-    Includes standard fields plus optional context from the log record:
-    - request_id: From RequestIDMiddleware
-    - user_id: From authentication context
-    - path, method, status_code: From request logging
-    """
 
     def format(self, record):
         log_entry = {

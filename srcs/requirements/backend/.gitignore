@@ -8,6 +8,8 @@ __pycache__/
 .env
 .env.*
 .envrc
+.mimocode
+.mimocode/
 
 tool/
 /staticfiles/
@@ -25,4 +27,3 @@ ruff_cache/
 
 .vscode/
 .idea/
-

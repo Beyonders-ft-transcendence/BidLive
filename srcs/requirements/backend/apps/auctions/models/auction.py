@@ -15,6 +15,7 @@ class ItemCondition(models.TextChoices):
 class AuctionStatus(models.TextChoices):
     DRAFT = "DRAFT", "Draft"
     SCHEDULED = "SCHEDULED", "Scheduled"
+    ACTIVE = "ACTIVE", "Active"
     LIVE = "LIVE", "Live"
     ENDED = "ENDED", "Ended"
     CANCELLED = "CANCELLED", "Cancelled"

@@ -25,6 +25,7 @@ from apps.auctions.models import (
     AuctionStatus,
     AuctionWatcher,
     Bid,
+    LiveStreamStatus,
 )
 from apps.auctions.selectors import get_highest_bid_for_auction
 from apps.auctions.services.anti_spam_service import enforce_bid_rate_limit
@@ -39,7 +40,6 @@ from apps.auctions.services.realtime_service import (
     publish_auction_snapshot,
     publish_global_event,
 )
-from apps.auctions.services.stream_service import end_active_streams_for_auction
 from apps.auctions.services.scheduling_service import schedule_auction_activation, schedule_auction_close
 from apps.auctions.services.winner_service import determine_winner
 from apps.notifications.models import NotificationType
@@ -112,9 +112,9 @@ def _ensure_auction_is_biddable(*, auction: Auction, bidder, ip_address: str = "
     if auction.status == AuctionStatus.ENDED:
         _record_bid_rejection(auction=auction, bidder=bidder, reason="auction_ended", ip_address=ip_address)
         raise ValidationError({"status": ["Auction has already ended."]})
-    if auction.status != AuctionStatus.LIVE:
-        _record_bid_rejection(auction=auction, bidder=bidder, reason="auction_not_live", ip_address=ip_address)
-        raise ValidationError({"status": ["Auction is not live."]})
+    if auction.status not in (AuctionStatus.LIVE, AuctionStatus.ACTIVE):
+        _record_bid_rejection(auction=auction, bidder=bidder, reason="auction_not_active", ip_address=ip_address)
+        raise ValidationError({"status": ["Auction is not active or live."]})
     if auction.end_time <= timezone.now():
         _record_bid_rejection(auction=auction, bidder=bidder, reason="auction_expired", ip_address=ip_address)
         raise ValidationError({"status": ["Auction has already ended."]})
@@ -149,14 +149,14 @@ def create_auction(*, seller, data: dict, image_urls=None, ip_address: str = "")
     if data.get("is_draft"):
         status = AuctionStatus.DRAFT
     else:
-        status = AuctionStatus.SCHEDULED if data["start_time"] > now else AuctionStatus.LIVE
+        status = AuctionStatus.SCHEDULED if data["start_time"] > now else AuctionStatus.ACTIVE
     auction = Auction.objects.create(
         item=item,
         start_time=data["start_time"],
         end_time=data["end_time"],
         status=status,
         rules=data.get("rules"),
-        started_at=now if status == AuctionStatus.LIVE else None,
+        started_at=now if status in (AuctionStatus.ACTIVE, AuctionStatus.LIVE) else None,
     )
 
     attach_images(item=item, image_urls=image_urls)
@@ -179,7 +179,7 @@ def create_auction(*, seller, data: dict, image_urls=None, ip_address: str = "")
     if status == AuctionStatus.SCHEDULED:
         schedule_auction_activation(auction_id=auction.id, start_time=auction.start_time)
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
-    if status == AuctionStatus.LIVE:
+    if status in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
 
     publish_auction_event(
@@ -216,9 +216,9 @@ def update_auction(
 
     if auction.status == AuctionStatus.DRAFT and data.get("publish"):
         auction.status = (
-            AuctionStatus.SCHEDULED if auction.start_time > timezone.now() else AuctionStatus.LIVE
+            AuctionStatus.SCHEDULED if auction.start_time > timezone.now() else AuctionStatus.ACTIVE
         )
-        if auction.status == AuctionStatus.LIVE:
+        if auction.status == AuctionStatus.ACTIVE:
             auction.started_at = timezone.now()
 
     if "rules" in data:
@@ -267,7 +267,7 @@ def update_auction(
     if auction.status == AuctionStatus.SCHEDULED:
         schedule_auction_activation(auction_id=auction.id, start_time=auction.start_time)
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
-    if auction.status == AuctionStatus.LIVE:
+    if auction.status in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         schedule_auction_close(auction_id=auction.id, end_time=auction.end_time)
 
     publish_auction_event(
@@ -318,7 +318,6 @@ def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str
         title="Auction cancelled",
         content=f"Auction {auction.id} was cancelled.",
     )
-    end_active_streams_for_auction(auction_id=auction.id, reason="auction_cancelled")
 
     publish_auction_event(
         auction_id=auction.id,
@@ -429,7 +428,7 @@ def place_bid(
 
 @transaction.atomic
 def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
-    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.LIVE):
+    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         raise ValidationError({"status": ["Auction is not available for buy now."]})
     if auction.item.buy_now_price is None:
         raise ValidationError({"buy_now_price": ["Buy now is not available."]})
@@ -506,7 +505,6 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
             content=f"Auction {auction.id} sold via buy now.",
             exclude_user_ids=[buyer.id],
         )
-        end_active_streams_for_auction(auction_id=auction.id, reason="auction_sold")
 
         publish_auction_event(
             auction_id=auction.id,
@@ -521,17 +519,27 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
 
 @transaction.atomic
 def activate_auction(*, auction: Auction) -> Auction:
-    if auction.status != AuctionStatus.SCHEDULED:
+    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.ACTIVE):
         return auction
-    auction.status = AuctionStatus.LIVE
-    auction.started_at = timezone.now()
+
+    if auction.start_time > timezone.now():
+        return auction
+
+    new_status = AuctionStatus.ACTIVE
+
+    if auction.status == new_status:
+        return auction
+
+    auction.status = new_status
+    if not auction.started_at:
+        auction.started_at = timezone.now()
     auction.save(update_fields=["status", "started_at", "updated_at"])
 
     AuctionAuditLog.objects.create(
         auction=auction,
         actor=None,
         action="auction.activated",
-        metadata={"scheduled": True},
+        metadata={"scheduled": True, "status": new_status},
     )
     publish_auction_event(
         auction_id=auction.id,
@@ -545,6 +553,9 @@ def activate_auction(*, auction: Auction) -> Auction:
 @transaction.atomic
 def close_auction(*, auction: Auction) -> Auction:
     if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
+        return auction
+
+    if auction.end_time > timezone.now():
         return auction
 
     winner_id, winning_bid, reserve_met = determine_winner(auction=auction)
@@ -578,7 +589,6 @@ def close_auction(*, auction: Auction) -> Auction:
         title="Auction ended",
         content=f"Auction {auction.id} has ended.",
     )
-    end_active_streams_for_auction(auction_id=auction.id, reason="auction_closed")
     if auction.winner_id:
         notify_user(
             user=auction.winner,

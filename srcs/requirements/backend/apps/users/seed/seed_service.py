@@ -17,7 +17,6 @@ from apps.auctions.models import (
 )
 from apps.auctions.services.stream_service import generate_stream_key
 from apps.chat.models import ChatRoom, Message
-from apps.domain.models import Domain
 from apps.notifications.models import Notification
 from apps.reports.models import Report, ReportReason, ReportStatus, ReportTargetType
 from apps.social.models import Friendship, FriendshipStatus
@@ -26,7 +25,6 @@ from apps.users.models import User
 from apps.users.seed.demo_data import (
     DEMO_ANALYTICS_EVENTS,
     DEMO_AUCTIONS,
-    DEMO_DOMAINS,
     DEMO_EMAIL_DOMAIN,
     DEMO_FRIENDSHIPS,
     DEMO_MESSAGES,
@@ -77,7 +75,6 @@ def clear_demo_data() -> dict[str, int]:
         requester_id__in=demo_user_ids,
         addressee_id__in=demo_user_ids,
     ).delete()[0]
-    counts["domains"] = Domain.objects.filter(owner_id__in=demo_user_ids).delete()[0]
     # Removed file count; storage app deprecated
     counts["users"] = demo_users.delete()[0]
     _AUCTION_REGISTRY.clear()
@@ -214,23 +211,6 @@ def _create_demo_auction(*, spec: DemoAuctionSpec, users: dict[str, User]) -> Au
     return auction
 
 
-def _seed_domains(*, users: dict[str, User]) -> int:
-    created = 0
-    for domain_spec in DEMO_DOMAINS:
-        _, was_created = Domain.objects.get_or_create(
-            owner=users[domain_spec["owner_key"]],
-            name=domain_spec["name"],
-            defaults={
-                "description": domain_spec["description"],
-                "status": domain_spec["status"],
-                "budget": domain_spec["budget"],
-            },
-        )
-        if was_created:
-            created += 1
-    return created
-
-
 def _seed_friendships(*, users: dict[str, User]) -> int:
     created = 0
     for requester_key, addressee_key in DEMO_FRIENDSHIPS:
@@ -348,7 +328,6 @@ def seed_demo_data(*, password: str) -> dict[str, int | dict[str, User]]:
     return {
         "users": len(users),
         "auctions": auctions_created,
-        "domains": _seed_domains(users=users),
         "friendships": _seed_friendships(users=users),
         "notifications": _seed_notifications(users=users),
         "messages": _seed_messages(users=users),

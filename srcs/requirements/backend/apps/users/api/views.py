@@ -34,6 +34,7 @@ from apps.users.selectors import get_permission_by_id, get_role_by_id, get_user_
 from apps.users.user_service import (
     ban_user,
     create_managed_user,
+    hard_delete_user,
     serialize_user_detail,
     soft_delete_user,
     update_managed_user,
@@ -82,6 +83,7 @@ class UserViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
             "partial_update": ["user.update"],
             "ban": ["user.ban"],
             "destroy": ["user.delete"],
+            "hard_delete": ["user.delete"],
         }
         return action_map.get(self.action, [])
 
@@ -215,6 +217,25 @@ class UserViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
             )
             return error_response(exc.detail, status_code=status_code)
         return success_response({}, message="Usuario removido com sucesso.")
+
+    @extend_schema(
+        tags=RBAC_TAGS,
+        summary="Remover usuario permanentemente (hard delete)",
+        responses={200: OpenApiResponse(description="Usuario removido permanentemente.")},
+    )
+    @action(detail=True, methods=["delete"], url_path="hard-delete")
+    def hard_delete(self, request, pk=None):
+        user = get_object_or_404(User.objects.all(), pk=pk)
+        try:
+            hard_delete_user(actor=request.user, user=user, ip_address=_client_ip(request))
+        except (PermissionDenied, ValidationError) as exc:
+            status_code = (
+                status.HTTP_403_FORBIDDEN
+                if isinstance(exc, PermissionDenied)
+                else status.HTTP_400_BAD_REQUEST
+            )
+            return error_response(exc.detail, status_code=status_code)
+        return success_response({}, message="Usuario removido permanentemente com sucesso.")
 
 
 @extend_schema_view(

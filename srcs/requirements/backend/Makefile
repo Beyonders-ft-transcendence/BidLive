@@ -8,6 +8,9 @@ uv-sync:
 	$(UV) sync
 
 dev:
+	@echo "Starting worker, beat, and gunicorn..."
+	$(UV) run celery -A config worker -l info &
+	$(UV) run celery -A config beat -l info &
 	$(UV) run gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -c tools/gunicorn.conf.py
 
 container:
@@ -18,7 +21,7 @@ container:
 container-clear:
 	docker stop redis postgres livekit
 	docker rm redis postgres livekit
-	docker rmi redis postgres livekit
+	docker rmi livekit/livekit-server:latest postgres:16-alpine redis:7-alpine 
 	docker volume rm postgres_data redis_data livekit_data
 
 runserver:

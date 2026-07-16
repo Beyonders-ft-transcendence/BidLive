@@ -99,3 +99,21 @@ def _client_ip(request: Request) -> str:
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR", "")
+
+
+ROLE_LEVELS = {
+    "SUPER_ADMIN": 4,
+    "MONITOR": 3,
+    "USER": 2,
+    "VISITOR": 1,
+}
+
+
+def get_user_level(user: User) -> int:
+    if user.is_superuser:
+        return 5
+    roles = get_cached_user_roles(user=user)
+    if not roles:
+        return 0
+    return max(ROLE_LEVELS.get(role, 0) for role in roles)
+

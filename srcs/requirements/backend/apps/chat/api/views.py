@@ -42,7 +42,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request: Request):
-        """GET /api/chat/conversations/ — lista de conversas com preview"""
+        """GET /api/chat/conversations/ — list conversations with preview"""
         conversations = list_private_conversations(user=request.user)
 
         conversations = conversations.prefetch_related("messages")
@@ -56,7 +56,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["get"], url_path="messages")
     def messages(self, request: Request, pk=None):
-        """GET /api/chat/conversations/{id}/messages/ — histórico de mensagens"""
+        """GET /api/chat/conversations/{id}/messages/ — message history"""
         conversation = get_private_conversation(conversation_id=pk, user=request.user)
         if not conversation:
             return error_response(
@@ -84,7 +84,6 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
         except Exception as exc:
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
-        # Broadcast message to WebSocket group if channel layer is available
         try:
             from channels.layers import get_channel_layer
             from asgiref.sync import async_to_sync
@@ -115,7 +114,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["post"], url_path="read")
     def read(self, request: Request, pk=None):
-        """POST /api/chat/conversations/{id}/read/ — marcar mensagens como lidas"""
+        """POST /api/chat/conversations/{id}/read/ — mark messages as read"""
         try:
             count = mark_messages_as_read(conversation_id=pk, user=request.user)
         except Exception as exc:
@@ -125,7 +124,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=["delete"], url_path="messages/(?P<message_id>[^/.]+)")
     def delete_message(self, request: Request, message_id=None):
-        """DELETE /api/chat/conversations/messages/{id}/ — apagar mensagem"""
+        """DELETE /api/chat/conversations/messages/{id}/ — delete message"""
         try:
             delete_private_message(message_id=message_id, user=request.user)
         except Exception as exc:
@@ -145,20 +144,20 @@ class AuctionChatViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["get"], url_path="room")
     def room(self, request: Request, pk=None):
-        """GET /api/chat/auctions/{auction_id}/room/ — info da sala"""
+        """GET /api/chat/auctions/{auction_id}/room/ — room info"""
         room, _ = get_or_create_auction_room(auction_id=pk)
         return success_response(data=ChatRoomSerializer(room).data)
 
     @action(detail=True, methods=["get"], url_path="messages")
     def messages(self, request: Request, pk=None):
-        """GET /api/chat/auctions/{auction_id}/messages/ — histórico da sala"""
+        """GET /api/chat/auctions/{auction_id}/messages/ — room message history"""
         room, _ = get_or_create_auction_room(auction_id=pk)
-        msgs = get_room_messages(room_id=room.id)
+        msgs = get_room_messages(room_id=room.id, viewer=request.user)
         return success_response(data=RoomMessageSerializer(msgs, many=True).data)
 
     @action(detail=True, methods=["post"], url_path="send")
     def send(self, request: Request, pk=None):
-        """POST /api/chat/auctions/{auction_id}/send/ — enviar mensagem via REST"""
+        """POST /api/chat/auctions/{auction_id}/send/ — send message via REST"""
         serializer = SendRoomMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -171,7 +170,6 @@ class AuctionChatViewSet(viewsets.GenericViewSet):
         except Exception as exc:
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
-        # Broadcast message to WebSocket group if channel layer is available
         try:
             from channels.layers import get_channel_layer
             from asgiref.sync import async_to_sync
@@ -202,10 +200,11 @@ class AuctionChatViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=["delete"], url_path="messages/(?P<message_id>[^/.]+)")
     def delete_message(self, request: Request, message_id=None):
-        """DELETE /api/chat/auctions/messages/{id}/ — apagar mensagem da sala"""
+        """DELETE /api/chat/auctions/messages/{id}/ — delete room message"""
         try:
             soft_delete_room_message(message_id=message_id, user=request.user)
         except Exception as exc:
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
         return success_response(message="Mensagem apagada.")
+    

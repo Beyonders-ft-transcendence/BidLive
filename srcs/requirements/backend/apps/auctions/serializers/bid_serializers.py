@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.auctions.models import Bid
+from common.fields import LocalDateTimeField, LocalDateTimeOutputField, LocalizedModelSerializer
 
 
 class BidderSummarySerializer(serializers.Serializer):
@@ -9,11 +10,12 @@ class BidderSummarySerializer(serializers.Serializer):
     full_name = serializers.CharField(read_only=True)
 
 
-class BidSerializer(serializers.ModelSerializer):
+class BidSerializer(LocalizedModelSerializer):
     bidder = BidderSummarySerializer(read_only=True)
     bidder_id = serializers.IntegerField(read_only=True)
     auction_id = serializers.IntegerField(read_only=True)
-    timestamp = serializers.DateTimeField(source="created_at", read_only=True)
+    timestamp = LocalDateTimeField(source="created_at", read_only=True)
+    created_at = LocalDateTimeOutputField(read_only=True)
 
     class Meta:
         model = Bid
@@ -32,6 +34,21 @@ class BidSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            from apps.social.selectors import get_blocked_user_ids
+            blocked_ids = get_blocked_user_ids(user=request.user)
+            if instance.bidder_id in blocked_ids:
+                ret["bidder"] = {
+                    "id": None,
+                    "username": "Usuário Bloqueado",
+                    "full_name": "Usuário Bloqueado"
+                }
+                ret["bidder_id"] = None
+        return ret
+
 
 class BidCreateSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
@@ -42,10 +59,11 @@ class BidCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Bid must be > 0.")
         return value
 
-class ActivitySerializer(serializers.ModelSerializer):
+class ActivitySerializer(LocalizedModelSerializer):
     bidder = BidderSummarySerializer(read_only=True)
     auction_title = serializers.CharField(source="auction.item.title", read_only=True)
-    
+    created_at = LocalDateTimeOutputField(read_only=True)
+
     class Meta:
         model = Bid
         fields = (
