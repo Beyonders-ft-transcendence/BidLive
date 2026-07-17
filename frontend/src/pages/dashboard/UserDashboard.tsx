@@ -1,8 +1,11 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import {
   useAuctionsQuery,
   useAuctionQuery,
@@ -10,9 +13,9 @@ import {
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
 } from "@/hooks/useAuction";
-import { AuctionStatus } from "@/shared/types/auction.types";
-import { useCategoriesQuery } from "@/hooks/useCategory";
 import { AlertCircle } from "lucide-react";
+import { useCategoriesQuery } from "@/hooks/useCategory";
+import { AuctionStatus } from "@/shared/types/auction.types";
 
 // Subcomponents
 import ChatTab from "@/components/user/ChatTab";
@@ -25,11 +28,16 @@ import AuctionDetailTab from "@/components/user/AuctionDetailTab";
 import FavoritesTab from "@/components/user/FavoritesTab";
 import LiveStreamTab from "@/components/user/LiveStreamTab";
 import MyReportsTab from "@/components/user/MyReportsTab";
+import ProfileTab from "@/components/user/ProfileTab";
 
 // Common UI Components
 import ConfirmModal from "@/components/common/ConfirmModal";
 
 export function UserDashboard() {
+  const { t } = useTranslation();
+
+  useDocumentTitle(t('user_dashboard.title'));
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -42,13 +50,13 @@ export function UserDashboard() {
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["overview", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "reports"].includes(tab)) {
-      return tab as "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
+    if (tab && ["overview", "profile", "my-auctions", "my-bids", "create-auction", "chat", "auction-detail", "favorites", "live-stream", "reports"].includes(tab)) {
+      return tab as "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
     }
     return "overview";
   }, [searchParams]);
 
-  const setActiveTab = (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => {
+  const setActiveTab = (tab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => {
     setSearchParams({ tab });
   };
 
@@ -240,6 +248,8 @@ export function UserDashboard() {
             />
           )}
 
+          {activeTab === "profile" && <ProfileTab />}
+
           {activeTab === "my-auctions" && (
             <MyAuctionsTab
               myAuctions={myAuctions}
@@ -386,7 +396,7 @@ export function UserDashboard() {
         </div>
       )}
 
-
+      <Footer />
     </div>
   );
 }

@@ -21,6 +21,7 @@ export default function AuctionDetailTab({
   onDeleteClick,
   onManageStreamClick,
 }: AuctionDetailTabProps) {
+  
   const images = auction.item?.images || [];
   const [selectedImage, setSelectedImage] = useState<string | null>(
     images.length > 0 ? images[0].image_url : null

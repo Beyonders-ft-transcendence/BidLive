@@ -44,3 +44,33 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
+export const resetPasswordSchema = z.object({
+    new_password: z
+        .string()
+        .min(8, { message: "A senha deve ter pelo menos 8 caracteres." }),
+    new_password_confirm: z
+        .string()
+        .min(1, { message: "A confirmação de senha é obrigatória." }),
+}).refine((data) => data.new_password === data.new_password_confirm, {
+    message: "As senhas não coincidem.",
+    path: ["new_password_confirm"],
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const changePasswordSchema = z.object({
+    current_password: z
+        .string()
+        .min(1, { message: "A senha atual é obrigatória." }),
+    new_password: z
+        .string()
+        .min(8, { message: "A nova senha deve ter pelo menos 8 caracteres." }),
+    new_password_confirm: z
+        .string()
+        .min(1, { message: "A confirmação de senha é obrigatória." }),
+}).refine((data) => data.new_password === data.new_password_confirm, {
+    message: "As senhas não coincidem.",
+    path: ["new_password_confirm"],
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

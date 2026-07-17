@@ -1,3 +1,5 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,8 @@ import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
 
 function SigninForm() {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
 
     const login = useAuthStore((state) => state.login);
@@ -63,7 +67,7 @@ function SigninForm() {
             handleSuccessRedirect();
         } catch (err: any) {
             console.error("Falha ao entrar com e-mail/senha:", err);
-            toast.error(err?.response?.data?.message || err?.message || "Erro ao entrar. Verifique os seus dados.");
+            toast.error(err?.response?.data?.message || err?.message || t('auth.error_signin'));
         }
     };
 
@@ -185,9 +189,9 @@ function SigninForm() {
                                 </div>
 
                                 <div className="flex items-center justify-end text-sm">
-                                    <a href="#" className="text-primary font-semibold hover:text-primary/80 transition-colors">
+                                    <Link to="/auth/forgot-password" className="text-primary font-semibold hover:text-primary/80 transition-colors">
                                         Esqueceu a palavra-passe?
-                                    </a>
+                                    </Link>
                                 </div>
 
                                 <div className="pt-2">
@@ -226,6 +230,8 @@ function SigninForm() {
 }
 
 export default function Signin() {
+  useDocumentTitle("Login");
+
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
     
     if (!googleClientId) {

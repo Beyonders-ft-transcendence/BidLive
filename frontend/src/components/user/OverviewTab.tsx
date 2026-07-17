@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -46,6 +47,8 @@ export default function OverviewTab({
   onViewAllAuctionsClick,
   onViewAllBidsClick,
 }: OverviewTabProps) {
+  const { t } = useTranslation();
+
   const updateUser = useAuthStore((s) => s.updateUser);
   const changePassword = useAuthStore((s) => s.changePassword);
 
@@ -204,7 +207,7 @@ export default function OverviewTab({
         
         {/* Profile Card & Avatar Upload */}
         <div className="bg-card border border-border rounded-sm p-6 shadow-sm flex flex-col items-center text-center gap-4">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Foto do Perfil</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('overview_tab.profile_photo')}</span>
           
           <div className="relative group w-24 h-24 rounded-full overflow-hidden border border-primary/20 shadow-sm">
             {avatarPreview ? (
@@ -285,7 +288,7 @@ export default function OverviewTab({
 
             <div className="space-y-3.5">
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase">Nome Completo</label>
+                <label className="text-[9px] font-bold text-muted-foreground uppercase">{t('overview_tab.full_name')}</label>
                 <input
                   type="text"
                   {...registerProfile("full_name")}
@@ -357,7 +360,7 @@ export default function OverviewTab({
               className="mt-4 space-y-3.5 animate-in slide-in-from-top-3 duration-200"
             >
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase">Senha Atual</label>
+                <label className="text-[9px] font-bold text-muted-foreground uppercase">{t('overview_tab.current_password')}</label>
                 <input
                   type="password"
                   {...registerPassword("current_password")}
@@ -373,7 +376,7 @@ export default function OverviewTab({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase">Nova Senha</label>
+                <label className="text-[9px] font-bold text-muted-foreground uppercase">{t('overview_tab.new_password')}</label>
                 <input
                   type="password"
                   {...registerPassword("new_password")}

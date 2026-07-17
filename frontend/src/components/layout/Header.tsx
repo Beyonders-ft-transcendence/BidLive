@@ -1,7 +1,7 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, ChevronDown, Menu, X, Globe, Bell, CheckCircle2 } from "lucide-react";
+import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2 } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
@@ -12,6 +12,7 @@ import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 import { useTranslation, LOCALES, type Locale } from "@/shared/i18n";
 
 export default function Header() {
+    const { t } = useTranslation();
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
@@ -94,6 +95,33 @@ export default function Header() {
                     <button onClick={handleToggleTheme} title={t("nav.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <header className="sticky top-0 z-50 w-full flex flex-col">
+            {/* Main Navigation */}
+            <div className="bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+                <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center gap-2">
+                        <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo} alt="BidLive Logo" className="h-8 sm:h-9 object-contain" />
+                    </Link>
+
+                    {/* Right Side: Links + Actions (Desktop) */}
+                    <div className="hidden md:flex items-center gap-6 justify-end flex-1">
+                        
+                        {/* Nav Links */}
+                        <nav className="flex items-center gap-6 text-sm font-bold text-foreground/70">
+                            <Link to="/" className="relative hover:text-primary transition-colors group">
+                                {t("header.home")}
+                                <span className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
+                            </Link>
+                            <Link to="/leiloes" className="relative hover:text-primary transition-colors group">
+                                {t("header.auctions")}
+                                <span className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
+                            </Link>
+                        </nav>
 
                     {isAuthenticated && (
                         <div className="relative group flex items-center h-full">
@@ -116,18 +144,35 @@ export default function Header() {
                                                 <Bell size={24} className="mx-auto mb-2 opacity-50" />
                                                 <p className="text-xs">{t("nav.noNotifications")}</p>
                                             </div>
-                                        ) : (
-                                            <div className="divide-y divide-border">
-                                                {notifications.slice(0, 10).map((notif: any) => (
-                                                    <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
-                                                        <div className="flex gap-3">
-                                                            <div className="mt-0.5 text-primary shrink-0">
-                                                                <Bell size={14} />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
-                                                                <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
-                                                                <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
+                                            <div className="overflow-y-auto flex-1">
+                                                {notifications.length === 0 ? (
+                                                    <div className="p-6 text-center text-muted-foreground">
+                                                        <Bell size={24} className="mx-auto mb-2 opacity-50" />
+                                                        <p className="text-xs">{t("header.no_notifications")}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-border">
+                                                        {notifications.slice(0, 10).map((notif: any) => (
+                                                            <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
+                                                                <div className="flex gap-3">
+                                                                    <div className="mt-0.5 text-primary shrink-0">
+                                                                        <Bell size={14} />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
+                                                                        <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
+                                                                        <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
+                                                                    </div>
+                                                                    {!notif.is_read && (
+                                                                        <button 
+                                                                            onClick={() => markReadMutation.mutate(notif.id)}
+                                                                            className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
+                                                                            title={t("header.mark_read")}
+                                                                        >
+                                                                            <CheckCircle2 size={14} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                             {!notif.is_read && (
                                                                 <button 
@@ -140,12 +185,28 @@ export default function Header() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                ))}
+                                                )}
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {isAuthenticated && user ? (
+                                <button 
+                                    onClick={() => setIsUserDrawerOpen(true)}
+                                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
+                                >
+                                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
+                                    <span className="hidden lg:inline text-xs font-bold text-foreground">
+                                        {user.full_name || user.username}
+                                    </span>
+                                </button>
+                            ) : (
+                                <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
+                                    {t("header.login_register")}
+                                </Link>
+                            )}
                         </div>
                     )}
 
@@ -192,12 +253,11 @@ export default function Header() {
                     <div className="flex items-center justify-between p-4 border-b border-border">
                         <span className="font-semibold text-lg">{t("nav.menu")}</span>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-foreground rounded-md hover:bg-muted transition-colors">
-                            <X size={24} />
+                            <X size={20} />
                         </button>
                     </div>
                     
                     <div className="p-4 overflow-y-auto space-y-6 flex-1">
-
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
                             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("nav.home")}</Link>
                             <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("nav.auctions")}</Link>
@@ -220,11 +280,11 @@ export default function Header() {
                         </nav>
                     </div>
 
-                    <div className="p-4 border-t border-border mt-auto bg-card">
+                    <div className="p-4 border-t border-border mt-auto bg-card flex flex-col gap-3">
                         {isAuthenticated && user ? (
                             <button 
                                 onClick={() => { setIsMobileMenuOpen(false); setIsUserDrawerOpen(true); }}
-                                className="flex items-center justify-between w-full p-2.5 rounded-md hover:bg-muted text-left border border-border bg-background"
+                                className="flex items-center justify-between w-full p-3 rounded-md hover:bg-muted text-left border border-border bg-background shadow-sm"
                             >
                                 <div className="flex items-center gap-3">
                                     <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />

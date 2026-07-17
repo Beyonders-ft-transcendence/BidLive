@@ -37,6 +37,7 @@ export default function ConfirmModal({
   cancelText = "Cancelar",
   variant = "danger",
 }: ConfirmModalProps) {
+  
   const styles = variantStyles[variant];
 
   return (

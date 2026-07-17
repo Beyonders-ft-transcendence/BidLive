@@ -13,6 +13,7 @@ import type {
     RegisterPayload,
     ResetPasswordPayload,
     SwaggerOAuth2TokenRequestPayload,
+    VerifyUserPayload,
     User,
 } from '@/shared/types/auth.types'
 
@@ -47,6 +48,7 @@ interface AuthActions {
     changePassword: (payload: ChangePasswordPayload) => Promise<void>
     forgotPassword: (payload: ForgotPasswordPayload) => Promise<void>
     resetPassword: (payload: ResetPasswordPayload) => Promise<void>
+    verifyUser: (payload: VerifyUserPayload) => Promise<void>
 
     // ── Social / OAuth ────────────────────────────────────────────────────────
     loginWithGoogle: (payload: GoogleLoginPayload) => Promise<void>
@@ -369,6 +371,25 @@ export const useAuthStore = create<AuthStore>()(
                     } catch (err: unknown) {
                         set((s) => {
                             s.error = getErrorMessage(err, 'Erro ao redefinir senha.')
+                        })
+                        throw err
+                    } finally {
+                        set((s) => {
+                            s.isLoading = false
+                        })
+                    }
+                },
+
+                async verifyUser(payload) {
+                    set((s) => {
+                        s.isLoading = true
+                        s.error = null
+                    })
+                    try {
+                        await authService.verifyUser(payload)
+                    } catch (err: unknown) {
+                        set((s) => {
+                            s.error = getErrorMessage(err, 'Erro ao verificar utilizador.')
                         })
                         throw err
                     } finally {
