@@ -337,7 +337,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://logstash:12201"
+        gelf-address: "udp://127.0.0.1:12201"
         tag: "livekit"
 
   adminer:
