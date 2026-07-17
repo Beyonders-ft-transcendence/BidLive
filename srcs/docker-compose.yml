@@ -23,7 +23,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:12201"
+        gelf-address: "udp://logstash:12201"
         tag: "nginx"
 
   nginx_exporter:
@@ -144,7 +144,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:12201"
+        gelf-address: "udp://logstash:12201"
         tag: "frontend"
 
   celery_beat:
@@ -186,7 +186,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:12201"
+        gelf-address: "udp://logstash:12201"
         tag: "celery-beat"
 
   celery_worker:
@@ -228,7 +228,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:12201"
+        gelf-address: "udp://logstash:12201"
         tag: "celery-worker"
 
   backend:
@@ -272,7 +272,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:12201"
+        gelf-address: "udp://logstash:12201"
         tag: "django-backend"
 
   livekit:
@@ -300,6 +300,11 @@ services:
       - ca_cert
       - ca_key
       - ca_config
+    logging:
+    driver: gelf
+    options:
+      gelf-address: "udp://logstash:12201"
+      tag: "livekit"
 
   adminer:
     image: adminer:0.0.1
@@ -381,6 +386,7 @@ services:
       - redis_credenciais
     volumes:
       - redis_data:/data
+  
 
   redis_exporter:
     image: redis_exporter:0.0.1
@@ -487,6 +493,7 @@ services:
         condition: service_healthy
     networks:
       - backend-network
+      - frontend-network
     ports:
       - "12201:12201/udp"
     expose:
