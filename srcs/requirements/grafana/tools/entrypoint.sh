@@ -16,7 +16,7 @@ if [ -f /run/secrets/grafana_credenciais ]; then
 fi
 
 if [ -f /run/secrets/elasticsearch_credenciais ]; then
-  export GF_ELASTICSEARCH_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
+  export GF_ELASTICSEARCH_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
 export GF_PATHS_DATA="${GF_PATHS_DATA:-/var/lib/grafana}"

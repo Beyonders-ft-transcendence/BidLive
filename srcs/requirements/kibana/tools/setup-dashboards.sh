@@ -9,7 +9,7 @@ DASHBOARDS_DIR="/usr/share/kibana/dashboards"
 # Load Elasticsearch password from Secret (line 2 = password)
 # Always use 'elastic' superuser for Kibana API operations
 if [ -z "$ELASTIC_PASSWORD" ] && [ -f /run/secrets/elasticsearch_credenciais ]; then
-    ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
+    ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
 CURL_OPTS="-sk -u elastic:${ELASTIC_PASSWORD}"

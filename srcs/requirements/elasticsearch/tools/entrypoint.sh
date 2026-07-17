@@ -25,8 +25,8 @@ chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/data
 
 # Load Elasticsearch credentials from Secret (line 1 = user, line 2 = password)
 if [ -f /run/secrets/elasticsearch_credenciais ]; then
-    export ELASTIC_USER=$(sed -n '1p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
-    export ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
+    export ELASTIC_USER=$(sed -n '1p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
+    export ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
 echo "Starting Elasticsearch..."

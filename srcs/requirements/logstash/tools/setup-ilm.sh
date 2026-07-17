@@ -7,8 +7,8 @@ POLICY_NAME="bidlive-retention-policy"
 
 # Load Elasticsearch credentials from Secret if not inherited (line 1 = user, line 2 = password)
 if [ -z "$ELASTIC_PASSWORD" ] && [ -f /run/secrets/elasticsearch_credenciais ]; then
-    ELASTIC_USER=$(sed -n '1p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
-    ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
+    ELASTIC_USER=$(sed -n '1p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
+    ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
 CURL_OPTS="-s -u ${ELASTIC_USER:-elastic}:${ELASTIC_PASSWORD} --cacert /run/secrets/ca_cert"

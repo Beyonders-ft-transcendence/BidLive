@@ -14,7 +14,7 @@ chown -R logstash:logstash /usr/share/logstash/data
 
 # Load Elasticsearch credentials from Secret (line 1 = user, line 2 = password)
 if [ -f /run/secrets/elasticsearch_credenciais ]; then
-    export ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | tr -d '\r')
+    export ELASTIC_PASSWORD=$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\r')
 fi
 
 echo "Waiting for Elasticsearch to be ready..."
