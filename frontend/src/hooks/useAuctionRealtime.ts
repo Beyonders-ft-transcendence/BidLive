@@ -29,14 +29,14 @@ export function useAuctionRealtime(id: number) {
   // React Query Queries
   const { data: auction, isLoading: loadingAuction, error: auctionQueryError } = useAuctionQuery(id);
   const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(id);
-  const { data: streamsData } = useAuctionStreamsQuery(id, isAuthenticated);
+  const { data: streamsData } = useAuctionStreamsQuery(id, isAuthenticated, 15000);
 
   const placeBidMutation = usePlaceBidMutation();
   const buyNowMutation = useBuyNowMutation();
 
   const bids = bidsData?.results || [];
-  const activeStream = streamsData?.find((s: any) => s.status === "LIVE") || null;
-  const hasEndedStream = streamsData?.some((s: any) => s.status === "ENDED") || false;
+  const activeStream = streamsData?.find((s) => s.status === "LIVE") || null;
+  const hasEndedStream = streamsData?.some((s) => s.status === "ENDED") || false;
 
   const loading = loadingAuction || loadingBids;
 

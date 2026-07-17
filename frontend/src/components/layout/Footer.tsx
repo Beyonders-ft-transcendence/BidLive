@@ -1,52 +1,75 @@
-import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
+import Logo2 from "@/assets/images/logo2.png";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation, LOCALES, type Locale } from "@/shared/i18n";
 
 export default function Footer() {
-    const { t } = useTranslation();
-    const isDark = document.documentElement.classList.contains("dark");
-    const currentYear = new Date().getFullYear();
+    const { t, locale, setLocale } = useTranslation();
+    const year = new Date().getFullYear();
 
     return (
-        <footer className="w-full bg-card border-t border-border mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-                <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
-                    
-                    {/* Logo & Description */}
-                    <div className="flex flex-col items-center md:items-start gap-4 max-w-sm text-center md:text-left">
-                        <Link to="/">
-                            <img src={isDark ? Logo2 : Logo} alt="BidLive Logo" className="h-10 object-contain" />
-                        </Link>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            A plataforma premium número 1 de Angola para leilões em tempo real. Descubra oportunidades únicas e faça as suas licitações de onde estiver.
-                        </p>
-                    </div>
-
-                    {/* Quick Links */}
-                    <div className="flex flex-col sm:flex-row gap-8 sm:gap-16 text-center sm:text-left">
-                        <div className="flex flex-col gap-3">
-                            <h4 className="font-bold text-foreground uppercase tracking-wider text-xs mb-1">Navegação</h4>
-                            <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("header.home")}</Link>
-                            <Link to="/leiloes" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("header.auctions")}</Link>
-                            <Link to="/signin" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("header.login_register")}</Link>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <h4 className="font-bold text-foreground uppercase tracking-wider text-xs mb-1">Legal</h4>
-                            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Termos de Serviço</a>
-                            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Política de Privacidade</a>
-                            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Suporte</a>
-                        </div>
-                    </div>
+        <footer className="border-t border-border bg-card">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+                {/* Brand */}
+                <div>
+                    <Link to="/" className="inline-block">
+                        <img src={Logo} alt="BidLive" className="h-8 object-contain dark:hidden" />
+                        <img src={Logo2} alt="BidLive" className="h-8 object-contain hidden dark:block" />
+                    </Link>
+                    <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
+                        {t("footer.tagline")}
+                    </p>
                 </div>
 
-                <div className="w-full h-px bg-border/50 my-8"></div>
+                {/* Navigation */}
+                <nav aria-label={t("footer.navigation")}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                        {t("footer.navigation")}
+                    </h3>
+                    <ul className="space-y-2.5 text-sm">
+                        <li><Link to="/" className="text-foreground/80 hover:text-primary transition-colors">{t("nav.home")}</Link></li>
+                        <li><Link to="/leiloes" className="text-foreground/80 hover:text-primary transition-colors">{t("nav.auctions")}</Link></li>
+                    </ul>
+                </nav>
 
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-medium text-muted-foreground">
-                    <p>&copy; {currentYear} BidLive. Todos os direitos reservados.</p>
-                    <p>
-                        Feito com <span className="text-red-500">♥</span> em Angola
-                    </p>
+                {/* Account */}
+                <nav aria-label={t("footer.account")}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                        {t("footer.account")}
+                    </h3>
+                    <ul className="space-y-2.5 text-sm">
+                        <li><Link to="/signin" className="text-foreground/80 hover:text-primary transition-colors">{t("footer.signin")}</Link></li>
+                        <li><Link to="/signup" className="text-foreground/80 hover:text-primary transition-colors">{t("footer.signup")}</Link></li>
+                    </ul>
+                </nav>
+
+                {/* Language */}
+                <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                        {t("footer.language")}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {(Object.keys(LOCALES) as Locale[]).map((code) => (
+                            <button
+                                key={code}
+                                onClick={() => setLocale(code)}
+                                className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
+                                    locale === code
+                                        ? "bg-primary text-primary-foreground border-primary"
+                                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                                }`}
+                            >
+                                {LOCALES[code].nativeLabel}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="border-t border-border">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span>© {year} BidLive. {t("footer.rights")}</span>
+                    <span>{t("footer.madeBy")}</span>
                 </div>
             </div>
         </footer>
