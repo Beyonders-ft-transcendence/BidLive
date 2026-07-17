@@ -9,14 +9,14 @@ import Avatar from "../common/Avatar";
 import UserDrawer from "./UserDrawer";
 import { useNotificationsQuery, useMarkNotificationReadMutation } from "@/hooks/useNotification";
 import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
-import LanguageSwitcher from "../common/LanguageSwitcher";
-import { useTranslation } from "react-i18next";
+import { useTranslation, LOCALES, type Locale } from "@/shared/i18n";
 
 export default function Header() {
     const { t } = useTranslation();
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
+    const { t, locale, setLocale } = useTranslation();
 
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -46,35 +46,54 @@ export default function Header() {
 
     return (
         <>
-        {/* Top Bar: Non-sticky, creative dark banner */}
-        <div className="relative z-[60] w-full bg-linear-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white border-b border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5 sm:py-1 flex justify-between items-center text-xs">
-                
-                {/* Left Side: Information / Slogan */}
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 mr-2">
-                    <div className="hidden sm:flex items-center justify-center w-5 h-5 rounded-full bg-white/10 border border-white/10 shadow-inner shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
-                    </div>
-                    <span className="text-zinc-300 font-medium tracking-wide text-[10px] sm:text-xs truncate">
-                        <span className="hidden sm:inline">Encontre as melhores oportunidades. </span>
-                        <span className="font-bold text-white">Leilões a decorrer agora!</span>
-                    </span>
+        <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-border">
+            <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                {/* Logo */}
+                <Link to="/" className="flex items-center gap-2">
+                    <img src={theme === "dark" || document.documentElement.classList.contains("dark") ? Logo2 : Logo} alt="BidLive Logo" className="h-8 object-contain" />
+                </Link>
+
+                {/* Middle Section: Nav Links & Search (Desktop) */}
+                <div className="hidden md:flex items-center gap-8 flex-1 justify-center px-4">
+                    <nav className="flex items-center gap-8 text-sm font-semibold text-foreground/70">
+                        <Link to="/" className="relative hover:text-primary transition-colors group">
+                            {t("nav.home")}
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
+                        <Link to="/leiloes" className="relative hover:text-primary transition-colors group">
+                            {t("nav.auctions")}
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                        </Link>
+                    </nav>
                 </div>
 
-                {/* Right Side: Settings (Theme, Language) */}
-                <div className="flex items-center gap-3 sm:gap-5">
-                    <div className="opacity-90 hover:opacity-100 transition-opacity">
-                        <LanguageSwitcher variant="topbar" />
-                    </div>
+                {/* Right Actions (Desktop) */}
+                <div className="hidden md:flex items-center gap-4">
                     
-                    <div className="w-px h-4 bg-white/20"></div>
-
-                    <button onClick={handleToggleTheme} title="Mudar Tema" className="p-1.5 text-zinc-300 hover:text-white transition-all cursor-pointer border-none bg-transparent flex items-center gap-2 rounded-md hover:bg-white/10">
-                        {theme === "dark" || document.documentElement.classList.contains("dark") ? (
-                            <><Sun size={14} className="text-yellow-400" /> <span className="hidden sm:inline font-bold tracking-wide">Modo Claro</span></>
-                        ) : (
-                            <><Moon size={14} className="text-blue-200" /> <span className="hidden sm:inline font-bold tracking-wide">Modo Escuro</span></>
-                        )}
+                    {/* Language Dropdown */}
+                    <div className="relative group">
+                        <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors h-full py-2 text-sm font-medium">
+                            <Globe size={18} />
+                            {locale.toUpperCase()}
+                            <ChevronDown size={14} />
+                        </button>
+                        <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                            <div className="w-36 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col py-1">
+                                {(Object.keys(LOCALES) as Locale[]).map((code) => (
+                                    <button
+                                        key={code}
+                                        onClick={() => setLocale(code)}
+                                        className={`px-4 py-2 hover:bg-muted text-sm text-start transition-colors ${locale === code ? "text-primary font-semibold" : "text-foreground"}`}
+                                    >
+                                        {LOCALES[code].nativeLabel}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <button onClick={handleToggleTheme} title={t("nav.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                        {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
                 </div>
             </div>
@@ -104,24 +123,26 @@ export default function Header() {
                             </Link>
                         </nav>
 
-                        {/* Divider */}
-                        <div className="w-px h-6 bg-border mx-1"></div>
-
-                        <div className="flex items-center gap-4">
-                            {isAuthenticated && (
-                                <div className="relative group flex items-center h-full">
-                                    <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
-                                        <Bell size={20} />
-                                        {unreadCount > 0 && (
-                                            <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
-                                        )}
-                                    </button>
-                                    
-                                    <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                        <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
-                                            <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
-                                                <span className="text-xs font-bold uppercase tracking-wider">{t("header.notifications")}</span>
-                                                {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{unreadCount} {t("header.new_notifications")}</span>}
+                    {isAuthenticated && (
+                        <div className="relative group flex items-center h-full">
+                            <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                                <Bell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
+                                )}
+                            </button>
+                            
+                            <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
+                                    <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
+                                        <span className="text-xs font-bold uppercase tracking-wider">{t("nav.notifications")}</span>
+                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{t("nav.unread", { count: unreadCount })}</span>}
+                                    </div>
+                                    <div className="overflow-y-auto flex-1">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-6 text-center text-muted-foreground">
+                                                <Bell size={24} className="mx-auto mb-2 opacity-50" />
+                                                <p className="text-xs">{t("nav.noNotifications")}</p>
                                             </div>
                                             <div className="overflow-y-auto flex-1">
                                                 {notifications.length === 0 ? (
@@ -153,7 +174,16 @@ export default function Header() {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                        ))}
+                                                            {!notif.is_read && (
+                                                                <button 
+                                                                    onClick={() => markReadMutation.mutate(notif.id)}
+                                                                    className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
+                                                                    title={t("nav.markRead")}
+                                                                >
+                                                                    <CheckCircle2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -178,16 +208,35 @@ export default function Header() {
                                 </Link>
                             )}
                         </div>
-                    </div>
+                    )}
 
-                    {/* Mobile Menu Toggle */}
-                    <div className="flex md:hidden items-center gap-2">
-                        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground bg-muted border border-border rounded-md">
-                            <Menu size={20} />
+                    {isAuthenticated && user ? (
+                        <button 
+                            onClick={() => setIsUserDrawerOpen(true)}
+                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card"
+                        >
+                            <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
+                            <span className="hidden lg:inline text-xs font-bold text-foreground">
+                                {user.full_name || user.username}
+                            </span>
                         </button>
-                    </div>
-                </nav>
-            </div>
+                    ) : (
+                        <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm text-center">
+                            {t("nav.signin")}
+                        </Link>
+                    )}
+                </div>
+
+                {/* Mobile Menu Toggle */}
+                <div className="flex md:hidden items-center gap-2">
+                    <button onClick={handleToggleTheme} title={t("nav.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                        {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground">
+                        <Menu size={24} />
+                    </button>
+                </div>
+            </nav>
         </header>
 
         {/* Mobile Menu Side Drawer */}
@@ -202,7 +251,7 @@ export default function Header() {
                 {/* Drawer */}
                 <div className="relative w-[80%] max-w-sm h-full bg-background shadow-2xl flex flex-col">
                     <div className="flex items-center justify-between p-4 border-b border-border">
-                        <span className="font-bold text-lg uppercase tracking-wider">{t("header.menu")}</span>
+                        <span className="font-semibold text-lg">{t("nav.menu")}</span>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-foreground rounded-md hover:bg-muted transition-colors">
                             <X size={20} />
                         </button>
@@ -210,8 +259,24 @@ export default function Header() {
                     
                     <div className="p-4 overflow-y-auto space-y-6 flex-1">
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
-                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.home")}</Link>
-                            <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.auctions")}</Link>
+                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("nav.home")}</Link>
+                            <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("nav.auctions")}</Link>
+
+                            {/* Mobile Language Selection */}
+                            <div className="py-4 border-b border-border/50">
+                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> {t("nav.language")}</p>
+                                <div className="flex gap-2">
+                                    {(Object.keys(LOCALES) as Locale[]).map((code) => (
+                                        <button
+                                            key={code}
+                                            onClick={() => { setLocale(code); setIsMobileMenuOpen(false); }}
+                                            className={`flex-1 py-1.5 text-sm rounded border ${locale === code ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}
+                                        >
+                                            {code.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </nav>
                     </div>
 
@@ -231,8 +296,8 @@ export default function Header() {
                                 <ChevronDown size={16} className="-rotate-90 text-muted-foreground" />
                             </button>
                         ) : (
-                            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-bold transition-all shadow-sm text-center uppercase tracking-wider">
-                                {t("header.login_register")}
+                            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm text-center">
+                                {t("nav.signin")}
                             </Link>
                         )}
                     </div>

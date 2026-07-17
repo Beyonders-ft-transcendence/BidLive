@@ -8,6 +8,13 @@ import type {
   Bid,
   BidCreatePayload,
   ApiResponse,
+  LiveStream,
+  LiveKitTokenRequest,
+  LiveKitTokenResponse,
+  StreamCreatePayload,
+  StreamStartPayload,
+  StreamEndPayload,
+  StreamViewer,
 } from '@/shared/types/auction.types';
 import type { PaginatedResponse } from '@/shared/types/auth.types';
 
@@ -120,38 +127,38 @@ class AuctionService {
   // NESTED LIVE STREAM ENDPOINTS (UC07)
   // ============================================================================
 
-  async listStreams(auctionId: number): Promise<ApiResponse<any[]>> {
-    const response = await api.get<ApiResponse<any[]>>(`/auctions/${auctionId}/streams/`);
+  async listStreams(auctionId: number): Promise<ApiResponse<LiveStream[]>> {
+    const response = await api.get<ApiResponse<LiveStream[]>>(`/auctions/${auctionId}/streams/`);
     return response.data;
   }
 
-  async createStream(auctionId: number, payload: any): Promise<ApiResponse<any>> {
-    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/`, payload);
+  async createStream(auctionId: number, payload: StreamCreatePayload): Promise<ApiResponse<LiveStream>> {
+    const response = await api.post<ApiResponse<LiveStream>>(`/auctions/${auctionId}/streams/`, payload);
     return response.data;
   }
 
-  async startStream(auctionId: number, streamId: number, payload: { stream_key?: string; metadata?: any }): Promise<ApiResponse<any>> {
-    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/start/`, payload);
+  async startStream(auctionId: number, streamId: number, payload: StreamStartPayload): Promise<ApiResponse<LiveStream>> {
+    const response = await api.post<ApiResponse<LiveStream>>(`/auctions/${auctionId}/streams/${streamId}/start/`, payload);
     return response.data;
   }
 
-  async endStream(auctionId: number, streamId: number, payload?: { reason?: string }): Promise<ApiResponse<any>> {
-    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/end/`, payload || {});
+  async endStream(auctionId: number, streamId: number, payload?: StreamEndPayload): Promise<ApiResponse<LiveStream>> {
+    const response = await api.post<ApiResponse<LiveStream>>(`/auctions/${auctionId}/streams/${streamId}/end/`, payload || {});
     return response.data;
   }
 
-  async regenerateStreamKey(auctionId: number, streamId: number): Promise<ApiResponse<any>> {
-    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/regenerate-key/`);
+  async regenerateStreamKey(auctionId: number, streamId: number): Promise<ApiResponse<LiveStream>> {
+    const response = await api.post<ApiResponse<LiveStream>>(`/auctions/${auctionId}/streams/${streamId}/regenerate-key/`);
     return response.data;
   }
 
-  async listStreamViewers(auctionId: number, streamId: number): Promise<ApiResponse<{ count: number; results: any[] }>> {
-    const response = await api.get<ApiResponse<{ count: number; results: any[] }>>(`/auctions/${auctionId}/streams/${streamId}/viewers/`);
+  async listStreamViewers(auctionId: number, streamId: number): Promise<ApiResponse<{ count: number; results: StreamViewer[] }>> {
+    const response = await api.get<ApiResponse<{ count: number; results: StreamViewer[] }>>(`/auctions/${auctionId}/streams/${streamId}/viewers/`);
     return response.data;
   }
 
-  async getLiveKitToken(auctionId: number, streamId: number, payload: { role?: string; participant_name?: string; metadata?: any }): Promise<ApiResponse<any>> {
-    const response = await api.post<ApiResponse<any>>(`/auctions/${auctionId}/streams/${streamId}/livekit-token/`, payload);
+  async getLiveKitToken(auctionId: number, streamId: number, payload: LiveKitTokenRequest): Promise<ApiResponse<LiveKitTokenResponse>> {
+    const response = await api.post<ApiResponse<LiveKitTokenResponse>>(`/auctions/${auctionId}/streams/${streamId}/livekit-token/`, payload);
     return response.data;
   }
 

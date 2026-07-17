@@ -1,15 +1,16 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { 
-  Video, VideoOff, Mic, MicOff, Key, Copy, Check, 
-  Tv, Radio, Users, RefreshCw, Play, Square, ArrowLeft,
+import {
+  Key, Copy, Check,
+  Tv, Radio, Users, RefreshCw, ArrowLeft,
   Calendar, Gavel, PlayCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import type { Auction } from "@/shared/types/auction.types";
+import type { Auction, LiveStream, StreamViewer } from "@/shared/types/auction.types";
 import { LiveStreamStatus, LiveStreamVisibility, AuctionStatus } from "@/shared/types/auction.types";
 import auctionService from "@/services/auction.service";
 import { auctionStatusColor, getAuctionStatusLabel } from "@/shared/utils/auction.utils";
+import BroadcasterStage from "@/components/livestream/BroadcasterStage";
 
 interface LiveStreamTabProps {
   myAuctions: Auction[];
@@ -34,26 +35,22 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
   }, [searchParams, myAuctions]);
   
   // Stream console states
-  const [stream, setStream] = useState<any | null>(null);
+  const [stream, setStream] = useState<LiveStream | null>(null);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
-  
+
   // Create stream form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<LiveStreamVisibility>(LiveStreamVisibility.PUBLIC);
 
-  // Web Broadcaster state
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [cameraOn, setCameraOn] = useState(false);
-  const [micOn, setMicOn] = useState(false);
+  // Broadcast state (a captura de câmera/microfone é gerenciada pelo LiveKit no BroadcasterStage)
   const [broadcasting, setBroadcasting] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Viewers state
-  const [viewers, setViewers] = useState<any[]>([]);
+  const [viewers, setViewers] = useState<StreamViewer[]>([]);
   const [viewerCount, setViewerCount] = useState(0);
 
   // Load stream data
@@ -63,7 +60,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       const res = await auctionService.listStreams(auctionId);
       if (res.success && res.data && res.data.length > 0) {
         // Find a stream that is LIVE or READY
-        const activeStream = res.data.find((s: any) => s.status === LiveStreamStatus.LIVE || s.status === LiveStreamStatus.READY);
+        const activeStream = res.data.find((s) => s.status === LiveStreamStatus.LIVE || s.status === LiveStreamStatus.READY);
         
         if (activeStream) {
           setStream(activeStream);
@@ -102,9 +99,6 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
     if (activeAuction) {
       loadStream(activeAuction.id);
     }
-    return () => {
-      stopCamera();
-    };
   }, [activeAuction]);
 
   // Set titles if activeAuction changes
@@ -130,66 +124,6 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
     }
     return () => clearInterval(interval);
   }, [activeAuction, stream]);
-
-  // Media Capture Functions
-  const stopCamera = () => {
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-      setLocalStream(null);
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  };
-
-  const startCamera = async () => {
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-    }
-
-    if (!cameraOn && !micOn) {
-      setLocalStream(null);
-      if (videoRef.current) videoRef.current.srcObject = null;
-      return;
-    }
-
-    try {
-      // Usar 'true' simples maximiza a compatibilidade com qualquer webcam
-      const constraints = {
-        video: cameraOn,
-        audio: micOn
-      };
-      const streamObj = await navigator.mediaDevices.getUserMedia(constraints);
-      setLocalStream(streamObj);
-      if (videoRef.current) {
-        videoRef.current.srcObject = streamObj;
-      }
-    } catch (err: any) {
-      console.error("Erro ao acessar câmera/microfone:", err);
-      
-      const errorMsg = err.name || err.message || "";
-      if (errorMsg.includes('NotFound') || errorMsg.includes('NotFoundError')) {
-        toast.error("Dispositivo não encontrado. Certifique-se de que a câmera/microfone estão conectados.");
-      } else if (errorMsg.includes('NotAllowed') || errorMsg.includes('NotAllowedError')) {
-        toast.error("Permissão negada. Autorize o acesso no seu navegador.");
-      } else if (errorMsg.includes('OverconstrainedError')) {
-        toast.error("A câmera não suporta as configurações exigidas.");
-      } else {
-        toast.error("Não foi possível acessar a câmera ou o microfone.");
-      }
-      
-      if (cameraOn) setCameraOn(false);
-      if (micOn) setMicOn(false);
-    }
-  };
-
-  useEffect(() => {
-    if (stream && (stream.status === LiveStreamStatus.READY || stream.status === LiveStreamStatus.LIVE)) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-  }, [stream?.status, cameraOn, micOn]);
 
   const showBackendError = (err: any, fallbackMessage: string) => {
     const errorMsg = err?.response?.data?.message || fallbackMessage;
@@ -244,7 +178,6 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       });
       if (res.success) {
         setBroadcasting(false);
-        stopCamera();
         loadStream(activeAuction.id);
         toast.success("Transmissão encerrada.");
       }
@@ -298,7 +231,6 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
           {activeAuction && (
             <button
               onClick={() => {
-                stopCamera();
                 setActiveAuction(null);
                 setStream(null);
                 const newParams = new URLSearchParams(searchParams);
@@ -479,93 +411,17 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
           /* WORKSPACE STREAM CONSOLE ACTIVE */
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
             
-            {/* Stream Video Broadcast Center */}
+            {/* Stream Video Broadcast Center (LiveKit) */}
             <div className="space-y-4 min-w-0">
               <div className="bg-card border border-border p-4 rounded-sm shadow-sm space-y-4">
-                <div className="relative aspect-video bg-slate-950 border border-slate-900 rounded-sm overflow-hidden flex items-center justify-center shadow-inner">
-                  {stream.status === LiveStreamStatus.LIVE || stream.status === LiveStreamStatus.READY ? (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-full object-cover scale-x-[-1]"
-                    />
-                  ) : (
-                    <div className="text-center text-slate-500 p-6">
-                      <Radio className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p className="text-xs font-bold uppercase tracking-wider">A transmissão está encerrada</p>
-                      <p className="text-[10px] text-slate-600 mt-1">Status da live: {stream.status}</p>
-                    </div>
-                  )}
-
-                  {/* Status Overlay Badges */}
-                  <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest ${
-                      broadcasting ? "bg-red-500 text-white animate-pulse" : "bg-slate-800 text-slate-300"
-                    }`}>
-                      {broadcasting ? "AO VIVO" : "OFFLINE"}
-                    </span>
-                    
-                    {broadcasting && (
-                      <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-sm text-[8px] font-bold text-white flex items-center gap-1">
-                        <Users size={10} />
-                        {viewerCount}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Device controls bar */}
-                {(stream.status === LiveStreamStatus.READY || stream.status === LiveStreamStatus.LIVE) && (
-                  <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setCameraOn(!cameraOn)}
-                        className={`p-2 rounded-sm border transition cursor-pointer border-none ${
-                          cameraOn 
-                            ? "bg-muted text-foreground hover:bg-muted/80" 
-                            : "bg-destructive text-destructive-foreground hover:bg-destructive/95"
-                        }`}
-                        title={cameraOn ? "Desativar Câmera" : "Ativar Câmera"}
-                      >
-                        {cameraOn ? <Video size={16} /> : <VideoOff size={16} />}
-                      </button>
-                      
-                      <button
-                        onClick={() => setMicOn(!micOn)}
-                        className={`p-2 rounded-sm border transition cursor-pointer border-none ${
-                          micOn 
-                            ? "bg-muted text-foreground hover:bg-muted/80" 
-                            : "bg-destructive text-destructive-foreground hover:bg-destructive/95"
-                        }`}
-                        title={micOn ? "Desativar Microfone" : "Ativar Microfone"}
-                      >
-                        {micOn ? <Mic size={16} /> : <MicOff size={16} />}
-                      </button>
-                    </div>
-
-                    <div className="flex gap-2">
-                      {!broadcasting ? (
-                        <button
-                          onClick={handleStartStream}
-                          className="px-5 py-2.5 bg-red-650 hover:bg-red-700 text-white font-bold text-xs rounded-sm shadow-sm uppercase flex items-center gap-1.5 cursor-pointer border-none animate-pulse"
-                        >
-                          <Play size={14} />
-                          Iniciar Transmissão
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleEndStream}
-                          className="px-5 py-2.5 bg-foreground hover:opacity-90 text-background font-bold text-xs rounded-sm shadow-sm uppercase flex items-center gap-1.5 cursor-pointer border-none"
-                        >
-                          <Square size={12} />
-                          Parar Transmissão
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <BroadcasterStage
+                  auctionId={activeAuction.id}
+                  stream={stream}
+                  broadcasting={broadcasting}
+                  viewerCount={viewerCount}
+                  onStart={handleStartStream}
+                  onEnd={handleEndStream}
+                />
               </div>
             </div>
 
