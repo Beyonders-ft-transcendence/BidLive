@@ -301,10 +301,10 @@ services:
       - ca_key
       - ca_config
     logging:
-    driver: gelf
-    options:
-      gelf-address: "udp://logstash:12201"
-      tag: "livekit"
+      driver: gelf
+      options:
+        gelf-address: "udp://logstash:12201"
+        tag: "livekit"
 
   adminer:
     image: adminer:0.0.1
