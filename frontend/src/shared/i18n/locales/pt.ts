@@ -24,6 +24,11 @@ const pt = {
         statTotal: "leilões na plataforma",
         statCategories: "categorias",
     },
+    mock: {
+        itemTitle: "Relógio suíço de coleção · 1968",
+        viewers: "{count} assistindo",
+        newBid: "Novo lance!",
+    },
     live: {
         badge: "Ao Vivo",
         title: "Acontecendo Agora",

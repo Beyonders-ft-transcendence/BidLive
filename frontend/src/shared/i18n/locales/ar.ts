@@ -26,6 +26,11 @@ const ar: Messages = {
         statTotal: "مزادات على المنصة",
         statCategories: "فئات",
     },
+    mock: {
+        itemTitle: "ساعة سويسرية نادرة · 1968",
+        viewers: "{count} يشاهدون",
+        newBid: "مزايدة جديدة!",
+    },
     live: {
         badge: "مباشر",
         title: "يجري الآن",

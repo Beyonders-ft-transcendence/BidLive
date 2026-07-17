@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -8,7 +9,7 @@ import { useTranslation } from "@/shared/i18n";
 import { formatCurrency } from "@/shared/utils/auction.utils";
 import type { Auction } from "@/shared/types/auction.types";
 import {
-    ArrowRight, Bell, Gavel, Radio, ShieldCheck,
+    ArrowRight, Bell, Eye, Gavel, Radio, ShieldCheck,
     Star, Trophy, UserPlus, Video, Zap,
 } from "lucide-react";
 
@@ -87,6 +88,144 @@ function AuctionCard({ auction, variant }: { auction: Auction; variant: "live" |
     );
 }
 
+const MOCK_BIDDERS = ["Marta N.", "Kiala F.", "Paulo T.", "Aisha B.", "Nelson K.", "Luena S."];
+const MOCK_INCREMENTS = [2500, 3000, 2000, 3500, 2500, 4000];
+const MOCK_BASE_AMOUNT = 145000;
+const MOCK_AVATAR_STYLES = [
+    "bg-purple-500/15 text-purple-600 dark:text-purple-300",
+    "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300",
+    "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
+];
+
+interface MockBid {
+    id: number;
+    name: string;
+    amount: number;
+}
+
+/**
+ * Mockup animado de um leilão ao vivo para o hero: leiloeiro ilustrado,
+ * espectadores e um feed de lances que se atualiza sozinho. Puramente
+ * decorativo — não depende do backend.
+ */
+function LiveShowcase() {
+    const { t } = useTranslation();
+    const [bids, setBids] = useState<MockBid[]>([
+        { id: 2, name: MOCK_BIDDERS[2], amount: MOCK_BASE_AMOUNT + 5500 },
+        { id: 1, name: MOCK_BIDDERS[1], amount: MOCK_BASE_AMOUNT + 2500 },
+        { id: 0, name: MOCK_BIDDERS[0], amount: MOCK_BASE_AMOUNT },
+    ]);
+
+    useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const timer = setInterval(() => {
+            setBids((prev) => {
+                const nextId = prev[0].id + 1;
+                const amount = prev[0].amount + MOCK_INCREMENTS[nextId % MOCK_INCREMENTS.length];
+                const next = { id: nextId, name: MOCK_BIDDERS[nextId % MOCK_BIDDERS.length], amount };
+                return [next, ...prev].slice(0, 3);
+            });
+        }, 2800);
+        return () => clearInterval(timer);
+    }, []);
+
+    const topBid = bids[0];
+    const viewers = 124 + topBid.id;
+
+    return (
+        <div className="relative mx-auto w-full max-w-md">
+            <div aria-hidden className="absolute -inset-8 bg-primary/20 blur-3xl rounded-full -z-10" />
+
+            <div className="relative bg-card border border-border rounded-2xl shadow-xl dark:shadow-none overflow-hidden animate-float">
+                {/* "Vídeo" da transmissão: cena ilustrada do leiloeiro */}
+                <div className="relative h-52 sm:h-60 bg-gradient-to-br from-primary via-[#6d0fa8] to-[#2b1140] overflow-hidden">
+                    <svg viewBox="0 0 400 240" className="absolute inset-0 w-full h-full" aria-hidden preserveAspectRatio="xMidYMax slice">
+                        {/* Foco de luz sobre o palco */}
+                        <polygon points="200,-30 90,240 310,240" fill="white" opacity="0.08" />
+                        <ellipse cx="200" cy="212" rx="120" ry="14" fill="white" opacity="0.10" />
+                        {/* Leiloeiro: cabeça, tronco e braço erguido com martelo */}
+                        <circle cx="200" cy="88" r="17" fill="white" opacity="0.92" />
+                        <rect x="172" y="108" width="56" height="42" rx="18" fill="white" opacity="0.92" />
+                        <g transform="rotate(30 236 112)">
+                            <rect x="231" y="70" width="9" height="46" rx="4.5" fill="white" opacity="0.92" />
+                            <rect x="219" y="56" width="34" height="13" rx="5" fill="white" opacity="0.92" />
+                        </g>
+                        {/* Púlpito */}
+                        <rect x="160" y="146" width="80" height="60" rx="8" fill="white" opacity="0.25" />
+                        <rect x="150" y="140" width="100" height="10" rx="5" fill="white" opacity="0.35" />
+                        {/* Plateia em silhueta */}
+                        <circle cx="60" cy="234" r="20" fill="white" opacity="0.16" />
+                        <circle cx="118" cy="240" r="24" fill="white" opacity="0.13" />
+                        <circle cx="284" cy="240" r="24" fill="white" opacity="0.13" />
+                        <circle cx="342" cy="234" r="20" fill="white" opacity="0.16" />
+                        <circle cx="24" cy="244" r="18" fill="white" opacity="0.10" />
+                        <circle cx="376" cy="244" r="18" fill="white" opacity="0.10" />
+                    </svg>
+
+                    <span className="absolute top-3 start-3 inline-flex items-center gap-1.5 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-sm uppercase shadow-md">
+                        <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+                        </span>
+                        {t("live.badge")}
+                    </span>
+                    <span className="absolute top-3 end-3 inline-flex items-center gap-1.5 bg-black/45 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                        <Eye className="w-3 h-3" />
+                        {t("mock.viewers", { count: viewers })}
+                    </span>
+
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-4 pt-10 pb-3">
+                        <p className="text-white text-xs font-semibold">{t("mock.itemTitle")}</p>
+                    </div>
+                </div>
+
+                {/* Feed de lances */}
+                <div className="p-4 space-y-2">
+                    {bids.map((bid, index) => (
+                        <div
+                            key={bid.id}
+                            className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 bg-background/60 ${index === 0 ? "animate-bid-in border-primary/40" : "border-border/60"}`}
+                        >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${MOCK_AVATAR_STYLES[bid.id % MOCK_AVATAR_STYLES.length]}`}>
+                                    {bid.name.split(" ").map((part) => part[0]).join("")}
+                                </span>
+                                <span className="text-xs font-semibold text-foreground truncate">{bid.name}</span>
+                            </div>
+                            <span className="text-xs font-bold font-mono text-primary whitespace-nowrap">
+                                {formatCurrency(bid.amount, true)}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="px-4 py-3 border-t border-border bg-muted/20 flex items-center justify-between gap-3">
+                    <div>
+                        <p className="text-[9px] uppercase tracking-wide text-muted-foreground">{t("live.currentBid")}</p>
+                        <p className="text-lg font-bold text-primary leading-tight">{formatCurrency(topBid.amount, true)}</p>
+                    </div>
+                    <span className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-bold whitespace-nowrap">
+                        {t("live.enter")}
+                    </span>
+                </div>
+            </div>
+
+            {/* Elementos flutuantes decorativos */}
+            <div className="absolute -top-5 -end-3 sm:-end-8 animate-float-delayed">
+                <div className="bg-card border border-border rounded-full px-3.5 py-2 shadow-lg dark:shadow-none flex items-center gap-2 text-xs font-bold text-foreground">
+                    <Zap className="w-3.5 h-3.5 text-primary" />
+                    {t("mock.newBid")}
+                </div>
+            </div>
+            <div className="absolute -bottom-5 -start-3 sm:-start-8 animate-float">
+                <div className="bg-primary text-primary-foreground rounded-xl p-3 shadow-lg dark:shadow-none">
+                    <Gavel className="w-5 h-5" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function AuctionCardSkeleton() {
     return (
         <div className="bg-card border border-border rounded-lg overflow-hidden animate-pulse">
@@ -154,58 +293,64 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-35 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14 sm:pt-24 sm:pb-20 flex flex-col items-center text-center">
-                    <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/5 text-primary rounded-full px-3.5 py-1.5 text-xs font-semibold mb-6">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 sm:pb-20 grid lg:grid-cols-[1.05fr_0.95fr] gap-14 lg:gap-10 items-center">
+                    {/* Coluna de texto */}
+                    <div className="flex flex-col items-center lg:items-start text-center lg:text-start">
+                        <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/5 text-primary rounded-full px-3.5 py-1.5 text-xs font-semibold mb-6">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                            </span>
+                            {t("hero.badge")}
                         </span>
-                        {t("hero.badge")}
-                    </span>
 
-                    <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] max-w-3xl text-foreground">
-                        {t("hero.titleLead")}{" "}
-                        <span className="bg-gradient-to-r from-primary to-[var(--chart-1)] bg-clip-text text-transparent">
-                            {t("hero.titleHighlight")}
-                        </span>
-                        .
-                    </h1>
+                        <h1 className="font-heading text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight leading-[1.1] max-w-3xl text-foreground">
+                            {t("hero.titleLead")}{" "}
+                            <span className="bg-gradient-to-r from-primary to-[var(--chart-1)] bg-clip-text text-transparent">
+                                {t("hero.titleHighlight")}
+                            </span>
+                            .
+                        </h1>
 
-                    <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl">
-                        {t("hero.subtitle")}
-                    </p>
+                        <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl">
+                            {t("hero.subtitle")}
+                        </p>
 
-                    <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <Link
-                            to="/leiloes"
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-7 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm"
-                        >
-                            {t("hero.exploreCta")}
-                            <ArrowRight className="w-4 h-4 rtl:-scale-x-100" />
-                        </Link>
-                        <Link
-                            to={isAuthenticated ? "/user" : "/signup"}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-border bg-card hover:bg-muted text-foreground px-7 py-3 rounded-md text-sm font-semibold transition-colors"
-                        >
-                            {isAuthenticated ? t("hero.dashboardCta") : t("hero.sellCta")}
-                        </Link>
+                        <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <Link
+                                to="/leiloes"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-7 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm"
+                            >
+                                {t("hero.exploreCta")}
+                                <ArrowRight className="w-4 h-4 rtl:-scale-x-100" />
+                            </Link>
+                            <Link
+                                to={isAuthenticated ? "/user" : "/signup"}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-border bg-card hover:bg-muted text-foreground px-7 py-3 rounded-md text-sm font-semibold transition-colors"
+                            >
+                                {isAuthenticated ? t("hero.dashboardCta") : t("hero.sellCta")}
+                            </Link>
+                        </div>
+
+                        {stats.length > 0 && (
+                            <dl className={`mt-12 grid ${stats.length === 3 ? "grid-cols-3" : stats.length === 2 ? "grid-cols-2" : "grid-cols-1"} divide-x divide-border border border-border rounded-xl bg-card/60 backdrop-blur-sm shadow-sm dark:shadow-none w-full max-w-xl overflow-hidden`}>
+                                {stats.map((stat) => (
+                                    <div key={stat.label} className="px-4 py-4 sm:py-5 text-center">
+                                        <dt className="sr-only">{stat.label}</dt>
+                                        <dd className="flex flex-col items-center gap-0.5">
+                                            <span className={`text-xl sm:text-2xl font-bold font-mono ${stat.live ? "text-red-500" : "text-foreground"}`}>
+                                                {formatNumber(stat.value as number)}
+                                            </span>
+                                            <span className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</span>
+                                        </dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        )}
                     </div>
 
-                    {stats.length > 0 && (
-                        <dl className={`mt-12 grid ${stats.length === 3 ? "grid-cols-3" : stats.length === 2 ? "grid-cols-2" : "grid-cols-1"} divide-x divide-border border border-border rounded-xl bg-card/60 backdrop-blur-sm shadow-sm dark:shadow-none w-full max-w-xl overflow-hidden`}>
-                            {stats.map((stat) => (
-                                <div key={stat.label} className="px-4 py-4 sm:py-5 text-center">
-                                    <dt className="sr-only">{stat.label}</dt>
-                                    <dd className="flex flex-col items-center gap-0.5">
-                                        <span className={`text-xl sm:text-2xl font-bold font-mono ${stat.live ? "text-red-500" : "text-foreground"}`}>
-                                            {formatNumber(stat.value as number)}
-                                        </span>
-                                        <span className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</span>
-                                    </dd>
-                                </div>
-                            ))}
-                        </dl>
-                    )}
+                    {/* Coluna visual: leilão ao vivo simulado */}
+                    <LiveShowcase />
                 </div>
             </section>
 
