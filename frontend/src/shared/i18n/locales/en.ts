@@ -26,6 +26,11 @@ const en: Messages = {
         statTotal: "auctions on the platform",
         statCategories: "categories",
     },
+    mock: {
+        itemTitle: "Collectible Swiss watch · 1968",
+        viewers: "{count} watching",
+        newBid: "New bid!",
+    },
     live: {
         badge: "Live",
         title: "Happening Now",

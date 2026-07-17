@@ -312,3 +312,28 @@
     @apply font-sans;
   }
 }
+
+/* ==========================
+   HOME SHOWCASE ANIMATIONS
+   ========================== */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes bid-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@layer utilities {
+  .animate-float { animation: float-y 6s ease-in-out infinite; }
+  .animate-float-delayed { animation: float-y 7s ease-in-out 1.2s infinite; }
+  .animate-bid-in { animation: bid-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-delayed,
+    .animate-bid-in { animation: none; }
+  }
+}
