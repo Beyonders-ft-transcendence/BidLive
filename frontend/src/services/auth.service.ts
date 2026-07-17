@@ -18,6 +18,8 @@ import type {
     ResetPasswordResponse,
     SwaggerOAuth2TokenRequestPayload,
     SwaggerOAuth2TokenResponse,
+    VerifyUserPayload,
+    VerifyUserResponse,
 } from '../shared/types/auth.types'
 
 class AuthService {
@@ -66,6 +68,11 @@ class AuthService {
 
     async resetPassword(payload: ResetPasswordPayload): Promise<ResetPasswordResponse> {
         const response = await api.post<ResetPasswordResponse>('/auth/reset-password/', payload)
+        return response.data
+    }
+
+    async verifyUser(payload: VerifyUserPayload): Promise<VerifyUserResponse> {
+        const response = await api.post<VerifyUserResponse>('/auth/verify-user/', payload)
         return response.data
     }
 

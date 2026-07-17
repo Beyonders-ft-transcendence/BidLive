@@ -13,6 +13,7 @@ interface ReportModalProps {
 }
 
 export default function ReportModal({ isOpen, onClose, targetType, targetId }: ReportModalProps) {
+  
   const { mutate: createReport, isPending } = useCreateReport();
 
   const {

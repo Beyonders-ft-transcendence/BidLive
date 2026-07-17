@@ -1,3 +1,5 @@
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -12,6 +14,8 @@ import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
 
 function SignupForm() {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
 
@@ -148,7 +152,7 @@ function SignupForm() {
                                     {step === 1 && (
                                         <>
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Nome Completo</label>
+                                                <label className="block text-sm font-medium text-foreground">{t('auth.full_name')}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
@@ -292,6 +296,8 @@ function SignupForm() {
 }
 
 export default function Signup() {
+  useDocumentTitle("Registo");
+
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
     return (

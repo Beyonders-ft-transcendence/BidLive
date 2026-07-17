@@ -1,4 +1,5 @@
 import { TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Auction } from "@/shared/types/auction.types";
 import type { User } from "@/shared/types/auth.types";
 import { formatCurrency } from "@/shared/utils/auction.utils";
@@ -10,13 +11,15 @@ interface MyBidsTabProps {
 }
 
 export default function MyBidsTab({ allAuctions, user, loadingAll }: MyBidsTabProps) {
+  const { t } = useTranslation();
+
   const wonAuctions = allAuctions.filter((a) => a.winner === user.id);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none">
       <div className="bg-card border border-border p-5 rounded-sm shadow-sm text-foreground">
         <div>
-          <h2 className="text-xl font-black tracking-tight">Meus Lances</h2>
+          <h2 className="text-xl font-black tracking-tight">{t('my_bids_tab.title')}</h2>
           <p className="text-xs text-muted-foreground mt-1 font-normal">
             Visualize leilões arrematados ou disputados em que você enviou ofertas.
           </p>

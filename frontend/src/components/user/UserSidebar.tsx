@@ -1,10 +1,11 @@
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, PlusCircle, MessageSquare, Heart, Radio } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp, 
+  PlusCircle, MessageSquare, Heart, Radio, UserCog } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { User } from "@/shared/types/auth.types";
-import Avatar from "@/components/common/Avatar";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
-  setActiveTab: (tab: "overview" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => void;
+  activeTab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
+  setActiveTab: (tab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => void;
   user: User;
   onLogout: () => void;
 }
@@ -12,43 +13,23 @@ interface UserSidebarProps {
 export default function UserSidebar({
   activeTab,
   setActiveTab,
-  user,
   onLogout,
 }: UserSidebarProps) {
+  const { t } = useTranslation();
+
   const sidebarItems = [
-    { id: "overview", label: "Visão Geral", icon: <LayoutDashboard size={16} /> },
-    { id: "my-auctions", label: "Meus Leilões", icon: <Gavel size={16} /> },
-    { id: "create-auction", label: "Criar Leilão", icon: <PlusCircle size={16} /> },
-    { id: "my-bids", label: "Meus Lances", icon: <TrendingUp size={16} /> },
-    { id: "favorites", label: "Meus Favoritos", icon: <Heart size={16} /> },
-    { id: "live-stream", label: "Transmitir Live", icon: <Radio size={16} /> },
-    { id: "chat", label: "Mensagens", icon: <MessageSquare size={16} /> },
+    { id: "overview", label: t('user_dashboard.overview'), icon: <LayoutDashboard size={16} /> },
+    { id: "profile", label: t('user_dashboard.profile'), icon: <UserCog size={16} /> },
+    { id: "my-auctions", label: t('user_dashboard.my_auctions'), icon: <Gavel size={16} /> },
+    { id: "create-auction", label: t('user_dashboard.create_auction'), icon: <PlusCircle size={16} /> },
+    { id: "my-bids", label: t('user_dashboard.my_bids'), icon: <TrendingUp size={16} /> },
+    { id: "favorites", label: t('user_dashboard.favorites'), icon: <Heart size={16} /> },
+    { id: "live-stream", label: t('user_dashboard.live_stream'), icon: <Radio size={16} /> },
+    { id: "chat", label: t('user_dashboard.chat'), icon: <MessageSquare size={16} /> },
   ] as const;
 
   return (
     <aside className="sticky top-24 self-start hidden md:flex w-64 shrink-0 flex-col gap-6 select-none bg-card border border-border rounded-sm p-5 shadow-sm text-foreground transition-all duration-300">
-      {/* Profile summary header */}
-      <div className="flex flex-col items-center text-center px-1 py-3">
-        <div className="relative group cursor-pointer">
-          <Avatar name={user.full_name || user.username} src={user.avatar_url} size="lg" />
-          <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 group-hover:scale-125 transition duration-300"></div>
-        </div>
-        
-        <h3 className="text-xs font-black text-foreground mt-4 truncate max-w-full leading-tight">
-          {user.full_name || user.username}
-        </h3>
-        <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-full mt-1">
-          {user.email}
-        </span>
-        
-        <span className="inline-block bg-primary/10 text-primary px-3 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-wider mt-3">
-          {typeof user.roles?.[0] === "object" && user.roles[0] !== null
-            ? (user.roles[0] as any).name || "USER"
-            : (user.roles?.[0] as any) || "USER"}
-        </span>
-      </div>
-
-      <hr className="border-border w-full m-0" />
 
       {/* Navigation menu list */}
       <nav className="flex flex-col gap-1 w-full">

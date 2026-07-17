@@ -118,6 +118,11 @@ export interface ResetPasswordPayload {
   new_password_confirm?: string; // For frontend validation
 }
 
+export interface VerifyUserPayload {
+  uid: string;
+  token: string;
+}
+
 // ============================================================================
 // JWT TOKENS
 // ============================================================================
@@ -214,6 +219,8 @@ export interface ForgotPasswordMessage {
 export type ForgotPasswordResponse = AuthResponse<Record<string, never>>;
 
 export type ResetPasswordResponse = AuthResponse<Record<string, never>>;
+
+export type VerifyUserResponse = AuthResponse<Record<string, never>>;
 
 // ============================================================================
 // OAUTH / SOCIAL AUTH

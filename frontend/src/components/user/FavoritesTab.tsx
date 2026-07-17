@@ -12,6 +12,7 @@ interface FavoritesTabProps {
 }
 
 export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }: FavoritesTabProps) {
+  
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
 
   // Load favorite IDs from localStorage
