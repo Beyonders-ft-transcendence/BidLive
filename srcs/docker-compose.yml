@@ -514,6 +514,26 @@ services:
       retries: 5
       start_period: 60s
 
+  kibana:
+    image: kibana:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/kibana
+      dockerfile: Dockerfile
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+      - elasticsearch_credenciais
+
 secrets:
   db_credenciais:
     file: ../secrets/db_credenciais.txt
