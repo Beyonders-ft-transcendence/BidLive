@@ -387,7 +387,6 @@ services:
     volumes:
       - redis_data:/data
   
-
   redis_exporter:
     image: redis_exporter:0.0.1
     pull_policy: never
