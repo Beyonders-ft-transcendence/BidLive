@@ -20,17 +20,7 @@ import { ReportTargetType } from "@/shared/types/report.types";
 import LiveStreamViewerPlayer from "@/components/livestream/LiveStreamViewerPlayer";
 import { useStreamViewersQuery } from "@/hooks/useLiveKit";
 
-// Condition label map
-// Note: we will use translation inside the component for conditionLabels, but if needed globally we can map keys
-// @ts-ignore
-const conditionLabels: any = {
-    NEW: "Novo",
-    USED: "Usado",
-    REFURBISHED: "Recondicionado",
-    DAMAGED: "Com Defeito",
-};
-
-function formatCurrency(val: string | number | null | undefined, compact: boolean = false) {
+function formatCurrency(val: string | number | null | undefined, compact: boolean = false, locale: string = "pt-AO") {
     if (!val) return "—";
     const n = Number(val);
     if (isNaN(n)) return String(val);
@@ -48,7 +38,7 @@ function formatCurrency(val: string | number | null | undefined, compact: boolea
         options.maximumFractionDigits = 0;
     }
     
-    return new Intl.NumberFormat("pt-AO", options).format(n);
+    return new Intl.NumberFormat(locale, options).format(n);
 }
 
 // Countdown hook
@@ -80,7 +70,9 @@ function useCountdown(endTime: string | null | undefined, status: string) {
 }
 
 export default function AuctionDetailPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const localeMap: Record<string, string> = { pt: "pt-AO", en: "en-US", ar: "ar-SA" };
+    const currentLocale = localeMap[i18n.language] || "pt-AO";
     const { id } = useParams<{ id: string }>();
     const auctionId = Number(id);
     const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
@@ -318,13 +310,13 @@ export default function AuctionDetailPage() {
                     <div className="flex items-center justify-between z-10">
                         <div className="flex items-center gap-2">
                             <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
-                                <span className="w-1 h-1 bg-[#111827] rounded-full" /> AO VIVO
+                                <span className="w-1 h-1 bg-[#111827] rounded-full" /> {t('auction_detail.status.live')}
                             </span>
                             <span className="text-[10px] font-bold text-slate-300 truncate max-w-[200px]">{activeStream.title}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {liveViewerCount} assistindo
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {liveViewerCount} {t('auction_detail.watching')}
                             </div>
                             <button onClick={() => setShowChat(!showChat)} className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1.5 text-white hover:bg-black/60 transition-colors cursor-pointer">
                                 <MessageSquare size={12} /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.chat')}
@@ -414,7 +406,7 @@ export default function AuctionDetailPage() {
                                     {msg.message}
                                 </div>
                                 <span className="text-[8px] text-muted-foreground mt-0.5 mx-1">
-                                    {new Date(msg.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}
+                                    {new Date(msg.created_at).toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit" })}
                                 </span>
                             </div>
                         )
@@ -619,7 +611,7 @@ export default function AuctionDetailPage() {
                                     ) : (
                                         <span className="text-sm font-semibold text-foreground leading-tight text-left">{t('auction_detail.anonymous')}</span>
                                     )}
-                                    <p className="text-[10px] text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" })}</p>
+                                    <p className="text-[10px] text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit" })}</p>
                                 </div>
                             </div>
                             <div className="text-right">
@@ -671,8 +663,8 @@ export default function AuctionDetailPage() {
                         },
                         { icon: <Tag size={13} className="text-primary" />, label: t('auction_detail.starting_price'), value: formatCurrency(auction.item.starting_price) },
                         { icon: <TrendingUp size={13} className="text-primary" />, label: t('auction_detail.min_increment'), value: formatCurrency(auction.item.minimum_increment) },
-                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.opening'), value: new Date(auction.start_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
-                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.closing'), value: new Date(auction.end_time).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" }) },
+                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.opening'), value: new Date(auction.start_time).toLocaleString(currentLocale, { dateStyle: "short", timeStyle: "short" }) },
+                        { icon: <CalendarDays size={13} className="text-primary" />, label: t('auction_detail.closing'), value: new Date(auction.end_time).toLocaleString(currentLocale, { dateStyle: "short", timeStyle: "short" }) },
                     ].map((item) => (
                         <div key={item.label} className="flex flex-col gap-1">
                             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{item.label}</p>
@@ -700,7 +692,7 @@ export default function AuctionDetailPage() {
                                     <p className="text-sm font-semibold text-foreground flex items-center gap-1">
                                         {auction.reserve_met ? (
                                             <><CheckCircle2 size={13} className="text-green-500" /><span className="text-green-400">{t('auction_detail.reached')}</span></>
-                                        ) : ("{t('auction_detail.not_reached')}")}
+                                        ) : t('auction_detail.not_reached')}
                                     </p>
                                 </div>
                             )}

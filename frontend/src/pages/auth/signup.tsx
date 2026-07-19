@@ -48,11 +48,11 @@ function SignupForm() {
                 full_name: data.full_name,
                 password: data.password,
             });
-            toast.success("Conta criada com sucesso! Faça login para continuar.");
+            toast.success(t("auth.signup_success"));
             navigate("/signin");
         } catch (err: any) {
             console.error("Falha ao registrar:", err);
-            const errMsg = useAuthStore.getState().error || "Erro ao registrar. Verifique os dados inseridos.";
+            const errMsg = useAuthStore.getState().error || t("auth.signup_error");
             toast.error(errMsg);
         }
     };
@@ -71,11 +71,11 @@ function SignupForm() {
             if (url) {
                 window.location.href = url;
             } else {
-                toast.error("Serviço de autenticação da Intra temporariamente indisponível.");
+                toast.error(t("auth.intra_unavailable"));
             }
         } catch (err: any) {
             console.error("Falha ao autorizar 42:", err);
-            toast.error("Ocorreu um erro ao tentar conectar com a Intra 42.");
+            toast.error(t("auth.intra_error"));
         }
     };
 
@@ -83,15 +83,15 @@ function SignupForm() {
         onSuccess: async (tokenResponse) => {
             try {
                 await loginWithGoogle({ access_token: tokenResponse.access_token });
-                toast.success("Login com Google efetuado com sucesso!");
+                toast.success(t("auth.google_success"));
                 navigate("/user");
             } catch (error: any) {
                 console.error("Erro na integração Google Auth do Backend:", error);
-                toast.error("Erro ao autenticar com o Google.");
+                toast.error(t("auth.google_error"));
             }
         },
         onError: () => {
-            toast.error("Autenticação cancelada ou falhou. Tente novamente.");
+            toast.error(t("auth.google_cancel"));
         },
     });
 
@@ -109,9 +109,9 @@ function SignupForm() {
                                 <img src={logoImgDark} alt="BidLive Logo" className="h-8 object-contain hidden dark:block" />
                             </Link>
 
-                            <h1 className="text-2xl font-bold mb-1 text-foreground">Criar conta</h1>
+                            <h1 className="text-2xl font-bold mb-1 text-foreground">{t("auth.create_account")}</h1>
                             <p className="text-muted-foreground text-sm mb-4">
-                                {step === 1 ? "Passo 1 de 2: Dados Pessoais" : "Passo 2 de 2: Segurança"}
+                                {step === 1 ? t("auth.step1_title") : t("auth.step2_title")}
                             </p>
 
                             <div className="w-full text-left">
@@ -144,7 +144,7 @@ function SignupForm() {
 
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="flex-1 border-t border-border"></div>
-                                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ou</span>
+                                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("auth.or")}</span>
                                     <div className="flex-1 border-t border-border"></div>
                                 </div>
 
@@ -156,7 +156,7 @@ function SignupForm() {
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
-                                                        placeholder="Insira o seu nome completo"
+                                                        placeholder={t("auth.full_name_placeholder")}
                                                         {...register("full_name")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.full_name ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -169,11 +169,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Nome de Usuário</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.username")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
-                                                        placeholder="Escolha um nome de usuário"
+                                                        placeholder={t("auth.username_placeholder")}
                                                         {...register("username")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.username ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -186,11 +186,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Email</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.email")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="email"
-                                                        placeholder="Insira o seu email"
+                                                        placeholder={t("auth.email_placeholder")}
                                                         {...register("email")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -208,7 +208,7 @@ function SignupForm() {
                                                     onClick={handleNextStep}
                                                     className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
                                                 >
-                                                    Continuar
+                                                    {t("auth.continue")}
                                                 </Button>
                                             </div>
                                         </>
@@ -217,11 +217,11 @@ function SignupForm() {
                                     {step === 2 && (
                                         <>
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.password")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="password"
-                                                        placeholder="Mínimo 8 caracteres"
+                                                        placeholder={t("auth.password_placeholder")}
                                                         {...register("password")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -234,11 +234,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Confirmar Palavra-passe</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.password_confirm")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="password"
-                                                        placeholder="Confirme a palavra-passe"
+                                                        placeholder={t("auth.password_confirm_placeholder")}
                                                         {...register("password_confirm")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password_confirm ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -257,14 +257,14 @@ function SignupForm() {
                                                     onClick={() => setStep(1)}
                                                     className="w-1/3 h-11 border border-border text-foreground hover:bg-muted rounded-sm font-semibold text-base transition-colors"
                                                 >
-                                                    Voltar
+                                                    {t("auth.back")}
                                                 </Button>
                                                 <Button
                                                     type="submit"
                                                     disabled={isLoading}
                                                     className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
                                                 >
-                                                    {isLoading ? "A criar conta..." : "Criar conta"}
+                                                    {isLoading ? t("auth.creating") : t("auth.create_account")}
                                                 </Button>
                                             </div>
                                         </>
@@ -273,7 +273,7 @@ function SignupForm() {
 
                                 <div className="mt-4 text-center">
                                     <p className="text-sm text-muted-foreground">
-                                        Já tem uma conta? <Link to="/signin" className="text-primary font-semibold hover:underline">Entrar</Link>
+                                        {t("auth.has_account")} <Link to="/signin" className="text-primary font-semibold hover:underline">{t("auth.signin")}</Link>
                                     </p>
                                 </div>
                             </div>
@@ -296,7 +296,8 @@ function SignupForm() {
 }
 
 export default function Signup() {
-  useDocumentTitle("Registo");
+    const { t } = useTranslation();
+    useDocumentTitle(t("auth.page_title_signup"));
 
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
