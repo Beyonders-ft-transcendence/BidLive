@@ -6,14 +6,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { initTheme } from '@/shared/utils/themes.utils'
-import { initLocale } from '@/shared/i18n'
 import '@/shared/http/interceptors'
 
 // Initialize the theme before React renders to prevent FOUC
 initTheme()
-
-// Apply lang/dir to <html> before React renders (RTL for Arabic)
-initLocale()
 
 const queryClient = new QueryClient()
 
