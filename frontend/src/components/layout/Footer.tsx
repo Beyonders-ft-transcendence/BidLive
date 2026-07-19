@@ -1,10 +1,12 @@
 import Logo from "@/assets/images/logo.png";
 import Logo2 from "@/assets/images/logo2.png";
 import { Link } from "react-router-dom";
-import { useTranslation, LOCALES, type Locale } from "@/shared/i18n";
+import { useTranslation } from "react-i18next";
+import { LANGUAGES, baseLanguage } from "@/i18n/languages";
 
 export default function Footer() {
-    const { t, locale, setLocale } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const currentLang = baseLanguage(i18n.language);
     const year = new Date().getFullYear();
 
     return (
@@ -49,17 +51,17 @@ export default function Footer() {
                         {t("footer.language")}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {(Object.keys(LOCALES) as Locale[]).map((code) => (
+                        {LANGUAGES.map((lang) => (
                             <button
-                                key={code}
-                                onClick={() => setLocale(code)}
+                                key={lang.code}
+                                onClick={() => i18n.changeLanguage(lang.code)}
                                 className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-                                    locale === code
+                                    currentLang === lang.code
                                         ? "bg-primary text-primary-foreground border-primary"
                                         : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                                 }`}
                             >
-                                {LOCALES[code].nativeLabel}
+                                {lang.name}
                             </button>
                         ))}
                     </div>

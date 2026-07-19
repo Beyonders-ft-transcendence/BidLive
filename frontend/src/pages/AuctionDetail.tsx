@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useAuctionRealtime } from "@/hooks/useAuctionRealtime";
