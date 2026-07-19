@@ -244,7 +244,6 @@ function AuctionCardSkeleton() {
 
 export default function HomePage() {
     const { t, i18n } = useTranslation();
-    const locale = i18n.language;
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
     const { data: liveData, isLoading: isLoadingLive } = useAuctionsQuery({ status: "LIVE", page_size: 4 });
