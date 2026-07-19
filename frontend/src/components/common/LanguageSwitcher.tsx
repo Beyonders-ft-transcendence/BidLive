@@ -51,10 +51,10 @@ export default function LanguageSwitcher({ variant = 'default' }: { variant?: 't
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`w-full text-left flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-muted/50 ${
+                className={`w-full text-start flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-muted/50 ${
                   currentLangCode === lang.code ? 'bg-muted font-bold text-primary' : 'text-foreground'
                 }`}
-                dir="ltr"
+                dir={lang.dir}
               >
                 <span>{lang.flag}</span>
                 <span>{lang.name}</span>

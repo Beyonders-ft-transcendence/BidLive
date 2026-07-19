@@ -2,9 +2,12 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+import { LANGUAGE_CODES, directionOf } from './languages';
+
 import ptTranslation from './locales/pt/translation.json';
 import enTranslation from './locales/en/translation.json';
 import frTranslation from './locales/fr/translation.json';
+import arTranslation from './locales/ar/translation.json';
 
 // Os resources carregam os diferentes idiomas
 const resources = {
@@ -17,6 +20,9 @@ const resources = {
   fr: {
     translation: frTranslation,
   },
+  ar: {
+    translation: arTranslation,
+  },
 };
 
 i18n
@@ -25,7 +31,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'pt', // idioma por defeito se não encontrar o selecionado
-    supportedLngs: ['pt', 'en', 'fr'],
+    supportedLngs: LANGUAGE_CODES,
     
     interpolation: {
       escapeValue: false, // react já faz escape contra XSS
@@ -37,16 +43,17 @@ i18n
     }
   });
 
-// Todos os idiomas suportados sao LTR, mas mantemos o dir explicito no <html>
-i18n.on('languageChanged', (lng) => {
-  document.documentElement.dir = 'ltr';
+// Aplica a direção do layout (RTL / LTR) e a classe rtl usada pelo Tailwind
+function applyDirection(lng: string) {
+  const dir = directionOf(lng);
+  document.documentElement.dir = dir;
   document.documentElement.lang = lng;
-  document.body.classList.remove('rtl');
-});
+  document.body.classList.toggle('rtl', dir === 'rtl');
+}
+
+i18n.on('languageChanged', applyDirection);
 
 // Inicializa lang/dir com base no idioma carregado inicialmente
-const initialLng = i18n.language || 'pt';
-document.documentElement.dir = 'ltr';
-document.documentElement.lang = initialLng;
+applyDirection(i18n.language || 'pt');
 
 export default i18n;
