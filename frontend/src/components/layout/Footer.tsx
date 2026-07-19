@@ -2,17 +2,11 @@ import Logo from "@/assets/images/logo.png";
 import Logo2 from "@/assets/images/logo2.png";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
-const LANGUAGES = [
-    { code: "pt" as const, label: "Português" },
-    { code: "en" as const, label: "English" },
-    { code: "ar" as const, label: "العربية" },
-];
+import { LANGUAGES, baseLanguage } from "@/i18n/languages";
 
 export default function Footer() {
     const { t, i18n } = useTranslation();
-    const locale = i18n.language;
-    const setLocale = (code: string) => i18n.changeLanguage(code);
+    const currentLang = baseLanguage(i18n.language);
     const year = new Date().getFullYear();
 
     return (
@@ -57,7 +51,7 @@ export default function Footer() {
                         {t("footer.language")}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {LANGUAGES.map(({ code, label }) => (
+                        {LANGUAGES.map((lang) => (
                             <button
                                 key={lang.code}
                                 onClick={() => i18n.changeLanguage(lang.code)}
@@ -67,7 +61,7 @@ export default function Footer() {
                                         : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                                 }`}
                             >
-                                {label}
+                                {lang.name}
                             </button>
                         ))}
                     </div>

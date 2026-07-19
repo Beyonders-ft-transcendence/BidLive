@@ -11,11 +11,11 @@ import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import { useNotificationsQuery, useMarkNotificationReadMutation } from "@/hooks/useNotification";
 import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 import { useTranslation } from "react-i18next";
+import { LANGUAGES, baseLanguage } from "@/i18n/languages";
 
 export default function Header() {
     const { t, i18n } = useTranslation();
-    const locale = i18n.language;
-    const setLocale = (code: string) => i18n.changeLanguage(code);
+    const currentLang = baseLanguage(i18n.language);
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
@@ -127,26 +127,34 @@ export default function Header() {
                         </div>
                     )}
 
-                    {isAuthenticated && user ? (
-                                <button 
-                                    onClick={() => setIsUserDrawerOpen(true)}
-                                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
-                                >
-                                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
-                                    <span className="hidden lg:inline text-xs font-bold text-foreground">
-                                        {user.full_name || user.username}
-                                    </span>
-                                </button>
-                            ) : (
-                                <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
-                                    {t("nav.signin")}
-                                </Link>
-                            )}
-                        </div>
+                        {/* Language */}
+                        <LanguageSwitcher />
+
+                        {/* Theme toggle */}
+                        <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                            {isDarkTheme ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
+
+                        {isAuthenticated && user ? (
+                            <button
+                                onClick={() => setIsUserDrawerOpen(true)}
+                                className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
+                            >
+                                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
+                                <span className="hidden lg:inline text-xs font-bold text-foreground">
+                                    {user.full_name || user.username}
+                                </span>
+                            </button>
+                        ) : (
+                            <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
+                                {t("header.login_register")}
+                            </Link>
+                        )}
+                    </div>
 
                 {/* Mobile Menu Toggle */}
                 <div className="flex md:hidden items-center gap-2">
-                    <button onClick={handleToggleTheme} title={t("nav.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                    <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
                         {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
                     <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground">
@@ -182,15 +190,15 @@ export default function Header() {
 
                             {/* Mobile Language Selection */}
                             <div className="py-4 border-b border-border/50">
-                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> {t("nav.language")}</p>
+                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> {t("header.language")}</p>
                                 <div className="flex gap-2">
-                                    {(["pt", "en", "ar"] as const).map((code) => (
+                                    {LANGUAGES.map((lang) => (
                                         <button
-                                            key={code}
-                                            onClick={() => { setLocale(code); setIsMobileMenuOpen(false); }}
-                                            className={`flex-1 py-1.5 text-sm rounded border ${locale === code ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}
+                                            key={lang.code}
+                                            onClick={() => { i18n.changeLanguage(lang.code); setIsMobileMenuOpen(false); }}
+                                            className={`flex-1 py-1.5 text-sm rounded border ${currentLang === lang.code ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}
                                         >
-                                            {code.toUpperCase()}
+                                            {lang.code.toUpperCase()}
                                         </button>
                                     ))}
                                 </div>
