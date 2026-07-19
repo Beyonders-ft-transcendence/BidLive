@@ -411,7 +411,8 @@
     "favorites": "Meus Favoritos",
     "live_stream": "Transmitir Live",
     "chat": "Mensagens",
-    "logout": "Sair"
+    "logout": "Sair",
+    "friends": "Amigos"
   },
   "overview_tab": {
     "profile_photo": "Foto do Perfil",
@@ -607,5 +608,51 @@
     "language": "Idioma",
     "rights": "Todos os direitos reservados.",
     "madeBy": "Projeto ft_transcendence — 42 Luanda"
+  },
+  "friends_tab": {
+    "title": "A Minha Rede",
+    "desc": "Pesquisa utilizadores, gere convites e vê os teus amigos.",
+    "search_placeholder": "Pesquisar utilizadores por nome ou email...",
+    "searching": "A pesquisar...",
+    "no_results": "Nenhum utilizador encontrado.",
+    "add": "Adicionar",
+    "already_friends": "Já são amigos",
+    "pending": "Pendente",
+    "check_requests": "Ver convites",
+    "request_sent": "Convite enviado a {{name}}.",
+    "request_error": "Não foi possível enviar o convite.",
+    "request_accepted": "Agora és amigo de {{name}}.",
+    "request_rejected": "Convite de {{name}} rejeitado.",
+    "request_cancelled": "Convite para {{name}} cancelado.",
+    "generic_error": "Ocorreu um erro. Tenta novamente.",
+    "received_title": "Convites Recebidos",
+    "no_received": "Sem convites pendentes.",
+    "accept": "Aceitar",
+    "reject": "Rejeitar",
+    "sent_title": "Convites Enviados",
+    "cancel_request": "Cancelar",
+    "friends_title": "Os Meus Amigos",
+    "no_friends": "Ainda não tens amigos",
+    "no_friends_desc": "Usa a pesquisa acima para encontrar e adicionar utilizadores.",
+    "online": "Online",
+    "offline": "Offline",
+    "view_profile": "Ver perfil",
+    "blocked": "Bloqueado"
+  },
+  "public_profile": {
+    "verified": "Conta Verificada",
+    "member_since": "Membro desde",
+    "blocked_badge": "Bloqueado",
+    "block": "Bloquear utilizador",
+    "block_confirm": "Bloquear",
+    "block_confirm_desc": "Ao bloquear {{name}} deixarás de ver as mensagens e lances deste utilizador, e ele não te poderá contactar.",
+    "block_success": "{{name}} foi bloqueado.",
+    "already_blocked": "{{name}} já estava bloqueado.",
+    "block_error": "Não foi possível bloquear o utilizador.",
+    "unblock": "Desbloquear utilizador",
+    "unblock_success": "{{name}} foi desbloqueado.",
+    "unblock_error": "Não foi possível desbloquear o utilizador.",
+    "unblock_confirm": "Desbloquear",
+    "unblock_confirm_desc": "Desbloquear {{name}} volta a permitir que te contacte e vejas as suas mensagens e lances."
   }
 }

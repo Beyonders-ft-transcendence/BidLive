@@ -411,7 +411,8 @@
     "favorites": "My Favorites",
     "live_stream": "Live Stream",
     "chat": "Messages",
-    "logout": "Logout"
+    "logout": "Logout",
+    "friends": "Friends"
   },
   "overview_tab": {
     "profile_photo": "Profile Photo",
@@ -607,5 +608,51 @@
     "language": "Language",
     "rights": "All rights reserved.",
     "madeBy": "ft_transcendence project — 42 Luanda"
+  },
+  "friends_tab": {
+    "title": "My Network",
+    "desc": "Search users, manage requests and see your friends.",
+    "search_placeholder": "Search users by name or email...",
+    "searching": "Searching...",
+    "no_results": "No users found.",
+    "add": "Add",
+    "already_friends": "Already friends",
+    "pending": "Pending",
+    "check_requests": "See requests",
+    "request_sent": "Request sent to {{name}}.",
+    "request_error": "Could not send the request.",
+    "request_accepted": "You are now friends with {{name}}.",
+    "request_rejected": "Request from {{name}} rejected.",
+    "request_cancelled": "Request to {{name}} cancelled.",
+    "generic_error": "An error occurred. Please try again.",
+    "received_title": "Received Requests",
+    "no_received": "No pending requests.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "sent_title": "Sent Requests",
+    "cancel_request": "Cancel",
+    "friends_title": "My Friends",
+    "no_friends": "No friends yet",
+    "no_friends_desc": "Use the search above to find and add users.",
+    "online": "Online",
+    "offline": "Offline",
+    "view_profile": "View profile",
+    "blocked": "Blocked"
+  },
+  "public_profile": {
+    "verified": "Verified Account",
+    "member_since": "Member since",
+    "blocked_badge": "Blocked",
+    "block": "Block user",
+    "block_confirm": "Block",
+    "block_confirm_desc": "Blocking {{name}} will hide their messages and bids from you, and they will not be able to contact you.",
+    "block_success": "{{name}} has been blocked.",
+    "already_blocked": "{{name}} was already blocked.",
+    "block_error": "Could not block the user.",
+    "unblock": "Unblock user",
+    "unblock_success": "{{name}} has been unblocked.",
+    "unblock_error": "Could not unblock the user.",
+    "unblock_confirm": "Unblock",
+    "unblock_confirm_desc": "Unblocking {{name}} will let them contact you again and make their messages and bids visible to you."
   }
 }
