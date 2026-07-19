@@ -1,10 +1,18 @@
 import Logo from "@/assets/images/logo.png";
 import Logo2 from "@/assets/images/logo2.png";
 import { Link } from "react-router-dom";
-import { useTranslation, LOCALES, type Locale } from "@/shared/i18n";
+import { useTranslation } from "react-i18next";
+
+const LANGUAGES = [
+    { code: "pt" as const, label: "Português" },
+    { code: "en" as const, label: "English" },
+    { code: "ar" as const, label: "العربية" },
+];
 
 export default function Footer() {
-    const { t, locale, setLocale } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language;
+    const setLocale = (code: string) => i18n.changeLanguage(code);
     const year = new Date().getFullYear();
 
     return (
@@ -49,7 +57,7 @@ export default function Footer() {
                         {t("footer.language")}
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {(Object.keys(LOCALES) as Locale[]).map((code) => (
+                        {LANGUAGES.map(({ code, label }) => (
                             <button
                                 key={code}
                                 onClick={() => setLocale(code)}
@@ -59,7 +67,7 @@ export default function Footer() {
                                         : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                                 }`}
                             >
-                                {LOCALES[code].nativeLabel}
+                                {label}
                             </button>
                         ))}
                     </div>
