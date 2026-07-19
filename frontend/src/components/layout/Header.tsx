@@ -1,7 +1,7 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2 } from "lucide-react";
+import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2, Globe } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
@@ -13,7 +13,9 @@ import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 import { useTranslation } from "react-i18next";
 
 export default function Header() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language;
+    const setLocale = (code: string) => i18n.changeLanguage(code);
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
@@ -71,100 +73,87 @@ export default function Header() {
                             </Link>
                         </nav>
 
-                        {/* Notifications */}
-                        {isAuthenticated && (
-                            <div className="relative group flex items-center h-full">
-                                <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
-                                    <Bell size={20} />
-                                    {unreadCount > 0 && (
-                                        <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
-                                    )}
-                                </button>
-
-                                <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                    <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
-                                        <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
-                                            <span className="text-xs font-bold uppercase tracking-wider">{t("header.notifications")}</span>
-                                            {unreadCount > 0 && (
-                                                <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">
-                                                    {unreadCount} {t("header.new_notifications")}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="overflow-y-auto flex-1">
-                                            {notifications.length === 0 ? (
-                                                <div className="p-6 text-center text-muted-foreground">
-                                                    <Bell size={24} className="mx-auto mb-2 opacity-50" />
-                                                    <p className="text-xs">{t("header.no_notifications")}</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-border">
-                                                    {notifications.slice(0, 10).map((notif: any) => (
-                                                        <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
-                                                            <div className="flex gap-3">
-                                                                <div className="mt-0.5 text-primary shrink-0">
-                                                                    <Bell size={14} />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
-                                                                    <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
-                                                                    <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
-                                                                </div>
-                                                                {!notif.is_read && (
-                                                                    <button
-                                                                        onClick={() => markReadMutation.mutate(notif.id)}
-                                                                        className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
-                                                                        title={t("header.mark_read")}
-                                                                    >
-                                                                        <CheckCircle2 size={14} />
-                                                                    </button>
-                                                                )}
+                    {isAuthenticated && (
+                        <div className="relative group flex items-center h-full">
+                            <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                                <Bell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
+                                )}
+                            </button>
+                            
+                            <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
+                                    <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
+                                        <span className="text-xs font-bold uppercase tracking-wider">{t("nav.notifications")}</span>
+                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{t("nav.unread", { count: unreadCount })}</span>}
+                                    </div>
+                                    <div className="overflow-y-auto flex-1">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-6 text-center text-muted-foreground">
+                                                <Bell size={24} className="mx-auto mb-2 opacity-50" />
+                                                <p className="text-xs">{t("nav.noNotifications")}</p>
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-border">
+                                                {notifications.slice(0, 10).map((notif: any) => (
+                                                    <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
+                                                        <div className="flex gap-3">
+                                                            <div className="mt-0.5 text-primary shrink-0">
+                                                                <Bell size={14} />
                                                             </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
+                                                                <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
+                                                                <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                            {!notif.is_read && (
+                                                                <button 
+                                                                    onClick={() => markReadMutation.mutate(notif.id)}
+                                                                    className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
+                                                                    title={t("nav.markRead")}
+                                                                >
+                                                                    <CheckCircle2 size={14} />
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Language */}
-                        <LanguageSwitcher />
+                    {isAuthenticated && user ? (
+                                <button 
+                                    onClick={() => setIsUserDrawerOpen(true)}
+                                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
+                                >
+                                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
+                                    <span className="hidden lg:inline text-xs font-bold text-foreground">
+                                        {user.full_name || user.username}
+                                    </span>
+                                </button>
+                            ) : (
+                                <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
+                                    {t("nav.signin")}
+                                </Link>
+                            )}
+                        </div>
 
-                        {/* Theme toggle */}
-                        <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
-                            {isDarkTheme ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
-
-                        {isAuthenticated && user ? (
-                            <button
-                                onClick={() => setIsUserDrawerOpen(true)}
-                                className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
-                            >
-                                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
-                                <span className="hidden lg:inline text-xs font-bold text-foreground">
-                                    {user.full_name || user.username}
-                                </span>
-                            </button>
-                        ) : (
-                            <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
-                                {t("header.login_register")}
-                            </Link>
-                        )}
-                    </div>
-
-                    {/* Mobile Menu Toggle */}
-                    <div className="flex md:hidden items-center gap-2">
-                        <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
-                            {isDarkTheme ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
-                        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground">
-                            <Menu size={24} />
-                        </button>
-                    </div>
-                </nav>
+                {/* Mobile Menu Toggle */}
+                <div className="flex md:hidden items-center gap-2">
+                    <button onClick={handleToggleTheme} title={t("nav.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                        {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground">
+                        <Menu size={24} />
+                    </button>
+                </div>
+            </nav>
             </div>
         </header>
 
@@ -193,8 +182,18 @@ export default function Header() {
 
                             {/* Mobile Language Selection */}
                             <div className="py-4 border-b border-border/50">
-                                <p className="text-muted-foreground text-sm mb-3">{t("header.language")}</p>
-                                <LanguageSwitcher />
+                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> {t("nav.language")}</p>
+                                <div className="flex gap-2">
+                                    {(["pt", "en", "ar"] as const).map((code) => (
+                                        <button
+                                            key={code}
+                                            onClick={() => { setLocale(code); setIsMobileMenuOpen(false); }}
+                                            className={`flex-1 py-1.5 text-sm rounded border ${locale === code ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}
+                                        >
+                                            {code.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </nav>
                     </div>
