@@ -65,61 +65,136 @@ A seller creates an auction for an item — setting a starting price, duration, 
 
 | Tool | Version | Install |
 |---|---|---|
-| Docker | 24+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
+| Docker | 24+ | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) |
 | Docker Compose | V2+ | Included with Docker Desktop |
 | Git | any | `apt install git` / `brew install git` |
 
-> No Python, Node.js, or database installation required — everything runs inside Docker.
+> No Python, Node.js, or database installation required — everything runs inside Docker containers.
 
 ---
 
-### Option A — One-Command Deploy (Recommended)
+### 1. Clone the Repository
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/BidLive.git
-cd BidLive/srcs
-
-# 2. Configure environment variables
-# Each service reads from its own .env.<service> file in srcs/
-# Edit the .env files as needed (see Environment Variables below)
-
-# 3. Start all 20 containers
-docker compose up --build
-
-# 4. (First run only) Run migrations and seed demo data
-docker compose exec backend uv run python manage.py migrate
-docker compose exec backend make seed
+git clone https://github.com/nmatondo/BidLive.git
+cd BidLive
 ```
 
-The application will be available at:
-
-| URL | Service |
-|---|---|
-| `https://localhost` | Frontend |
-| `https://localhost/api/docs/` | Swagger UI |
-| `https://localhost/api/redoc/` | Redoc |
-| `https://localhost/grafana/` | Grafana dashboards |
+The project root contains a `Makefile` that orchestrates the full stack. The Docker Compose file lives at `srcs/docker-compose.yml`.
 
 ---
 
-### Environment Variables
+### 2. Configure the Domain Name
 
-Environment configuration is split across multiple `.env.<service>` files in the `srcs/` directory:
+The platform is configured to serve on the domain `bidlive.42.fr`. You must map this domain to your local machine:
 
-| File | Purpose |
-|---|---|
-| `.env.backend` | Django settings, JWT config, CORS, email |
-| `.env.db` | PostgreSQL credentials |
-| `.env.redis` | Redis credentials |
-| `.env.livekit` | LiveKit API keys and URL |
-| `.env.frontend` | Vite environment variables |
-| `.env.nginx` | Nginx server name |
-| `.env.grafana` | Grafana admin credentials |
-| `.env.email` | SMTP credentials |
-| `.env.webhook` | Alertmanager webhook config |
+| OS | File to edit | Line to add |
+|---|---|---|
+| Linux / macOS | `/etc/hosts` | `127.0.0.1 bidlive.42.fr` |
+| Windows | `C:\Windows\System32\drivers\etc\hosts` | `127.0.0.1 bidlive.42.fr` |
 
-Sensitive credentials (database passwords, API keys, TLS certificates) are managed via **Docker secrets** stored in the `secrets/` directory. The `.env.*` files and `secrets/` directory are excluded from version control.
+Open the file with administrator/root privileges and append the line above. Without this step, Nginx will reject requests because the `server_name` directive matches only `bidlive.42.fr`.
+
+> If you need a different domain, update `server_name` in `srcs/requirements/nginx/conf/nginx.conf` and the `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`, and `FRONTEND_URL` values in `srcs/.env.backend`.
+
+---
+
+### 3. Create and Configure Environment Variables
+
+All environment files live in `srcs/` and are named `.env.<service>`. The repository includes committed `.env.*` files with development defaults — review them and adjust as needed:
+
+| File | Purpose | Key variables |
+|---|---|---|
+| `.env.backend` | Django settings, CORS, JWT | `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL` |
+| `.env.db` | PostgreSQL connection | `DATABASE_DB`, `DATABASE_USER`, `DATABASE_HOST` |
+| `.env.redis` | Redis connection | `REDIS_USER`, `REDIS_HOST`, `REDIS_PORT` |
+| `.env.livekit` | LiveKit streaming server | `LIVEKIT_URL`, `LIVEKIT_API_KEY` (loaded from secrets) |
+| `.env.frontend` | Vite / React config | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WS_BASE_URL`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID` |
+| `.env.nginx` | Nginx exporter scrape URI | `NGINX_EXPORTER_SCRAPE_URI` |
+| `.env.grafana` | Grafana server config | `GF_SERVER_DOMAIN`, `GF_SERVER_ROOT_URL` |
+| `.env.email` | SMTP / Alertmanager email | `SMTP_SMARTHOST`, `EMAIL_TO` |
+| `.env.webhook` | Alertmanager webhook | Discord/Slack webhook URL |
+
+> Database passwords, JWT secrets, and API keys are **not** in `.env` files. They are managed via Docker secrets — see the next step.
+
+---
+
+### 4. Set Up Secrets and Credential Files
+
+Sensitive credentials are stored in the `secrets/` directory (gitignored). Create each file with the exact variable names the containers expect:
+
+#### Required secrets files
+
+| File | Variables | Example |
+|---|---|---|
+| `secrets/db_credenciais.txt` | `POSTGRES_PASSWORD` | `POSTGRES_PASSWORD=bidlive` |
+| `secrets/redis_credenciais.txt` | `REDIS_PASSWORD` | `REDIS_PASSWORD=1234567890` |
+| `secrets/backend_credenciais.txt` | `SECRET_KEY` | `SECRET_KEY=<your-django-secret>` |
+| `secrets/livekit_credenciais.txt` | `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | `LIVEKIT_API_KEY=devkey` |
+| `secrets/grafana_credenciais.txt` | `GF_SECURITY_ADMIN_USER`, `GF_SECURITY_ADMIN_PASSWORD` | `GF_SECURITY_ADMIN_USER=bidlive` |
+| `secrets/email_credenciais.txt` | `EMAIL_USER`, `EMAIL_PASSWORD` | `EMAIL_USER=you@gmail.com` |
+| `secrets/elasticsearch_credenciais.txt` | `ELASTICSEARCH_USER`, `ELASTICSEARCH_PASSWORD` | `ELASTICSEARCH_USER=bidlive` |
+| `secrets/portainer_credenciais.txt` | `PORTAINER_USER`, `PORTAINER_PASSWORD` | `PORTAINER_USER=admin_bidlive` |
+| `secrets/42_credenciais.txt` | `FORTY_TWO_CLIENT_ID`, `FORTY_TWO_CLIENT_SECRET`, `FORTY_TWO_REDIRECT_URI` | Obtain from 42 API settings |
+| `secrets/google_credenciais.txt` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Obtain from Google Cloud Console |
+| `secrets/webhook_credenciais.txt` | `APIURL` | Discord/Slack webhook URL |
+
+Each file contains plain `KEY=VALUE` pairs, one per line. The Docker Compose file mounts these as Docker secrets at `/run/secrets/<name>` inside the containers.
+
+#### TLS certificates (auto-generated)
+
+The `Makefile` `all` target runs `make ca` before building, which invokes `srcs/ca/generate_ca.sh`. This script uses `cfssl` in Docker to generate a self-signed Root CA (`ca.pem` + `ca-key.pem`) in the `secrets/` directory. Individual service certificates are generated at container startup by each container's `entrypoint.sh`.
+
+> You do **not** need to manually generate certificates. The `make all` command handles this automatically.
+
+---
+
+### 5. Run the Project
+
+The Makefile provides a single command that generates the Root CA, builds all 20 Docker images, and starts every container:
+
+```bash
+make all
+```
+
+This is equivalent to:
+
+```bash
+make ca       # Generate Root CA certificates (requires Docker)
+make build    # Build all 20 Docker images
+make up       # Start all containers in detached mode
+```
+
+On first run (or after a full reset), run migrations and seed the demo data:
+
+```bash
+# Wait for PostgreSQL to be healthy (~15 seconds after containers start)
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run python manage.py migrate
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed
+```
+
+> On Windows, use `make all` from PowerShell or Git Bash. The `make` targets call `docker compose` with the correct project name and compose file path automatically.
+
+Once all containers are healthy, the platform is accessible at the URLs listed in the [Services](#main-services) table below.
+
+---
+
+### Main Services
+
+| Service | URL | Credentials / Access Notes |
+|---|---|---|
+| **Frontend** (React) | `https://bidlive.42.fr` | Self-signed certificate — browser will warn on first visit; click "Advanced" -> "Proceed" |
+| **Backend API** | `https://bidlive.42.fr/api/` | JWT-authenticated. Register or use demo accounts below |
+| **Swagger UI** | `https://bidlive.42.fr/api/docs/` | No auth required |
+| **Redoc** | `https://bidlive.42.fr/api/redoc/` | No auth required |
+| **Grafana** | `https://bidlive.42.fr/grafana/` | User: `bidlive`, Password: from `secrets/grafana_credenciais.txt` |
+| **Kibana** | `https://bidlive.42.fr/kibana/` | User: `elastic`, Password: from `secrets/elasticsearch_credenciais.txt` |
+| **Adminer** | `https://bidlive.42.fr/adminer/` | Server: `postgres`, User: `bidlive`, Password: from `secrets/db_credenciais.txt` |
+| **Portainer** | `https://bidlive.42.fr/portainer/` | User: from `secrets/portainer_credenciais.txt`, Password: same file |
+| **LiveKit** | Internal only (`livekit:7880`) | Not exposed externally; tokens issued by the backend |
+| **Prometheus** | Internal only (`backend-network`) | Scrapes metrics from all exporters; accessed via Grafana dashboards |
+
+> All services are behind Nginx reverse proxy with HTTPS (port 443). The Nginx container is the only service exposed to the host via `ports: "443:443"`.
 
 ---
 
@@ -129,39 +204,48 @@ After seeding, these accounts are available (password: `demo1234`):
 
 | Email | Role | Capabilities |
 |---|---|---|
-| `admin@bidlive.dev` | SUPER_ADMIN | Full platform access |
+| `admin@bidlive.dev` | SUPER_ADMIN | Full platform access, backoffice |
 | `seller@bidlive.dev` | USER | Create and manage auctions |
 | `manager@bidlive.dev` | MONITOR | Moderation panel, review reports |
 | `buyer1@bidlive.dev` | USER | Place bids, chat |
 | `buyer2@bidlive.dev` | USER | Place bids, chat |
 | `buyer3@bidlive.dev` | USER | Place bids, chat |
 | `buyer4@bidlive.dev` | USER | Place bids, chat |
-| `banned@bidlive.dev` | USER | Banned account (for testing) |
+| `banned@bidlive.dev` | USER | Banned account (for testing moderation) |
 
 ---
 
 ### Useful Commands
 
 ```bash
-# Tear down all containers
-docker compose down
+# Full rebuild (tear down, remove volumes, rebuild, restart)
+make re
 
-# Remove containers + volumes (full reset)
-docker compose down -v
+# Stop all containers
+make down
 
-# View logs
-docker compose logs -f backend
-docker compose logs -f celery_worker
+# Remove containers + volumes (full reset, no rebuild)
+make clean
 
-# Run tests
-docker compose exec backend uv run pytest tests -v
+# Nuclear option — removes all Docker data on the system
+make fclean
+
+# View all logs
+make logs
+
+# View logs for a specific container
+docker compose -p bidlive -f srcs/docker-compose.yml logs -f backend
+docker compose -p bidlive -f srcs/docker-compose.yml logs -f celery_worker
+
+# Run tests inside the backend container
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run pytest tests -v
 
 # Access Django shell
-docker compose exec backend uv run python manage.py shell
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run python manage.py shell
 
 # Clear and reseed demo data
-docker compose exec backend make seed-clear
-docker compose exec backend make seed
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed-clear
+docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed
 ```
 
 ---
