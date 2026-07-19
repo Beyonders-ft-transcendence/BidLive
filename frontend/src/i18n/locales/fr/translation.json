@@ -367,7 +367,8 @@
     "favorites": "Mes favoris",
     "live_stream": "Diffusion en direct",
     "chat": "Messages",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "friends": "Amis"
   },
   "overview_tab": {
     "profile_photo": "Photo de profil",
@@ -563,5 +564,51 @@
     "language": "Langue",
     "rights": "Tous droits réservés.",
     "madeBy": "Projet ft_transcendence — 42 Luanda"
+  },
+  "friends_tab": {
+    "title": "Mon Réseau",
+    "desc": "Recherchez des utilisateurs, gérez les invitations et retrouvez vos amis.",
+    "search_placeholder": "Rechercher des utilisateurs par nom ou e-mail...",
+    "searching": "Recherche...",
+    "no_results": "Aucun utilisateur trouvé.",
+    "add": "Ajouter",
+    "already_friends": "Déjà amis",
+    "pending": "En attente",
+    "check_requests": "Voir les invitations",
+    "request_sent": "Invitation envoyée à {{name}}.",
+    "request_error": "Impossible d'envoyer l'invitation.",
+    "request_accepted": "Vous êtes désormais ami avec {{name}}.",
+    "request_rejected": "Invitation de {{name}} rejetée.",
+    "request_cancelled": "Invitation à {{name}} annulée.",
+    "generic_error": "Une erreur est survenue. Veuillez réessayer.",
+    "received_title": "Invitations reçues",
+    "no_received": "Aucune invitation en attente.",
+    "accept": "Accepter",
+    "reject": "Rejeter",
+    "sent_title": "Invitations envoyées",
+    "cancel_request": "Annuler",
+    "friends_title": "Mes amis",
+    "no_friends": "Pas encore d'amis",
+    "no_friends_desc": "Utilisez la recherche ci-dessus pour trouver et ajouter des utilisateurs.",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "view_profile": "Voir le profil",
+    "blocked": "Bloqué"
+  },
+  "public_profile": {
+    "verified": "Compte vérifié",
+    "member_since": "Membre depuis",
+    "blocked_badge": "Bloqué",
+    "block": "Bloquer l'utilisateur",
+    "block_confirm": "Bloquer",
+    "block_confirm_desc": "En bloquant {{name}}, vous ne verrez plus ses messages ni ses enchères, et il ne pourra plus vous contacter.",
+    "block_success": "{{name}} a été bloqué.",
+    "already_blocked": "{{name}} était déjà bloqué.",
+    "block_error": "Impossible de bloquer l'utilisateur.",
+    "unblock": "Débloquer l'utilisateur",
+    "unblock_success": "{{name}} a été débloqué.",
+    "unblock_error": "Impossible de débloquer l'utilisateur.",
+    "unblock_confirm": "Débloquer",
+    "unblock_confirm_desc": "Débloquer {{name}} lui permettra de vous contacter à nouveau et rendra ses messages et enchères visibles."
   }
 }

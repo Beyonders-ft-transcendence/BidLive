@@ -367,7 +367,8 @@
     "favorites": "مفضلاتي",
     "live_stream": "بث مباشر",
     "chat": "الرسائل",
-    "logout": "خروج"
+    "logout": "خروج",
+    "friends": "الأصدقاء"
   },
   "overview_tab": {
     "profile_photo": "صورة الملف الشخصي",
@@ -563,5 +564,51 @@
     "language": "اللغة",
     "rights": "جميع الحقوق محفوظة.",
     "madeBy": "مشروع ft_transcendence — ‏42 لواندا"
+  },
+  "friends_tab": {
+    "title": "شبكتي",
+    "desc": "ابحث عن المستخدمين، وأدر الدعوات، واطّلع على أصدقائك.",
+    "search_placeholder": "ابحث عن المستخدمين بالاسم أو البريد الإلكتروني...",
+    "searching": "جارٍ البحث...",
+    "no_results": "لم يتم العثور على مستخدمين.",
+    "add": "إضافة",
+    "already_friends": "أصدقاء بالفعل",
+    "pending": "قيد الانتظار",
+    "check_requests": "عرض الدعوات",
+    "request_sent": "تم إرسال الدعوة إلى {{name}}.",
+    "request_error": "تعذر إرسال الدعوة.",
+    "request_accepted": "أصبحت الآن صديقاً لـ {{name}}.",
+    "request_rejected": "تم رفض دعوة {{name}}.",
+    "request_cancelled": "تم إلغاء الدعوة إلى {{name}}.",
+    "generic_error": "حدث خطأ. حاول مرة أخرى.",
+    "received_title": "الدعوات المستلمة",
+    "no_received": "لا توجد دعوات معلقة.",
+    "accept": "قبول",
+    "reject": "رفض",
+    "sent_title": "الدعوات المرسلة",
+    "cancel_request": "إلغاء",
+    "friends_title": "أصدقائي",
+    "no_friends": "لا يوجد أصدقاء بعد",
+    "no_friends_desc": "استخدم البحث أعلاه للعثور على مستخدمين وإضافتهم.",
+    "online": "متصل",
+    "offline": "غير متصل",
+    "view_profile": "عرض الملف الشخصي",
+    "blocked": "محظور"
+  },
+  "public_profile": {
+    "verified": "حساب موثّق",
+    "member_since": "عضو منذ",
+    "blocked_badge": "محظور",
+    "block": "حظر المستخدم",
+    "block_confirm": "حظر",
+    "block_confirm_desc": "بحظر {{name}} لن ترى رسائله ومزايداته، ولن يتمكن من التواصل معك.",
+    "block_success": "تم حظر {{name}}.",
+    "already_blocked": "{{name}} محظور بالفعل.",
+    "block_error": "تعذر حظر المستخدم.",
+    "unblock": "إلغاء حظر المستخدم",
+    "unblock_success": "تم إلغاء حظر {{name}}.",
+    "unblock_error": "تعذر إلغاء حظر المستخدم.",
+    "unblock_confirm": "إلغاء الحظر",
+    "unblock_confirm_desc": "بإلغاء حظر {{name}} سيتمكن من التواصل معك مجدداً وسترى رسائله ومزايداته."
   }
 }
