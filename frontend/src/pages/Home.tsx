@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { useAuctionsQuery, useFeaturedAuctionsQuery } from "@/hooks/useAuction";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { useAuthStore } from "@/shared/stores/auth.store";
-import { useTranslation } from "@/shared/i18n";
+import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/shared/utils/auction.utils";
 import type { Auction } from "@/shared/types/auction.types";
 import {
@@ -243,7 +243,7 @@ function AuctionCardSkeleton() {
 }
 
 export default function HomePage() {
-    const { t, locale } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
     const { data: liveData, isLoading: isLoadingLive } = useAuctionsQuery({ status: "LIVE", page_size: 4 });
@@ -261,7 +261,7 @@ export default function HomePage() {
             : (featuredData as { results?: Auction[] } | undefined)?.results || []
     ).slice(0, 4);
 
-    const formatNumber = (value: number) => value.toLocaleString(locale);
+    const formatNumber = (value: number) => value.toLocaleString(i18n.language);
 
     const stats = [
         { value: liveCount, label: t("hero.statLive"), live: true },

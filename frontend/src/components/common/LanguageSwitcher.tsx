@@ -1,12 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-
-const languages = [
-  { code: 'pt', name: 'Português', flag: '🇵🇹' },
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'ar', name: 'العربية', flag: '🇦🇪', dir: 'rtl' },
-];
+import { LANGUAGES as languages, baseLanguage } from '@/i18n/languages';
 
 export default function LanguageSwitcher({ variant = 'default' }: { variant?: 'topbar' | 'default' }) {
   const { i18n } = useTranslation();
@@ -14,7 +9,7 @@ export default function LanguageSwitcher({ variant = 'default' }: { variant?: 't
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Consider base language to match correctly
-  const currentLangCode = i18n.language?.split('-')[0] || 'pt';
+  const currentLangCode = baseLanguage(i18n.language);
   const currentLang = languages.find((lang) => lang.code === currentLangCode) || languages[0];
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -59,7 +54,7 @@ export default function LanguageSwitcher({ variant = 'default' }: { variant?: 't
                 className={`w-full text-left flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-muted/50 ${
                   currentLangCode === lang.code ? 'bg-muted font-bold text-primary' : 'text-foreground'
                 }`}
-                dir={lang.dir || 'ltr'}
+                dir="ltr"
               >
                 <span>{lang.flag}</span>
                 <span>{lang.name}</span>

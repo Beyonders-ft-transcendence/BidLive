@@ -4,7 +4,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import ptTranslation from './locales/pt/translation.json';
 import enTranslation from './locales/en/translation.json';
-import arTranslation from './locales/ar/translation.json';
+import frTranslation from './locales/fr/translation.json';
 
 // Os resources carregam os diferentes idiomas
 const resources = {
@@ -14,8 +14,8 @@ const resources = {
   en: {
     translation: enTranslation,
   },
-  ar: {
-    translation: arTranslation,
+  fr: {
+    translation: frTranslation,
   },
 };
 
@@ -25,7 +25,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'pt', // idioma por defeito se não encontrar o selecionado
-    supportedLngs: ['pt', 'en', 'ar'],
+    supportedLngs: ['pt', 'en', 'fr'],
     
     interpolation: {
       escapeValue: false, // react já faz escape contra XSS
@@ -37,22 +37,16 @@ i18n
     }
   });
 
-// Atualizar a direção do layout (RTL / LTR) e classe do tailwind de rtl
+// Todos os idiomas suportados sao LTR, mas mantemos o dir explicito no <html>
 i18n.on('languageChanged', (lng) => {
-  const dir = lng === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.dir = dir;
+  document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
-  
-  if (lng === 'ar') {
-    document.body.classList.add('rtl');
-  } else {
-    document.body.classList.remove('rtl');
-  }
+  document.body.classList.remove('rtl');
 });
 
-// Inicializa a direção com base no idioma carregado inicialmente
+// Inicializa lang/dir com base no idioma carregado inicialmente
 const initialLng = i18n.language || 'pt';
-document.documentElement.dir = initialLng.startsWith('ar') ? 'rtl' : 'ltr';
+document.documentElement.dir = 'ltr';
 document.documentElement.lang = initialLng;
 
 export default i18n;
