@@ -1,11 +1,11 @@
-import { LogOut, Gavel, LayoutDashboard, TrendingUp, 
-  PlusCircle, MessageSquare, Heart, Radio, UserCog } from "lucide-react";
+import { LogOut, Gavel, LayoutDashboard, TrendingUp,
+  PlusCircle, MessageSquare, Heart, Radio, UserCog, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { User } from "@/shared/types/auth.types";
 
 interface UserSidebarProps {
-  activeTab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports";
-  setActiveTab: (tab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "auction-detail" | "favorites" | "live-stream" | "reports") => void;
+  activeTab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "friends" | "auction-detail" | "favorites" | "live-stream" | "reports";
+  setActiveTab: (tab: "overview" | "profile" | "my-auctions" | "my-bids" | "create-auction" | "chat" | "friends" | "auction-detail" | "favorites" | "live-stream" | "reports") => void;
   user: User;
   onLogout: () => void;
 }
@@ -25,6 +25,7 @@ export default function UserSidebar({
     { id: "my-bids", label: t('user_dashboard.my_bids'), icon: <TrendingUp size={16} /> },
     { id: "favorites", label: t('user_dashboard.favorites'), icon: <Heart size={16} /> },
     { id: "live-stream", label: t('user_dashboard.live_stream'), icon: <Radio size={16} /> },
+    { id: "friends", label: t('user_dashboard.friends'), icon: <Users size={16} /> },
     { id: "chat", label: t('user_dashboard.chat'), icon: <MessageSquare size={16} /> },
   ] as const;
 
