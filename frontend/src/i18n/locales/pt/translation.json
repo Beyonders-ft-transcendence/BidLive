@@ -238,7 +238,19 @@
     "btn_next": "Próx",
     "clear": "Limpar",
     "apply": "Aplicar",
-    "search_title": "Buscar"
+    "search_title": "Buscar",
+    "hero_description": "Descubra lotes exclusivos, faça os seus lances em tempo real e assista a leilões ao vivo com transmissão em vídeo. A sua próxima grande aquisição começa aqui.",
+    "no_auctions_title": "Nenhum leilão encontrado",
+    "clear_filters": "Limpar Filtros",
+    "enter_auction": "Entrar no Leilão"
+  },
+  "use_auction": {
+    "load_fail": "Falha ao carregar leilões.",
+    "featured_load_fail": "Falha ao carregar leilões em destaque.",
+    "activities_load_fail": "Falha ao carregar atividades.",
+    "detail_load_fail": "Falha ao carregar detalhes do leilão.",
+    "bids_load_fail": "Falha ao obter lances.",
+    "streams_load_fail": "Falha ao obter transmissões."
   },
   "auction_detail": {
     "title": "Detalhes do Leilão",

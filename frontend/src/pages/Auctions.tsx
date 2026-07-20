@@ -199,7 +199,7 @@ export default function AuctionsPage() {
                             {t('auctions.title')}
                         </h1>
                         <p className="text-base sm:text-lg text-muted-foreground font-medium leading-relaxed">
-                            Descubra lotes exclusivos, faça os seus lances em tempo real e assista a leilões ao vivo com transmissão em vídeo. A sua próxima grande aquisição começa aqui.
+                            {t('auctions.hero_description')}
                         </p>
                     </div>
                 </div>
@@ -289,14 +289,14 @@ export default function AuctionsPage() {
                                     <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                                     <span className="font-bold tracking-wider uppercase text-xs">{t('auctions.fetching')}</span>
                                 </div>
-                            ) : auctions.length === 0 ? (
+                             ) : auctions.length === 0 ? (
                                 <div className="py-32 flex flex-col items-center justify-center text-center bg-card border border-dashed border-border/80 rounded-md col-span-full px-6">
                                     <Search className="w-12 h-12 text-muted-foreground/30 mb-4" />
-                                    <h3 className="text-lg font-bold text-foreground mb-1">Nenhum leilão encontrado</h3>
+                                    <h3 className="text-lg font-bold text-foreground mb-1">{t('auctions.no_auctions_title')}</h3>
                                     <p className="text-sm text-muted-foreground max-w-md">{t('auctions.no_auctions')}</p>
                                     {hasActiveFilters && (
                                         <button onClick={handleClearFilters} className="mt-6 px-6 py-2.5 bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider rounded-md hover:bg-primary/20 transition-colors">
-                                            Limpar Filtros
+                                            {t('auctions.clear_filters')}
                                         </button>
                                     )}
                                 </div>
@@ -371,7 +371,7 @@ export default function AuctionsPage() {
                                                     )}
                                                     
                                                     <div className="mt-5 w-full bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground py-3 rounded-md text-center text-sm font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
-                                                        Entrar no Leilão <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                                                        {t('auctions.enter_auction')} <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
                                                     </div>
                                                 </div>
                                             </>
@@ -391,7 +391,7 @@ export default function AuctionsPage() {
                                                 </div>
                                                 <div className="px-5 py-4 border-t border-border/50 bg-muted/5 flex items-center justify-between gap-4">
                                                     <div>
-                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Lance Atual</p>
+                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{t('auctions.current_bid_label')}</p>
                                                         <div className="text-lg font-black text-primary tracking-tight">
                                                             {currentPrice}<span className="text-[10px] font-bold text-primary/60 ml-1">Kz</span>
                                                         </div>

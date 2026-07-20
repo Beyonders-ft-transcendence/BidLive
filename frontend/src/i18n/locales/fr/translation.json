@@ -194,7 +194,19 @@
     "btn_next": "Suiv.",
     "clear": "Effacer",
     "apply": "Appliquer",
-    "search_title": "Rechercher"
+    "search_title": "Rechercher",
+    "hero_description": "Découvrez des lots exclusifs, faites vos enchères en temps réel et regardez les enchères en direct. Votre prochaine grande acquisition commence ici.",
+    "no_auctions_title": "Aucune enchère trouvée",
+    "clear_filters": "Effacer les filtres",
+    "enter_auction": "Rejoindre l'enchère"
+  },
+  "use_auction": {
+    "load_fail": "Échec du chargement des enchères.",
+    "featured_load_fail": "Échec du chargement des enchères en vedette.",
+    "activities_load_fail": "Échec du chargement des activités.",
+    "detail_load_fail": "Échec du chargement des détails de l'enchère.",
+    "bids_load_fail": "Échec de la récupération des offres.",
+    "streams_load_fail": "Échec de la récupération des diffusions."
   },
   "auction_detail": {
     "title": "Détails de l'enchère",

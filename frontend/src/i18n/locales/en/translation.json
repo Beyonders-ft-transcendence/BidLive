@@ -238,7 +238,19 @@
     "btn_next": "Next",
     "clear": "Clear",
     "apply": "Apply",
-    "search_title": "Search"
+    "search_title": "Search",
+    "hero_description": "Discover exclusive lots, place your bids in real time and watch live video auctions. Your next big acquisition starts here.",
+    "no_auctions_title": "No auctions found",
+    "clear_filters": "Clear Filters",
+    "enter_auction": "Enter Auction"
+  },
+  "use_auction": {
+    "load_fail": "Failed to load auctions.",
+    "featured_load_fail": "Failed to load featured auctions.",
+    "activities_load_fail": "Failed to load activities.",
+    "detail_load_fail": "Failed to load auction details.",
+    "bids_load_fail": "Failed to fetch bids.",
+    "streams_load_fail": "Failed to fetch streams."
   },
   "auction_detail": {
     "title": "Auction Details",
