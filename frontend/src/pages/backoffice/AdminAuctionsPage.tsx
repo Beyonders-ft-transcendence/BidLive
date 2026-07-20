@@ -34,7 +34,7 @@ export default function AdminAuctionsPage() {
   });
   
   const { mutate: cancelAuction, isPending: isCanceling } = useCancelAuctionMutation();
-
+  
   const confirmCancelAuction = () => {
     if (auctionToCancel !== null) {
       cancelAuction(
@@ -162,11 +162,11 @@ export default function AdminAuctionsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col text-xs text-zinc-400 gap-1">
-                          <div className="flex items-center gap-1.5" title="Início">
+                          <div className="flex items-center gap-1.5" title={t('backoffice_auctions.start_date')}>
                             <Calendar size={12} className="text-zinc-500" />
                             {new Date(auction.start_time).toLocaleDateString()}
                           </div>
-                          <div className="flex items-center gap-1.5" title="Fim">
+                          <div className="flex items-center gap-1.5" title={t('backoffice_auctions.end_date')}>
                             <Calendar size={12} className="text-zinc-500" />
                             {new Date(auction.end_time).toLocaleDateString()}
                           </div>

@@ -59,11 +59,11 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/")) {
-        toast.error(`O arquivo "${file.name}" não é uma imagem válida.`);
+        toast.error(t('create_auction_tab.toast_invalid_image', { name: file.name }));
         continue;
       }
       if (file.size > 5 * 1024 * 1024) {
-        toast.error(`A imagem "${file.name}" ultrapassa o limite de 5MB.`);
+        toast.error(t('create_auction_tab.toast_image_too_large', { name: file.name }));
         continue;
       }
       newFiles.push({
@@ -104,16 +104,16 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
 
   const onSubmit = async (data: CreateAuctionInput) => {
     if (selectedFiles.length === 0) {
-      toast.error("Por favor, adicione pelo menos uma imagem para o lote.");
+      toast.error(t('create_auction_tab.toast_no_images'));
       return;
     }
 
     try {
-      setUploadProgress("Enviando imagens para o servidor...");
+      setUploadProgress(t('create_auction_tab.toast_upload_progress'));
       const uploadedUrls: string[] = [];
 
       for (let i = 0; i < selectedFiles.length; i++) {
-        setUploadProgress(`Enviando imagem ${i + 1} de ${selectedFiles.length}...`);
+        setUploadProgress(t('create_auction_tab.toast_upload_image_progress', { current: i + 1, total: selectedFiles.length }));
         const url = await uploadImageToCloudinary(selectedFiles[i].file);
         if (url) {
           uploadedUrls.push(url);
@@ -121,12 +121,12 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
       }
 
       if (uploadedUrls.length === 0) {
-        toast.error("Falha ao carregar as imagens do lote.");
+        toast.error(t('create_auction_tab.toast_upload_failed'));
         setUploadProgress(null);
         return;
       }
 
-      setUploadProgress("Salvando detalhes do leilão...");
+      setUploadProgress(t('create_auction_tab.toast_saving'));
 
       const payload = {
         title: data.title,
@@ -143,29 +143,29 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
       };
 
       await createAuctionMutation.mutateAsync(payload);
-      toast.success("Leilão criado com sucesso!");
+      toast.success(t('create_auction_tab.toast_success'));
       reset();
       setSelectedFiles([]);
       onSuccess();
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || err?.response?.data?.message || "Erro ao processar criação de leilão.");
+      toast.error(err?.message || err?.response?.data?.message || t('create_auction_tab.toast_error'));
     } finally {
       setUploadProgress(null);
     }
   };
 
   const STEPS = [
-    { id: 1, title: 'Detalhes do Lote', icon: AlertCircle },
-    { id: 2, title: 'Valores e Regras', icon: Save },
-    { id: 3, title: 'Mídias e Datas', icon: Calendar },
+    { id: 1, title: t('create_auction_tab.step_details'), icon: AlertCircle },
+    { id: 2, title: t('create_auction_tab.step_pricing'), icon: Save },
+    { id: 3, title: t('create_auction_tab.step_media'), icon: Calendar },
   ];
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300 select-none max-w-4xl mx-auto text-foreground">
       {/* Header and Stepper */}
       <div className="bg-card border border-border p-6 rounded-sm shadow-sm">
-        <h2 className="text-xl font-black tracking-tight mb-6">Criar Novo Lote</h2>
+        <h2 className="text-xl font-black tracking-tight mb-6">{t('create_auction_tab.title')}</h2>
         
         <div className="flex items-center justify-between relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-muted z-0"></div>
@@ -207,7 +207,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Título do Lote</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.lot_title')}</label>
                   <input
                     type="text"
                     {...register("title")}
@@ -216,7 +216,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
-                    placeholder="Ex: iPhone 15 Pro Max 256GB - Selado"
+                    placeholder={t('create_auction_tab.lot_title_placeholder')}
                   />
                   {errors.title && <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.title.message}</p>}
                 </div>
@@ -231,7 +231,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
                   >
-                    <option value="">Selecione uma Categoria</option>
+                    <option value="">{t('create_auction_tab.select_category')}</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -244,21 +244,21 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estado de Conservação</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.condition')}</label>
                   <select
                     {...register("condition_type")}
                     className="w-full px-3.5 py-2.5 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition duration-150 h-[38px]"
                   >
-                    <option value={ItemCondition.NEW}>Novo (NEW)</option>
-                    <option value={ItemCondition.USED}>Usado (USED)</option>
-                    <option value={ItemCondition.REFURBISHED}>Recondicionado (REFURBISHED)</option>
-                    <option value={ItemCondition.DAMAGED}>Avariado/Danificado (DAMAGED)</option>
+                    <option value={ItemCondition.NEW}>{t('create_auction_tab.condition_new')}</option>
+                    <option value={ItemCondition.USED}>{t('create_auction_tab.condition_used')}</option>
+                    <option value={ItemCondition.REFURBISHED}>{t('create_auction_tab.condition_refurbished')}</option>
+                    <option value={ItemCondition.DAMAGED}>{t('create_auction_tab.condition_damaged')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Descrição Geral</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.description')}</label>
                 <textarea
                   rows={4}
                   {...register("description")}
@@ -267,7 +267,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                   }`}
-                  placeholder="Forneça especificações do lote, estado físico, detalhes de envio, garantia..."
+                  placeholder={t('create_auction_tab.description_placeholder')}
                 />
                 {errors.description && <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.description.message}</p>}
               </div>
@@ -288,7 +288,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
-                    placeholder="Ex: 150000"
+                    placeholder={t('create_auction_tab.start_price_placeholder')}
                   />
                   {errors.starting_price && (
                     <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.starting_price.message}</p>
@@ -296,7 +296,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Incremento Mínimo (Kz)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.min_increment')}</label>
                   <input
                     type="text"
                     {...register("minimum_increment")}
@@ -305,7 +305,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
-                    placeholder="Ex: 5000"
+                    placeholder={t('create_auction_tab.min_increment_placeholder')}
                   />
                   {errors.minimum_increment && (
                     <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.minimum_increment.message}</p>
@@ -324,7 +324,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
-                    placeholder="Preço mínimo exigido para vender o lote"
+                    placeholder={t('create_auction_tab.reserve_price_placeholder')}
                   />
                   {errors.reserve_price && (
                     <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.reserve_price.message}</p>
@@ -332,7 +332,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Preço Compra Imediata (Opcional)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.buy_now_price')}</label>
                   <input
                     type="text"
                     {...register("buy_now_price")}
@@ -341,7 +341,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                         ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                         : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                     }`}
-                    placeholder="Valor para arrematar o lote imediatamente"
+                    placeholder={t('create_auction_tab.buy_now_placeholder')}
                   />
                   {errors.buy_now_price && (
                     <p className="text-[10px] text-destructive font-semibold mt-0.5">{errors.buy_now_price.message}</p>
@@ -356,7 +356,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Data/Hora de Início</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.start_time')}</label>
                   <input
                     type="datetime-local"
                     {...register("start_time")}
@@ -372,7 +372,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Data/Hora de Término</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('create_auction_tab.end_time')}</label>
                   <input
                     type="datetime-local"
                     {...register("end_time")}
@@ -392,13 +392,13 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
               <div className="space-y-3 pt-2 text-left">
                 <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-primary" />
-                  Galeria de Mídias do Lote
+                  {t('create_auction_tab.media_gallery')}
                 </h3>
 
                 <label className="border border-dashed border-border hover:border-primary/50 rounded-sm flex flex-col items-center justify-center p-6 cursor-pointer bg-muted/10 hover:bg-muted/30 transition duration-150 text-center w-full min-h-[140px] col-span-full select-none">
                   <Upload className="w-6 h-6 text-muted-foreground mb-2 animate-bounce" style={{ animationDuration: '2.5s' }} />
-                  <span className="text-xs font-bold text-foreground">Selecionar Imagens do Lote</span>
-                  <span className="text-[10px] text-muted-foreground mt-1">Formatos aceitos: PNG, JPG, WEBP • Máx 5MB por arquivo</span>
+                  <span className="text-xs font-bold text-foreground">{t('create_auction_tab.select_images')}</span>
+                  <span className="text-[10px] text-muted-foreground mt-1">{t('create_auction_tab.upload_hint')}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -436,7 +436,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                 onClick={handlePrev}
                 className="px-6 py-2.5 bg-muted hover:bg-muted/80 text-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer border-none"
               >
-                Voltar
+                {t('create_auction_tab.back')}
               </button>
             ) : (
               <div></div> // spacer
@@ -456,7 +456,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   onClick={handleNext}
                   className="px-8 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/20 transition uppercase cursor-pointer border-none"
                 >
-                  Próximo
+                  {t('create_auction_tab.next')}
                 </button>
               ) : (
                 <button
@@ -465,7 +465,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   className="flex items-center justify-center gap-2 px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-sm shadow-md shadow-green-600/20 transition uppercase disabled:opacity-50 cursor-pointer border-none"
                 >
                   <Save size={14} />
-                  {isSubmitting || uploadProgress ? "Processando..." : "Salvar Rascunho"}
+                  {isSubmitting || uploadProgress ? t('create_auction_tab.processing') : t('create_auction_tab.save_draft')}
                 </button>
               )}
             </div>

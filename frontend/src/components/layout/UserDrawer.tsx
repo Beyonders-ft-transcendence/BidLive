@@ -31,7 +31,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
       onClose();
       navigate("/");
     } catch (err) {
-      console.error("Erro ao fazer logout:", err);
+      console.error(t('user_drawer.logout_error'), err);
     }
   };
 
@@ -56,29 +56,29 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
   const navItems = [
     {
       id: "overview",
-      title: "Visão Geral",
-      subtitle: "Centro de comando e perfil",
+      title: t('user_drawer.overview'),
+      subtitle: t('user_drawer.overview_subtitle'),
       icon: <LayoutDashboard size={14} />,
       action: () => navigateToTab("overview")
     },
     {
       id: "my-auctions",
-      title: "Meus Leilões",
-      subtitle: "Gerir lotes criados e rascunhos",
+      title: t('user_drawer.my_auctions'),
+      subtitle: t('user_drawer.my_auctions_subtitle'),
       icon: <Gavel size={14} />,
       action: () => navigateToTab("my-auctions")
     },
     {
       id: "my-bids",
-      title: "Meus Lances",
-      subtitle: "Histórico de lances e lotes ganhos",
+      title: t('user_drawer.my_bids'),
+      subtitle: t('user_drawer.my_bids_subtitle'),
       icon: <TrendingUp size={14} />,
       action: () => navigateToTab("my-bids")
     },
     {
       id: "create-auction",
-      title: "Criar Novo Leilão",
-      subtitle: "Cadastrar um novo item para venda",
+      title: t('user_drawer.create_auction'),
+      subtitle: t('user_drawer.create_auction_subtitle'),
       icon: <PlusCircle size={14} />,
       action: () => navigateToTab("create-auction")
     }
@@ -97,7 +97,7 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
       }
       footer={
         <div className="w-full text-center text-[9px] text-muted-foreground font-semibold uppercase tracking-wider py-1">
-          BidLive v1.0 • Plataforma de Leilões Ao Vivo
+          BidLive v1.0 • {t('user_drawer.footer_version')}
         </div>
       }
     >
@@ -122,15 +122,15 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
           <div className="space-y-4 pt-1">
             {/* Account Role */}
             <div className="flex flex-col gap-1 text-left">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Nível de Conta</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{t('user_drawer.account_level')}</span>
               <span className="bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider w-fit mt-0.5">
-                {hasRole(UserRole.SUPER_ADMIN) ? "Administrador" : hasRole(UserRole.MONITOR) ? "Moderador" : "Licitante"}
+                {hasRole(UserRole.SUPER_ADMIN) ? t('user_drawer.role_admin') : hasRole(UserRole.MONITOR) ? t('user_drawer.role_moderator') : t('user_drawer.role_bidder')}
               </span>
             </div>
 
             {/* Email Contact info */}
             <div className="space-y-1 pt-3 border-t border-border/50 text-left">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Endereço de Email</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('user_drawer.email_label')}</span>
               <span className="text-xs text-foreground font-bold truncate block">{user.email}</span>
             </div>
           </div>
@@ -155,14 +155,14 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
                 }}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer border-none"
               >
-                Painel Admin
+                {t('user_drawer.panel_admin')}
               </button>
             ) : (
               <button
                 onClick={() => navigateToTab("overview")}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer border-none"
               >
-                Visão Geral
+                {t('user_drawer.overview')}
               </button>
             )}
             <button
@@ -170,20 +170,20 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
               className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-background border border-border hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold rounded-sm transition cursor-pointer"
             >
               <LogOut size={13} />
-              Terminar Sessão
+              {t('user_drawer.logout')}
             </button>
           </div>
 
           {/* Bio text */}
           <div className="text-left">
             <p className="text-[11px] text-muted-foreground leading-relaxed italic border-l-2 border-border pl-3">
-              {user.bio || "Este usuário não preencheu uma biografia na sua conta do BidLive."}
+              {user.bio || t('user_drawer.no_bio')}
             </p>
           </div>
 
           {/* Platform Navigation Options */}
           <div className="space-y-3">
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block text-left">Navegação Rápida</span>
+            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block text-left">{t('user_drawer.quick_nav')}</span>
             
             <div className="space-y-2">
               {isAdminOrMonitor && (
@@ -196,8 +196,8 @@ export default function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
                       <ShieldCheck size={14} />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-primary group-hover:underline">Painel Backoffice</h4>
-                      <p className="text-[9px] text-primary/80 mt-0.5">Administração global do portal</p>
+                      <h4 className="text-xs font-bold text-primary group-hover:underline">{t('user_drawer.panel_backoffice')}</h4>
+                      <p className="text-[9px] text-primary/80 mt-0.5">{t('user_drawer.panel_backoffice_subtitle')}</p>
                     </div>
                   </div>
                   <ChevronRight size={14} className="text-primary/70 group-hover:translate-x-0.5 transition-transform" />
