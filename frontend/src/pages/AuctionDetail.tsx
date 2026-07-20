@@ -277,8 +277,9 @@ export default function AuctionDetailPage() {
     const isTimeStarted = nowTime >= new Date(auction.start_time).getTime();
     const isTimeEnded = nowTime >= new Date(auction.end_time).getTime();
 
-    // Um leilão é considerado LIVE se o status for LIVE, OU se for SCHEDULED e a hora de início já tiver chegado (otimista).
-    const isLive = auction.status === "LIVE" || (auction.status === "SCHEDULED" && isTimeStarted && !isTimeEnded);
+    // Um leilão está com lances abertos se for ACTIVE, LIVE, ou SCHEDULED mas já chegou na hora.
+    const isBiddingOpen = auction.status === "ACTIVE" || auction.status === "LIVE" || (auction.status === "SCHEDULED" && isTimeStarted && !isTimeEnded);
+    const isStreamingLive = auction.status === "LIVE" && !!activeStream;
     
     const images = auction.item.images || [];
 
@@ -351,9 +352,14 @@ export default function AuctionDetailPage() {
                             <span className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-md shadow-black/20">
                                 {t('auction_detail.lot')}{auction.id}
                             </span>
-                            {isLive && (
+                            {isStreamingLive && (
                                 <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> {t('auctions.live')}
+                                </span>
+                            )}
+                            {auction.status === 'ACTIVE' && (
+                                <span className="bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
+                                    {t('auctions.active', 'Active')}
                                 </span>
                             )}
                         </div>
@@ -478,20 +484,20 @@ export default function AuctionDetailPage() {
             <div className="px-6 py-5 flex items-end justify-between border-b border-border bg-muted">
                 <div>
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.current_bid')}</p>
-                    <p className={`text-3xl font-black tracking-tight ${isLive ? "text-primary" : "text-foreground"}`}>
+                    <p className={`text-3xl font-black tracking-tight ${isBiddingOpen ? "text-primary" : "text-foreground"}`}>
                         {formatCurrency(currentPrice, true)}
                     </p>
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.time_left')}</p>
-                    <p className={`text-sm font-bold flex items-center justify-end gap-1 ${isLive ? "text-red-500" : "text-muted-foreground"}`}>
+                    <p className={`text-sm font-bold flex items-center justify-end gap-1 ${isBiddingOpen ? "text-red-500" : "text-muted-foreground"}`}>
                         <Clock size={13} /> {countdown}
                     </p>
                 </div>
             </div>
 
             <div className="px-6 py-5">
-                {isLive ? (
+                {isBiddingOpen ? (
                     isAuthenticated ? (
                         <div className="flex flex-col gap-4">
                             <div className="space-y-1.5">

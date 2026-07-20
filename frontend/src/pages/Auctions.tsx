@@ -8,7 +8,7 @@ import { useCategoriesQuery } from "@/hooks/useCategory";
 import {
     List, Grid2X2, Search, ChevronRight,
     Clock, DollarSign, Activity,
-    SlidersHorizontal, X, ArrowRight, PlayCircle
+    SlidersHorizontal, X, ArrowRight, PlayCircle, CheckCircle2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +24,18 @@ const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number, status: st
                 {t('auctions.live')}
             </div>
         );
+    } else if (status === 'ACTIVE' || status === 'LIVE') {
+        return (
+            <div className="absolute top-3 left-3 bg-green-500/90 backdrop-blur-md border border-green-400/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase shadow-[0_0_15px_rgba(34,197,94,0.5)] flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.active', 'Active')}
+            </div>
+        );
+    } else if (status === 'SOLD') {
+        return (
+            <div className="absolute top-3 left-3 bg-slate-800/90 backdrop-blur-md border border-slate-700/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.sold', 'Sold')}
+            </div>
+        );
     }
     return null;
 };
@@ -33,10 +45,35 @@ const AuctionLiveText = ({ auctionId, status, viewType }: { auctionId: number, s
     const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
     const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
     
+    let statusText = '';
+    let statusColor = 'text-primary/70';
+    let Icon = Activity;
+
+    if (isActuallyLive) {
+        statusText = t('auctions.live');
+        statusColor = 'text-red-500';
+    } else if (status === 'LIVE' || status === 'ACTIVE') {
+        statusText = t('auctions.active', 'Active');
+        statusColor = 'text-green-500';
+    } else if (status === 'SCHEDULED') {
+        statusText = t('auctions.scheduled');
+        Icon = Clock;
+    } else if (status === 'SOLD') {
+        statusText = t('auctions.sold', 'Sold');
+        Icon = CheckCircle2;
+    } else if (status === 'CANCELLED') {
+        statusText = t('auctions.cancelled', 'Cancelled');
+        statusColor = 'text-red-500';
+        Icon = X;
+    } else {
+        statusText = t('auctions.ended');
+        Icon = CheckCircle2;
+    }
+
     return (
-        <span className={`inline-flex items-center gap-1.5 ${viewType === 'list' ? 'text-[10px] sm:text-[11px]' : 'text-[10px]'} font-bold uppercase tracking-wider ${isActuallyLive ? 'text-red-500' : 'text-primary/70'}`}>
-            <Activity className={viewType === 'list' ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-3 h-3"} />
-            {isActuallyLive ? t('auctions.live') : status === 'LIVE' ? t('auctions.scheduled') : status === 'SCHEDULED' ? t('auctions.scheduled') : t('auctions.ended')}
+        <span className={`inline-flex items-center gap-1.5 ${viewType === 'list' ? 'text-[10px] sm:text-[11px]' : 'text-[10px]'} font-bold uppercase tracking-wider ${statusColor}`}>
+            <Icon className={viewType === 'list' ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-3 h-3"} />
+            {statusText}
         </span>
     );
 };
