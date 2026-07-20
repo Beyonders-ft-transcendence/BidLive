@@ -238,7 +238,19 @@
     "btn_next": "التالي",
     "clear": "مسح",
     "apply": "تطبيق",
-    "search_title": "بحث"
+    "search_title": "بحث",
+    "hero_description": "اكتشف قطعًا حصرية، وقدم مزايداتك في الوقت الفعلي وشاهد مزادات الفيديو المباشرة. أفضل حيازة لك تبدأ من هنا.",
+    "no_auctions_title": "لم يتم العثور على مزادات",
+    "clear_filters": "مسح الفلاتر",
+    "enter_auction": "دخول المزاد"
+  },
+  "use_auction": {
+    "load_fail": "فشل تحميل المزادات.",
+    "featured_load_fail": "فشل تحميل المزادات المميزة.",
+    "activities_load_fail": "فشل تحميل الأنشطة.",
+    "detail_load_fail": "فشل تحميل تفاصيل المزاد.",
+    "bids_load_fail": "فشل جلب المزايدات.",
+    "streams_load_fail": "فشل جلب البثوث."
   },
   "auction_detail": {
     "title": "تفاصيل المزاد",
