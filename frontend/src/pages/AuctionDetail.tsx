@@ -42,7 +42,7 @@ function formatCurrency(val: string | number | null | undefined, compact: boolea
 }
 
 // Countdown hook
-function useCountdown(endTime: string | null | undefined, status: string) {
+function useCountdown(startTime: string | null | undefined, endTime: string | null | undefined, status: string) {
     const [now, setNow] = useState(() => Date.now());
 
     useEffect(() => {
@@ -51,22 +51,31 @@ function useCountdown(endTime: string | null | undefined, status: string) {
         return () => clearInterval(timer);
     }, [endTime, status]);
 
-    if (status === "ENDED" || status === "SOLD") return "ended"; // handled below
-    if (status === "CANCELLED") return "cancelled";
-    if (!endTime) return null;
+    if (status === "ENDED" || status === "SOLD") return { state: "ended" };
+    if (status === "CANCELLED") return { state: "cancelled" };
+    if (!startTime || !endTime) return null;
 
+    const start = new Date(startTime).getTime();
     const end = new Date(endTime).getTime();
+    
+    if (now < start) {
+        const diff = start - now;
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        return { state: "scheduled", time: { days, hours, minutes, seconds } };
+    }
+    
     const diff = end - now;
-    if (diff <= 0) return "ended";
+    if (diff <= 0) return { state: "ended" };
 
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
 
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m ${seconds}s`;
+    return { state: "active", time: { days, hours, minutes, seconds } };
 }
 
 export default function AuctionDetailPage() {
@@ -97,8 +106,26 @@ export default function AuctionDetailPage() {
         submittingBuyNow,
     } = useAuctionRealtime(auctionId);
 
-    const countdownRaw: any = useCountdown(auction?.end_time, auction?.status || "");
-    const countdown = typeof countdownRaw === "string" ? (countdownRaw === "ended" ? t('auction_detail.status.ended') : t('auction_detail.status.cancelled')) : (countdownRaw ? (countdownRaw.days !== undefined ? `${countdownRaw.days}${t('auction_detail.days')} ${countdownRaw.hours}${t('auction_detail.hours')}` : countdownRaw.hours !== undefined ? `${countdownRaw.hours}${t('auction_detail.hours')} ${countdownRaw.minutes}${t('auction_detail.minutes')}` : `${countdownRaw.minutes}${t('auction_detail.minutes')} ${countdownRaw.seconds}${t('auction_detail.seconds')}`) : null);
+    const countdownRaw: any = useCountdown(auction?.start_time, auction?.end_time, auction?.status || "");
+    
+    let countdownDisplay = null;
+    let countdownLabel = t('auction_detail.time_left');
+
+    if (countdownRaw) {
+        if (countdownRaw.state === "ended") {
+            countdownDisplay = t('auction_detail.status.ended');
+        } else if (countdownRaw.state === "cancelled") {
+            countdownDisplay = t('auction_detail.status.cancelled');
+        } else {
+            if (countdownRaw.state === "scheduled") {
+                countdownLabel = t('auction_detail.starts_in', 'Início em');
+            }
+            const { days, hours, minutes, seconds } = countdownRaw.time;
+            if (days > 0) countdownDisplay = `${days}${t('auction_detail.days', 'd')} ${hours}${t('auction_detail.hours', 'h')}`;
+            else if (hours > 0) countdownDisplay = `${hours}${t('auction_detail.hours', 'h')} ${minutes}${t('auction_detail.minutes', 'm')}`;
+            else countdownDisplay = `${minutes}${t('auction_detail.minutes', 'm')} ${seconds}${t('auction_detail.seconds', 's')}`;
+        }
+    }
 
     // Contagem de espectadores via GET /auctions/:id/streams/:pk/viewers/
     // (fallback para as conexões do WebSocket enquanto o polling não responde)
@@ -489,9 +516,9 @@ export default function AuctionDetailPage() {
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{t('auction_detail.time_left')}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">{countdownLabel}</p>
                     <p className={`text-sm font-bold flex items-center justify-end gap-1 ${isBiddingOpen ? "text-red-500" : "text-muted-foreground"}`}>
-                        <Clock size={13} /> {countdown}
+                        <Clock size={13} /> {countdownDisplay}
                     </p>
                 </div>
             </div>
