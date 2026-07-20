@@ -725,7 +725,30 @@
     "start_stream": "بدء البث",
     "bids_history": "سجل المزايدات",
     "no_bids": "لم يتم تلقي أي مزايدات بعد.",
-    "item_info": "معلومات العنصر"
+    "item_info": "معلومات العنصر",
+    "lot_management": "إدارة القطع",
+    "lot_detail_title": "قطعة #{{id}} • التفاصيل العامة",
+    "no_category": "بدون تصنيف",
+    "no_images": "لا توجد صور مرفقة بهذه القطعة",
+    "lot_description": "وصف القطعة",
+    "no_description": "لا يوجد وصف تفصيلي لهذه القطعة.",
+    "specs": "المواصفات الفنية",
+    "lot_id": "معرف القطعة",
+    "condition": "حالة الحفظ",
+    "condition_new": "جديد",
+    "bids_received": "المزايدات المستلمة",
+    "status_label": "حالة المزاد",
+    "start_price": "سعر البداية",
+    "current_price": "سعر المزايدة الحالي",
+    "quick_actions": "إجراءات سريعة",
+    "btn_publish": "نشر المزاد",
+    "btn_delete": "حذف القطعة",
+    "btn_stream": "بث مباشر",
+    "btn_cancel": "إلغاء المزاد",
+    "no_actions": "لا توجد إجراءات متاحة للمزادات المنتهية أو الملغاة.",
+    "schedule": "الجدول الزمني للقطعة",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ النهاية"
   },
   "live_stream_tab": {
     "title": "مركز البث المباشر",
@@ -958,5 +981,14 @@
     "unblock_error": "تعذر إلغاء حظر المستخدم.",
     "unblock_confirm": "إلغاء الحظر",
     "unblock_confirm_desc": "بإلغاء حظر {{name}} سيتمكن من التواصل معك مجدداً وسترى رسائله ومزايداته."
+  },
+  "auction_status": {
+    "draft": "مسودة",
+    "scheduled": "مجدول",
+    "active": "نشط",
+    "live": "مباشر",
+    "ended": "منتهي",
+    "cancelled": "ملغي",
+    "sold": "تم البيع"
   }
 }

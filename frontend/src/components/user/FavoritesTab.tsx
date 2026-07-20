@@ -115,7 +115,7 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
                         {auc.item?.category_label || t('favorites_tab.category_fallback')}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-bold uppercase shrink-0 ${auctionStatusColor(auc.status)}`}>
-                        {getAuctionStatusLabel(auc.status)}
+                        {getAuctionStatusLabel(auc.status, t)}
                       </span>
                     </div>
 

@@ -725,7 +725,30 @@
     "start_stream": "Iniciar Transmissão",
     "bids_history": "Histórico de Lances",
     "no_bids": "Nenhum lance recebido ainda.",
-    "item_info": "Informações do Item"
+    "item_info": "Informações do Item",
+    "lot_management": "Gerenciamento de Lotes",
+    "lot_detail_title": "Lote #{{id}} • Detalhes Gerais",
+    "no_category": "Sem Categoria",
+    "no_images": "Sem imagens anexadas a este lote",
+    "lot_description": "Descrição do Lote",
+    "no_description": "Nenhuma descrição detalhada informada para este lote.",
+    "specs": "Especificações Técnicas",
+    "lot_id": "ID do Lote",
+    "condition": "Estado de Conservação",
+    "condition_new": "Novo",
+    "bids_received": "Lances Recebidos",
+    "status_label": "Status do Leilão",
+    "start_price": "Preço de Lançamento",
+    "current_price": "Preço de Lances Atual",
+    "quick_actions": "Ações Rápidas",
+    "btn_publish": "Publicar Leilão",
+    "btn_delete": "Excluir Lote",
+    "btn_stream": "Transmitir Ao Vivo",
+    "btn_cancel": "Cancelar Leilão",
+    "no_actions": "Nenhuma ação disponível para leilões finalizados ou cancelados.",
+    "schedule": "Cronograma do Lote",
+    "start_date": "Data de Início",
+    "end_date": "Data de Término"
   },
   "live_stream_tab": {
     "title": "Central de Transmissão Ao Vivo",
@@ -958,5 +981,14 @@
     "unblock_error": "Não foi possível desbloquear o utilizador.",
     "unblock_confirm": "Desbloquear",
     "unblock_confirm_desc": "Desbloquear {{name}} volta a permitir que te contacte e vejas as suas mensagens e lances."
+  },
+  "auction_status": {
+    "draft": "Rascunho",
+    "scheduled": "Agendado",
+    "active": "Activo",
+    "live": "Ao Vivo",
+    "ended": "Finalizado",
+    "cancelled": "Cancelado",
+    "sold": "Vendido"
   }
 }
