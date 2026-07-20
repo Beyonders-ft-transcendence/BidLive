@@ -30,6 +30,12 @@ const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number, status: st
                 {t('auctions.active', 'Active')}
             </div>
         );
+    } else if (status === 'SCHEDULED') {
+        return (
+            <div className="absolute top-3 left-3 bg-blue-500/90 backdrop-blur-md border border-blue-400/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.scheduled', 'Agendado')}
+            </div>
+        );
     } else if (status === 'SOLD') {
         return (
             <div className="absolute top-3 left-3 bg-slate-800/90 backdrop-blur-md border border-slate-700/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase flex items-center gap-1.5 z-10 transition-all">
