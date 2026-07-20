@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.chat.models import Message, PrivateMessage
 from apps.chat.selectors import get_or_create_auction_room, get_or_create_private_conversation
-from apps.social.selectors import get_blocked_user_ids, is_blocked
+from apps.social.selectors import are_friends, get_blocked_user_ids, is_blocked
 from apps.users.models import User
 
 logger = logging.getLogger(__name__)
@@ -98,6 +98,13 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
         )
         if blocked:
             await self.send_json({"error": "Não podes enviar mensagem a este utilizador."})
+            return
+
+        friends = await sync_to_async(are_friends)(
+            user=self.user, other_user=recipient
+        )
+        if not friends:
+            await self.send_json({"error": "Só podes enviar mensagens privadas a amigos."})
             return
 
         conversation, _ = await sync_to_async(get_or_create_private_conversation)(
