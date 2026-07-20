@@ -312,7 +312,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[9px] font-bold text-muted-foreground uppercase">{auc.item?.category_label || t('live_stream_tab.category_fallback')}</span>
                         <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-bold uppercase ${auctionStatusColor(auc.status)}`}>
-                          {getAuctionStatusLabel(auc.status)}
+                          {getAuctionStatusLabel(auc.status, t)}
                         </span>
                       </div>
                       <h3 className="text-xs font-bold text-foreground truncate mt-1 group-hover:text-primary transition-colors">

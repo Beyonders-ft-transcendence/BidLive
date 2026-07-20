@@ -16,6 +16,7 @@ export type ItemCondition = typeof ItemCondition[keyof typeof ItemCondition];
 export const AuctionStatus = {
   DRAFT: "DRAFT",
   SCHEDULED: "SCHEDULED",
+  ACTIVE: "ACTIVE",
   LIVE: "LIVE",
   ENDED: "ENDED",
   CANCELLED: "CANCELLED",

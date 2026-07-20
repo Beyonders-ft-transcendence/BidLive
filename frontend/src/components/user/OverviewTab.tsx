@@ -502,7 +502,7 @@ export default function OverviewTab({
                         auc.status
                       )}`}
                     >
-                      {getAuctionStatusLabel(auc.status)}
+                      {getAuctionStatusLabel(auc.status, t)}
                     </span>
                   </div>
                 </div>

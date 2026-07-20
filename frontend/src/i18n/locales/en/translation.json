@@ -725,7 +725,30 @@
     "start_stream": "Start Stream",
     "bids_history": "Bids History",
     "no_bids": "No bids received yet.",
-    "item_info": "Item Information"
+    "item_info": "Item Information",
+    "lot_management": "Lot Management",
+    "lot_detail_title": "Lot #{{id}} • General Details",
+    "no_category": "No Category",
+    "no_images": "No images attached to this lot",
+    "lot_description": "Lot Description",
+    "no_description": "No detailed description provided for this lot.",
+    "specs": "Technical Specifications",
+    "lot_id": "Lot ID",
+    "condition": "Condition",
+    "condition_new": "New",
+    "bids_received": "Bids Received",
+    "status_label": "Auction Status",
+    "start_price": "Starting Price",
+    "current_price": "Current Bid Price",
+    "quick_actions": "Quick Actions",
+    "btn_publish": "Publish Auction",
+    "btn_delete": "Delete Lot",
+    "btn_stream": "Stream Live",
+    "btn_cancel": "Cancel Auction",
+    "no_actions": "No actions available for finished or cancelled auctions.",
+    "schedule": "Lot Schedule",
+    "start_date": "Start Date",
+    "end_date": "End Date"
   },
   "live_stream_tab": {
     "title": "Live Stream Center",
@@ -958,5 +981,14 @@
     "unblock_error": "Could not unblock the user.",
     "unblock_confirm": "Unblock",
     "unblock_confirm_desc": "Unblocking {{name}} will let them contact you again and make their messages and bids visible to you."
+  },
+  "auction_status": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "active": "Active",
+    "live": "Live",
+    "ended": "Ended",
+    "cancelled": "Cancelled",
+    "sold": "Sold"
   }
 }

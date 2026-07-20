@@ -1,23 +1,21 @@
 import { AuctionStatus } from "../types/auction.types";
 export { AuctionStatus };
 
-export function getAuctionStatusLabel(status: AuctionStatus | string): string {
-  switch (status) {
-    case AuctionStatus.DRAFT:
-      return "Rascunho";
-    case AuctionStatus.SCHEDULED:
-      return "Agendado";
-    case AuctionStatus.LIVE:
-      return "Ao Vivo";
-    case AuctionStatus.ENDED:
-      return "Finalizado";
-    case AuctionStatus.CANCELLED:
-      return "Cancelado";
-    case AuctionStatus.SOLD:
-      return "Vendido";
-    default:
-      return status;
-  }
+type TFunction = (key: string, options?: Record<string, any>) => string;
+
+export function getAuctionStatusLabel(status: AuctionStatus | string, t?: TFunction): string {
+  const keyMap: Record<string, string> = {
+    [AuctionStatus.DRAFT]: "auction_status.draft",
+    [AuctionStatus.SCHEDULED]: "auction_status.scheduled",
+    [AuctionStatus.ACTIVE]: "auction_status.active",
+    [AuctionStatus.LIVE]: "auction_status.live",
+    [AuctionStatus.ENDED]: "auction_status.ended",
+    [AuctionStatus.CANCELLED]: "auction_status.cancelled",
+    [AuctionStatus.SOLD]: "auction_status.sold",
+  };
+  const i18nKey = keyMap[status];
+  if (i18nKey && t) return t(i18nKey);
+  return i18nKey ? status : status;
 }
 
 export function auctionStatusColor(status: AuctionStatus | string): string {
@@ -27,6 +25,7 @@ export function auctionStatusColor(status: AuctionStatus | string): string {
     case AuctionStatus.SCHEDULED:
       return "bg-blue-50 text-blue-600 border border-blue-100";
     case AuctionStatus.LIVE:
+    case AuctionStatus.ACTIVE:
       return "bg-green-50 text-green-600 border border-green-100";
     case AuctionStatus.ENDED:
       return "bg-gray-100 text-gray-600 border border-gray-200";

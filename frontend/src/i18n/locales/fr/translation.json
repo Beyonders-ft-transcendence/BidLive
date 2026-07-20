@@ -681,7 +681,30 @@
     "start_stream": "Démarrer la diffusion",
     "bids_history": "Historique des offres",
     "no_bids": "Aucune offre reçue pour le moment.",
-    "item_info": "Informations sur l'article"
+    "item_info": "Informations sur l'article",
+    "lot_management": "Gestion des lots",
+    "lot_detail_title": "Lot #{{id}} • Détails généraux",
+    "no_category": "Aucune catégorie",
+    "no_images": "Aucune image attachée à ce lot",
+    "lot_description": "Description du lot",
+    "no_description": "Aucune description détaillée fournie pour ce lot.",
+    "specs": "Spécifications techniques",
+    "lot_id": "ID du lot",
+    "condition": "État de conservation",
+    "condition_new": "Neuf",
+    "bids_received": "Offres reçues",
+    "status_label": "Statut de l'enchère",
+    "start_price": "Prix de départ",
+    "current_price": "Prix actuel des offres",
+    "quick_actions": "Actions rapides",
+    "btn_publish": "Publier l'enchère",
+    "btn_delete": "Supprimer le lot",
+    "btn_stream": "Diffuser en direct",
+    "btn_cancel": "Annuler l'enchère",
+    "no_actions": "Aucune action disponible pour les enchères terminées ou annulées.",
+    "schedule": "Calendrier du lot",
+    "start_date": "Date de début",
+    "end_date": "Date de fin"
   },
   "live_stream_tab": {
     "title": "Centre de diffusion en direct",
@@ -914,5 +937,14 @@
     "unblock_error": "Impossible de débloquer l'utilisateur.",
     "unblock_confirm": "Débloquer",
     "unblock_confirm_desc": "Débloquer {{name}} lui permettra de vous contacter à nouveau et rendra ses messages et enchères visibles."
+  },
+  "auction_status": {
+    "draft": "Brouillon",
+    "scheduled": "Programmé",
+    "active": "Actif",
+    "live": "En direct",
+    "ended": "Terminé",
+    "cancelled": "Annulé",
+    "sold": "Vendu"
   }
 }

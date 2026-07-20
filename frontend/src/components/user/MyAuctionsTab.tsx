@@ -120,7 +120,7 @@ export default function MyAuctionsTab({
                         auc.status
                       )}`}
                     >
-                      {getAuctionStatusLabel(auc.status)}
+                      {getAuctionStatusLabel(auc.status, t)}
                     </span>
                   </td>
                   <td className="py-3 text-muted-foreground font-bold">

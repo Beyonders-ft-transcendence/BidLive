@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Calendar, ShieldAlert, CheckCircle, Trash2, Ban, Video, ImageIcon } from "lucide-react";
 import type { Auction } from "@/shared/types/auction.types";
 import { AuctionStatus } from "@/shared/types/auction.types";
@@ -21,7 +22,9 @@ export default function AuctionDetailTab({
   onDeleteClick,
   onManageStreamClick,
 }: AuctionDetailTabProps) {
-  
+
+  const { t } = useTranslation();
+
   const images = auction.item?.images || [];
   const [selectedImage, setSelectedImage] = useState<string | null>(
     images.length > 0 ? images[0].image_url : null
@@ -39,10 +42,10 @@ export default function AuctionDetailTab({
         </button>
         <div>
           <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            Gerenciamento de Lotes
+            {t('auction_detail_tab.lot_management')}
           </span>
           <h2 className="text-lg font-black tracking-tight leading-none mt-0.5">
-            Lote #{auction.id} • Detalhes Gerais
+            {t('auction_detail_tab.lot_detail_title', { id: auction.id })}
           </h2>
         </div>
       </div>
@@ -57,7 +60,7 @@ export default function AuctionDetailTab({
           <div className="bg-card border border-border p-6 rounded-sm shadow-sm space-y-5">
             <div>
               <span className="text-[9px] font-bold text-primary uppercase tracking-wider font-mono">
-                {auction.item?.category_label || "Sem Categoria"}
+                {auction.item?.category_label || t('auction_detail_tab.no_category')}
               </span>
               <h3 className="text-base font-black tracking-tight mt-1 leading-snug">
                 {auction.item?.title}
@@ -76,7 +79,7 @@ export default function AuctionDetailTab({
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground gap-2">
                     <ImageIcon size={32} className="opacity-30" />
-                    <span className="text-xs">Sem imagens anexadas a este lote</span>
+                    <span className="text-xs">{t('auction_detail_tab.no_images')}</span>
                   </div>
                 )}
               </div>
@@ -102,9 +105,9 @@ export default function AuctionDetailTab({
 
             {/* Description */}
             <div className="space-y-1.5 pt-2 border-t border-border/60">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Descrição do Lote</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('auction_detail_tab.lot_description')}</span>
               <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {auction.item?.description || "Nenhuma descrição detalhada informada para este lote."}
+                {auction.item?.description || t('auction_detail_tab.no_description')}
               </p>
             </div>
           </div>
@@ -112,20 +115,20 @@ export default function AuctionDetailTab({
           {/* Technical Specs Panel */}
           <div className="bg-card border border-border p-5 rounded-sm shadow-sm">
             <span className="text-xs font-black uppercase tracking-wider block border-b border-border pb-2.5 mb-4">
-              Especificações Técnicas
+              {t('auction_detail_tab.specs')}
             </span>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">ID do Lote</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('auction_detail_tab.lot_id')}</span>
                 <span className="text-xs font-bold font-mono">#{auction.id}</span>
               </div>
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Estado de Conservação</span>
-                <span className="text-xs font-bold uppercase font-mono">{auction.item?.condition_type || "Novo"}</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('auction_detail_tab.condition')}</span>
+                <span className="text-xs font-bold uppercase font-mono">{auction.item?.condition_type || t('auction_detail_tab.condition_new')}</span>
               </div>
               <div>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Lances Recebidos</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('auction_detail_tab.bids_received')}</span>
                 <span className="text-xs font-bold font-mono">{auction.bids_count ?? 0}</span>
               </div>
             </div>
@@ -139,26 +142,26 @@ export default function AuctionDetailTab({
           {/* Current pricing box */}
           <div className="bg-card border border-border rounded-sm shadow-sm overflow-hidden">
             <div className="p-4 bg-muted/40 border-b border-border flex items-center justify-between">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Status do Leilão</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{t('auction_detail_tab.status_label')}</span>
               <span
                 className={`px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase ${auctionStatusColor(
                   auction.status
                 )}`}
               >
-                {getAuctionStatusLabel(auction.status)}
+                {getAuctionStatusLabel(auction.status, t)}
               </span>
             </div>
 
             <div className="p-5 space-y-4">
               <div className="space-y-1">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Preço de Lançamento</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('auction_detail_tab.start_price')}</span>
                 <span className="text-sm font-black font-mono block">
                   {formatCurrency(auction.item?.starting_price || 0)}
                 </span>
               </div>
 
               <div className="space-y-1 pt-3 border-t border-border/60">
-                <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">Preço de Lances Atual</span>
+                <span className="text-[9px] font-bold text-primary uppercase tracking-wider block">{t('auction_detail_tab.current_price')}</span>
                 <span className="text-lg font-black text-primary font-mono block leading-none mt-1">
                   {formatCurrency(auction.item?.current_price || 0)}
                 </span>
@@ -169,7 +172,7 @@ export default function AuctionDetailTab({
           {/* Quick Actions Panel */}
           <div className="bg-card border border-border p-5 rounded-sm shadow-sm space-y-4">
             <span className="text-xs font-black uppercase tracking-wider block border-b border-border pb-2.5 mb-2.5">
-              Ações Rápidas
+              {t('auction_detail_tab.quick_actions')}
             </span>
 
             <div className="flex flex-col gap-2">
@@ -181,40 +184,40 @@ export default function AuctionDetailTab({
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-sm transition uppercase cursor-pointer border-none"
                   >
                     <CheckCircle size={14} />
-                    Publicar Leilão
+                    {t('auction_detail_tab.btn_publish')}
                   </button>
                   <button
                     onClick={() => onDeleteClick(auction.id)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-background border border-border hover:bg-destructive hover:border-destructive hover:text-white text-muted-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer"
                   >
                     <Trash2 size={14} />
-                    Excluir Lote
+                    {t('auction_detail_tab.btn_delete')}
                   </button>
                 </>
               )}
 
               {/* Live state actions */}
-              {auction.status === AuctionStatus.LIVE && (
+              {(auction.status === AuctionStatus.LIVE || auction.status === AuctionStatus.ACTIVE) && (
                 <>
                   <button
                     onClick={() => onManageStreamClick(auction)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer border-none"
                   >
                     <Video size={14} />
-                    Transmitir Ao Vivo
+{t('auction_detail_tab.btn_stream')}
                   </button>
                   <button
                     onClick={() => onCancelClick(auction.id)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-background border border-border hover:bg-destructive hover:border-destructive hover:text-white text-muted-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer"
                   >
                     <Ban size={14} />
-                    Cancelar Leilão
+                    {t('auction_detail_tab.btn_cancel')}
                   </button>
                 </>
               )}
 
               {/* Scheduled state actions */}
-              {auction.status === AuctionStatus.SCHEDULED && (
+              {(auction.status === AuctionStatus.SCHEDULED) && (
                 <button
                   onClick={() => onManageStreamClick(auction)}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm transition uppercase cursor-pointer border-none"
@@ -227,10 +230,11 @@ export default function AuctionDetailTab({
               {/* No actions available fallback */}
               {auction.status !== AuctionStatus.DRAFT &&
                auction.status !== AuctionStatus.LIVE &&
+               auction.status !== AuctionStatus.ACTIVE &&
                auction.status !== AuctionStatus.SCHEDULED && (
                 <div className="flex items-center gap-2 text-muted-foreground p-3 bg-muted/40 rounded-sm border border-border/50 text-[10px] font-semibold leading-relaxed">
                   <ShieldAlert size={14} className="shrink-0" />
-                  Nenhuma ação disponível para leilões finalizados ou cancelados.
+                  {t('auction_detail_tab.no_actions')}
                 </div>
               )}
             </div>
@@ -239,7 +243,7 @@ export default function AuctionDetailTab({
           {/* Timeline & Schedule Dates */}
           <div className="bg-card border border-border p-5 rounded-sm shadow-sm space-y-4">
             <span className="text-xs font-black uppercase tracking-wider block border-b border-border pb-2.5 mb-2">
-              Cronograma do Lote
+              {t('auction_detail_tab.schedule')}
             </span>
 
             <div className="space-y-4 text-left">
@@ -249,7 +253,7 @@ export default function AuctionDetailTab({
                 </div>
                 <div>
                   <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Data de Início
+                    {t('auction_detail_tab.start_date')}
                   </span>
                   <span className="text-[10px] font-bold text-foreground block mt-0.5">
                     {new Date(auction.start_time).toLocaleString("pt-PT")}
@@ -263,7 +267,7 @@ export default function AuctionDetailTab({
                 </div>
                 <div>
                   <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Data de Término
+                    {t('auction_detail_tab.end_date')}
                   </span>
                   <span className="text-[10px] font-bold text-foreground block mt-0.5">
                     {new Date(auction.end_time).toLocaleString("pt-PT")}
