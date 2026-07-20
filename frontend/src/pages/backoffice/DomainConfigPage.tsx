@@ -83,12 +83,12 @@ export default function DomainConfigPage() {
     return (
       <Container>
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <p className="text-zinc-500">Domínio não encontrado.</p>
+          <p className="text-zinc-500">{t('backoffice_domain_config.not_found')}</p>
           <button 
             onClick={() => navigate('/backoffice/domains')}
             className="text-zinc-300 hover:text-zinc-50 hover:underline"
           >
-            Voltar para a lista
+            {t('backoffice_domain_config.back_to_list')}
           </button>
         </div>
       </Container>
@@ -206,10 +206,10 @@ export default function DomainConfigPage() {
                       onChange={handleChange}
                       className="w-full px-3 py-2 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 appearance-none transition-all"
                     >
-                      <option value="draft">Rascunho</option>
-                      <option value="active">Ativo</option>
-                      <option value="paused">Pausado</option>
-                      <option value="completed">Concluído</option>
+                      <option value="draft">{t('backoffice_domains.status.draft')}</option>
+                      <option value="active">{t('backoffice_domains.status.active')}</option>
+                      <option value="paused">{t('backoffice_domains.status.paused')}</option>
+                      <option value="completed">{t('backoffice_domains.status.completed')}</option>
                     </select>
                   </div>
 

@@ -102,12 +102,12 @@ export default function OverviewTab({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione um arquivo de imagem.");
+      toast.error(t('overview_tab.toast_select_image'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 5MB.");
+      toast.error(t('overview_tab.toast_image_max_size'));
       return;
     }
 
@@ -126,23 +126,23 @@ export default function OverviewTab({
             const res = await rbacService.updateUser(user.id, { avatar_url: uploadedUrl });
             if (res.success) {
               updateUser({ avatar_url: uploadedUrl });
-              toast.success("Foto de perfil carregada e atualizada com sucesso!");
+              toast.success(t('overview_tab.toast_avatar_updated'));
             } else {
-              toast.error(res.message || "Falha ao salvar a imagem no servidor.");
+              toast.error(res.message || t('overview_tab.toast_avatar_save_fail'));
             }
           } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Ocorreu um erro ao atualizar a foto no servidor.");
+            toast.error(err?.response?.data?.message || t('overview_tab.toast_avatar_update_error'));
           }
         } else {
-          toast.success("Foto de perfil carregada com sucesso!");
+          toast.success(t('overview_tab.toast_avatar_uploaded'));
         }
       } else {
-        toast.error("Falha ao enviar imagem. Tente novamente.");
+        toast.error(t('overview_tab.toast_upload_fail'));
         setAvatarPreview(user.avatar_url || null);
       }
     } catch (err) {
       console.error("Erro no upload do avatar:", err);  
-      toast.error("Ocorreu um erro ao enviar a imagem.");
+      toast.error(t('overview_tab.toast_upload_error'));
       setAvatarPreview(user.avatar_url || null);
     } finally {
       setUploadingAvatar(false);
@@ -165,19 +165,19 @@ export default function OverviewTab({
       }
 
       if (Object.keys(payload).length === 0) {
-        toast.success("Nenhuma alteração feita para salvar.");
+        toast.success(t('overview_tab.toast_no_changes'));
         return;
       }
 
       const res = await rbacService.updateUser(user.id, payload);
       if (res.success && res.data) {
         updateUser(payload);
-        toast.success("Os detalhes do seu perfil foram salvos!");
+        toast.success(t('overview_tab.toast_profile_saved'));
       } else {
-        toast.error(res.message || "Falha ao atualizar perfil.");
+        toast.error(res.message || t('overview_tab.toast_profile_update_fail'));
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Ocorreu um erro ao atualizar os detalhes do perfil.");
+      toast.error(err?.response?.data?.message || t('overview_tab.toast_profile_update_error'));
     }
   };
 
@@ -190,11 +190,11 @@ export default function OverviewTab({
         new_password_confirm: data.new_password_confirm,
       });
 
-      toast.success("Senha alterada com sucesso!");
+      toast.success(t('overview_tab.toast_password_changed'));
       resetPasswordForm();
       setShowPasswordFields(false);
     } catch (err: any) {
-      const msg = useAuthStore.getState().error || "Erro ao alterar a senha. Verifique a senha atual.";
+      const msg = useAuthStore.getState().error || t('overview_tab.toast_password_error');
       toast.error(msg);
     }
   };
@@ -225,7 +225,7 @@ export default function OverviewTab({
             {/* Upload Overlay */}
             <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-300">
               <Camera className="w-5 h-5 text-white" />
-              <span className="text-[8px] font-bold text-white mt-1 uppercase">Mudar</span>
+              <span className="text-[8px] font-bold text-white mt-1 uppercase">{t('overview_tab.change_photo')}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -271,7 +271,7 @@ export default function OverviewTab({
               }}
               className="text-[10px] font-bold text-destructive hover:underline bg-transparent border-none cursor-pointer uppercase tracking-wider"
             >
-              Descartar Foto
+              {t('overview_tab.discard_photo')}
             </button>
           )}
         </div>
@@ -283,7 +283,7 @@ export default function OverviewTab({
             
             <div className="flex items-center gap-2 border-b border-border pb-2.5">
               <UserIcon className="w-4 h-4 text-primary" />
-              <span className="text-xs font-black uppercase tracking-wider">Dados Pessoais</span>
+              <span className="text-xs font-black uppercase tracking-wider">{t('overview_tab.personal_data')}</span>
             </div>
 
             <div className="space-y-3.5">
@@ -305,11 +305,11 @@ export default function OverviewTab({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase">Biografia</label>
+                <label className="text-[9px] font-bold text-muted-foreground uppercase">{t('overview_tab.bio')}</label>
                 <textarea
                   rows={3}
                   {...registerProfile("bio")}
-                  placeholder="Conte um pouco sobre você..."
+                  placeholder={t('overview_tab.bio_placeholder')}
                   className={`w-full px-3 py-2 border rounded-sm bg-background text-foreground text-xs outline-none resize-none transition duration-150 ${
                     profileErrors.bio
                       ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
@@ -340,7 +340,7 @@ export default function OverviewTab({
           <div className="flex items-center justify-between border-b border-border pb-2.5">
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-primary" />
-              <span className="text-xs font-black uppercase tracking-wider">Alterar Senha</span>
+              <span className="text-xs font-black uppercase tracking-wider">{t('overview_tab.change_password')}</span>
             </div>
             <button
               type="button"
@@ -350,7 +350,7 @@ export default function OverviewTab({
               }}
               className="text-[9px] font-extrabold text-primary hover:underline uppercase bg-transparent border-none cursor-pointer"
             >
-              {showPasswordFields ? "Fechar" : "Mudar"}
+              {showPasswordFields ? t('overview_tab.close') : t('overview_tab.change')}
             </button>
           </div>
 
@@ -385,7 +385,7 @@ export default function OverviewTab({
                       ? "border-destructive focus:ring-1 focus:ring-destructive focus:border-destructive"
                       : "border-border focus:ring-1 focus:ring-primary focus:border-primary"
                   }`}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={t('overview_tab.min_chars')}
                 />
                 {passwordErrors.new_password && (
                   <p className="text-[9px] text-destructive font-semibold">{passwordErrors.new_password.message}</p>
@@ -393,7 +393,7 @@ export default function OverviewTab({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase">Confirmar Nova Senha</label>
+                <label className="text-[9px] font-bold text-muted-foreground uppercase">{t('overview_tab.confirm_password')}</label>
                 <input
                   type="password"
                   {...registerPassword("new_password_confirm")}
@@ -415,13 +415,13 @@ export default function OverviewTab({
                   className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-sm shadow-sm transition uppercase cursor-pointer disabled:opacity-50 border-none"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  {isPasswordSubmitting ? "Gravando..." : "Alterar Senha"}
+                  {isPasswordSubmitting ? t('overview_tab.saving') : t('overview_tab.change_password')}
                 </button>
               </div>
             </form>
           ) : (
             <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
-              Mantenha os seus dados seguros mudando a palavra-passe de acesso regularmente.
+              {t('overview_tab.security')}
             </p>
           )}
         </div>
@@ -434,25 +434,25 @@ export default function OverviewTab({
         {/* Welcome header card */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15 rounded-sm p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
           <div>
-            <h2 className="text-xl font-black tracking-tight">Bem-vindo, {user.full_name}!</h2>
-            <p className="text-xs text-muted-foreground mt-1 font-normal">Controle aqui seus lances, leilões ativos e preferências do portal.</p>
+            <h2 className="text-xl font-black tracking-tight">{t('overview_tab.welcome', { name: user.full_name })}</h2>
+            <p className="text-xs text-muted-foreground mt-1 font-normal">{t('overview_tab.welcome_desc')}</p>
           </div>
           <button
             onClick={onCreateNewClick}
             className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
           >
             <PlusCircle size={15} />
-            Novo Leilão
+            {t('overview_tab.create_first')}
           </button>
         </div>
 
         {/* Stats Grid */}
         <StatsGrid
           items={[
-            { label: "Leilões Criados", value: metrics.totalCreated, icon: <Gavel size={16} /> },
-            { label: "Leilões Ativos", value: metrics.activeCreated, icon: <TrendingUp size={16} /> },
-            { label: "Leilões Participando", value: metrics.participatingCount, icon: <FileText size={16} /> },
-            { label: "Leilões Ganhos", value: metrics.wonCount, icon: <CheckCircle2 size={16} /> },
+            { label: t('overview_tab.created_auctions'), value: metrics.totalCreated, icon: <Gavel size={16} /> },
+            { label: t('overview_tab.active_auctions'), value: metrics.activeCreated, icon: <TrendingUp size={16} /> },
+            { label: t('overview_tab.participating_auctions'), value: metrics.participatingCount, icon: <FileText size={16} /> },
+            { label: t('overview_tab.won_auctions'), value: metrics.wonCount, icon: <CheckCircle2 size={16} /> },
           ]}
           columns={4}
         />
@@ -460,20 +460,20 @@ export default function OverviewTab({
         {/* Recent Created Auctions (Full Width) */}
         <div className="bg-card border border-border rounded-sm p-5 shadow-sm text-left">
           <div className="flex justify-between items-center mb-4 border-b border-border pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider">Meus Leilões Recentes</span>
+            <span className="text-xs font-black uppercase tracking-wider">{t('overview_tab.recent_auctions')}</span>
             <button
               onClick={onViewAllAuctionsClick}
               className="text-[10px] font-bold text-primary hover:underline uppercase bg-transparent border-none cursor-pointer"
             >
-              Ver Todos
+              {t('overview_tab.view_all')}
             </button>
           </div>
 
           <div className="space-y-3">
             {loadingAuctions ? (
-              <p className="text-center text-xs text-muted-foreground py-8">Carregando...</p>
+              <p className="text-center text-xs text-muted-foreground py-8">{t('overview_tab.loading')}</p>
             ) : myAuctions.length === 0 ? (
-              <p className="text-center text-xs text-muted-foreground py-8">Você não possui leilões cadastrados.</p>
+              <p className="text-center text-xs text-muted-foreground py-8">{t('overview_tab.no_auctions')}</p>
             ) : (
               myAuctions.slice(0, 4).map((auc) => (
                 <div
@@ -489,7 +489,7 @@ export default function OverviewTab({
                         {auc.item?.title}
                       </span>
                       <span className="text-[8px] font-mono font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-                        {auc.item?.category_label || "Sem Categoria"}
+                        {auc.item?.category_label || t('my_auctions_tab.no_category')}
                       </span>
                     </div>
                   </div>
@@ -514,22 +514,22 @@ export default function OverviewTab({
         {/* Bidding Summary Panel (Full Width) */}
         <div className="bg-card border border-border rounded-sm p-5 shadow-sm text-left">
           <div className="flex justify-between items-center mb-4 border-b border-border pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider">Histórico de Disputas</span>
+            <span className="text-xs font-black uppercase tracking-wider">{t('overview_tab.bidding_history')}</span>
             <button
               onClick={onViewAllBidsClick}
               className="text-[10px] font-bold text-primary hover:underline uppercase bg-transparent border-none cursor-pointer"
             >
-              Ver Todos
+              {t('overview_tab.view_all')}
             </button>
           </div>
 
           <div className="space-y-3">
             {loadingAll ? (
-              <p className="text-center text-xs text-muted-foreground py-8">Carregando...</p>
+              <p className="text-center text-xs text-muted-foreground py-8">{t('overview_tab.loading')}</p>
             ) : allAuctions.filter((a) => a.winner === user.id).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
                 <TrendingUp size={24} className="opacity-40 animate-pulse mb-2" />
-                <p className="text-xs">Nenhuma licitação ganha ou disputada no momento.</p>
+                <p className="text-xs">{t('overview_tab.no_bids')}</p>
               </div>
             ) : (
               allAuctions
@@ -549,7 +549,7 @@ export default function OverviewTab({
                           {auc.item?.title}
                         </span>
                         <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-wider mt-0.5">
-                          Vencedor do Lote
+                          {t('overview_tab.winner_label')}
                         </span>
                       </div>
                     </div>
@@ -558,7 +558,7 @@ export default function OverviewTab({
                         {formatCurrency(auc.item?.current_price || 0, true)}
                       </p>
                       <span className="inline-block px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[7px] font-bold uppercase rounded-sm mt-1">
-                        Ganho
+                        {t('overview_tab.won_label')}
                       </span>
                     </div>
                   </div>

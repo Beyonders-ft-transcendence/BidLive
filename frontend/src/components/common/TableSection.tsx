@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface TableSectionProps {
   filters?: ReactNode;
@@ -17,24 +18,26 @@ export default function TableSection({
   filters,
   children,
   pagination,
-  entityName = "registros",
+  entityName: entityNameProp,
 }: TableSectionProps) {
+  const { t } = useTranslation();
+  const entityName = entityNameProp ?? t("table_section.records");
   const showPagination = pagination && pagination.totalCount > 0;
 
   // Calculate paging ranges
   const startRange = showPagination
-    ? (pagination.currentPage - 1) * pagination.pageSize + 1
+    ? (pagination!.currentPage - 1) * pagination!.pageSize + 1
     : 0;
   const endRange = showPagination
-    ? Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)
+    ? Math.min(pagination!.currentPage * pagination!.pageSize, pagination!.totalCount)
     : 0;
 
   const totalPages = showPagination
-    ? Math.ceil(pagination.totalCount / pagination.pageSize)
+    ? Math.ceil(pagination!.totalCount / pagination!.pageSize)
     : 1;
 
-  const hasPrevious = showPagination && pagination.currentPage > 1;
-  const hasNext = showPagination && pagination.currentPage < totalPages;
+  const hasPrevious = showPagination && pagination!.currentPage > 1;
+  const hasNext = showPagination && pagination!.currentPage < totalPages;
 
   return (
     <div className="bg-card p-5 rounded-sm border border-border shadow-sm overflow-hidden flex flex-col text-foreground">
@@ -50,7 +53,7 @@ export default function TableSection({
       {showPagination && (
         <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
           <span className="text-xs text-muted-foreground font-semibold">
-            Mostrando {startRange}–{endRange} de {pagination.totalCount} {entityName}
+            {t('table_section.showing', { start: startRange, end: endRange, total: pagination.totalCount, entityName })}
           </span>
 
           <div className="flex items-center gap-1.5 select-none">

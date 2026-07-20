@@ -43,7 +43,7 @@ export default function MyAuctionsTab({
           <div>
             <h2 className="text-xl font-black tracking-tight">{t('my_auctions_tab.title')}</h2>
             <p className="text-xs text-muted-foreground mt-1 font-normal">
-              Crie novos lotes, gerencie seus rascunhos, publique itens ou cancele leilões criados.
+              {t('my_auctions_tab.desc')}
             </p>
           </div>
           <button
@@ -51,14 +51,14 @@ export default function MyAuctionsTab({
             className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
           >
             <PlusCircle size={15} />
-            Criar Leilão
+            {t('my_auctions_tab.new_auction')}
           </button>
         </div>
       </div>
 
       {/* Table list section */}
       <TableSection
-        entityName="leilões"
+        entityName={t('my_auctions_tab.title')}
         pagination={{
           currentPage: myAuctionsPage,
           totalCount: myAuctionsTotal,
@@ -69,25 +69,25 @@ export default function MyAuctionsTab({
         <table className="w-full text-left border-collapse min-w-[700px] text-foreground">
           <thead>
             <tr className="border-b border-border text-[9px] text-muted-foreground font-bold uppercase tracking-wider bg-muted/30">
-              <th className="p-3">Título / Categoria</th>
-              <th className="py-3">Preço Inicial</th>
-              <th className="py-3">Preço Atual</th>
-              <th className="py-3">Status</th>
-              <th className="py-3">Término</th>
-              <th className="py-3 text-right pr-6">Ações</th>
+              <th className="p-3">{t('my_auctions_tab.title_header')}</th>
+              <th className="py-3">{t('my_auctions_tab.initial_price')}</th>
+              <th className="py-3">{t('my_auctions_tab.current_price')}</th>
+              <th className="py-3">{t('my_auctions_tab.status')}</th>
+              <th className="py-3">{t('my_auctions_tab.end_date')}</th>
+              <th className="py-3 text-right pr-6">{t('my_auctions_tab.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border text-[10px]">
             {loadingAuctions ? (
               <tr>
                 <td colSpan={6} className="p-8 text-center text-muted-foreground font-medium">
-                  Carregando seus leilões da API...
+                  {t('my_auctions_tab.loading')}
                 </td>
               </tr>
             ) : myAuctions.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-8 text-center text-muted-foreground font-medium">
-                  Nenhum leilão cadastrado por você.
+                  {t('my_auctions_tab.no_auctions')}
                 </td>
               </tr>
             ) : (
@@ -102,8 +102,8 @@ export default function MyAuctionsTab({
                         <span className="font-bold text-foreground text-xs leading-tight truncate" title={auc.item?.title}>
                           {auc.item?.title}
                         </span>
-                        <span className="text-[8px] font-bold text-muted-foreground mt-0.5 uppercase tracking-wider font-mono truncate" title={auc.item?.category_label || "Sem categoria"}>
-                          ID: #{auc.id} | {auc.item?.category_label || "Sem categoria"}
+                        <span className="text-[8px] font-bold text-muted-foreground mt-0.5 uppercase tracking-wider font-mono truncate" title={auc.item?.category_label || t('my_auctions_tab.no_category')}>
+                          ID: #{auc.id} | {auc.item?.category_label || t('my_auctions_tab.no_category')}
                         </span>
                       </div>
                     </div>
@@ -135,7 +135,7 @@ export default function MyAuctionsTab({
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => onViewDetails(auc)}
-                        title="Ver Detalhes"
+                        title={t('my_auctions_tab.view_details')}
                         className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                       >
                         <Eye size={12} />
@@ -145,14 +145,14 @@ export default function MyAuctionsTab({
                         <>
                           <button
                             onClick={() => onPublishClick(auc.id)}
-                            title="Publicar Leilão"
+                            title={t('my_auctions_tab.publish')}
                             className="p-1.5 rounded-sm hover:bg-green-500/10 text-green-600 transition-colors cursor-pointer border border-border bg-background"
                           >
                             <CheckCircle size={12} />
                           </button>
                           <button
                             onClick={() => onDeleteClick(auc.id)}
-                            title="Excluir Rascunho"
+                            title={t('my_auctions_tab.delete')}
                             className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                           >
                             <Trash2 size={12} />
@@ -163,7 +163,7 @@ export default function MyAuctionsTab({
                       {auc.status === AuctionStatus.LIVE && (
                         <button
                           onClick={() => onCancelClick(auc.id)}
-                          title="Cancelar Leilão"
+                          title={t('my_auctions_tab.cancel')}
                           className="p-1.5 rounded-sm hover:bg-destructive/10 text-destructive transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Ban size={12} />
@@ -173,7 +173,7 @@ export default function MyAuctionsTab({
                       {(auc.status === AuctionStatus.LIVE || auc.status === AuctionStatus.SCHEDULED) && (
                         <button
                           onClick={() => onManageStreamClick(auc)}
-                          title="Transmitir Ao Vivo"
+                          title={t('my_auctions_tab.manage_stream')}
                           className="p-1.5 rounded-sm hover:bg-primary/5 text-primary transition-colors cursor-pointer border border-border bg-background"
                         >
                           <Video size={12} />

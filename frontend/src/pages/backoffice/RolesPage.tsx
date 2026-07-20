@@ -124,14 +124,14 @@ export default function RolesPage() {
                 </div>
               </div>
               <h3 className="text-xl font-black text-zinc-100 uppercase tracking-tight mb-2 relative z-10">{role.name}</h3>
-              <p className="text-sm text-zinc-400 mb-6 line-clamp-2 min-h-[40px] leading-relaxed relative z-10">{role.description || 'Perfil sem descrição associada. As permissões definem o acesso.'}</p>
+              <p className="text-sm text-zinc-400 mb-6 line-clamp-2 min-h-[40px] leading-relaxed relative z-10">{role.description || t('backoffice_roles.no_description')}</p>
               
               <div className="flex items-center gap-2 pt-4 border-t border-zinc-800/80 relative z-10">
                 <div className="p-1.5 bg-zinc-800/80 rounded-md text-zinc-400 group-hover:text-zinc-200 transition-colors">
                   <KeyRound size={14} />
                 </div>
                 <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">
-                  <strong className="text-zinc-100">{role.permissions?.length || 0}</strong> permissões ativas
+                  <strong className="text-zinc-100">{role.permissions?.length || 0}</strong> {t('backoffice_roles.permissions_active')}
                 </span>
               </div>
             </div>
@@ -159,12 +159,12 @@ export default function RolesPage() {
               {activeRole?.name}
             </h2>
             <div className="flex items-center justify-between mt-1 gap-4">
-              <p className="text-xs text-zinc-400">Gerir permissões ativas</p>
+              <p className="text-xs text-zinc-400">{t('backoffice_roles.manage_permissions')}</p>
               <button 
                 onClick={toggleAllPermissions}
                 className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
               >
-                {selectedPermissions.length === permissions.length ? 'Desativar Todas' : 'Ativar Todas'}
+                {selectedPermissions.length === permissions.length ? t('backoffice_roles.disable_all') : t('backoffice_roles.enable_all')}
               </button>
             </div>
           </div>
@@ -185,13 +185,13 @@ export default function RolesPage() {
               <div key={groupName} className="bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-4 border-b border-zinc-800/50 pb-2">
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                    Módulo: {groupName}
+                    {t('backoffice_roles.module_label', { name: groupName })}
                   </h3>
                   <button 
                     onClick={() => toggleGroupPermissions(groupName)}
                     className="text-[10px] font-bold text-zinc-400 hover:text-zinc-200 transition-colors bg-zinc-800/50 hover:bg-zinc-700/50 px-2 py-1 rounded"
                   >
-                    {allGroupActive ? 'Desativar Módulo' : 'Ativar Módulo'}
+                    {allGroupActive ? t('backoffice_roles.disable_module') : t('backoffice_roles.enable_module')}
                   </button>
                 </div>
                 <div className="space-y-4">
@@ -238,7 +238,7 @@ export default function RolesPage() {
             className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-zinc-100 hover:bg-white text-black rounded-xl text-sm font-semibold transition cursor-pointer disabled:opacity-50"
           >
             <Save size={16} /> 
-            {isUpdating ? 'A Guardar...' : 'Guardar Alterações'}
+            {isUpdating ? t('backoffice_roles.btn_saving') : t('backoffice_roles.btn_save')}
           </button>
         </div>
       </div>

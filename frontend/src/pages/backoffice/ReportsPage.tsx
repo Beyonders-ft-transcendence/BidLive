@@ -75,14 +75,14 @@ export default function ReportsPage() {
 
   const getReasonLabel = (reason: string) => {
     const reasons: Record<string, string> = {
-      SPAM: 'Spam',
-      HARASSMENT: 'Assédio',
-      SCAM: 'Burla',
-      HATE_SPEECH: 'Ódio',
-      FRAUD: 'Fraude',
-      INAPPROPRIATE_CONTENT: 'Inapropriado',
-      COPYRIGHT: 'Copyright',
-      OTHER: 'Outro',
+      SPAM: t('backoffice_reports.reason_spam'),
+      HARASSMENT: t('backoffice_reports.reason_harassment'),
+      SCAM: t('backoffice_reports.reason_scam'),
+      HATE_SPEECH: t('backoffice_reports.reason_hate_speech'),
+      FRAUD: t('backoffice_reports.reason_fraud'),
+      INAPPROPRIATE_CONTENT: t('backoffice_reports.reason_inappropriate'),
+      COPYRIGHT: t('backoffice_reports.reason_copyright'),
+      OTHER: t('backoffice_reports.reason_other'),
     };
     return reasons[reason] || reason;
   };
@@ -154,18 +154,18 @@ export default function ReportsPage() {
       <div className="flex flex-col gap-6 max-w-[1400px] w-full relative">
         <Toolbar>
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <span className="text-sm font-medium text-zinc-400">Filtrar Alvo:</span>
+            <span className="text-sm font-medium text-zinc-400">{t('backoffice_reports.filter_target_label')}</span>
             <select
               value={selectedTargetType}
               onChange={(e) => setSelectedTargetType(e.target.value)}
               className="bg-black border border-zinc-800 text-zinc-100 px-3 py-1.5 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all appearance-none"
             >
-              <option value="">Todos</option>
-              <option value="USER">Utilizador</option>
-              <option value="AUCTION">Leilão</option>
-              <option value="STREAM">Transmissão</option>
-              <option value="MESSAGE">Mensagem de Chat</option>
-              <option value="BID">Lance</option>
+              <option value="">{t('backoffice_reports.filter_all')}</option>
+              <option value="USER">{t('backoffice_reports.filter_user')}</option>
+              <option value="AUCTION">{t('backoffice_reports.filter_auction')}</option>
+              <option value="STREAM">{t('backoffice_reports.filter_stream')}</option>
+              <option value="MESSAGE">{t('backoffice_reports.filter_message')}</option>
+              <option value="BID">{t('backoffice_reports.filter_bid')}</option>
             </select>
           </div>
         </Toolbar>
@@ -173,19 +173,19 @@ export default function ReportsPage() {
         {/* Kanban Board */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-x-auto pb-4">
           <KanbanColumn 
-            title="Em Fila (Novas)" 
+            title={t('backoffice_reports.col_pending')}
             icon={<AlertTriangle size={16} />} 
             statusList={['OPEN']} 
             accentColor="text-red-400"
           />
           <KanbanColumn 
-            title="Em Revisão" 
+            title={t('backoffice_reports.col_review')}
             icon={<Eye size={16} />} 
             statusList={['UNDER_REVIEW']} 
             accentColor="text-amber-400"
           />
           <KanbanColumn 
-            title="Fechadas" 
+            title={t('backoffice_reports.col_closed')}
             icon={<CheckCircle size={16} />} 
             statusList={['RESOLVED', 'REJECTED', 'IGNORED']} 
             accentColor="text-zinc-500"
@@ -209,10 +209,10 @@ export default function ReportsPage() {
         }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-zinc-800 bg-zinc-900/20">
-          <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
-            <ShieldAlert className="text-zinc-400" size={20} />
-            Detalhes #{activeReport?.id}
-          </h2>
+            <h2 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
+              <ShieldAlert className="text-zinc-400" size={20} />
+              {t('backoffice_reports.detail_title', { id: activeReport?.id })}
+            </h2>
           <button 
             onClick={() => setActiveReport(null)}
             className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50"
@@ -229,21 +229,21 @@ export default function ReportsPage() {
               <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-4">
                   <span className="inline-flex items-center px-2 py-1 rounded bg-zinc-800 text-[10px] font-bold text-zinc-300 border border-zinc-700/50 uppercase">
-                    Alvo: {activeReport.target_type} ({activeReport.target_id})
+                    {t('backoffice_reports.detail_target', { type: activeReport.target_type, id: activeReport.target_id })}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    Estado: <span className="text-zinc-300">{activeReport.status}</span>
+                    {t('backoffice_reports.detail_status')} <span className="text-zinc-300">{activeReport.status}</span>
                   </span>
                 </div>
                 
                 <div>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">Motivo Principal</span>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">{t('backoffice_reports.detail_reason_label')}</span>
                   <p className="text-lg font-semibold text-red-400">{getReasonLabel(activeReport.reason)}</p>
                 </div>
 
                 {activeReport.description && (
                   <div className="mt-4 pt-4 border-t border-zinc-800/50">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">Descrição</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">{t('backoffice_reports.detail_desc_label')}</span>
                     <p className="text-sm bg-black p-3 border border-zinc-800 rounded-lg text-zinc-300 whitespace-pre-wrap leading-relaxed">
                       {activeReport.description}
                     </p>
@@ -253,7 +253,7 @@ export default function ReportsPage() {
 
               {/* Reporter Info */}
               <div>
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">Denunciante</span>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">{t('backoffice_reports.detail_reporter_label')}</span>
                 <div className="flex items-center gap-3 bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
                   <Avatar name={activeReport.reporter.full_name} src={activeReport.reporter.avatar_url} size="md" />
                   <div>
@@ -270,45 +270,45 @@ export default function ReportsPage() {
                   onClick={() => handleUpdateStatus(activeReport.id, 'UNDER_REVIEW')}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
                 >
-                  <Clock size={14} /> Rever
+                  <Clock size={14} /> {t('backoffice_reports.btn_review')}
                 </button>
                 <button 
                   disabled={isUpdatingStatus || activeReport.status === 'IGNORED'}
                   onClick={() => handleUpdateStatus(activeReport.id, 'IGNORED')}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border border-zinc-700/50 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
                 >
-                  <XCircle size={14} /> Ignorar
+                  <XCircle size={14} /> {t('backoffice_reports.btn_ignore')}
                 </button>
               </div>
 
               {/* Take Administrative Action Form */}
               <form onSubmit={handleApplyAction} className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-zinc-100 mb-1">Ação Administrativa</h3>
-                  <p className="text-xs text-zinc-500 mb-4">Alique uma penalização ou adicione uma nota à moderação.</p>
+                  <h3 className="font-semibold text-zinc-100 mb-1">{t('backoffice_reports.action_section_title')}</h3>
+                  <p className="text-xs text-zinc-500 mb-4">{t('backoffice_reports.action_section_desc')}</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-zinc-300">Tipo de Ação</label>
+                  <label className="text-xs font-medium text-zinc-300">{t('backoffice_reports.action_type_label')}</label>
                   <select
                     value={actionType}
                     onChange={(e) => setActionType(e.target.value as ReportActionType)}
                     className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all appearance-none"
                   >
-                    <option value="COMMENT">📝 Adicionar Comentário Interno</option>
-                    <option value="WARN_USER">⚠️ Alertar Utilizador</option>
-                    <option value="BAN_USER">🔨 Banir Utilizador (Resolve Denúncia)</option>
-                    <option value="DELETE_CONTENT">🗑️ Remover Conteúdo (Resolve Denúncia)</option>
-                    <option value="ESCALATE">↗️ Escalar Denúncia</option>
+                    <option value="COMMENT">{t('backoffice_reports.action_comment')}</option>
+                    <option value="WARN_USER">{t('backoffice_reports.action_warn')}</option>
+                    <option value="BAN_USER">{t('backoffice_reports.action_ban')}</option>
+                    <option value="DELETE_CONTENT">{t('backoffice_reports.action_delete')}</option>
+                    <option value="ESCALATE">{t('backoffice_reports.action_escalate')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-zinc-300">Nota / Justificação</label>
+                  <label className="text-xs font-medium text-zinc-300">{t('backoffice_reports.action_note_label')}</label>
                   <textarea
                     required
                     rows={3}
-                    placeholder="Escreve a justificação para a ação tomada..."
+                    placeholder={t('backoffice_reports.action_note_placeholder')}
                     value={actionNote}
                     onChange={(e) => setActionNote(e.target.value)}
                     className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-100 p-3 rounded-lg text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all resize-none"
@@ -321,14 +321,14 @@ export default function ReportsPage() {
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-zinc-100 hover:bg-white text-black rounded-lg text-sm font-semibold transition cursor-pointer disabled:opacity-50 mt-4"
                 >
                   <AlertOctagon size={16} /> 
-                  {isApplyingAction ? 'A Aplicar...' : 'Aplicar Ação'}
+                  {isApplyingAction ? t('backoffice_reports.action_applying') : t('backoffice_reports.action_apply')}
                 </button>
               </form>
 
               {/* History / Actions Timeline */}
               {activeReport.actions && activeReport.actions.length > 0 && (
                 <div className="space-y-3 pt-6 border-t border-zinc-800/50">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Histórico de Ações</span>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">{t('backoffice_reports.history_title')}</span>
                   <div className="space-y-3">
                     {activeReport.actions.map((act) => (
                       <div key={act.id} className="text-xs bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/50 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-zinc-800 before:rounded-r">

@@ -110,7 +110,7 @@ export default function DomainsPage() {
           <form onSubmit={handleCreate} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center gap-4 animate-in fade-in slide-in-from-top-2">
             <input 
               type="text" 
-              placeholder="Nome do novo domínio..." 
+              placeholder={t('backoffice_domains.new_domain_name_placeholder')}
               value={newDomainName}
               onChange={(e) => setNewDomainName(e.target.value)}
               className="flex-1 px-4 py-2 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-500 text-zinc-100"
@@ -122,14 +122,14 @@ export default function DomainsPage() {
                 disabled={isCreatingMut || !newDomainName.trim()}
                 className="px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50"
               >
-                {isCreatingMut ? 'A Criar...' : 'Guardar'}
+                {isCreatingMut ? t('backoffice_domains.saving') : t('backoffice_domains.save')}
               </button>
               <button 
                 type="button" 
                 onClick={() => setIsCreating(false)}
                 className="px-4 py-2 bg-transparent text-zinc-400 border border-zinc-800 rounded-lg font-medium hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
               >
-                Cancelar
+                {t('backoffice_domains.cancel')}
               </button>
             </div>
           </form>
@@ -140,7 +140,7 @@ export default function DomainsPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input 
               type="text" 
-              placeholder="Pesquisar domínios..." 
+              placeholder={t('backoffice_domains.search_placeholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
@@ -155,12 +155,12 @@ export default function DomainsPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Nome</th>
-                  <th className="px-6 py-4 font-medium">Proprietário</th>
-                  <th className="px-6 py-4 font-medium">Estado</th>
-                  <th className="px-6 py-4 font-medium">Orçamento</th>
-                  <th className="px-6 py-4 font-medium">Criado em</th>
-                  <th className="px-6 py-4 text-right font-medium">Ações</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_domains.th_name')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_domains.th_owner')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_domains.th_status')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_domains.th_budget')}</th>
+                  <th className="px-6 py-4 font-medium">{t('backoffice_domains.th_created')}</th>
+                  <th className="px-6 py-4 text-right font-medium">{t('backoffice_domains.th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50">
@@ -178,7 +178,7 @@ export default function DomainsPage() {
                 ) : domains.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-16 text-center text-zinc-500">
-                      Nenhum domínio encontrado.
+                      {t('backoffice_domains.no_domains')}
                     </td>
                   </tr>
                 ) : (
@@ -206,7 +206,7 @@ export default function DomainsPage() {
                           <button 
                             onClick={() => navigate(`/backoffice/domains/${domain.id}`)}
                             className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
-                            title="Configurar Domínio"
+                            title={t('backoffice_domains.configure_title')}
                           >
                             <Edit size={16} />
                           </button>
@@ -214,7 +214,7 @@ export default function DomainsPage() {
                             onClick={() => handleDelete(domain.id, domain.name)}
                             disabled={isDeleting}
                             className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors rounded-md hover:bg-zinc-800 disabled:opacity-50"
-                            title="Eliminar Domínio"
+                            title={t('backoffice_domains.delete_title')}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -231,7 +231,7 @@ export default function DomainsPage() {
           {data && data.count > 10 && (
             <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
               <span className="text-xs text-zinc-500">
-                <span className="font-medium text-zinc-300">{data.count}</span> domínios
+                <span className="font-medium text-zinc-300">{data.count}</span> {t('backoffice_domains.total_suffix')}
               </span>
               <div className="flex gap-2">
                 <button 
@@ -239,14 +239,14 @@ export default function DomainsPage() {
                   disabled={!data.previous}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Anterior
+                  {t('backoffice_domains.btn_prev')}
                 </button>
                 <button 
                   onClick={() => setPage(p => p + 1)}
                   disabled={!data.next}
                   className="px-3 py-1 text-xs border border-zinc-800 text-zinc-300 rounded-md disabled:opacity-50 hover:bg-zinc-800 transition-colors"
                 >
-                  Próxima
+                  {t('backoffice_domains.btn_next')}
                 </button>
               </div>
             </div>
