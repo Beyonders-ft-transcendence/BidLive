@@ -124,7 +124,7 @@ export function usePermissions() {
 
     // 3. Fallback: Se a lista explícita de permissões estiver vazia, verifica permissões padrão do perfil/role
     for (const r of userRoles) {
-      const roleStr = (typeof r === "string" ? r : r?.name)?.toUpperCase();
+      const roleStr = (typeof r === "string" ? r : (r as any)?.name)?.toUpperCase();
       if (roleStr && defaultRolePermissions[roleStr]) {
         const defaults = defaultRolePermissions[roleStr];
         if (defaults.includes("*") || defaults.includes(permissionCodename)) {

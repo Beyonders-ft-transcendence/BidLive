@@ -13,6 +13,68 @@ import logoImg from "@/assets/images/logo.png";
 import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
 import ENV from "@/shared/utils/env.utils";
+import { X, ShieldCheck, FileText } from "lucide-react";
+
+interface LegalModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    lastUpdated?: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}
+
+function LegalModal({ isOpen, onClose, title, lastUpdated, icon, children }: LegalModalProps) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                onClick={onClose} 
+            />
+            <div className="relative bg-card border border-border w-full max-w-2xl max-h-[85vh] rounded-lg shadow-2xl flex flex-col z-10 overflow-hidden">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0">
+                            {icon}
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-foreground">{title}</h2>
+                            {lastUpdated && (
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{lastUpdated}</p>
+                            )}
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        type="button"
+                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-none bg-transparent"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 overflow-y-auto space-y-4 text-sm text-foreground/80 leading-relaxed flex-1">
+                    {children}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-border bg-muted/40 flex justify-end shrink-0">
+                    <Button 
+                        type="button" 
+                        onClick={onClose}
+                        className="h-9 px-6 bg-primary text-primary-foreground font-semibold text-xs rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                        Entendido
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function SignupForm() {
     const { t } = useTranslation();
@@ -20,6 +82,8 @@ function SignupForm() {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const registerUser = useAuthStore((state) => state.register);
     const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
@@ -262,7 +326,22 @@ function SignupForm() {
                                                     className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-1"
                                                 />
                                                 <label htmlFor="terms" className="text-xs text-foreground/80 leading-tight">
-                                                    {t("legal.consent.agree_to_terms")} <Link to="/terms" className="text-primary hover:underline">{t("legal.consent.terms")}</Link> {t("legal.consent.and")} <Link to="/privacy" className="text-primary hover:underline">{t("legal.consent.privacy")}</Link>.
+                                                    {t("legal.consent.agree_to_terms")}{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowTermsModal(true)}
+                                                        className="text-primary hover:underline font-semibold bg-transparent border-none p-0 cursor-pointer inline"
+                                                    >
+                                                        {t("legal.consent.terms")}
+                                                    </button>{" "}
+                                                    {t("legal.consent.and")}{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPrivacyModal(true)}
+                                                        className="text-primary hover:underline font-semibold bg-transparent border-none p-0 cursor-pointer inline"
+                                                    >
+                                                        {t("legal.consent.privacy")}
+                                                    </button>.
                                                 </label>
                                             </div>
 
@@ -307,6 +386,52 @@ function SignupForm() {
                     </div>
                 </div>
             </div>
+
+            {/* Terms of Service Modal */}
+            <LegalModal
+                isOpen={showTermsModal}
+                onClose={() => setShowTermsModal(false)}
+                title={t("legal.terms.title")}
+                lastUpdated={t("legal.terms.last_updated")}
+                icon={<FileText size={18} />}
+            >
+                <p className="text-sm font-medium text-foreground">{t("legal.terms.p1")}</p>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h1")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c1")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h2")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c2")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h3")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c3")}</p>
+                </div>
+            </LegalModal>
+
+            {/* Privacy Policy Modal */}
+            <LegalModal
+                isOpen={showPrivacyModal}
+                onClose={() => setShowPrivacyModal(false)}
+                title={t("legal.privacy.title")}
+                lastUpdated={t("legal.privacy.last_updated")}
+                icon={<ShieldCheck size={18} />}
+            >
+                <p className="text-sm font-medium text-foreground">{t("legal.privacy.p1")}</p>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h1")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c1")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h2")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c2")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h3")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c3")}</p>
+                </div>
+            </LegalModal>
         </div>
     );
 }

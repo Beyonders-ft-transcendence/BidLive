@@ -10,7 +10,7 @@ import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageM
 import {
     ChevronLeft, Gavel, CheckCircle2, Shield, AlertCircle,
     Tag, User, CalendarDays, TrendingUp, ShoppingBag, MessageSquare,
-    Send, Heart, AlertOctagon
+    Send, Heart, AlertOctagon, CheckCheck
 } from "lucide-react";
 import auctionService from "@/services/auction.service";
 import { toast } from "sonner";
@@ -94,7 +94,6 @@ export default function AuctionDetailPage() {
         auctionError,
         bidError,
         activeStream,
-        hasEndedStream,
         isWatchingStream,
         setIsWatchingStream,
         viewerCount,
@@ -421,63 +420,166 @@ export default function AuctionDetailPage() {
         </>
     );
 
+    const getInitials = (name?: string | null) => {
+        if (!name) return "?";
+        const parts = name.trim().split(" ");
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.slice(0, 2).toUpperCase();
+    };
+
+    const getAvatarColor = (id: number) => {
+        const colors = [
+            "bg-[#00a884] text-white",
+            "bg-[#34b7f1] text-white",
+            "bg-[#a5b4fc] text-slate-900",
+            "bg-[#f59e0b] text-slate-900",
+            "bg-[#ec4899] text-white",
+            "bg-[#8b5cf6] text-white",
+            "bg-[#14b8a6] text-white",
+        ];
+        return colors[id % colors.length];
+    };
+
     const renderChat = () => (
-        <>
-            <div className="px-4 py-3 border-b border-border bg-muted flex items-center gap-2 shrink-0">
-                <MessageSquare size={16} className="text-primary" /> 
-                <span className="text-xs font-bold uppercase tracking-wider text-foreground">{t('auction_detail.public_chat')}</span>
+        <div className="flex flex-col h-full bg-slate-900 text-slate-100 rounded-xl overflow-hidden shadow-lg border border-slate-800">
+            {/* Header */}
+            <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                    <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-[#00a884]/15 text-[#00a884] border border-[#00a884]/30">
+                        <MessageSquare size={16} />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#00a884] rounded-full border-2 border-slate-900 animate-pulse" />
+                    </div>
+                    <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-100 flex items-center gap-1.5">
+                            {t('auction_detail.public_chat')}
+                        </h3>
+                        <p className="text-[10px] text-[#00a884] font-medium">
+                            {chatMessages.length} {t('chat_tab.tab_conversations', 'mensagens')}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-full text-slate-300 font-mono text-[10px] border border-slate-700/60">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00a884] animate-ping" />
+                    Live
+                </div>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-muted">
+
+            {/* Chat Messages Body - WhatsApp theme wallpaper & spacing */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-[#0b141a] bg-[radial-gradient(#1f2c34_1px,transparent_1px)] [background-size:16px_16px]">
                 {chatMessages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center">
-                        <MessageSquare size={24} className="text-muted-foreground mb-2" />
-                        <p className="text-xs text-muted-foreground font-medium">{t('auction_detail.empty_chat')}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{t('auction_detail.empty_chat_desc')}</p>
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                        <div className="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mb-3 text-[#00a884] border border-slate-700">
+                            <MessageSquare size={24} />
+                        </div>
+                        <p className="text-sm font-semibold text-slate-200">{t('auction_detail.empty_chat')}</p>
+                        <p className="text-xs text-slate-400 mt-1 max-w-[200px] leading-relaxed">{t('auction_detail.empty_chat_desc')}</p>
                     </div>
                 ) : (
                     chatMessages.map((msg) => {
                         const isMine = msg.sender.id === currentUser?.id;
+                        const senderName = msg.sender.full_name || msg.sender.username || "Usuário";
+                        const initials = getInitials(senderName);
+                        const avatarBg = getAvatarColor(msg.sender.id || 0);
+
                         return (
-                            <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                                <span className="text-[9px] text-muted-foreground mb-0.5 ml-1 mr-1">{msg.sender.username}</span>
-                                <div className={`px-3 py-2 rounded-md text-sm max-w-[85%] break-words ${isMine ? 'bg-primary text-white rounded-br-none' : 'bg-muted text-foreground rounded-bl-none'}`}>
-                                    {msg.message}
+                            <div 
+                                key={msg.id} 
+                                className={`flex gap-2.5 group items-end ${isMine ? 'flex-row-reverse' : 'flex-row'}`}
+                            >
+                                {/* User Avatar */}
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedProfile({ id: msg.sender.id, username: msg.sender.username })}
+                                    className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center font-bold text-[11px] shadow-sm transition-transform hover:scale-105 overflow-hidden border border-slate-700 cursor-pointer ${
+                                        msg.sender.avatar_url ? 'bg-slate-800' : avatarBg
+                                    }`}
+                                    title={senderName}
+                                >
+                                    {msg.sender.avatar_url ? (
+                                        <img src={msg.sender.avatar_url} alt={senderName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span>{initials}</span>
+                                    )}
+                                </button>
+
+                                {/* Message Bubble (WhatsApp style) */}
+                                <div 
+                                    className={`relative max-w-[82%] sm:max-w-[78%] px-3.5 py-2.5 shadow-md text-xs leading-relaxed transition-all ${
+                                        isMine 
+                                            ? 'bg-[#005c4b] text-slate-100 rounded-2xl rounded-br-xs border border-emerald-600/30' 
+                                            : 'bg-[#202c33] text-slate-100 rounded-2xl rounded-bl-xs border border-slate-700/60'
+                                    }`}
+                                >
+                                    {/* Sender Header */}
+                                    <div className="flex items-center justify-between gap-3 mb-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedProfile({ id: msg.sender.id, username: msg.sender.username })}
+                                            className={`font-bold text-[11px] hover:underline cursor-pointer truncate max-w-[150px] text-left ${
+                                                isMine ? 'text-emerald-300' : 'text-[#00a884]'
+                                            }`}
+                                        >
+                                            {isMine ? t('user_drawer.my_account', 'Você') : senderName}
+                                        </button>
+                                        <span className="text-[9px] text-slate-400 font-mono shrink-0">
+                                            @{msg.sender.username}
+                                        </span>
+                                    </div>
+
+                                    {/* Message Text */}
+                                    <p className="break-words text-slate-100 text-[13px] whitespace-pre-wrap font-normal">
+                                        {msg.message}
+                                    </p>
+
+                                    {/* Time Footer & Status */}
+                                    <div className={`flex items-center justify-end gap-1 mt-1 text-[9.5px] font-mono ${
+                                        isMine ? 'text-emerald-200/80' : 'text-slate-400'
+                                    }`}>
+                                        <span>
+                                            {new Date(msg.created_at).toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit" })}
+                                        </span>
+                                        {isMine && <CheckCheck size={13} className="text-emerald-300 ml-0.5" />}
+                                    </div>
                                 </div>
-                                <span className="text-[8px] text-muted-foreground mt-0.5 mx-1">
-                                    {new Date(msg.created_at).toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit" })}
-                                </span>
                             </div>
-                        )
+                        );
                     })
                 )}
                 <div ref={chatEndRef} />
             </div>
             
-            <div className="p-3 bg-card border-t border-border shrink-0">
+            {/* Input Bar (WhatsApp style) */}
+            <div className="p-3 bg-[#111b21] border-t border-slate-800 shrink-0">
                 {isAuthenticated ? (
-                    <form onSubmit={handleSendMessage} className="relative flex items-center">
+                    <form onSubmit={handleSendMessage} className="relative flex items-center gap-2">
                         <input
                             type="text"
                             value={chatInput}
                             onChange={e => setChatInput(e.target.value)}
                             placeholder={t('auction_detail.chat_placeholder')}
-                            className="w-full bg-muted border border-border rounded-full pl-4 pr-10 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 text-foreground"
+                            className="flex-1 bg-[#2a3942] border border-slate-700/80 rounded-full pl-4 pr-10 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884]/30 transition-all"
                         />
                         <button 
                             type="submit" 
                             disabled={!chatInput.trim()}
-                            className="absolute right-1.5 p-1.5 bg-primary text-white rounded-full hover:bg-primary/90 disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors"
+                            className="w-9 h-9 bg-[#00a884] hover:bg-[#008f70] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:bg-slate-700 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0 border-none"
                         >
-                            <Send size={12} />
+                            <Send size={14} />
                         </button>
                     </form>
                 ) : (
-                    <div className="text-center py-1">
-                        <p className="text-[10px] text-muted-foreground">{t('auction_detail.login_to_chat').split('<1>')[0]}<Link to="/signin" className="text-primary hover:underline font-medium">{t('auction_detail.login_to_chat').split('<1>')[1].split('</1>')[0]}</Link>{t('auction_detail.login_to_chat').split('</1>')[1]}</p>
+                    <div className="text-center py-2 bg-slate-800/40 rounded-lg px-3 border border-slate-700/50">
+                        <p className="text-[11px] text-slate-300">
+                            {t('auction_detail.login_to_chat').split('<1>')[0]}
+                            <Link to="/signin" className="text-[#00a884] hover:underline font-bold mx-1">
+                                {t('auction_detail.login_to_chat').split('<1>')[1].split('</1>')[0]}
+                            </Link>
+                            {t('auction_detail.login_to_chat').split('</1>')[1]}
+                        </p>
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 
 
