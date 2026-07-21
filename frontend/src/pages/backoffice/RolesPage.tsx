@@ -71,7 +71,10 @@ export default function RolesPage() {
     setIsRoleCreateMode(false);
     setShowRoleDeleteConfirm(false);
     setRoleForm({ name: role.name, description: role.description || '' });
-    setSelectedPermissions(role.permissions?.map((p: any) => p.name) || []);
+    const permNames = Array.isArray(role.permissions)
+      ? role.permissions.map((p: any) => (typeof p === 'string' ? p : p?.name)).filter(Boolean)
+      : [];
+    setSelectedPermissions(permNames);
   };
 
   const handleNewRole = () => {
@@ -132,7 +135,13 @@ export default function RolesPage() {
         { id: activeRole.id, payload },
         {
           onSuccess: (data) => {
-            setActiveRole(data);
+            if (data) {
+              setActiveRole(data);
+              const permNames = Array.isArray(data.permissions)
+                ? data.permissions.map((p: any) => (typeof p === 'string' ? p : p?.name)).filter(Boolean)
+                : [];
+              setSelectedPermissions(permNames);
+            }
           }
         }
       );
