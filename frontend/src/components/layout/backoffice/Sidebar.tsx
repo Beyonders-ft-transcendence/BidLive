@@ -42,8 +42,8 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                  ? 'bg-zinc-800 text-zinc-50'
-                  : 'hover:bg-zinc-800/50 hover:text-zinc-200'
+                ? 'bg-zinc-800 text-zinc-50'
+                : 'hover:bg-zinc-800/50 hover:text-zinc-200'
                 }`}
             >
               <Icon size={16} className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-zinc-400'}`} />
