@@ -66,18 +66,15 @@ function SignupForm() {
         }
     };
 
-    const handleIntraLogin = () => {
+    const handleIntraLogin = async () => {
         try {
-            const clientId = ENV.FORTY_TWO_CLIENT_ID;
-            if (!clientId) {
-                console.error("VITE_FORTY_TWO_CLIENT_ID não está configurado.");
-                toast.error(t("auth.intra_unavailable"));
-                return;
-            }
             const redirectUri = window.location.origin + "/";
-            const state = Math.random().toString(36).substring(7);
-            const url = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${state}`;
-            window.location.href = url;
+            const url = await authorizeFortyTwo(redirectUri);
+            if (url) {
+                window.location.href = url;
+            } else {
+                toast.error(t("auth.intra_unavailable"));
+            }
         } catch (err: any) {
             console.error("Falha ao autorizar 42:", err);
             toast.error(t("auth.intra_error"));
