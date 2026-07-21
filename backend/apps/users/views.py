@@ -937,8 +937,9 @@ class FortyTwoAuthorizeView(APIView):
         ],
     )
     def get(self, request):
+        redirect_uri = request.query_params.get("redirect_uri")
         try:
-            payload = build_42_authorization_url()
+            payload = build_42_authorization_url(redirect_uri=redirect_uri)
         except ValidationError as exc:
             return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
         return success_response(payload, message="URL de autorizacao gerada com sucesso.")
