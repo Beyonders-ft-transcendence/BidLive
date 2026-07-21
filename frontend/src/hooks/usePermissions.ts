@@ -1,7 +1,6 @@
 import { useAuthStore } from "@/shared/stores/auth.store";
 import { UserRole } from "@/shared/types/auth.types";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 
 /**
  * Custom Hook para Verificação de Permissões RBAC no Frontend.
