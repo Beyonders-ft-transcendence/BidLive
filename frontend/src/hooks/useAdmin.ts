@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import adminService from "@/services/admin.service";
-import type { RoleWritePayload, UserBanPayload, ReportActionPayload, ReportStatusUpdatePayload } from "@/shared/types/admin.types";
+import type { RoleWritePayload, UserBanPayload, ReportActionPayload, ReportStatusUpdatePayload, PermissionWritePayload } from "@/shared/types/admin.types";
 import { toast } from "sonner";
 
 export const adminKeys = {
@@ -147,6 +147,69 @@ export function useUpdateRoleMutation() {
     },
     onError: () => {
       toast.error("Erro ao atualizar perfil de acesso");
+    }
+  });
+}
+
+export function useDeleteRoleMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adminService.deleteRole(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.roles() });
+      toast.success("Perfil de acesso removido");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao remover perfil de acesso";
+      toast.error(msg);
+    }
+  });
+}
+
+export function useCreatePermissionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: PermissionWritePayload) => adminService.createPermission(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.permissions() });
+      toast.success("Permissão criada com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao criar permissão");
+    }
+  });
+}
+
+export function useUpdatePermissionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: PermissionWritePayload }) => 
+      adminService.updatePermission(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.permissions() });
+      toast.success("Permissão atualizada com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar permissão");
+    }
+  });
+}
+
+export function useDeletePermissionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adminService.deletePermission(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.permissions() });
+      toast.success("Permissão removida com sucesso");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao remover permissão";
+      toast.error(msg);
     }
   });
 }
