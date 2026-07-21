@@ -19,7 +19,6 @@ export default function Sidebar() {
 
   const navItems = [
     { name: t('backoffice_sidebar.dashboard'), path: '/backoffice', icon: LayoutDashboard },
-    { name: t('backoffice_sidebar.domains'), path: '/backoffice/domains', icon: Globe },
     { name: t('backoffice_sidebar.users'), path: '/backoffice/users', icon: Users },
     { name: t('backoffice_sidebar.reports'), path: '/backoffice/reports', icon: ShieldAlert },
     { name: t('backoffice_sidebar.auctions'), path: '/backoffice/auctions', icon: Gavel },
