@@ -3,7 +3,7 @@ import Logo from "@/assets/images/logo.png";
 import { useState, useEffect, useRef } from "react";
 import {
   Sun, Moon, ChevronDown, ChevronRight, Menu, X, Bell, CheckCircle2,
-  Globe, MessageSquareText, ShieldCheck, Plus, Gavel, LayoutDashboard,
+  MessageSquareText, ShieldCheck, Plus, Gavel, LayoutDashboard,
   UserCog, TrendingUp, Heart, Radio, Users, Sparkles
 } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
