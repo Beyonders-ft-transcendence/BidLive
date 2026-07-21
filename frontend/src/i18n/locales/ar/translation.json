@@ -112,9 +112,20 @@
     "banned_suspended": "محظور / موقوف",
     "access_profile": "ملف الوصول (الدور)",
     "select_profile": "اختر ملفاً...",
-    "profile_help": "يحدد الملف الشخصي صلاحيات المستخدم على المنصة.",
     "btn_save": "حفظ التغييرات",
-    "btn_saving": "جاري الحفظ..."
+    "btn_saving": "جاري الحفظ...",
+    "btn_new_user": "مستخدم جديد",
+    "create_user_title": "إنشاء مستخدم جديد",
+    "email": "عنوان البريد الإلكتروني",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور (اختياري للتحديث)",
+    "password_create": "كلمة المرور (مطلوب)",
+    "password_placeholder": "8 أحرف كحد أدنى",
+    "delete_user": "حذف المستخدم",
+    "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟",
+    "delete_confirm_desc": "لن يتمكن المستخدم من الوصول إلى المنصة بعد الآن.",
+    "btn_cancel": "إلغاء",
+    "btn_delete": "حذف"
   },
   "backoffice_reports": {
     "title": "البلاغات",
