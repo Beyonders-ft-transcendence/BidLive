@@ -112,6 +112,7 @@
     "banned_suspended": "محظور / موقوف",
     "access_profile": "ملف الوصول (الدور)",
     "select_profile": "اختر ملفاً...",
+    "profile_help": "يحدد الملف الشخصي صلاحيات المستخدم على المنصة.",
     "btn_save": "حفظ التغييرات",
     "btn_saving": "جاري الحفظ...",
     "btn_new_user": "مستخدم جديد",
