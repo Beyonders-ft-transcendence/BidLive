@@ -155,17 +155,23 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
       setSelectedFiles([]);
       onSuccess();
     } catch (err: any) {
-      console.error(err);
+      console.error("Error creating auction:", err);
       let errorMsg = t('create_auction_tab.toast_error');
       if (err?.response?.data) {
-        if (typeof err.response.data === 'string') {
-          errorMsg = err.response.data;
-        } else if (err.response.data.message) {
-          errorMsg = err.response.data.message;
-        } else if (typeof err.response.data === 'object') {
-          const firstKey = Object.keys(err.response.data)[0];
-          const firstError = err.response.data[firstKey];
-          errorMsg = `${firstKey}: ${Array.isArray(firstError) ? firstError[0] : firstError}`;
+        const resData = err.response.data;
+        const targetObj = resData.errors || resData;
+        if (typeof targetObj === 'string') {
+          errorMsg = targetObj;
+        } else if (targetObj.message && typeof targetObj.message === 'string') {
+          errorMsg = targetObj.message;
+        } else if (typeof targetObj === 'object') {
+          const keys = Object.keys(targetObj).filter(k => k !== 'success');
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            const firstVal = targetObj[firstKey];
+            const detailStr = Array.isArray(firstVal) ? firstVal[0] : (typeof firstVal === 'object' ? JSON.stringify(firstVal) : firstVal);
+            errorMsg = `${firstKey}: ${detailStr}`;
+          }
         }
       } else if (err?.message) {
         errorMsg = err.message;
