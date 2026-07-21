@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
@@ -33,13 +33,26 @@ def create_managed_user(
         raise PermissionDenied({"permission": ["Permissao user.create necessaria."]})
 
     validate_password(password)
-    user = User.objects.create_user(
-        email=email,
-        username=username,
-        full_name=full_name,
-        password=password,
-        **extra_fields,
-    )
+    normalized_email = User.objects.normalize_email(email)
+    duplicate_errors: dict[str, list[str]] = {}
+    if User.objects.filter(email=normalized_email).exists():
+        duplicate_errors["email"] = ["Email ja esta em uso."]
+    if User.objects.filter(username=username).exists():
+        duplicate_errors["username"] = ["Username ja esta em uso."]
+    if duplicate_errors:
+        raise ValidationError(duplicate_errors)
+
+    try:
+        user = User.objects.create_user(
+            email=normalized_email,
+            username=username,
+            full_name=full_name,
+            password=password,
+            **extra_fields,
+        )
+    except IntegrityError as exc:
+        raise ValidationError({"non_field_errors": ["Usuario ja existe."]}) from exc
+
     resolved_roles = role_names or [DEFAULT_SIGNUP_ROLE]
     _set_user_roles(user=user, role_names=resolved_roles)
 
