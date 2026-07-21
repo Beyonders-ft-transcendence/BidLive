@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShieldCheck, 
+import {
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
   LogOut,
   Gavel,
   ShieldAlert,
-  Globe
 } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png";
@@ -42,11 +41,10 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive 
-                  ? 'bg-zinc-800 text-zinc-50' 
+              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
+                  ? 'bg-zinc-800 text-zinc-50'
                   : 'hover:bg-zinc-800/50 hover:text-zinc-200'
-              }`}
+                }`}
             >
               <Icon size={16} className={`shrink-0 ${isActive ? 'text-zinc-50' : 'text-zinc-400'}`} />
               {item.name}
@@ -56,7 +54,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-zinc-800">
-        <button 
+        <button
           onClick={() => logout()}
           className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm font-medium text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200 transition-colors group"
         >
