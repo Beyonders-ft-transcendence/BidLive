@@ -133,7 +133,7 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
       const payload = {
         title: data.title,
         description: data.description,
-        category_id: Number(data.category_id),
+        category_id: data.category_id ? Number(data.category_id) : null,
         condition_type: data.condition_type,
         starting_price: Number(data.starting_price),
         minimum_increment: Number(data.minimum_increment),
@@ -156,7 +156,21 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
       onSuccess();
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || err?.response?.data?.message || t('create_auction_tab.toast_error'));
+      let errorMsg = t('create_auction_tab.toast_error');
+      if (err?.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errorMsg = err.response.data;
+        } else if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        } else if (typeof err.response.data === 'object') {
+          const firstKey = Object.keys(err.response.data)[0];
+          const firstError = err.response.data[firstKey];
+          errorMsg = `${firstKey}: ${Array.isArray(firstError) ? firstError[0] : firstError}`;
+        }
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+      toast.error(errorMsg);
     } finally {
       setUploadProgress(null);
     }
