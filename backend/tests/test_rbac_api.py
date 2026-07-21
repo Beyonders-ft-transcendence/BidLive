@@ -85,6 +85,32 @@ def test_super_admin_creates_role(super_admin_client):
 
 
 @pytest.mark.django_db
+def test_super_admin_rejects_duplicate_user_email(super_admin_client):
+    duplicate = User.objects.create_user(
+        email="ndondadaniel@gmail.com",
+        username="existing_user",
+        full_name="Existing User",
+        password="AdminPass123!",
+    )
+
+    response = super_admin_client.post(
+        "/api/users/",
+        {
+            "email": duplicate.email,
+            "username": "new_username",
+            "full_name": "Duplicate Email",
+            "password": "AdminPass123!",
+            "role_names": [ROLE_USER],
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert response.data["success"] is False
+    assert "email" in response.data["errors"]
+
+
+@pytest.mark.django_db
 def test_super_admin_manages_permissions(super_admin_client):
     response = super_admin_client.post(
         "/api/permissions/",
