@@ -53,7 +53,7 @@ interface AuthActions {
     // ── Social / OAuth ────────────────────────────────────────────────────────
     loginWithGoogle: (payload: GoogleLoginPayload) => Promise<void>
     loginWithGoogleCallback: (payload: Pick<GoogleLoginPayload, 'code' | 'redirect_uri'>) => Promise<void>
-    authorizeFortyTwo: () => Promise<string>
+    authorizeFortyTwo: (redirect_uri?: string) => Promise<string>
     loginWith42: (payload: FortyTwoCallbackPayload) => Promise<void>
 
     // ── Swagger OAuth2 ────────────────────────────────────────────────────────
@@ -461,13 +461,13 @@ export const useAuthStore = create<AuthStore>()(
                     }
                 },
 
-                async authorizeFortyTwo() {
+                async authorizeFortyTwo(redirect_uri?: string) {
                     set((s) => {
                         s.isLoading = true
                         s.error = null
                     })
                     try {
-                        const res = await authService.authorizeFortyTwo()
+                        const res = await authService.authorizeFortyTwo(redirect_uri)
                         return res.data?.authorization_url ?? ''
                     } catch (err: unknown) {
                         set((s) => {

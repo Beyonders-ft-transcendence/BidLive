@@ -29,7 +29,6 @@ export default function Header() {
     if (path.includes('/users')) return t('backoffice_header.users');
     if (path.includes('/roles')) return t('backoffice_header.roles');
     if (path.includes('/auctions')) return t('backoffice_header.auctions');
-    if (path.includes('/domains')) return t('backoffice_header.domains');
     return t('backoffice_header.admin');
   };
 

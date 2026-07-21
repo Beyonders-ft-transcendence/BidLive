@@ -52,11 +52,26 @@ export interface PaginatedResponse<T> {
 export interface RoleWritePayload {
   name: string;
   description?: string;
-  permission_names: string[];
+  permission_names?: string[];
+}
+
+export interface PermissionWritePayload {
+  name: string;
+  description?: string;
 }
 
 export interface UserBanPayload {
   status: 'BANNED' | 'SUSPENDED' | 'ACTIVE';
+}
+
+export interface UserCreatePayload {
+  email: string;
+  username: string;
+  full_name: string;
+  password?: string;
+  role_names?: string[];
+  avatar_url?: string;
+  bio?: string;
 }
 
 // --- Reports (Denúncias) ---

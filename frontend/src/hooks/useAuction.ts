@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import auctionService from "@/services/auction.service";
 import { useAuthStore } from "@/shared/stores/auth.store";
+import i18n from "@/i18n/config";
 import type {
   AuctionCreatePayload,
   AuctionUpdatePayload,
@@ -8,12 +9,16 @@ import type {
   BidCreatePayload,
 } from "@/shared/types/auction.types";
 
+function t(key: string) {
+  return i18n.t(key);
+}
+
 export function useAuctionsQuery(params?: Record<string, any>) {
   return useQuery({
     queryKey: ["auctions", params],
     queryFn: async () => {
       const res = await auctionService.list(params);
-      if (!res.success) throw new Error(res.message || "Falha ao carregar leilões.");
+      if (!res.success) throw new Error(res.message || t("use_auction.load_fail"));
       return res.data;
     },
   });
@@ -24,7 +29,7 @@ export function useFeaturedAuctionsQuery(params?: Record<string, any>) {
     queryKey: ["featuredAuctions", params],
     queryFn: async () => {
       const res = await auctionService.listFeatured(params);
-      if (!res.success) throw new Error(res.message || "Falha ao carregar leilões em destaque.");
+      if (!res.success) throw new Error(res.message || t("use_auction.featured_load_fail"));
       return res.data;
     },
   });
@@ -35,7 +40,7 @@ export function useAuctionActivitiesQuery() {
     queryKey: ["auctionActivities"],
     queryFn: async () => {
       const res = await auctionService.listActivities();
-      if (!res.success) throw new Error(res.message || "Falha ao carregar atividades.");
+      if (!res.success) throw new Error(res.message || t("use_auction.activities_load_fail"));
       return res.data;
     },
   });
@@ -46,7 +51,7 @@ export function useAuctionQuery(id: number) {
     queryKey: ["auction", id],
     queryFn: async () => {
       const res = await auctionService.retrieve(id);
-      if (!res.success) throw new Error(res.message || "Falha ao carregar detalhes do leilão.");
+      if (!res.success) throw new Error(res.message || t("use_auction.detail_load_fail"));
       return res.data;
     },
     enabled: !!id && !isNaN(id),
@@ -59,7 +64,7 @@ export function useAuctionBidsQuery(id: number, params?: Record<string, any>) {
     queryKey: ["auctionBids", id, params],
     queryFn: async () => {
       const res = await auctionService.listBids(id, params);
-      if (!res.success) throw new Error(res.message || "Falha ao obter lances.");
+      if (!res.success) throw new Error(res.message || t("use_auction.bids_load_fail"));
       return res.data;
     },
     enabled: !!id && !isNaN(id) && isAuthenticated,
@@ -75,7 +80,7 @@ export function useAuctionStreamsQuery(id: number, enabled = true, refetchInterv
     queryKey: ["auctionStreams", id],
     queryFn: async () => {
       const res = await auctionService.listStreams(id);
-      if (!res.success) throw new Error("Falha ao obter transmissões.");
+      if (!res.success) throw new Error(t("use_auction.streams_load_fail"));
       return res.data;
     },
     enabled: !!id && !isNaN(id) && enabled,

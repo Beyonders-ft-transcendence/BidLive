@@ -94,13 +94,14 @@ class AuthService {
         return this.loginWithGoogleCallback(payload)
     }
 
-    async authorizeFortyTwo(): Promise<FortyTwoAuthorizeResponse> {
-        const response = await api.get<FortyTwoAuthorizeResponse>('/auth/42/')
+    async authorizeFortyTwo(redirect_uri?: string): Promise<FortyTwoAuthorizeResponse> {
+        const url = redirect_uri ? `/auth/42/?redirect_uri=${encodeURIComponent(redirect_uri)}` : '/auth/42/'
+        const response = await api.get<FortyTwoAuthorizeResponse>(url)
         return response.data
     }
 
-    async authorize42(): Promise<FortyTwoAuthorizeResponse> {
-        return this.authorizeFortyTwo()
+    async authorize42(redirect_uri?: string): Promise<FortyTwoAuthorizeResponse> {
+        return this.authorizeFortyTwo(redirect_uri)
     }
 
     async loginWith42(payload: FortyTwoCallbackPayload): Promise<LoginResponse> {

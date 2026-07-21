@@ -180,21 +180,17 @@ export function useAuctionRealtime(id: number) {
             setSubmittingBid(false);
           }
         } catch (err) {
-          console.error("Erro ao processar mensagem do WebSocket:", err);
+          // Silent: WS message parse error
         }
       };
 
-      socket.onerror = (event) => {
-        if (socket.readyState !== WebSocket.CLOSED && socket.readyState !== WebSocket.CLOSING) {
-          console.error("Erro na conexão WebSocket:", event);
-        }
-      };
+      socket.onerror = () => {};
 
       socket.onclose = () => {
         ws.current = null;
       };
-    } catch (err) {
-      console.error("Erro ao inicializar WebSocket:", err);
+    } catch {
+      // Silent: WS init error
     }
 
     return () => {
@@ -377,20 +373,16 @@ export function useGlobalAuctionRealtime() {
               return [data.payload, ...currentActivities].slice(0, 10);
             });
           }
-        } catch (err) {
-          console.error("Failed to parse global websocket message", err);
+        } catch {
+          // Silent: global WS message parse error
         }
       };
 
-      socket.onclose = () => {
-        console.log("Global WebSocket disconnected.");
-      };
+      socket.onclose = () => {};
 
-      socket.onerror = (err) => {
-        console.error("Global WebSocket error:", err);
-      };
-    } catch (err) {
-      console.error("Failed to connect to Global WebSocket", err);
+      socket.onerror = () => {};
+    } catch {
+      // Silent: global WS init error
     }
 
     return () => {

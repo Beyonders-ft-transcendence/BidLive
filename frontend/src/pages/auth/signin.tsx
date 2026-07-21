@@ -13,6 +13,7 @@ import { signInSchema, type SignInInput } from "@/shared/schema/auth.schema";
 import logoImg from "@/assets/images/logo.png";
 import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
+import ENV from "@/shared/utils/env.utils";
 
 function SigninForm() {
     const { t } = useTranslation();
@@ -73,7 +74,8 @@ function SigninForm() {
 
     const handleIntraLogin = async () => {
         try {
-            const url = await authorizeFortyTwo();
+            const redirectUri = window.location.origin + "/";
+            const url = await authorizeFortyTwo(redirectUri);
             if (url) {
                 window.location.href = url;
             } else {
@@ -232,7 +234,7 @@ function SigninForm() {
 export default function Signin() {
   useDocumentTitle("Login");
 
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    const googleClientId = ENV.GOOGLE_CLIENT_ID;
     
     if (!googleClientId) {
         console.warn("VITE_GOOGLE_CLIENT_ID não está configurado. Login via Google pode falhar.");

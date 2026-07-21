@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Heart, Gavel } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Auction } from "@/shared/types/auction.types";
 import { formatCurrency, auctionStatusColor, getAuctionStatusLabel } from "@/shared/utils/auction.utils";
 import auctionService from "@/services/auction.service";
@@ -12,6 +13,7 @@ interface FavoritesTabProps {
 }
 
 export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }: FavoritesTabProps) {
+  const { t } = useTranslation();
   
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
 
@@ -42,13 +44,13 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
       setFavoriteIds(updated);
       localStorage.setItem("bidlive_watched_auctions", JSON.stringify(updated));
       window.dispatchEvent(new Event("storage"));
-      toast.success("Removido dos favoritos.");
+      toast.success(t('favorites_tab.remove_success'));
       
       // Sincronização em background
       auctionService.unwatch(auctionId).catch(console.error);
     } catch (err) {
       console.error("Erro ao remover favorito:", err);
-      toast.error("Ocorreu um erro ao atualizar a lista de favoritos.");
+      toast.error(t('favorites_tab.remove_error'));
     }
   };
 
@@ -60,17 +62,17 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
       <div>
         <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
           <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-          Meus Leilões Favoritos
+          {t('favorites_tab.title')}
         </h2>
         <p className="text-xs text-muted-foreground mt-1">
-          Acompanhe os leilões que você favoritou e receba atualizações em tempo real.
+          {t('favorites_tab.desc')}
         </p>
       </div>
 
       {loadingAll ? (
         <div className="bg-card border border-border p-12 rounded-sm text-center flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-xs text-muted-foreground font-semibold">Buscando favoritos...</span>
+          <span className="text-xs text-muted-foreground font-semibold">{t('favorites_tab.loading')}</span>
         </div>
       ) : favoriteAuctions.length === 0 ? (
         <div className="bg-card border border-border p-16 rounded-sm text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
@@ -78,9 +80,9 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
             <Heart size={22} />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-foreground">Nenhum leilão favoritado</h4>
+            <h4 className="text-sm font-bold text-foreground">{t('favorites_tab.no_favorites')}</h4>
             <p className="text-xs text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
-              Marque como favorito (coração) os leilões que você deseja acompanhar na página principal de leilões.
+              {t('favorites_tab.no_favorites_desc')}
             </p>
           </div>
         </div>
@@ -110,10 +112,10 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[9px] font-bold text-muted-foreground truncate uppercase">
-                        {auc.item?.category_label || "Geral"}
+                        {auc.item?.category_label || t('favorites_tab.category_fallback')}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-bold uppercase shrink-0 ${auctionStatusColor(auc.status)}`}>
-                        {getAuctionStatusLabel(auc.status)}
+                        {getAuctionStatusLabel(auc.status, t)}
                       </span>
                     </div>
 
@@ -124,11 +126,11 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
 
                   <div className="grid grid-cols-2 gap-2 border-t border-border/40 pt-2 mt-2">
                     <div>
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">Lote ID</span>
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider block">{t('favorites_tab.lot_id')}</span>
                       <span className="text-[10px] font-bold font-mono">#{auc.id}</span>
                     </div>
                     <div>
-                      <span className="text-[8px] font-bold text-primary/70 uppercase tracking-wider block">Lance Atual</span>
+                      <span className="text-[8px] font-bold text-primary/70 uppercase tracking-wider block">{t('favorites_tab.current_bid')}</span>
                       <span className="text-[10px] font-black text-primary font-mono">{formatCurrency(auc.item?.current_price || 0)}</span>
                     </div>
                   </div>
@@ -138,7 +140,7 @@ export default function FavoritesTab({ allAuctions, loadingAll, onViewDetails }:
                 <button
                   onClick={(e) => handleUnfavorite(e, auc.id)}
                   className="absolute top-2.5 right-2.5 p-1.5 bg-background border border-border rounded-sm hover:border-red-500 hover:text-red-500 text-red-500 fill-red-500 transition cursor-pointer"
-                  title="Remover dos favoritos"
+                  title={t('favorites_tab.remove_tooltip')}
                 >
                   <Heart size={12} className="fill-current" />
                 </button>

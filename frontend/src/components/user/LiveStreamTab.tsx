@@ -5,6 +5,7 @@ import {
   Tv, Radio, Users, RefreshCw, ArrowLeft,
   Calendar, Gavel, PlayCircle
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { Auction, LiveStream, StreamViewer } from "@/shared/types/auction.types";
 import { LiveStreamStatus, LiveStreamVisibility, AuctionStatus } from "@/shared/types/auction.types";
@@ -19,6 +20,7 @@ interface LiveStreamTabProps {
 }
 
 export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNewClick }: LiveStreamTabProps) {
+  const { t } = useTranslation();
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeAuction, setActiveAuction] = useState<Auction | null>(null);
@@ -78,18 +80,18 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
         } else {
           setStream(null);
           if (activeAuction) {
-            setTitle(`Live Stream: ${activeAuction.item?.title || "Leilão"}`);
+            setTitle(`Live Stream: ${activeAuction.item?.title || t('live_stream_tab.category_fallback')}`);
           }
         }
       } else {
         setStream(null);
         if (activeAuction) {
-          setTitle(`Live Stream: ${activeAuction.item?.title || "Leilão"}`);
+          setTitle(`Live Stream: ${activeAuction.item?.title || t('live_stream_tab.category_fallback')}`);
         }
       }
     } catch (err) {
       console.error("Erro ao carregar streams:", err);
-      toast.error("Falha ao carregar configurações de transmissão.");
+      toast.error(t('live_stream_tab.toast_load_error'));
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
   // Set titles if activeAuction changes
   useEffect(() => {
     if (activeAuction && !stream) {
-      setTitle(`Live Stream: ${activeAuction.item?.title || "Leilão"}`);
+      setTitle(`Live Stream: ${activeAuction.item?.title || t('live_stream_tab.category_fallback')}`);
     }
   }, [activeAuction, stream]);
 
@@ -144,10 +146,10 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       });
       if (res.success && res.data) {
         setStream(res.data);
-        toast.success("Sala de transmissão criada!");
+        toast.success(t('live_stream_tab.toast_stream_created'));
       }
     } catch (err: any) {
-      showBackendError(err, "Erro ao criar transmissão.");
+      showBackendError(err, t('live_stream_tab.toast_create_error'));
     } finally {
       setCreating(false);
     }
@@ -163,10 +165,10 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       if (res.success) {
         setBroadcasting(true);
         loadStream(activeAuction.id);
-        toast.success("Você está AO VIVO!");
+        toast.success(t('live_stream_tab.toast_stream_started'));
       }
     } catch (err: any) {
-      showBackendError(err, "Falha ao iniciar transmissão.");
+      showBackendError(err, t('live_stream_tab.toast_start_error'));
     }
   };
 
@@ -179,27 +181,27 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       if (res.success) {
         setBroadcasting(false);
         loadStream(activeAuction.id);
-        toast.success("Transmissão encerrada.");
+        toast.success(t('live_stream_tab.toast_stream_ended'));
       }
     } catch (err: any) {
-      showBackendError(err, "Falha ao encerrar transmissão.");
+      showBackendError(err, t('live_stream_tab.toast_end_error'));
     }
   };
 
   const handleRegenerateKey = async () => {
     if (!activeAuction || !stream) return;
     if (broadcasting) {
-      toast.error("Não é possível alterar a chave com a transmissão ao vivo.");
+      toast.error(t('live_stream_tab.toast_key_live_error'));
       return;
     }
     try {
       const res = await auctionService.regenerateStreamKey(activeAuction.id, stream.id);
       if (res.success) {
         loadStream(activeAuction.id);
-        toast.success("Chave de transmissão atualizada!");
+        toast.success(t('live_stream_tab.toast_key_updated'));
       }
     } catch (err: any) {
-      showBackendError(err, "Erro ao regenerar a chave.");
+      showBackendError(err, t('live_stream_tab.toast_regenerate_error'));
     }
   };
 
@@ -212,7 +214,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2000);
     }
-    toast.success("Copiado com sucesso!");
+    toast.success(t('live_stream_tab.toast_copied'));
   };
 
   const serverUrl = "rtmp://rtmp.bidlive.ao/live";
@@ -245,12 +247,12 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
           <div>
             <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
               <Radio className="w-5 h-5 text-primary" />
-              Central de Transmissão Ao Vivo
+              {t('live_stream_tab.title')}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
               {activeAuction 
-                ? `Console de Streaming: Lote #${activeAuction.id} • ${activeAuction.item?.title}`
-                : "Selecione um lote ativo ou agendado para iniciar a transmissão."
+                ? t('live_stream_tab.subtitle_console', { id: activeAuction.id, title: activeAuction.item?.title })
+                : t('live_stream_tab.subtitle_select')
               }
             </p>
           </div>
@@ -262,7 +264,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
         loadingAuctions ? (
           <div className="bg-card border border-border p-12 rounded-sm text-center flex flex-col items-center gap-4">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs text-muted-foreground font-semibold">Buscando lotes elegíveis...</span>
+            <span className="text-xs text-muted-foreground font-semibold">{t('live_stream_tab.loading_eligible')}</span>
           </div>
         ) : streamableAuctions.length === 0 ? (
           <div className="bg-card border border-border p-16 rounded-sm text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
@@ -270,15 +272,15 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
               <Tv size={22} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">Nenhum lote elegível para live</h4>
+              <h4 className="text-sm font-bold text-foreground">{t('live_stream_tab.no_eligible_title')}</h4>
               <p className="text-xs text-muted-foreground mt-1.5 max-w-sm leading-relaxed mx-auto">
-                Apenas lotes com status **Ativo (LIVE)** ou **Agendado (SCHEDULED)** podem ser transmitidos.
+                {t('live_stream_tab.no_eligible_desc')}
               </p>
               <button
                 onClick={onCreateNewClick}
                 className="mt-6 px-6 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm uppercase tracking-wider transition cursor-pointer border-none"
               >
-                Criar Novo Leilão
+                {t('live_stream_tab.create_new_auction')}
               </button>
             </div>
           </div>
@@ -308,9 +310,9 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase">{auc.item?.category_label || "Geral"}</span>
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase">{auc.item?.category_label || t('live_stream_tab.category_fallback')}</span>
                         <span className={`px-1.5 py-0.5 rounded-sm text-[8px] font-bold uppercase ${auctionStatusColor(auc.status)}`}>
-                          {getAuctionStatusLabel(auc.status)}
+                          {getAuctionStatusLabel(auc.status, t)}
                         </span>
                       </div>
                       <h3 className="text-xs font-bold text-foreground truncate mt-1 group-hover:text-primary transition-colors">
@@ -328,7 +330,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
 
                     <button className="flex items-center gap-1 text-[10px] font-bold uppercase text-primary group-hover:underline">
                       <PlayCircle size={14} />
-                      Configurar Transmissão
+                      {t('live_stream_tab.configure_stream')}
                     </button>
                   </div>
                 </div>
@@ -343,7 +345,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
         loading ? (
           <div className="bg-card border border-border p-16 rounded-sm text-center flex flex-col items-center gap-4">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs text-muted-foreground font-semibold">Carregando sala de stream...</span>
+            <span className="text-xs text-muted-foreground font-semibold">{t('live_stream_tab.loading_stream')}</span>
           </div>
         ) : !stream ? (
           /* CREATE STREAM SUBSTATE */
@@ -351,47 +353,46 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
             <div className="bg-primary/5 border border-primary/10 rounded-sm p-4 flex gap-3 text-primary mb-6">
               <Radio className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <span className="font-bold">Aviso:</span> Nenhuma sala de transmissão configurada.
-                Configure as opções abaixo para gerar o endereço RTMP e a Chave de Stream necessários.
+                <span className="font-bold">{t('live_stream_tab.no_stream_title')}</span> {t('live_stream_tab.no_stream_desc')}
               </div>
             </div>
 
             <form onSubmit={handleCreateStream} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Título da Live</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('live_stream_tab.stream_title')}</label>
                   <input
                     type="text"
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none"
-                    placeholder="Ex: Apresentação ao vivo do lote"
+                    placeholder={t('live_stream_tab.stream_title_placeholder')}
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Visibilidade</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('live_stream_tab.visibility')}</label>
                   <select
                     value={visibility}
                     onChange={(e) => setVisibility(e.target.value as LiveStreamVisibility)}
                     className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none h-[34px]"
                   >
-                    <option value={LiveStreamVisibility.PUBLIC}>Público</option>
-                    <option value={LiveStreamVisibility.UNLISTED}>Não Listado</option>
-                    <option value={LiveStreamVisibility.PRIVATE}>Privado</option>
+                    <option value={LiveStreamVisibility.PUBLIC}>{t('live_stream_tab.visibility_public')}</option>
+                    <option value={LiveStreamVisibility.UNLISTED}>{t('live_stream_tab.visibility_unlisted')}</option>
+                    <option value={LiveStreamVisibility.PRIVATE}>{t('live_stream_tab.visibility_private')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Descrição da Live</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('live_stream_tab.stream_description')}</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-primary outline-none resize-none"
-                  placeholder="Descreva detalhes específicos para os espectadores..."
+                  placeholder={t('live_stream_tab.stream_description_placeholder')}
                 />
               </div>
 
@@ -402,7 +403,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                   className="px-6 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-bold text-xs rounded-sm uppercase tracking-wider disabled:opacity-55 flex items-center gap-1.5 cursor-pointer border-none"
                 >
                   <Tv size={14} />
-                  {creating ? "Criando sala..." : "Gerar Credenciais de Live"}
+                  {creating ? t('live_stream_tab.creating_room') : t('live_stream_tab.generate_credentials')}
                 </button>
               </div>
             </form>
@@ -430,13 +431,13 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
               
               {/* Status Spec */}
               <div className="bg-card border border-border p-4 rounded-sm shadow-sm space-y-2">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Status do Canal</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">{t('live_stream_tab.channel_status')}</span>
                 <div className="flex justify-between items-baseline text-xs border-b border-border/40 pb-2">
-                  <span className="text-muted-foreground">Estado</span>
+                  <span className="text-muted-foreground">{t('live_stream_tab.status_label')}</span>
                   <span className="font-bold uppercase font-mono">{stream.status}</span>
                 </div>
                 <div className="flex justify-between items-baseline text-xs pt-1">
-                  <span className="text-muted-foreground">Visibilidade</span>
+                  <span className="text-muted-foreground">{t('live_stream_tab.visibility_label')}</span>
                   <span className="font-bold uppercase font-mono">{stream.visibility}</span>
                 </div>
               </div>
@@ -445,12 +446,12 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
               <div className="bg-card border border-border p-4 rounded-sm shadow-sm space-y-3">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground flex items-center gap-1 border-b border-border pb-2">
                   <Key className="w-3.5 h-3.5 text-primary" />
-                  Conexão OBS Studio / RTMP
+                  {t('live_stream_tab.obs_connection')}
                 </span>
 
                 <div className="space-y-3 text-xs">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-muted-foreground uppercase block">Servidor RTMP</label>
+                    <label className="text-[8px] font-bold text-muted-foreground uppercase block">{t('live_stream_tab.rtmp_server')}</label>
                     <div className="flex gap-1">
                       <input
                         type="text"
@@ -468,7 +469,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-muted-foreground uppercase block">Chave de Stream</label>
+                    <label className="text-[8px] font-bold text-muted-foreground uppercase block">{t('live_stream_tab.stream_key')}</label>
                     <div className="flex gap-1">
                       <input
                         type="password"
@@ -491,7 +492,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                     className="w-full py-2 bg-background border border-border text-foreground hover:bg-muted disabled:opacity-50 rounded-sm text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <RefreshCw size={10} />
-                    Trocar Chave de Stream
+                    {t('live_stream_tab.rotate_key')}
                   </button>
                 </div>
               </div>
@@ -501,7 +502,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                 <div className="bg-card border border-border p-4 rounded-sm shadow-sm space-y-3 max-h-52 overflow-y-auto">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5 border-b border-border pb-2">
                     <Users className="w-3.5 h-3.5" />
-                    Espectadores Logados ({viewerCount})
+                    {t('live_stream_tab.viewers_title', { count: viewerCount })}
                   </span>
                   
                   <div className="divide-y divide-border/60 text-xs">
@@ -509,13 +510,13 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                       viewers.map((v) => (
                         <div key={v.id} className="py-2 flex items-center justify-between">
                           <span className="font-semibold text-foreground truncate max-w-[150px]">
-                            {v.viewer?.username || "Anônimo"}
+                            {v.viewer?.username || t('live_stream_tab.viewer_anonymous')}
                           </span>
-                          <span className="text-[8px] bg-green-500/10 text-green-500 border border-green-500/25 px-1.5 py-0.5 rounded-sm font-bold uppercase shrink-0">Assistindo</span>
+                          <span className="text-[8px] bg-green-500/10 text-green-500 border border-green-500/25 px-1.5 py-0.5 rounded-sm font-bold uppercase shrink-0">{t('live_stream_tab.viewer_watching')}</span>
                         </div>
                       ))
                     ) : (
-                      <p className="text-[10px] text-muted-foreground py-4 text-center">Nenhum espectador logado.</p>
+                      <p className="text-[10px] text-muted-foreground py-4 text-center">{t('live_stream_tab.no_viewers')}</p>
                     )}
                   </div>
                 </div>

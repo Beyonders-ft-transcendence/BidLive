@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/shared/stores/auth.store";
+import { usePermissions } from "@/hooks/usePermissions";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import {
@@ -13,7 +14,7 @@ import {
   useCancelAuctionMutation,
   useDeleteAuctionMutation,
 } from "@/hooks/useAuction";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ShieldAlert, LayoutDashboard, UserCog, Gavel, PlusCircle, TrendingUp, Heart, Radio, Users, MessageSquare } from "lucide-react";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { AuctionStatus } from "@/shared/types/auction.types";
 
@@ -42,11 +43,12 @@ export function UserDashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Auth Store selectors
+  // Auth Store & Permissions
   const user = useAuthStore((s) => s.user);
   const status = useAuthStore((s) => s.status);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const { hasPermission, isSuperAdmin } = usePermissions();
 
   // Sincronizar aba ativa a partir da URL (?tab=...)
   const activeTab = useMemo(() => {
@@ -211,12 +213,25 @@ export function UserDashboard() {
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest animate-pulse">
-            Carregando painel...
+            {t('user_dashboard.loading_dashboard')}
           </p>
         </div>
       </div>
     );
   }
+
+  // Abas móveis
+  const mobileTabs = [
+    { id: "overview", label: t('user_dashboard.overview'), icon: <LayoutDashboard size={14} /> },
+    { id: "profile", label: t('user_dashboard.profile'), icon: <UserCog size={14} /> },
+    { id: "my-auctions", label: t('user_dashboard.my_auctions'), icon: <Gavel size={14} /> },
+    { id: "create-auction", label: t('user_dashboard.create_auction'), icon: <PlusCircle size={14} /> },
+    { id: "my-bids", label: t('user_dashboard.my_bids'), icon: <TrendingUp size={14} /> },
+    { id: "favorites", label: t('user_dashboard.favorites'), icon: <Heart size={14} /> },
+    { id: "live-stream", label: t('user_dashboard.live_stream'), icon: <Radio size={14} /> },
+    { id: "friends", label: t('user_dashboard.friends'), icon: <Users size={14} /> },
+    { id: "chat", label: t('user_dashboard.chat'), icon: <MessageSquare size={14} /> },
+  ] as const;
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
@@ -224,8 +239,8 @@ export function UserDashboard() {
       <Header />
 
       {/* Container Principal */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start gap-6 flex-1 select-none">
-        {/* Sidebar do Usuário */}
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-start gap-6 flex-1 select-none">
+        {/* Sidebar do Usuário (Desktop) */}
         <UserSidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -233,8 +248,29 @@ export function UserDashboard() {
           onLogout={handleLogout}
         />
 
+        {/* Barra de Navegação por Abas (Mobile) */}
+        <div className="w-full md:hidden flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-border no-scrollbar scroll-smooth">
+          {mobileTabs.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as any)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs whitespace-nowrap shrink-0 transition-all font-bold border ${
+                  isActive
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-card text-muted-foreground border-border hover:bg-muted"
+                }`}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Área de Conteúdo da Aba Ativa */}
-        <div className="flex-1 min-w-0 flex flex-col gap-6">
+        <div className="flex-1 min-w-0 flex flex-col gap-6 w-full">
           {activeTab === "overview" && (
             <OverviewTab
               user={user}
@@ -281,20 +317,38 @@ export function UserDashboard() {
           {activeTab === "reports" && <MyReportsTab />}
 
           {activeTab === "create-auction" && (
-            <CreateAuctionTab
-              categories={categories}
-              onSuccess={() => {
-                fetchMyAuctions();
-                setActiveTab("my-auctions");
-              }}
-            />
+            hasPermission("auction.create") || isSuperAdmin ? (
+              <CreateAuctionTab
+                categories={categories}
+                onSuccess={() => {
+                  fetchMyAuctions();
+                  setActiveTab("my-auctions");
+                }}
+              />
+            ) : (
+              <div className="bg-card border border-destructive/30 rounded-sm p-8 text-center flex flex-col items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+                  <ShieldAlert size={24} />
+                </div>
+                <h3 className="text-sm font-black uppercase tracking-wider text-foreground">Permissão Negada</h3>
+                <p className="text-xs text-muted-foreground max-w-md">
+                  O seu perfil atual não possui a permissão necessária (<code className="text-destructive font-mono">auction.create</code>) para criar novos leilões na plataforma. Contacte o administrador do sistema se considerar que se trata de um erro.
+                </p>
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className="mt-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-sm uppercase border-none cursor-pointer"
+                >
+                  Voltar à Visão Geral
+                </button>
+              </div>
+            )
           )}
 
           {activeTab === "auction-detail" && (
             loadingDetail ? (
               <div className="bg-card border border-border p-12 rounded-sm text-center flex flex-col items-center gap-4">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-xs text-muted-foreground font-semibold">Carregando detalhes do lote...</span>
+                <span className="text-xs text-muted-foreground font-semibold">{t('user_dashboard.loading_auction_detail')}</span>
               </div>
             ) : fetchedAuction ? (
               <AuctionDetailTab
@@ -307,12 +361,12 @@ export function UserDashboard() {
               />
             ) : (
               <div className="bg-card border border-border p-12 rounded-sm text-center">
-                <p className="text-sm font-bold text-destructive">Leilão não encontrado</p>
+                <p className="text-sm font-bold text-destructive">{t('user_dashboard.auction_not_found')}</p>
                 <button
                   onClick={() => setSearchParams({ tab: "my-auctions" })}
                   className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-sm cursor-pointer"
                 >
-                  Voltar para Meus Leilões
+                  {t('user_dashboard.back_to_my_auctions')}
                 </button>
               </div>
             )
@@ -341,9 +395,9 @@ export function UserDashboard() {
         isOpen={approveAuctionId !== null}
         onClose={() => setApproveAuctionId(null)}
         onConfirm={handleApproveAuction}
-        title="Publicar Leilão"
-        message="Tem certeza de que deseja publicar este rascunho de leilão? Isso o tornará ativo para lances assim que o horário de início for alcançado."
-        confirmText="Publicar Leilão"
+        title={t('user_dashboard.publish_title')}
+        message={t('user_dashboard.publish_message')}
+        confirmText={t('user_dashboard.publish_confirm')}
         variant="primary"
       />
 
@@ -352,9 +406,9 @@ export function UserDashboard() {
         isOpen={deleteAuctionId !== null}
         onClose={() => setDeleteAuctionId(null)}
         onConfirm={handleDeleteAuction}
-        title="Excluir Rascunho"
-        message="Tem certeza de que deseja excluir permanentemente este rascunho? Esta ação não pode ser desfeita."
-        confirmText="Excluir Rascunho"
+        title={t('user_dashboard.delete_title')}
+        message={t('user_dashboard.delete_message')}
+        confirmText={t('user_dashboard.delete_confirm')}
         variant="danger"
       />
 
@@ -364,16 +418,16 @@ export function UserDashboard() {
           <div className="bg-card border border-border rounded-sm max-w-md w-full p-6 shadow-xl animate-in zoom-in duration-200 text-left text-foreground">
             <h3 className="text-sm font-black uppercase tracking-wider mb-3 flex items-center gap-2">
               <AlertCircle size={16} className="text-destructive" />
-              Cancelar Leilão Ativo
+              {t('user_dashboard.cancel_title')}
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-              Informe o motivo para cancelar este leilão imediatamente. Os licitantes ativos serão notificados.
+              {t('user_dashboard.cancel_message')}
             </p>
             <textarea
               rows={3}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Ex: Erro no preenchimento das especificações ou lote avariado..."
+              placeholder={t('user_dashboard.cancel_placeholder')}
               className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-sm text-xs focus:ring-1 focus:ring-destructive outline-none resize-none mb-6"
             />
             <div className="flex justify-end gap-3">
@@ -384,14 +438,14 @@ export function UserDashboard() {
                 }}
                 className="px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted border border-border rounded-sm uppercase cursor-pointer bg-background"
               >
-                Voltar
+                {t('user_dashboard.cancel_back')}
               </button>
               <button
                 disabled={!cancelReason.trim()}
                 onClick={handleCancelAuction}
                 className="px-4 py-2 text-xs font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-sm uppercase disabled:opacity-50 cursor-pointer border-none"
               >
-                Cancelar Leilão
+                {t('user_dashboard.cancel_confirm')}
               </button>
             </div>
           </div>

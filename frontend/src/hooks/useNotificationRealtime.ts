@@ -42,16 +42,16 @@ export function useNotificationRealtime() {
             
             toast.info(`🔔 ${data.notification.title}`);
           }
-        } catch (e) {
-          console.error("Error parsing notification ws message", e);
+        } catch {
+          // Silent: notification WS message parse error
         }
       };
 
       return () => {
         socket.close();
       };
-    } catch (err) {
-      console.error("WS notification error", err);
+    } catch {
+      // Silent: notification WS init error
     }
   }, [isAuthenticated, accessToken, queryClient]);
 }

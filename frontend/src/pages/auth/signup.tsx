@@ -12,12 +12,78 @@ import { signUpSchema, type SignUpInput } from "@/shared/schema/auth.schema";
 import logoImg from "@/assets/images/logo.png";
 import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
+import ENV from "@/shared/utils/env.utils";
+import { X, ShieldCheck, FileText } from "lucide-react";
+
+interface LegalModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    lastUpdated?: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}
+
+function LegalModal({ isOpen, onClose, title, lastUpdated, icon, children }: LegalModalProps) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                onClick={onClose} 
+            />
+            <div className="relative bg-card border border-border w-full max-w-2xl max-h-[85vh] rounded-lg shadow-2xl flex flex-col z-10 overflow-hidden">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0">
+                            {icon}
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-foreground">{title}</h2>
+                            {lastUpdated && (
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{lastUpdated}</p>
+                            )}
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        type="button"
+                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-none bg-transparent"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 overflow-y-auto space-y-4 text-sm text-foreground/80 leading-relaxed flex-1">
+                    {children}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-border bg-muted/40 flex justify-end shrink-0">
+                    <Button 
+                        type="button" 
+                        onClick={onClose}
+                        className="h-9 px-6 bg-primary text-primary-foreground font-semibold text-xs rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                        Entendido
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function SignupForm() {
     const { t } = useTranslation();
 
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const registerUser = useAuthStore((state) => state.register);
     const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
@@ -48,11 +114,11 @@ function SignupForm() {
                 full_name: data.full_name,
                 password: data.password,
             });
-            toast.success("Conta criada com sucesso! Faça login para continuar.");
+            toast.success(t("auth.signup_success"));
             navigate("/signin");
         } catch (err: any) {
             console.error("Falha ao registrar:", err);
-            const errMsg = useAuthStore.getState().error || "Erro ao registrar. Verifique os dados inseridos.";
+            const errMsg = useAuthStore.getState().error || t("auth.signup_error");
             toast.error(errMsg);
         }
     };
@@ -67,15 +133,16 @@ function SignupForm() {
 
     const handleIntraLogin = async () => {
         try {
-            const url = await authorizeFortyTwo();
+            const redirectUri = window.location.origin + "/";
+            const url = await authorizeFortyTwo(redirectUri);
             if (url) {
                 window.location.href = url;
             } else {
-                toast.error("Serviço de autenticação da Intra temporariamente indisponível.");
+                toast.error(t("auth.intra_unavailable"));
             }
         } catch (err: any) {
             console.error("Falha ao autorizar 42:", err);
-            toast.error("Ocorreu um erro ao tentar conectar com a Intra 42.");
+            toast.error(t("auth.intra_error"));
         }
     };
 
@@ -83,15 +150,15 @@ function SignupForm() {
         onSuccess: async (tokenResponse) => {
             try {
                 await loginWithGoogle({ access_token: tokenResponse.access_token });
-                toast.success("Login com Google efetuado com sucesso!");
+                toast.success(t("auth.google_success"));
                 navigate("/user");
             } catch (error: any) {
                 console.error("Erro na integração Google Auth do Backend:", error);
-                toast.error("Erro ao autenticar com o Google.");
+                toast.error(t("auth.google_error"));
             }
         },
         onError: () => {
-            toast.error("Autenticação cancelada ou falhou. Tente novamente.");
+            toast.error(t("auth.google_cancel"));
         },
     });
 
@@ -109,9 +176,9 @@ function SignupForm() {
                                 <img src={logoImgDark} alt="BidLive Logo" className="h-8 object-contain hidden dark:block" />
                             </Link>
 
-                            <h1 className="text-2xl font-bold mb-1 text-foreground">Criar conta</h1>
+                            <h1 className="text-2xl font-bold mb-1 text-foreground">{t("auth.create_account")}</h1>
                             <p className="text-muted-foreground text-sm mb-4">
-                                {step === 1 ? "Passo 1 de 2: Dados Pessoais" : "Passo 2 de 2: Segurança"}
+                                {step === 1 ? t("auth.step1_title") : t("auth.step2_title")}
                             </p>
 
                             <div className="w-full text-left">
@@ -144,7 +211,7 @@ function SignupForm() {
 
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="flex-1 border-t border-border"></div>
-                                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ou</span>
+                                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("auth.or")}</span>
                                     <div className="flex-1 border-t border-border"></div>
                                 </div>
 
@@ -156,7 +223,7 @@ function SignupForm() {
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
-                                                        placeholder="Insira o seu nome completo"
+                                                        placeholder={t("auth.full_name_placeholder")}
                                                         {...register("full_name")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.full_name ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -169,11 +236,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Nome de Usuário</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.username")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
-                                                        placeholder="Escolha um nome de usuário"
+                                                        placeholder={t("auth.username_placeholder")}
                                                         {...register("username")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.username ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -186,11 +253,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Email</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.email")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="email"
-                                                        placeholder="Insira o seu email"
+                                                        placeholder={t("auth.email_placeholder")}
                                                         {...register("email")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -208,7 +275,7 @@ function SignupForm() {
                                                     onClick={handleNextStep}
                                                     className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
                                                 >
-                                                    Continuar
+                                                    {t("auth.continue")}
                                                 </Button>
                                             </div>
                                         </>
@@ -217,11 +284,11 @@ function SignupForm() {
                                     {step === 2 && (
                                         <>
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.password")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="password"
-                                                        placeholder="Mínimo 8 caracteres"
+                                                        placeholder={t("auth.password_placeholder")}
                                                         {...register("password")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -234,11 +301,11 @@ function SignupForm() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-foreground">Confirmar Palavra-passe</label>
+                                                <label className="block text-sm font-medium text-foreground">{t("auth.password_confirm")}</label>
                                                 <div className="relative">
                                                     <Input
                                                         type="password"
-                                                        placeholder="Confirme a palavra-passe"
+                                                        placeholder={t("auth.password_confirm_placeholder")}
                                                         {...register("password_confirm")}
                                                         className={`h-10 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.password_confirm ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                                     />
@@ -250,6 +317,34 @@ function SignupForm() {
                                                 </div>
                                             </div>
 
+                                            <div className="pt-2 flex items-center gap-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="terms" 
+                                                    checked={acceptedTerms}
+                                                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                                    className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-1"
+                                                />
+                                                <label htmlFor="terms" className="text-xs text-foreground/80 leading-tight">
+                                                    {t("legal.consent.agree_to_terms")}{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowTermsModal(true)}
+                                                        className="text-primary hover:underline font-semibold bg-transparent border-none p-0 cursor-pointer inline"
+                                                    >
+                                                        {t("legal.consent.terms")}
+                                                    </button>{" "}
+                                                    {t("legal.consent.and")}{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPrivacyModal(true)}
+                                                        className="text-primary hover:underline font-semibold bg-transparent border-none p-0 cursor-pointer inline"
+                                                    >
+                                                        {t("legal.consent.privacy")}
+                                                    </button>.
+                                                </label>
+                                            </div>
+
                                             <div className="pt-2 flex gap-3">
                                                 <Button
                                                     type="button"
@@ -257,14 +352,14 @@ function SignupForm() {
                                                     onClick={() => setStep(1)}
                                                     className="w-1/3 h-11 border border-border text-foreground hover:bg-muted rounded-sm font-semibold text-base transition-colors"
                                                 >
-                                                    Voltar
+                                                    {t("auth.back")}
                                                 </Button>
                                                 <Button
                                                     type="submit"
-                                                    disabled={isLoading}
-                                                    className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
+                                                    disabled={isLoading || !acceptedTerms}
+                                                    className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    {isLoading ? "A criar conta..." : "Criar conta"}
+                                                    {isLoading ? t("auth.creating") : t("auth.create_account")}
                                                 </Button>
                                             </div>
                                         </>
@@ -273,7 +368,7 @@ function SignupForm() {
 
                                 <div className="mt-4 text-center">
                                     <p className="text-sm text-muted-foreground">
-                                        Já tem uma conta? <Link to="/signin" className="text-primary font-semibold hover:underline">Entrar</Link>
+                                        {t("auth.has_account")} <Link to="/signin" className="text-primary font-semibold hover:underline">{t("auth.signin")}</Link>
                                     </p>
                                 </div>
                             </div>
@@ -291,14 +386,61 @@ function SignupForm() {
                     </div>
                 </div>
             </div>
+
+            {/* Terms of Service Modal */}
+            <LegalModal
+                isOpen={showTermsModal}
+                onClose={() => setShowTermsModal(false)}
+                title={t("legal.terms.title")}
+                lastUpdated={t("legal.terms.last_updated")}
+                icon={<FileText size={18} />}
+            >
+                <p className="text-sm font-medium text-foreground">{t("legal.terms.p1")}</p>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h1")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c1")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h2")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c2")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.terms.h3")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.terms.c3")}</p>
+                </div>
+            </LegalModal>
+
+            {/* Privacy Policy Modal */}
+            <LegalModal
+                isOpen={showPrivacyModal}
+                onClose={() => setShowPrivacyModal(false)}
+                title={t("legal.privacy.title")}
+                lastUpdated={t("legal.privacy.last_updated")}
+                icon={<ShieldCheck size={18} />}
+            >
+                <p className="text-sm font-medium text-foreground">{t("legal.privacy.p1")}</p>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h1")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c1")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h2")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c2")}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                    <h3 className="text-sm font-bold text-foreground">{t("legal.privacy.h3")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("legal.privacy.c3")}</p>
+                </div>
+            </LegalModal>
         </div>
     );
 }
 
 export default function Signup() {
-  useDocumentTitle("Registo");
+    const { t } = useTranslation();
+    useDocumentTitle(t("auth.page_title_signup"));
 
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    const googleClientId = ENV.GOOGLE_CLIENT_ID;
 
     return (
         <GoogleOAuthProvider clientId={googleClientId}>

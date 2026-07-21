@@ -8,7 +8,7 @@ import { useCategoriesQuery } from "@/hooks/useCategory";
 import {
     List, Grid2X2, Search, ChevronRight,
     Clock, DollarSign, Activity,
-    SlidersHorizontal, X, ArrowRight, PlayCircle
+    SlidersHorizontal, X, ArrowRight, PlayCircle, CheckCircle2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +24,24 @@ const AuctionLiveBadge = ({ auctionId, status }: { auctionId: number, status: st
                 {t('auctions.live')}
             </div>
         );
+    } else if (status === 'ACTIVE' || status === 'LIVE') {
+        return (
+            <div className="absolute top-3 left-3 bg-green-500/90 backdrop-blur-md border border-green-400/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase shadow-[0_0_15px_rgba(34,197,94,0.5)] flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.active', 'Active')}
+            </div>
+        );
+    } else if (status === 'SCHEDULED') {
+        return (
+            <div className="absolute top-3 left-3 bg-blue-500/90 backdrop-blur-md border border-blue-400/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.scheduled', 'Agendado')}
+            </div>
+        );
+    } else if (status === 'SOLD') {
+        return (
+            <div className="absolute top-3 left-3 bg-slate-800/90 backdrop-blur-md border border-slate-700/50 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase flex items-center gap-1.5 z-10 transition-all">
+                {t('auctions.sold', 'Sold')}
+            </div>
+        );
     }
     return null;
 };
@@ -33,10 +51,35 @@ const AuctionLiveText = ({ auctionId, status, viewType }: { auctionId: number, s
     const { data: streams } = useAuctionStreamsQuery(auctionId, status === 'LIVE');
     const isActuallyLive = status === 'LIVE' && streams?.some((s: any) => s.status === 'LIVE');
     
+    let statusText = '';
+    let statusColor = 'text-primary/70';
+    let Icon = Activity;
+
+    if (isActuallyLive) {
+        statusText = t('auctions.live');
+        statusColor = 'text-red-500';
+    } else if (status === 'LIVE' || status === 'ACTIVE') {
+        statusText = t('auctions.active', 'Active');
+        statusColor = 'text-green-500';
+    } else if (status === 'SCHEDULED') {
+        statusText = t('auctions.scheduled');
+        Icon = Clock;
+    } else if (status === 'SOLD') {
+        statusText = t('auctions.sold', 'Sold');
+        Icon = CheckCircle2;
+    } else if (status === 'CANCELLED') {
+        statusText = t('auctions.cancelled', 'Cancelled');
+        statusColor = 'text-red-500';
+        Icon = X;
+    } else {
+        statusText = t('auctions.ended');
+        Icon = CheckCircle2;
+    }
+
     return (
-        <span className={`inline-flex items-center gap-1.5 ${viewType === 'list' ? 'text-[10px] sm:text-[11px]' : 'text-[10px]'} font-bold uppercase tracking-wider ${isActuallyLive ? 'text-red-500' : 'text-primary/70'}`}>
-            <Activity className={viewType === 'list' ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-3 h-3"} />
-            {isActuallyLive ? t('auctions.live') : status === 'LIVE' ? t('auctions.scheduled') : status === 'SCHEDULED' ? t('auctions.scheduled') : t('auctions.ended')}
+        <span className={`inline-flex items-center gap-1.5 ${viewType === 'list' ? 'text-[10px] sm:text-[11px]' : 'text-[10px]'} font-bold uppercase tracking-wider ${statusColor}`}>
+            <Icon className={viewType === 'list' ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-3 h-3"} />
+            {statusText}
         </span>
     );
 };
@@ -199,7 +242,7 @@ export default function AuctionsPage() {
                             {t('auctions.title')}
                         </h1>
                         <p className="text-base sm:text-lg text-muted-foreground font-medium leading-relaxed">
-                            Descubra lotes exclusivos, faça os seus lances em tempo real e assista a leilões ao vivo com transmissão em vídeo. A sua próxima grande aquisição começa aqui.
+                            {t('auctions.hero_description')}
                         </p>
                     </div>
                 </div>
@@ -289,14 +332,14 @@ export default function AuctionsPage() {
                                     <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                                     <span className="font-bold tracking-wider uppercase text-xs">{t('auctions.fetching')}</span>
                                 </div>
-                            ) : auctions.length === 0 ? (
+                             ) : auctions.length === 0 ? (
                                 <div className="py-32 flex flex-col items-center justify-center text-center bg-card border border-dashed border-border/80 rounded-md col-span-full px-6">
                                     <Search className="w-12 h-12 text-muted-foreground/30 mb-4" />
-                                    <h3 className="text-lg font-bold text-foreground mb-1">Nenhum leilão encontrado</h3>
+                                    <h3 className="text-lg font-bold text-foreground mb-1">{t('auctions.no_auctions_title')}</h3>
                                     <p className="text-sm text-muted-foreground max-w-md">{t('auctions.no_auctions')}</p>
                                     {hasActiveFilters && (
                                         <button onClick={handleClearFilters} className="mt-6 px-6 py-2.5 bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider rounded-md hover:bg-primary/20 transition-colors">
-                                            Limpar Filtros
+                                            {t('auctions.clear_filters')}
                                         </button>
                                     )}
                                 </div>
@@ -371,7 +414,7 @@ export default function AuctionsPage() {
                                                     )}
                                                     
                                                     <div className="mt-5 w-full bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground py-3 rounded-md text-center text-sm font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
-                                                        Entrar no Leilão <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                                                        {t('auctions.enter_auction')} <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
                                                     </div>
                                                 </div>
                                             </>
@@ -391,7 +434,7 @@ export default function AuctionsPage() {
                                                 </div>
                                                 <div className="px-5 py-4 border-t border-border/50 bg-muted/5 flex items-center justify-between gap-4">
                                                     <div>
-                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Lance Atual</p>
+                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{t('auctions.current_bid_label')}</p>
                                                         <div className="text-lg font-black text-primary tracking-tight">
                                                             {currentPrice}<span className="text-[10px] font-bold text-primary/60 ml-1">Kz</span>
                                                         </div>

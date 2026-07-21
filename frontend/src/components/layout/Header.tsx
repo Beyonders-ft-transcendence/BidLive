@@ -1,9 +1,13 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
-import { useState, useEffect } from "react";
-import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2, Globe } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  Sun, Moon, ChevronDown, ChevronRight, Menu, X, Bell, CheckCircle2,
+  MessageSquareText, ShieldCheck, Plus, Gavel, LayoutDashboard,
+  UserCog, TrendingUp, Heart, Radio, Users, Sparkles
+} from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import Avatar from "../common/Avatar";
 import UserDrawer from "./UserDrawer";
@@ -16,9 +20,12 @@ import { LANGUAGES, baseLanguage } from "@/i18n/languages";
 export default function Header() {
     const { t, i18n } = useTranslation();
     const currentLang = baseLanguage(i18n.language);
+    const location = useLocation();
     const [theme, setCurrentTheme] = useState<Theme>("light");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
+    const [showNotifPanel, setShowNotifPanel] = useState(false);
+    const notifRef = useRef<HTMLDivElement>(null);
 
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -39,6 +46,17 @@ export default function Header() {
         setCurrentTheme(getTheme());
     }, []);
 
+    // Close notification panel on outside click
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+                setShowNotifPanel(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const handleToggleTheme = () => {
         const isDark = document.documentElement.classList.contains("dark");
         const newTheme = isDark ? "light" : "dark";
@@ -48,181 +66,355 @@ export default function Header() {
 
     const isDarkTheme = theme === "dark" || document.documentElement.classList.contains("dark");
 
+    const isActivePath = (path: string) => location.pathname === path;
+
+    const hasAdminRole = user?.roles?.some((r: any) =>
+        (typeof r === "string" ? r : r?.name) === "SUPER_ADMIN" ||
+        (typeof r === "string" ? r : r?.name) === "MONITOR"
+    );
+
     return (
         <>
-        <header className="sticky top-0 z-50 w-full flex flex-col">
-            <div className="bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
-                <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <header className="sticky top-0 z-50 w-full">
+            <div className="bg-background/70 backdrop-blur-xl border-b border-border/60">
+                <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <img src={isDarkTheme ? Logo2 : Logo} alt="BidLive Logo" className="h-8 sm:h-9 object-contain" />
+                    <Link to="/" className="flex items-center gap-2.5 shrink-0">
+                        <img src={isDarkTheme ? Logo2 : Logo} alt="BidLive" className="h-7 object-contain" />
                     </Link>
 
-                    {/* Right Side: Links + Actions (Desktop) */}
-                    <div className="hidden md:flex items-center gap-6 justify-end flex-1">
+                    {/* Center: Nav Links (Desktop) */}
+                    <div className="hidden md:flex items-center gap-1 ml-10">
+                        <Link
+                            to="/"
+                            className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                                isActivePath("/")
+                                    ? "text-foreground bg-muted"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            }`}
+                        >
+                            {t("header.home")}
+                        </Link>
+                        <Link
+                            to="/leiloes"
+                            className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                                isActivePath("/leiloes")
+                                    ? "text-foreground bg-muted"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            }`}
+                        >
+                            {t("header.auctions")}
+                        </Link>
+                    </div>
 
-                        {/* Nav Links */}
-                        <nav className="flex items-center gap-6 text-sm font-bold text-foreground/70">
-                            <Link to="/" className="relative hover:text-primary transition-colors group">
-                                {t("header.home")}
-                                <span className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
-                            </Link>
-                            <Link to="/leiloes" className="relative hover:text-primary transition-colors group">
-                                {t("header.auctions")}
-                                <span className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
-                            </Link>
-                        </nav>
+                    {/* Right Side: Actions (Desktop) */}
+                    <div className="hidden md:flex items-center gap-1 ml-auto">
 
-                    {isAuthenticated && (
-                        <div className="relative group flex items-center h-full">
-                            <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
-                                <Bell size={20} />
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
-                                )}
-                            </button>
-                            
-                            <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                <div className="w-80 bg-card border border-border rounded-md shadow-lg overflow-hidden flex flex-col max-h-[400px]">
-                                    <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
-                                        <span className="text-xs font-bold uppercase tracking-wider">{t("nav.notifications")}</span>
-                                        {unreadCount > 0 && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-sm font-bold">{t("nav.unread", { count: unreadCount })}</span>}
-                                    </div>
-                                    <div className="overflow-y-auto flex-1">
-                                        {notifications.length === 0 ? (
-                                            <div className="p-6 text-center text-muted-foreground">
-                                                <Bell size={24} className="mx-auto mb-2 opacity-50" />
-                                                <p className="text-xs">{t("nav.noNotifications")}</p>
-                                            </div>
-                                        ) : (
-                                            <div className="divide-y divide-border">
-                                                {notifications.slice(0, 10).map((notif: any) => (
-                                                    <div key={notif.id} className={`p-3 transition-colors ${notif.is_read ? "bg-background" : "bg-primary/5"}`}>
-                                                        <div className="flex gap-3">
-                                                            <div className="mt-0.5 text-primary shrink-0">
-                                                                <Bell size={14} />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className={`text-xs text-foreground mb-1 ${notif.is_read ? "font-medium" : "font-bold"}`}>{notif.title}</p>
-                                                                <p className="text-[10px] text-muted-foreground line-clamp-2">{notif.content}</p>
-                                                                <p className="text-[9px] text-muted-foreground mt-1 font-mono">{new Date(notif.created_at).toLocaleDateString()}</p>
-                                                            </div>
-                                                            {!notif.is_read && (
-                                                                <button 
-                                                                    onClick={() => markReadMutation.mutate(notif.id)}
-                                                                    className="shrink-0 p-1 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer border-none bg-transparent"
-                                                                    title={t("nav.markRead")}
-                                                                >
-                                                                    <CheckCircle2 size={14} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                        {/* Create Auction CTA */}
+                        {isAuthenticated && (
+                            <Link
+                                to="/user?tab=create-auction"
+                                className="flex items-center gap-1.5 px-3 py-1.5 mr-1 text-[13px] font-medium text-foreground bg-muted/60 hover:bg-muted border border-border/50 rounded-md transition-all"
+                            >
+                                <Plus size={14} strokeWidth={2} />
+                                <span className="hidden lg:inline">Criar Leilão</span>
+                            </Link>
+                        )}
+
+                        {/* Separator */}
+                        {isAuthenticated && (
+                            <div className="w-px h-5 bg-border/60 mx-1" />
+                        )}
+
+                        {isAuthenticated && (
+                            <>
+                                {/* Chat */}
+                                <Link
+                                    to="/user?tab=chat"
+                                    className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                                    title="Mensagens"
+                                >
+                                    <MessageSquareText size={18} strokeWidth={1.75} />
+                                </Link>
+
+                                {/* Notifications */}
+                                <div className="relative" ref={notifRef}>
+                                    <button
+                                        onClick={() => setShowNotifPanel(!showNotifPanel)}
+                                        className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer border-none bg-transparent"
+                                    >
+                                        <Bell size={18} strokeWidth={1.75} />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-blue-500 ring-2 ring-background" />
                                         )}
-                                    </div>
+                                    </button>
+
+                                    {showNotifPanel && (
+                                        <div className="absolute top-full right-0 mt-2 w-80 bg-popover border border-border rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[420px] animate-in fade-in slide-in-from-top-1 duration-150 z-50">
+                                            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                                                <span className="text-[13px] font-semibold text-foreground">{t("nav.notifications")}</span>
+                                                {unreadCount > 0 && (
+                                                    <span className="text-[11px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
+                                                        {unreadCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="overflow-y-auto flex-1">
+                                                {notifications.length === 0 ? (
+                                                    <div className="py-10 text-center text-muted-foreground">
+                                                        <Bell size={20} className="mx-auto mb-2 opacity-40" />
+                                                        <p className="text-xs">{t("nav.noNotifications")}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-border">
+                                                        {notifications.slice(0, 10).map((notif: any) => (
+                                                            <div
+                                                                key={notif.id}
+                                                                className={`px-4 py-3 transition-colors hover:bg-muted/40 ${
+                                                                    notif.is_read ? "" : "bg-blue-500/[0.03]"
+                                                                }`}
+                                                            >
+                                                                <div className="flex gap-3 items-start">
+                                                                    <div className={`mt-0.5 shrink-0 ${notif.is_read ? "text-muted-foreground" : "text-blue-500"}`}>
+                                                                        <Sparkles size={14} />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className={`text-[13px] text-foreground leading-snug ${notif.is_read ? "" : "font-medium"}`}>
+                                                                            {notif.title}
+                                                                        </p>
+                                                                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{notif.content}</p>
+                                                                        <p className="text-[11px] text-muted-foreground/60 mt-1">{new Date(notif.created_at).toLocaleDateString()}</p>
+                                                                    </div>
+                                                                    {!notif.is_read && (
+                                                                        <button
+                                                                            onClick={() => markReadMutation.mutate(notif.id)}
+                                                                            className="shrink-0 p-1 text-muted-foreground hover:text-blue-500 transition-colors cursor-pointer border-none bg-transparent"
+                                                                            title={t("nav.markRead")}
+                                                                        >
+                                                                            <CheckCircle2 size={14} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
-                    )}
+                            </>
+                        )}
 
                         {/* Language */}
                         <LanguageSwitcher />
 
                         {/* Theme toggle */}
-                        <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
-                            {isDarkTheme ? <Sun size={20} /> : <Moon size={20} />}
+                        <button
+                            onClick={handleToggleTheme}
+                            title={t("header.theme")}
+                            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            {isDarkTheme ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
                         </button>
 
+                        {/* Separator */}
+                        <div className="w-px h-5 bg-border/60 mx-1" />
+
+                        {/* User / Login */}
                         {isAuthenticated && user ? (
                             <button
                                 onClick={() => setIsUserDrawerOpen(true)}
-                                className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-muted transition-all duration-200 border border-border bg-card shadow-sm"
+                                className="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-muted/60 transition-all duration-150 cursor-pointer border-none bg-transparent"
                             >
                                 <Avatar name={user.full_name || user.username} src={user.avatar_url} size="sm" />
-                                <span className="hidden lg:inline text-xs font-bold text-foreground">
-                                    {user.full_name || user.username}
-                                </span>
+                                <ChevronDown size={14} className="text-muted-foreground" />
                             </button>
                         ) : (
-                            <Link to="/signin" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-sm shadow-primary/20 text-center uppercase tracking-wider">
+                            <Link
+                                to="/signin"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-foreground text-background hover:opacity-90 rounded-md text-[13px] font-medium transition-all text-center"
+                            >
                                 {t("header.login_register")}
                             </Link>
                         )}
                     </div>
 
-                {/* Mobile Menu Toggle */}
-                <div className="flex md:hidden items-center gap-2">
-                    <button onClick={handleToggleTheme} title={t("header.theme")} className="p-2 text-muted-foreground hover:text-primary transition-colors">
-                        {theme === "dark" || document.documentElement.classList.contains("dark") ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
-                    <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-foreground">
-                        <Menu size={24} />
-                    </button>
-                </div>
-            </nav>
+                    {/* Mobile Right Area */}
+                    <div className="flex md:hidden items-center gap-0.5">
+                        {isAuthenticated && (
+                            <>
+                                <Link
+                                    to="/user?tab=chat"
+                                    className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    <MessageSquareText size={18} strokeWidth={1.75} />
+                                </Link>
+                                <button
+                                    onClick={() => setShowNotifPanel(!showNotifPanel)}
+                                    className="relative p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-none bg-transparent"
+                                >
+                                    <Bell size={18} strokeWidth={1.75} />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-blue-500 ring-2 ring-background" />
+                                    )}
+                                </button>
+                            </>
+                        )}
+                        <button
+                            onClick={handleToggleTheme}
+                            title={t("header.theme")}
+                            className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            {isDarkTheme ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
+                        </button>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="p-2 rounded-md text-foreground hover:bg-muted/50 transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            <Menu size={20} strokeWidth={1.75} />
+                        </button>
+                    </div>
+                </nav>
             </div>
         </header>
 
-        {/* Mobile Menu Side Drawer */}
+        {/* ─── Mobile Drawer ─────────────────────────────────────────────── */}
         {isMobileMenuOpen && (
             <div className="fixed inset-0 z-[60] flex justify-end md:hidden">
-                {/* Backdrop overlay */}
                 <div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
 
-                {/* Drawer */}
-                <div className="relative w-[80%] max-w-sm h-full bg-background shadow-2xl flex flex-col">
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                        <span className="font-semibold text-lg">{t("header.menu")}</span>
-                        <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-foreground rounded-md hover:bg-muted transition-colors">
-                            <X size={20} />
+                <div className="relative w-[85%] max-w-xs h-full bg-background flex flex-col shadow-2xl">
+                    {/* Drawer Header */}
+                    <div className="flex items-center justify-between px-5 h-14 border-b border-border shrink-0">
+                        <img src={isDarkTheme ? Logo2 : Logo} alt="BidLive" className="h-6 object-contain" />
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer border-none bg-transparent"
+                        >
+                            <X size={18} />
                         </button>
                     </div>
 
-                    <div className="p-4 overflow-y-auto space-y-6 flex-1">
-                        <nav className="flex flex-col gap-2 font-medium text-foreground">
-                            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.home")}</Link>
-                            <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.auctions")}</Link>
+                    {/* Drawer Body */}
+                    <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-left">
 
-                            {/* Mobile Language Selection */}
-                            <div className="py-4 border-b border-border/50">
-                                <p className="text-muted-foreground text-sm mb-3 flex items-center gap-2"><Globe size={16} /> {t("header.language")}</p>
-                                <div className="flex gap-2">
-                                    {LANGUAGES.map((lang) => (
-                                        <button
-                                            key={lang.code}
-                                            onClick={() => { i18n.changeLanguage(lang.code); setIsMobileMenuOpen(false); }}
-                                            className={`flex-1 py-1.5 text-sm rounded border ${currentLang === lang.code ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground"}`}
-                                        >
-                                            {lang.code.toUpperCase()}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </nav>
+                        {/* Navigation */}
+                        <span className="block px-3 pb-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                            Navegação
+                        </span>
+                        <Link to="/" onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-colors ${
+                                isActivePath("/") ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            }`}>
+                            {t("header.home")}
+                        </Link>
+                        <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-colors ${
+                                isActivePath("/leiloes") ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            }`}>
+                            {t("header.auctions")}
+                        </Link>
+
+                        {/* Authenticated Links */}
+                        {isAuthenticated && user && (
+                            <>
+                                <div className="my-3 h-px bg-border" />
+                                <span className="block px-3 pb-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                                    Dashboard
+                                </span>
+
+                                {([
+                                    { to: "/user?tab=overview", label: "Visão Geral", icon: <LayoutDashboard size={15} /> },
+                                    { to: "/user?tab=profile", label: "Meu Perfil", icon: <UserCog size={15} /> },
+                                    { to: "/user?tab=my-auctions", label: "Meus Leilões", icon: <Gavel size={15} /> },
+                                    { to: "/user?tab=my-bids", label: "Meus Lances", icon: <TrendingUp size={15} /> },
+                                    { to: "/user?tab=favorites", label: "Favoritos", icon: <Heart size={15} /> },
+                                    { to: "/user?tab=live-stream", label: "Transmissões", icon: <Radio size={15} /> },
+                                    { to: "/user?tab=chat", label: "Mensagens", icon: <MessageSquareText size={15} /> },
+                                    { to: "/user?tab=friends", label: "Amigos", icon: <Users size={15} /> },
+                                ] as const).map((item) => (
+                                    <Link
+                                        key={item.to}
+                                        to={item.to}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                                    >
+                                        <span className="text-muted-foreground/60">{item.icon}</span>
+                                        {item.label}
+                                    </Link>
+                                ))}
+
+                                {/* Create Auction CTA */}
+                                <Link
+                                    to="/user?tab=create-auction"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center gap-2.5 mx-1 mt-2 px-3 py-2.5 rounded-md text-[13px] font-semibold text-foreground bg-muted border border-border/60 hover:bg-muted/80 transition-colors"
+                                >
+                                    <Plus size={15} strokeWidth={2} />
+                                    Criar Novo Leilão
+                                </Link>
+
+                                {/* Admin Panel */}
+                                {hasAdminRole && (
+                                    <Link
+                                        to="/backoffice"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="flex items-center gap-2.5 mx-1 mt-1 px-3 py-2.5 rounded-md text-[13px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/5 border border-blue-500/15 hover:bg-blue-500/10 transition-colors"
+                                    >
+                                        <ShieldCheck size={15} />
+                                        Painel Backoffice
+                                        <ChevronRight size={14} className="ml-auto opacity-40" />
+                                    </Link>
+                                )}
+                            </>
+                        )}
+
+                        {/* Language */}
+                        <div className="my-3 h-px bg-border" />
+                        <span className="block px-3 pb-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                            {t("header.language")}
+                        </span>
+                        <div className="flex gap-1.5 px-3">
+                            {LANGUAGES.map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => { i18n.changeLanguage(lang.code); setIsMobileMenuOpen(false); }}
+                                    className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-colors cursor-pointer ${
+                                        currentLang === lang.code
+                                            ? "bg-foreground text-background border-foreground"
+                                            : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-transparent"
+                                    }`}
+                                >
+                                    {lang.code.toUpperCase()}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className="p-4 border-t border-border mt-auto bg-card flex flex-col gap-3">
+                    {/* Drawer Footer */}
+                    <div className="px-4 py-4 border-t border-border shrink-0">
                         {isAuthenticated && user ? (
                             <button
                                 onClick={() => { setIsMobileMenuOpen(false); setIsUserDrawerOpen(true); }}
-                                className="flex items-center justify-between w-full p-3 rounded-md hover:bg-muted text-left border border-border bg-background shadow-sm"
+                                className="flex items-center gap-3 w-full p-2.5 rounded-lg hover:bg-muted text-left transition-colors cursor-pointer border-none bg-transparent"
                             >
-                                <div className="flex items-center gap-3">
-                                    <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-foreground leading-tight">{user.full_name || user.username}</span>
-                                        <span className="text-[10px] text-muted-foreground mt-0.5">{user.email}</span>
-                                    </div>
+                                <Avatar name={user.full_name || user.username} src={user.avatar_url} size="md" />
+                                <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="text-[13px] font-semibold text-foreground truncate">{user.full_name || user.username}</span>
+                                    <span className="text-[11px] text-muted-foreground truncate">{user.email}</span>
                                 </div>
-                                <ChevronDown size={16} className="-rotate-90 text-muted-foreground" />
+                                <ChevronRight size={14} className="text-muted-foreground shrink-0" />
                             </button>
                         ) : (
-                            <Link to="/signin" onClick={() => setIsMobileMenuOpen(false)} className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold transition-colors shadow-sm text-center">
+                            <Link
+                                to="/signin"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center justify-center w-full px-4 py-2.5 bg-foreground text-background rounded-md text-[13px] font-medium transition-all hover:opacity-90"
+                            >
                                 {t("header.login_register")}
                             </Link>
                         )}

@@ -19,24 +19,36 @@ export const createAuctionSchema = z
       .min(1, { message: "O preço inicial é obrigatório." })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "O preço inicial deve ser um número maior ou igual a 0.",
+      })
+      .refine((val) => val.split('.')[0].replace('-', '').length <= 10, {
+        message: "O preço inicial não pode ter mais de 10 dígitos antes da vírgula.",
       }),
     minimum_increment: z
       .string()
       .min(1, { message: "O incremento mínimo é obrigatório." })
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: "O incremento mínimo deve ser maior que 0.",
+      })
+      .refine((val) => val.split('.')[0].replace('-', '').length <= 10, {
+        message: "O incremento mínimo não pode ter mais de 10 dígitos antes da vírgula.",
       }),
     reserve_price: z
       .string()
       .optional()
       .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 0), {
         message: "O preço de reserva deve ser um número maior ou igual a 0.",
+      })
+      .refine((val) => !val || val.split('.')[0].replace('-', '').length <= 10, {
+        message: "O preço de reserva não pode ter mais de 10 dígitos antes da vírgula.",
       }),
     buy_now_price: z
       .string()
       .optional()
       .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 0), {
         message: "O preço de compra imediata deve ser um número maior ou igual a 0.",
+      })
+      .refine((val) => !val || val.split('.')[0].replace('-', '').length <= 10, {
+        message: "O preço de compra imediata não pode ter mais de 10 dígitos antes da vírgula.",
       }),
     start_time: z
       .string()
