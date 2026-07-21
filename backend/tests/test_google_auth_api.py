@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.access.models import OAuthAccount, OAuthProvider
 from apps.analytics.models import AnalyticsEvent
-from apps.users.models import User
+from apps.users.models import User, UserStatus
 
 
 GOOGLE_PROFILE = {
@@ -105,3 +105,63 @@ def test_google_login_requires_token(google_settings):
     client = APIClient()
     response = client.post("/api/auth/google/", {}, format="json")
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+def test_google_login_blocked_user_with_oauth_account(mock_get, google_settings, user):
+    user.email = GOOGLE_PROFILE["email"]
+    user.save(update_fields=["email"])
+    OAuthAccount.objects.create(
+        user=user,
+        provider=OAuthProvider.GOOGLE,
+        provider_user_id=GOOGLE_PROFILE["sub"],
+    )
+    user.status = UserStatus.BANNED
+    user.is_active = False
+    user.save(update_fields=["status", "is_active"])
+
+    client = APIClient()
+    response = client.post(
+        "/api/auth/google/",
+        {"access_token": "google-access-token"},
+        format="json",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+def test_google_login_blocked_user_by_email(mock_get, google_settings, user):
+    user.email = GOOGLE_PROFILE["email"]
+    user.save(update_fields=["email"])
+    user.status = UserStatus.BANNED
+    user.is_active = False
+    user.save(update_fields=["status", "is_active"])
+
+    client = APIClient()
+    response = client.post(
+        "/api/auth/google/",
+        {"access_token": "google-access-token"},
+        format="json",
+    )
+    assert response.status_code == 403
+    assert response.data["message"] == "Conta indisponivel para login"
+
+
+@pytest.mark.django_db
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_google_userinfo_response())
+def test_google_login_suspended_user(mock_get, google_settings, user):
+    user.email = GOOGLE_PROFILE["email"]
+    user.save(update_fields=["email"])
+    user.status = UserStatus.SUSPENDED
+    user.is_active = False
+    user.save(update_fields=["status", "is_active"])
+
+    client = APIClient()
+    response = client.post(
+        "/api/auth/google/",
+        {"access_token": "google-access-token"},
+        format="json",
+    )
+    assert response.status_code == 403

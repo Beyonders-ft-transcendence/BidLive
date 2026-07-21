@@ -293,7 +293,7 @@ class LoginView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
         return success_response(payload, message="Login realizado com sucesso.")
@@ -826,7 +826,7 @@ class GoogleLoginView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
@@ -890,7 +890,7 @@ class GoogleCallbackView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
@@ -1006,7 +1006,7 @@ class FortyTwoCallbackView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
