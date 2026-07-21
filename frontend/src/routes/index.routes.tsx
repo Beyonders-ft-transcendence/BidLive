@@ -22,6 +22,7 @@ import { UserRole } from "@/shared/types/auth.types";
 import AuthLayout from "@/components/layout/AuthLayout";
 import PublicLayout from "@/components/layout/PublicLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import GuestRoute from "@/components/auth/GuestRoute";
 import AuthCallbackHandler from "@/components/auth/AuthCallbackHandler";
 
 export default function IndexRoot() {
@@ -29,21 +30,25 @@ export default function IndexRoot() {
         <>
             <AuthCallbackHandler />
             <Routes>
-                {/* Rotas Públicas */}
+                {/* Rotas Públicas (Navegação Geral) */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/leiloes" element={<AuctionsPage />} />
                     <Route path="/auction/:id" element={<AuctionDetailPage />} />
-                    <Route path="/signin" element={<SigninPage />} />
-                    <Route path="/auth/signin" element={<SigninPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Alias do email */}
-                    <Route path="/auth/verify-user" element={<VerifyUserPage />} />
-                    <Route path="/verify-user" element={<VerifyUserPage />} /> {/* Alias do email */}
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
+
+                    {/* Rotas de Autenticação (Apenas para Visitantes Não Autenticados) */}
+                    <Route element={<GuestRoute />}>
+                        <Route path="/signin" element={<SigninPage />} />
+                        <Route path="/auth/signin" element={<SigninPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+                        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+                        <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Alias do email */}
+                        <Route path="/auth/verify-user" element={<VerifyUserPage />} />
+                        <Route path="/verify-user" element={<VerifyUserPage />} /> {/* Alias do email */}
+                    </Route>
                 </Route>
 
                 {/* Rotas Autenticadas (Plataforma/Backoffice) */}
