@@ -990,5 +990,40 @@
     "ended": "Ended",
     "cancelled": "Cancelled",
     "sold": "Sold"
+  },
+  "legal": {
+    "terms": {
+      "title": "Terms of Service",
+      "last_updated": "Last updated: January 2026",
+      "p1": "Welcome to BidLive. By using our service, you agree to these terms. Please read them carefully.",
+      "h1": "1. Acceptance of Terms",
+      "c1": "By accessing and using BidLive, you agree to be bound by these Terms of Service and all applicable laws and regulations.",
+      "h2": "2. Account Registration",
+      "c2": "You must provide accurate and complete information when registering. You are responsible for maintaining the confidentiality of your account.",
+      "h3": "3. Auction Rules",
+      "c3": "All bids are final and binding. Fraudulent bids are not permitted."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "last_updated": "Last updated: January 2026",
+      "p1": "Your privacy is important to us. This policy explains how we collect, use, and protect your information.",
+      "h1": "1. Data Collection",
+      "c1": "We collect information you provide directly to us, such as when you create an account or update your profile.",
+      "h2": "2. Data Use",
+      "c2": "We use your information to provide, maintain, and improve our services.",
+      "h3": "3. Data Protection",
+      "c3": "We implement security measures to protect your personal information against unauthorized access."
+    },
+    "consent": {
+      "agree_to_terms": "I agree to the",
+      "terms": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy"
+    },
+    "cookie_banner": {
+      "message": "We use cookies to improve your experience, analyze traffic and personalize content. By continuing to browse, you accept our ",
+      "accept": "Accept",
+      "privacy_link": "Cookie and Privacy Policy"
+    }
   }
 }

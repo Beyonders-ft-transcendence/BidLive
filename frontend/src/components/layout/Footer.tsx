@@ -69,9 +69,16 @@ export default function Footer() {
             </div>
 
             <div className="border-t border-border">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
                     <span>© {year} BidLive. {t("footer.rights")}</span>
-                    <span>{t("footer.madeBy")}</span>
+                    <div className="flex items-center gap-4">
+                        <Link to="/terms" className="hover:text-primary transition-colors">
+                            {t("legal.terms.title")}
+                        </Link>
+                        <Link to="/privacy" className="hover:text-primary transition-colors">
+                            {t("legal.privacy.title")}
+                        </Link>
+                    </div>
                 </div>
             </div>
         </footer>

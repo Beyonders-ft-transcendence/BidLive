@@ -16,4 +16,8 @@ export { default as DomainsPage } from "./backoffice/DomainsPage";
 export { default as DomainConfigPage } from "./backoffice/DomainConfigPage";
 export { default as AdminAuctionsPage } from "./backoffice/AdminAuctionsPage";
 export { default as RolesPage } from "./backoffice/RolesPage";
+
+// LEGAL
+export { TermsPage } from "./legal/TermsPage";
+export { PrivacyPage } from "./legal/PrivacyPage";
 

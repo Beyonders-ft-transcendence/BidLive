@@ -17,6 +17,8 @@ import {
     DomainConfigPage,
     AdminAuctionsPage,
     RolesPage,
+    TermsPage,
+    PrivacyPage,
 } from "@/pages/index";
 import { UserRole } from "@/shared/types/auth.types";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -42,6 +44,8 @@ export default function IndexRoot() {
                     <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Alias do email */}
                     <Route path="/auth/verify-user" element={<VerifyUserPage />} />
                     <Route path="/verify-user" element={<VerifyUserPage />} /> {/* Alias do email */}
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
                 </Route>
 
                 {/* Rotas Autenticadas (Plataforma/Backoffice) */}
