@@ -102,6 +102,8 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
     setStep((prev) => prev - 1);
   };
 
+  const [isDraftSubmission, setIsDraftSubmission] = useState(false);
+
   const onSubmit = async (data: CreateAuctionInput) => {
     if (selectedFiles.length === 0) {
       toast.error(t('create_auction_tab.toast_no_images'));
@@ -140,10 +142,15 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
         start_time: new Date(data.start_time).toISOString(),
         end_time: new Date(data.end_time).toISOString(),
         image_urls: uploadedUrls,
+        is_draft: isDraftSubmission,
       };
 
       await createAuctionMutation.mutateAsync(payload);
-      toast.success(t('create_auction_tab.toast_success'));
+      toast.success(
+        isDraftSubmission 
+          ? t('create_auction_tab.toast_draft_success', 'Rascunho salvo com sucesso!')
+          : t('create_auction_tab.toast_success')
+      );
       reset();
       setSelectedFiles([]);
       onSuccess();
@@ -459,14 +466,30 @@ export default function CreateAuctionTab({ categories, onSuccess }: CreateAuctio
                   {t('create_auction_tab.next')}
                 </button>
               ) : (
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !!uploadProgress}
-                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-sm shadow-md shadow-green-600/20 transition uppercase disabled:opacity-50 cursor-pointer border-none"
-                >
-                  <Save size={14} />
-                  {isSubmitting || uploadProgress ? t('create_auction_tab.processing') : t('create_auction_tab.save_draft')}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="submit"
+                    onClick={() => setIsDraftSubmission(true)}
+                    disabled={isSubmitting || !!uploadProgress}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-muted hover:bg-muted/80 text-foreground font-bold text-xs rounded-sm shadow-xs transition uppercase disabled:opacity-50 cursor-pointer border border-border"
+                  >
+                    <Save size={14} />
+                    {isSubmitting && isDraftSubmission
+                      ? t('create_auction_tab.processing')
+                      : t('create_auction_tab.save_draft', 'Salvar Rascunho')}
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={() => setIsDraftSubmission(false)}
+                    disabled={isSubmitting || !!uploadProgress}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-sm shadow-md shadow-green-600/20 transition uppercase disabled:opacity-50 cursor-pointer border-none"
+                  >
+                    <Upload size={14} />
+                    {isSubmitting && !isDraftSubmission
+                      ? t('create_auction_tab.processing')
+                      : t('create_auction_tab.publish_auction', 'Publicar Leilão')}
+                  </button>
+                </div>
               )}
             </div>
           </div>

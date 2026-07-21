@@ -10,7 +10,7 @@ import { useAuctionMessagesQuery, useAuctionChatRealtime, useSendAuctionMessageM
 import {
     ChevronLeft, Gavel, CheckCircle2, Shield, AlertCircle,
     Tag, User, CalendarDays, TrendingUp, ShoppingBag, MessageSquare,
-    Send, Heart, AlertOctagon, CheckCheck
+    Send, Heart, AlertOctagon, CheckCheck, XCircle, X
 } from "lucide-react";
 import auctionService from "@/services/auction.service";
 import { toast } from "sonner";
@@ -19,6 +19,8 @@ import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { ReportTargetType } from "@/shared/types/report.types";
 import LiveStreamViewerPlayer from "@/components/livestream/LiveStreamViewerPlayer";
 import { useStreamViewersQuery } from "@/hooks/useLiveKit";
+import { useCancelAuctionMutation } from "@/hooks/useAuction";
+import { usePermissions } from "@/hooks/usePermissions";
 
 function formatCurrency(val: string | number | null | undefined, compact: boolean = false, locale: string = "pt-AO") {
     if (!val) return "—";
@@ -203,6 +205,29 @@ export default function AuctionDetailPage() {
     const [activeImage, setActiveImage] = useState(0);
     const [chatInput, setChatInput] = useState("");
     const [showChat, setShowChat] = useState(true);
+    
+    // Cancellation state & permissions
+    const permissions = usePermissions();
+    const cancelAuctionMutation = useCancelAuctionMutation();
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+
+    const handleCancelAuction = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!auctionId) return;
+        try {
+            await cancelAuctionMutation.mutateAsync({
+                id: auctionId,
+                payload: { reason: cancelReason },
+            });
+            toast.success(t("auction_detail.toast_cancel_success", "Leilão cancelado com sucesso."));
+            setShowCancelModal(false);
+            setCancelReason("");
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err?.message || t("auction_detail.toast_cancel_error", "Erro ao cancelar o leilão."));
+        }
+    };
     
     // Chat integration
     const { data: messagesData } = useAuctionMessagesQuery(auctionId);
@@ -441,38 +466,38 @@ export default function AuctionDetailPage() {
     };
 
     const renderChat = () => (
-        <div className="flex flex-col h-full bg-slate-900 text-slate-100 rounded-xl overflow-hidden shadow-lg border border-slate-800">
+        <div className="flex flex-col h-full bg-card text-card-foreground rounded-xl overflow-hidden shadow-md border border-border">
             {/* Header */}
-            <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div className="px-4 py-3 bg-muted/60 border-b border-border flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
-                    <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-[#00a884]/15 text-[#00a884] border border-[#00a884]/30">
+                    <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary border border-primary/20">
                         <MessageSquare size={16} />
-                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#00a884] rounded-full border-2 border-slate-900 animate-pulse" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-card animate-pulse" />
                     </div>
                     <div>
-                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-100 flex items-center gap-1.5">
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground flex items-center gap-1.5">
                             {t('auction_detail.public_chat')}
                         </h3>
-                        <p className="text-[10px] text-[#00a884] font-medium">
+                        <p className="text-[10px] text-primary font-semibold">
                             {chatMessages.length} {t('chat_tab.tab_conversations', 'mensagens')}
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-full text-slate-300 font-mono text-[10px] border border-slate-700/60">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00a884] animate-ping" />
+                <div className="flex items-center gap-1.5 bg-card px-2.5 py-1 rounded-full text-foreground font-mono text-[10px] border border-border shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     Live
                 </div>
             </div>
 
-            {/* Chat Messages Body - WhatsApp theme wallpaper & spacing */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-[#0b141a] bg-[radial-gradient(#1f2c34_1px,transparent_1px)] [background-size:16px_16px]">
+            {/* Chat Messages Body - Platform theme tokens */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-muted/30">
                 {chatMessages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                        <div className="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mb-3 text-[#00a884] border border-slate-700">
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3 text-primary border border-border">
                             <MessageSquare size={24} />
                         </div>
-                        <p className="text-sm font-semibold text-slate-200">{t('auction_detail.empty_chat')}</p>
-                        <p className="text-xs text-slate-400 mt-1 max-w-[200px] leading-relaxed">{t('auction_detail.empty_chat_desc')}</p>
+                        <p className="text-sm font-semibold text-foreground">{t('auction_detail.empty_chat')}</p>
+                        <p className="text-xs text-muted-foreground mt-1 max-w-[200px] leading-relaxed">{t('auction_detail.empty_chat_desc')}</p>
                     </div>
                 ) : (
                     chatMessages.map((msg) => {
@@ -490,8 +515,8 @@ export default function AuctionDetailPage() {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedProfile({ id: msg.sender.id, username: msg.sender.username })}
-                                    className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center font-bold text-[11px] shadow-sm transition-transform hover:scale-105 overflow-hidden border border-slate-700 cursor-pointer ${
-                                        msg.sender.avatar_url ? 'bg-slate-800' : avatarBg
+                                    className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center font-bold text-[11px] shadow-sm transition-transform hover:scale-105 overflow-hidden border border-border cursor-pointer ${
+                                        msg.sender.avatar_url ? 'bg-muted' : avatarBg
                                     }`}
                                     title={senderName}
                                 >
@@ -502,12 +527,12 @@ export default function AuctionDetailPage() {
                                     )}
                                 </button>
 
-                                {/* Message Bubble (WhatsApp style) */}
+                                {/* Message Bubble (Platform tokens) */}
                                 <div 
-                                    className={`relative max-w-[82%] sm:max-w-[78%] px-3.5 py-2.5 shadow-md text-xs leading-relaxed transition-all ${
+                                    className={`relative max-w-[82%] sm:max-w-[78%] px-3.5 py-2.5 shadow-sm text-xs leading-relaxed transition-all ${
                                         isMine 
-                                            ? 'bg-[#005c4b] text-slate-100 rounded-2xl rounded-br-xs border border-emerald-600/30' 
-                                            : 'bg-[#202c33] text-slate-100 rounded-2xl rounded-bl-xs border border-slate-700/60'
+                                            ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-xs border border-primary/20' 
+                                            : 'bg-card text-card-foreground rounded-2xl rounded-bl-xs border border-border'
                                     }`}
                                 >
                                     {/* Sender Header */}
@@ -516,29 +541,29 @@ export default function AuctionDetailPage() {
                                             type="button"
                                             onClick={() => setSelectedProfile({ id: msg.sender.id, username: msg.sender.username })}
                                             className={`font-bold text-[11px] hover:underline cursor-pointer truncate max-w-[150px] text-left ${
-                                                isMine ? 'text-emerald-300' : 'text-[#00a884]'
+                                                isMine ? 'text-primary-foreground/90' : 'text-primary'
                                             }`}
                                         >
                                             {isMine ? t('user_drawer.my_account', 'Você') : senderName}
                                         </button>
-                                        <span className="text-[9px] text-slate-400 font-mono shrink-0">
+                                        <span className={`text-[9px] font-mono shrink-0 ${isMine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                                             @{msg.sender.username}
                                         </span>
                                     </div>
 
                                     {/* Message Text */}
-                                    <p className="break-words text-slate-100 text-[13px] whitespace-pre-wrap font-normal">
+                                    <p className={`break-words text-[13px] whitespace-pre-wrap font-normal ${isMine ? 'text-primary-foreground' : 'text-foreground'}`}>
                                         {msg.message}
                                     </p>
 
                                     {/* Time Footer & Status */}
                                     <div className={`flex items-center justify-end gap-1 mt-1 text-[9.5px] font-mono ${
-                                        isMine ? 'text-emerald-200/80' : 'text-slate-400'
+                                        isMine ? 'text-primary-foreground/80' : 'text-muted-foreground'
                                     }`}>
                                         <span>
                                             {new Date(msg.created_at).toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit" })}
                                         </span>
-                                        {isMine && <CheckCheck size={13} className="text-emerald-300 ml-0.5" />}
+                                        {isMine && <CheckCheck size={13} className="text-primary-foreground ml-0.5" />}
                                     </div>
                                 </div>
                             </div>
@@ -548,8 +573,8 @@ export default function AuctionDetailPage() {
                 <div ref={chatEndRef} />
             </div>
             
-            {/* Input Bar (WhatsApp style) */}
-            <div className="p-3 bg-[#111b21] border-t border-slate-800 shrink-0">
+            {/* Input Bar (Platform tokens) */}
+            <div className="p-3 bg-muted/40 border-t border-border shrink-0">
                 {isAuthenticated ? (
                     <form onSubmit={handleSendMessage} className="relative flex items-center gap-2">
                         <input
@@ -557,21 +582,21 @@ export default function AuctionDetailPage() {
                             value={chatInput}
                             onChange={e => setChatInput(e.target.value)}
                             placeholder={t('auction_detail.chat_placeholder')}
-                            className="flex-1 bg-[#2a3942] border border-slate-700/80 rounded-full pl-4 pr-10 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884]/30 transition-all"
+                            className="flex-1 bg-background border border-border rounded-full pl-4 pr-10 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
                         />
                         <button 
                             type="submit" 
                             disabled={!chatInput.trim()}
-                            className="w-9 h-9 bg-[#00a884] hover:bg-[#008f70] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:bg-slate-700 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0 border-none"
+                            className="w-9 h-9 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full flex items-center justify-center shadow-md hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:bg-muted disabled:cursor-not-allowed transition-all cursor-pointer shrink-0 border-none"
                         >
                             <Send size={14} />
                         </button>
                     </form>
                 ) : (
-                    <div className="text-center py-2 bg-slate-800/40 rounded-lg px-3 border border-slate-700/50">
-                        <p className="text-[11px] text-slate-300">
+                    <div className="text-center py-2 bg-card rounded-lg px-3 border border-border">
+                        <p className="text-[11px] text-muted-foreground">
                             {t('auction_detail.login_to_chat').split('<1>')[0]}
-                            <Link to="/signin" className="text-[#00a884] hover:underline font-bold mx-1">
+                            <Link to="/signin" className="text-primary hover:underline font-bold mx-1">
                                 {t('auction_detail.login_to_chat').split('<1>')[1].split('</1>')[0]}
                             </Link>
                             {t('auction_detail.login_to_chat').split('</1>')[1]}
@@ -669,6 +694,16 @@ export default function AuctionDetailPage() {
                     </Link>
                     {isAuthenticated && (
                         <div className="flex items-center gap-2">
+                            {((currentUser?.id && (auction?.item?.seller === currentUser.id || (typeof auction?.item?.seller === 'object' && (auction?.item?.seller as any)?.id === currentUser.id))) || permissions.isAdminOrMonitor || permissions.isSuperAdmin) && 
+                             auction.status !== "CANCELLED" && auction.status !== "ENDED" && auction.status !== "SOLD" && (
+                                <button
+                                    onClick={() => setShowCancelModal(true)}
+                                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg border border-red-500/40 text-red-500 hover:bg-red-500/10 transition-all cursor-pointer bg-transparent shadow-xs"
+                                >
+                                    <XCircle className="h-4 w-4" />
+                                    {t("auction_detail.cancel_auction", "Cancelar Leilão")}
+                                </button>
+                            )}
                             <button
                                 onClick={() => setIsReportModalOpen(true)}
                                 className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all cursor-pointer bg-transparent"
@@ -975,6 +1010,79 @@ export default function AuctionDetailPage() {
                     userId={selectedProfile.id}
                     username={selectedProfile.username}
                 />
+            )}
+
+            {/* Modal de Cancelamento de Leilão */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+                    <div 
+                        className="absolute inset-0 bg-black/60 backdrop-blur-xs" 
+                        onClick={() => setShowCancelModal(false)} 
+                    />
+                    <div className="relative bg-card border border-border w-full max-w-md rounded-xl shadow-2xl flex flex-col z-10 overflow-hidden">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20">
+                                    <XCircle size={18} />
+                                </div>
+                                <h2 className="text-base font-bold text-foreground">
+                                    {t("auction_detail.cancel_modal_title", "Cancelar Leilão")}
+                                </h2>
+                            </div>
+                            <button
+                                onClick={() => setShowCancelModal(false)}
+                                type="button"
+                                className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-none bg-transparent"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <form onSubmit={handleCancelAuction} className="p-6 space-y-4">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                {t(
+                                    "auction_detail.cancel_modal_desc",
+                                    "Tem certeza de que deseja cancelar este leilão? Esta ação não pode ser desfeita e os participantes serão notificados."
+                                )}
+                            </p>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-foreground">
+                                    {t("auction_detail.cancel_reason_label", "Motivo do Cancelamento (opcional)")}
+                                </label>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder={t("auction_detail.cancel_reason_placeholder", "Descreva o motivo do cancelamento...")}
+                                    rows={3}
+                                    className="w-full p-3 bg-muted/50 border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 resize-none"
+                                />
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="flex items-center justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCancelModal(false)}
+                                    className="px-4 py-2 text-xs font-semibold text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer border-none"
+                                >
+                                    {t("modals.cancel", "Cancelar")}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={cancelAuctionMutation.isPending}
+                                    className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-md transition-all cursor-pointer border-none disabled:opacity-50"
+                                >
+                                    {cancelAuctionMutation.isPending
+                                        ? t("modals.sending", "Cancelando...")
+                                        : t("auction_detail.confirm_cancel", "Confirmar Cancelamento")}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
 
             <Footer />
