@@ -88,6 +88,38 @@ export function useUpdateUserMutation() {
   });
 }
 
+export function useCreateUserMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: any) => adminService.createUser(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users(1, "") });
+      toast.success("Utilizador criado com sucesso");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao criar utilizador";
+      toast.error(msg);
+    }
+  });
+}
+
+export function useDeleteUserMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adminService.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users(1, "") });
+      toast.success("Utilizador removido com sucesso");
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Erro ao remover utilizador";
+      toast.error(msg);
+    }
+  });
+}
+
 export function useCreateRoleMutation() {
   const queryClient = useQueryClient();
 

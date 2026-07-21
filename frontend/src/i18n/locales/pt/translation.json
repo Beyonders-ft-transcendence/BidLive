@@ -114,7 +114,19 @@
     "select_profile": "Selecione um perfil...",
     "profile_help": "O perfil define as permissões do utilizador na plataforma.",
     "btn_save": "Guardar Alterações",
-    "btn_saving": "A Guardar..."
+    "btn_saving": "A Guardar...",
+    "btn_new_user": "Novo Utilizador",
+    "create_user_title": "Criar Novo Utilizador",
+    "email": "Endereço de Email",
+    "username": "Nome de Utilizador (Username)",
+    "password": "Senha (Opcional no update)",
+    "password_create": "Senha (Obrigatório)",
+    "password_placeholder": "Mínimo 8 caracteres",
+    "delete_user": "Remover Utilizador",
+    "delete_confirm": "Tem a certeza que deseja remover este utilizador?",
+    "delete_confirm_desc": "O utilizador não poderá aceder à plataforma.",
+    "btn_cancel": "Cancelar",
+    "btn_delete": "Remover"
   },
   "backoffice_reports": {
     "title": "Denúncias",

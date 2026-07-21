@@ -59,6 +59,16 @@ export interface UserBanPayload {
   status: 'BANNED' | 'SUSPENDED' | 'ACTIVE';
 }
 
+export interface UserCreatePayload {
+  email: string;
+  username: string;
+  full_name: string;
+  password?: string;
+  role_names?: string[];
+  avatar_url?: string;
+  bio?: string;
+}
+
 // --- Reports (Denúncias) ---
 export type ReportStatus = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED' | 'IGNORED';
 

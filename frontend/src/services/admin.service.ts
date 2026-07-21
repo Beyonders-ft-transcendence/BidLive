@@ -9,7 +9,8 @@ import type {
   PaginatedResponse,
   Report,
   ReportStatusUpdatePayload,
-  ReportActionPayload
+  ReportActionPayload,
+  UserCreatePayload
 } from "@/shared/types/admin.types";
 
 export const adminService = {
@@ -24,6 +25,15 @@ export const adminService = {
   getUserById: async (id: number): Promise<AdminUser> => {
     const response = await api.get(`/users/${id}/`);
     return response.data.data;
+  },
+
+  createUser: async (payload: UserCreatePayload): Promise<AdminUser> => {
+    const response = await api.post(`/users/`, payload);
+    return response.data.data;
+  },
+
+  deleteUser: async (id: number): Promise<void> => {
+    await api.delete(`/users/${id}/`);
   },
 
   updateUser: async (id: number, data: any): Promise<AdminUser> => {
