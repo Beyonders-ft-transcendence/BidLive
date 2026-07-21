@@ -76,9 +76,14 @@ export default function UsersPage() {
         }
       });
     } else if (selectedUserId) {
-      // In update we only send password if it's filled
+      // In update we remove password if empty and remove email since it cannot be changed via partial update
       const updateData = { ...formData } as any;
       if (!updateData.password) delete updateData.password;
+      delete updateData.email;
+      
+      if (Array.isArray(updateData.role_names)) {
+        updateData.role_names = updateData.role_names.filter((r: string) => r && r.trim() !== '');
+      }
       
       updateUser({ 
         id: selectedUserId, 
@@ -363,15 +368,13 @@ export default function UsersPage() {
                   <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.access_profile')}</label>
                   <select 
                     value={formData.role_names[0] || ''}
-                    onChange={(e) => setFormData(p => ({ ...p, role_names: [e.target.value] }))}
+                    onChange={(e) => setFormData(p => ({ ...p, role_names: e.target.value ? [e.target.value] : [] }))}
                     className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 appearance-none transition-all"
                   >
-                    <option value="" disabled>{t('backoffice_users.select_profile')}</option>
+                    <option value="">{t('backoffice_users.select_profile')}</option>
                     {roles.map((role: any) => (
                       <option key={role.id} value={role.name}>{role.name}</option>
                     ))}
-                    <option value="USER">USER (Padrão)</option>
-                    <option value="ADMIN">ADMIN</option>
                   </select>
                   <p className="text-xs text-zinc-500 mt-1">{t('backoffice_users.profile_help')}</p>
                 </div>
