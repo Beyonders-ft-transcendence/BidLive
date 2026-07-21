@@ -946,7 +946,7 @@ export default function AuctionDetailPage() {
                             {bids.length === 0 ? (
                                 <div className="p-8 text-center text-muted-foreground text-xs">{t('auction_detail.no_bids')}</div>
                             ) : (
-                                <div className="overflow-x-auto">
+                                <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
                                     <table className="w-full text-left text-xs border-collapse">
                                         <thead>
                                             <tr className="bg-muted text-muted-foreground font-mono font-bold uppercase tracking-wider border-b border-border">
