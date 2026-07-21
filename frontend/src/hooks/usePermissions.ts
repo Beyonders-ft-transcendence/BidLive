@@ -45,6 +45,47 @@ export function usePermissions() {
   const isMonitor = hasRole(UserRole.MONITOR);
   const isAdminOrMonitor = isSuperAdmin || isMonitor;
 
+  // Standard system fallback permissions by role name when explicit permissions array is empty/omitted
+  const defaultRolePermissions: Record<string, string[]> = {
+    USER: [
+      "auction.create",
+      "auction.read",
+      "auction.update",
+      "auction.delete",
+      "auction.bid",
+      "auction.buy_now",
+      "auction.watch",
+      "chat.send",
+      "report.create",
+      "user.read",
+      "user.update",
+    ],
+    MONITOR: [
+      "auction.create",
+      "auction.read",
+      "auction.update",
+      "auction.delete",
+      "auction.bid",
+      "auction.buy_now",
+      "auction.cancel",
+      "auction.watch",
+      "auction.manage",
+      "chat.send",
+      "chat.delete",
+      "chat.moderate",
+      "report.create",
+      "report.review",
+      "report.resolve",
+      "user.read",
+      "user.update",
+      "user.ban",
+      "content.hide",
+      "content.remove",
+      "moderation.alert",
+    ],
+    SUPER_ADMIN: ["*"],
+  };
+
   // Helper para verificar uma permissão específica
   const hasPermission = (permissionCodename: string): boolean => {
     if (!user || !isAuthenticated) return false;
@@ -52,8 +93,8 @@ export function usePermissions() {
     // Super Administradores possuem acesso irrestrito
     if (isSuperAdmin) return true;
 
-    // Verificar na lista de permissões diretas do utilizador
-    if (Array.isArray(userPermissions)) {
+    // 1. Verificar na lista de permissões diretas do utilizador (array de strings)
+    if (Array.isArray(userPermissions) && userPermissions.length > 0) {
       if (userPermissions.includes("*") || userPermissions.includes(permissionCodename)) {
         return true;
       }
@@ -61,6 +102,34 @@ export function usePermissions() {
       const category = permissionCodename.split(".")[0];
       if (category && userPermissions.includes(`${category}.*`)) {
         return true;
+      }
+    }
+
+    // 2. Verificar se roles é um array de objetos Role (ex: [{ name: "USER", permissions: [{ name: "auction.create" }] }])
+    if (Array.isArray(userRoles)) {
+      for (const r of userRoles) {
+        if (typeof r === "object" && r !== null && Array.isArray((r as any).permissions)) {
+          const perms: any[] = (r as any).permissions;
+          const permCodenames = perms.map((p: any) => (typeof p === "string" ? p : p.name || p.codename));
+          if (permCodenames.includes("*") || permCodenames.includes(permissionCodename)) {
+            return true;
+          }
+          const category = permissionCodename.split(".")[0];
+          if (category && permCodenames.includes(`${category}.*`)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    // 3. Fallback: Se a lista explícita de permissões estiver vazia, verifica permissões padrão do perfil/role
+    for (const r of userRoles) {
+      const roleStr = (typeof r === "string" ? r : r?.name)?.toUpperCase();
+      if (roleStr && defaultRolePermissions[roleStr]) {
+        const defaults = defaultRolePermissions[roleStr];
+        if (defaults.includes("*") || defaults.includes(permissionCodename)) {
+          return true;
+        }
       }
     }
 
