@@ -70,7 +70,19 @@
     "select_profile": "Sélectionnez un profil...",
     "profile_help": "Le profil définit les permissions de l'utilisateur sur la plateforme.",
     "btn_save": "Enregistrer les modifications",
-    "btn_saving": "Enregistrement..."
+    "btn_saving": "Enregistrement...",
+    "btn_new_user": "Nouvel Utilisateur",
+    "create_user_title": "Créer un Nouvel Utilisateur",
+    "email": "Adresse e-mail",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe (Facultatif pour modification)",
+    "password_create": "Mot de passe (Obligatoire)",
+    "password_placeholder": "Minimum 8 caractères",
+    "delete_user": "Supprimer l'utilisateur",
+    "delete_confirm": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+    "delete_confirm_desc": "L'utilisateur ne pourra plus accéder à la plateforme.",
+    "btn_cancel": "Annuler",
+    "btn_delete": "Supprimer"
   },
   "backoffice_reports": {
     "title": "Signalements",

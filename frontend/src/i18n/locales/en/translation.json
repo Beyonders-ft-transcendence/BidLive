@@ -114,7 +114,19 @@
     "select_profile": "Select a profile...",
     "profile_help": "The profile defines the user's permissions on the platform.",
     "btn_save": "Save Changes",
-    "btn_saving": "Saving..."
+    "btn_saving": "Saving...",
+    "btn_new_user": "New User",
+    "create_user_title": "Create New User",
+    "email": "Email Address",
+    "username": "Username",
+    "password": "Password (Optional for update)",
+    "password_create": "Password (Required)",
+    "password_placeholder": "Minimum 8 characters",
+    "delete_user": "Delete User",
+    "delete_confirm": "Are you sure you want to delete this user?",
+    "delete_confirm_desc": "The user will no longer be able to access the platform.",
+    "btn_cancel": "Cancel",
+    "btn_delete": "Delete"
   },
   "backoffice_reports": {
     "title": "Reports",
