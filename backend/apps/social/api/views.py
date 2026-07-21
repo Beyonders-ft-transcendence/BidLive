@@ -11,6 +11,7 @@ from apps.social.selectors import (
     list_online_friends,
     list_pending_requests_received,
     list_pending_requests_sent,
+    list_blocked_users,
 )
 from apps.social.serializers import (
     FriendshipCreateSerializer,
@@ -188,3 +189,15 @@ class BlockViewSet(viewsets.GenericViewSet):
             return error_response(errors=str(exc), status_code=status.HTTP_400_BAD_REQUEST)
 
         return success_response(message="Bloqueio removido.")
+    
+    @extend_schema(tags=SOCIAL_TAGS, summary="Listar utilizadores bloqueados")
+    @action(detail=False, methods=["get"], url_path="blocked")
+    def blocked(self, request: Request):
+        """GET /api/social/users/blocked/"""
+
+        users = list_blocked_users(user=request.user)
+
+        return success_response(
+            data=PublicUserSerializer(users, many=True).data
+        )
+
