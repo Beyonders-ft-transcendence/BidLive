@@ -81,7 +81,12 @@ class AuctionViewSet(viewsets.GenericViewSet):
         # Public endpoints: list, retrieve, featured, activities
         if self.action in ["list", "retrieve", "featured", "activities"]:
             return [AllowAny()]
-        # All other actions require authentication (default permission classes)
+
+        # Endpoints where any authenticated user (buyers) can perform the action
+        if self.action in ["buy_now", "watch", "unwatch", "bids"]:
+            return [IsAuthenticated(), HasRBACPermission()]
+
+        # All other actions require authentication and ownership/manager permissions
         return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
