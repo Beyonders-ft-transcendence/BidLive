@@ -58,6 +58,11 @@ class SocialService {
     return response.data;
   }
 
+  async listBlockedUsers(): Promise<ApiResponse<PublicUser[]>> {
+    const response = await api.get<ApiResponse<PublicUser[]>>('/social/users/blocked/');
+    return response.data;
+  }
+
   async searchUsers(query: string): Promise<ApiResponse<{ results: PublicUser[] }>> {
     const response = await api.get<ApiResponse<{ results: PublicUser[] }>>(`/users/?search=${encodeURIComponent(query)}`);
     return response.data;
