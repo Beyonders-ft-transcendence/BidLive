@@ -3,9 +3,16 @@ import { useState, useEffect } from 'react';
 import Container from '@/components/layout/backoffice/Container';
 import PageHeader from '@/components/layout/backoffice/PageHeader';
 import Toolbar from '@/components/layout/backoffice/Toolbar';
-import { useAdminUsersQuery, useUpdateUserMutation, useAdminRolesQuery, useAdminUserDetailQuery } from '@/hooks/useAdmin';
+import { 
+  useAdminUsersQuery, 
+  useUpdateUserMutation, 
+  useAdminRolesQuery, 
+  useAdminUserDetailQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation
+} from '@/hooks/useAdmin';
 import Avatar from '@/components/common/Avatar';
-import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save } from 'lucide-react';
+import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function UsersPage() {
@@ -15,41 +22,74 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   
+  const [isCreateMode, setIsCreateMode] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const { data, isLoading } = useAdminUsersQuery(page, search);
   const { data: rolesData } = useAdminRolesQuery();
   const { data: userDetail, isLoading: isLoadingDetail } = useAdminUserDetailQuery(selectedUserId || 0);
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUserMutation();
+  const { mutate: createUser, isPending: isCreating } = useCreateUserMutation();
+  const { mutate: deleteUser, isPending: isDeleting } = useDeleteUserMutation();
 
   const [formData, setFormData] = useState({
+    email: '',
+    username: '',
     full_name: '',
+    password: '',
     status: 'ACTIVE',
     role_names: [] as string[],
   });
 
+  const resetForm = () => {
+    setFormData({
+      email: '',
+      username: '',
+      full_name: '',
+      password: '',
+      status: 'ACTIVE',
+      role_names: [],
+    });
+  };
+
   useEffect(() => {
-    if (userDetail) {
+    if (userDetail && !isCreateMode) {
       setFormData({
+        email: userDetail.email || '',
+        username: userDetail.username || '',
         full_name: userDetail.full_name || '',
+        password: '',
         status: userDetail.status || 'ACTIVE',
         role_names: userDetail.roles?.map((r: any) => typeof r === 'string' ? r : r.name) || [],
       });
     }
-  }, [userDetail]);
+  }, [userDetail, isCreateMode]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) return;
-    
-    updateUser({ 
-      id: selectedUserId, 
-      payload: formData 
-    }, {
-      onSuccess: () => {
-        setSelectedUserId(null);
-      }
-    });
+    if (isCreateMode) {
+      createUser(formData, {
+        onSuccess: () => {
+          setIsCreateMode(false);
+          resetForm();
+        }
+      });
+    } else if (selectedUserId) {
+      // In update we only send password if it's filled
+      const updateData = { ...formData } as any;
+      if (!updateData.password) delete updateData.password;
+      
+      updateUser({ 
+        id: selectedUserId, 
+        payload: updateData 
+      }, {
+        onSuccess: () => {
+          setSelectedUserId(null);
+          resetForm();
+        }
+      });
+    }
   };
 
   const roles = Array.isArray(rolesData) ? rolesData : (rolesData?.results || []);
@@ -65,15 +105,29 @@ export default function UsersPage() {
 
       <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full relative">
         <Toolbar>
-          <div className="relative w-full md:w-80">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder={t('backoffice_users.search_placeholder')}
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
-            />
+          <div className="flex items-center gap-4 w-full">
+            <div className="relative flex-1 md:w-80 md:flex-none">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input 
+                type="text" 
+                placeholder={t('backoffice_users.search_placeholder')}
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
+              />
+            </div>
+            <button
+              onClick={() => {
+                resetForm();
+                setIsCreateMode(true);
+                setSelectedUserId(null);
+                setShowDeleteConfirm(false);
+              }}
+              className="ml-auto flex items-center gap-2 px-4 py-2 bg-zinc-100 text-black text-sm font-medium rounded-lg hover:bg-white transition-colors"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:inline">{t('backoffice_users.btn_new_user')}</span>
+            </button>
           </div>
         </Toolbar>
 
@@ -141,7 +195,11 @@ export default function UsersPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
-                            onClick={() => setSelectedUserId(user.id)}
+                            onClick={() => {
+                              setSelectedUserId(user.id);
+                              setIsCreateMode(false);
+                              setShowDeleteConfirm(false);
+                            }}
                             className="p-1.5 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800"
                             title={t('backoffice_users.manage_user')}
                           >
@@ -185,23 +243,33 @@ export default function UsersPage() {
       </div>
 
       {/* Right Drawer Backdrop */}
-      {selectedUserId && (
+      {(selectedUserId || isCreateMode) && (
         <div 
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in"
-          onClick={() => setSelectedUserId(null)}
+          onClick={() => {
+            setSelectedUserId(null);
+            setIsCreateMode(false);
+            setShowDeleteConfirm(false);
+          }}
         />
       )}
 
       {/* Right Drawer Panel */}
       <div 
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-black border-l border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col ${
-          selectedUserId ? 'translate-x-0' : 'translate-x-full'
+          (selectedUserId || isCreateMode) ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-semibold text-zinc-100">{t('backoffice_users.manage_user')}</h2>
+          <h2 className="text-xl font-semibold text-zinc-100">
+            {isCreateMode ? t('backoffice_users.create_user_title') : t('backoffice_users.manage_user')}
+          </h2>
           <button 
-            onClick={() => setSelectedUserId(null)}
+            onClick={() => {
+              setSelectedUserId(null);
+              setIsCreateMode(false);
+              setShowDeleteConfirm(false);
+            }}
             className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-md hover:bg-zinc-800/50"
           >
             <X size={20} />
@@ -209,30 +277,72 @@ export default function UsersPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {isLoadingDetail && selectedUserId ? (
+          {(isLoadingDetail && selectedUserId && !isCreateMode) ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-500"></div>
             </div>
-          ) : userDetail ? (
+          ) : (
             <form id="user-form" onSubmit={handleSave} className="p-6 flex flex-col gap-8">
               
-              {/* Profile Overview */}
-              <div className="flex items-center gap-4">
-                <Avatar name={userDetail.full_name} src={userDetail.avatar_url} size="lg" />
-                <div>
-                  <h3 className="font-semibold text-zinc-100 text-lg">{userDetail.full_name}</h3>
-                  <p className="text-sm text-zinc-500">{userDetail.email}</p>
+              {/* Profile Overview (Only in edit mode) */}
+              {!isCreateMode && userDetail && (
+                <div className="flex items-center gap-4">
+                  <Avatar name={userDetail.full_name} src={userDetail.avatar_url} size="lg" />
+                  <div>
+                    <h3 className="font-semibold text-zinc-100 text-lg">{userDetail.full_name}</h3>
+                    <p className="text-sm text-zinc-500">{userDetail.email}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Form Fields */}
               <div className="flex flex-col gap-6">
+                {isCreateMode && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.email')}</label>
+                      <input 
+                        type="email" 
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
+                        className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.username')}</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.username}
+                        onChange={(e) => setFormData(p => ({ ...p, username: e.target.value }))}
+                        className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-zinc-300">{t('backoffice_users.full_name')}</label>
                   <input 
                     type="text" 
+                    required
                     value={formData.full_name}
                     onChange={(e) => setFormData(p => ({ ...p, full_name: e.target.value }))}
+                    className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-zinc-300">
+                    {isCreateMode ? t('backoffice_users.password_create') : t('backoffice_users.password')}
+                  </label>
+                  <input 
+                    type="password" 
+                    required={isCreateMode}
+                    placeholder={t('backoffice_users.password_placeholder')}
+                    value={formData.password}
+                    onChange={(e) => setFormData(p => ({ ...p, password: e.target.value }))}
                     className="w-full px-3 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
                   />
                 </div>
@@ -265,20 +375,67 @@ export default function UsersPage() {
                   </select>
                   <p className="text-xs text-zinc-500 mt-1">{t('backoffice_users.profile_help')}</p>
                 </div>
+
+                {/* Delete button only in edit mode */}
+                {!isCreateMode && (
+                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                    {!showDeleteConfirm ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                        {t('backoffice_users.delete_user')}
+                      </button>
+                    ) : (
+                      <div className="p-4 bg-red-950/30 border border-red-900/50 rounded-lg">
+                        <p className="text-sm font-medium text-red-400 mb-1">{t('backoffice_users.delete_confirm')}</p>
+                        <p className="text-xs text-red-400/80 mb-3">{t('backoffice_users.delete_confirm_desc')}</p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowDeleteConfirm(false)}
+                            className="flex-1 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-300 bg-zinc-900 hover:bg-zinc-800 rounded-md transition-colors"
+                          >
+                            {t('backoffice_users.btn_cancel')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedUserId) {
+                                deleteUser(selectedUserId, {
+                                  onSuccess: () => {
+                                    setSelectedUserId(null);
+                                    setShowDeleteConfirm(false);
+                                  }
+                                });
+                              }
+                            }}
+                            disabled={isDeleting}
+                            className="flex-1 px-3 py-1.5 text-xs font-medium text-red-950 bg-red-500 hover:bg-red-400 rounded-md transition-colors disabled:opacity-50"
+                          >
+                            {isDeleting ? '...' : t('backoffice_users.btn_delete')}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </form>
-          ) : null}
+          )}
         </div>
 
         <div className="p-6 border-t border-zinc-800 bg-black/80 backdrop-blur-md">
           <button 
             type="submit"
             form="user-form"
-            disabled={isUpdating || isLoadingDetail}
+            disabled={isUpdating || isCreating || (isLoadingDetail && !isCreateMode)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-black rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50"
           >
             <Save size={18} />
-            {isUpdating ? t('backoffice_users.btn_saving') : t('backoffice_users.btn_save')}
+            {(isUpdating || isCreating) ? t('backoffice_users.btn_saving') : t('backoffice_users.btn_save')}
           </button>
         </div>
       </div>
