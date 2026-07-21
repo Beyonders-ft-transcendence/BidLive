@@ -745,81 +745,302 @@ export default function AuctionDetailPage() {
         <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
             <Header />
 
-            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
-                    <Link to="/leiloes" className="flex items-center gap-1 hover:text-primary transition-colors font-medium">
-                        <ChevronLeft size={14} /> {t('auction_detail.explore_lots')}
+            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 space-y-8">
+                {/* Top Action Bar */}
+                <div className="flex items-center justify-between">
+                    <Link to="/leiloes" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-xs font-semibold px-3.5 py-2 hover:bg-muted border border-border rounded-lg transition-all">
+                        <ChevronLeft className="h-4 w-4" />
+                        {t('auction_detail.explore_lots')}
                     </Link>
-                    <span>/</span>
-                    <span className="text-foreground font-semibold truncate max-w-xs">{auction.item.title}</span>
-                </div>
-
-                {/* MOBILE VIEW (< 1024px) */}
-                <div className="flex flex-col lg:hidden gap-6">
-                    <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden flex flex-col">
-                        {renderMedia()}
-                    </div>
-                    
-                    <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden">
-                        {renderBidding()}
-                    </div>
-                    
-                    {showChat && (
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 flex flex-col h-[400px]">
-                            {renderChat()}
+                    {isAuthenticated && (
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsReportModalOpen(true)}
+                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all cursor-pointer bg-transparent"
+                                title={t('auction_detail.report_auction')}
+                            >
+                                <AlertOctagon className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={handleToggleFavorite}
+                                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition-all border cursor-pointer ${
+                                    isFavorite
+                                        ? 'bg-red-500/10 border-red-500/40 text-red-500'
+                                        : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                                }`}
+                            >
+                                <Heart className="h-4 w-4" fill={isFavorite ? 'currentColor' : 'none'} />
+                                {isFavorite ? t('auction_detail.remove_favorite') : t('auction_detail.add_favorite')}
+                            </button>
                         </div>
                     )}
-                    
-                    <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden">
-                        {renderBidsHistory()}
-                    </div>
-                    
-                    <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20">
-                        {renderDetails()}
-                    </div>
                 </div>
 
-                {/* DESKTOP VIEW (>= 1024px) */}
-                <div className="hidden lg:grid lg:grid-cols-[1fr_380px] gap-8">
-                    
-                    {/* ── LEFT COLUMN ── */}
-                    <div className="flex flex-col gap-6">
-                        
-                        {/* Top Section: Media + Chat side by side on large screens */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden flex flex-col xl:flex-row">
-                            
-                            {/* Media Section */}
-                            <div className="flex-1 flex flex-col">
-                                {renderMedia()}
+                {/* Live Stream + Chat (when active) */}
+                {activeStream && isWatchingStream && (
+                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
+                            {renderMedia()}
+                        </div>
+                        {showChat && (
+                            <div className="lg:col-span-1 bg-card border border-border rounded-xl overflow-hidden flex flex-col h-[400px] lg:h-auto">
+                                {renderChat()}
                             </div>
+                        )}
+                    </section>
+                )}
 
-                            {/* Chat Card */}
-                            {showChat && (
-                                <div className="w-full xl:w-[320px] shrink-0 border-t xl:border-t-0 xl:border-l border-border flex flex-col h-[400px] xl:h-auto bg-background/20">
-                                    {renderChat()}
+                {/* MAIN GRID: 12-col — 5 for gallery, 7 for content */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* ── LEFT: Image Gallery (5 cols) ── */}
+                    <div className="lg:col-span-5 space-y-4">
+                        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-card border border-border shadow-md">
+                            {images.length > 0 ? (
+                                <img
+                                    src={images[activeImage]?.image_url}
+                                    alt={auction.item.title}
+                                    className="h-full w-full object-cover transition-all"
+                                />
+                            ) : (
+                                <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground">
+                                    <Gavel size={44} className="mb-2" />
+                                    <span className="text-sm">{t('auction_detail.no_image')}</span>
                                 </div>
                             )}
-
+                            {/* Status Badges */}
+                            <div className="absolute top-3 left-3 flex gap-2">
+                                <span className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md shadow-md">{t('auction_detail.lot')}{auction.id}</span>
+                                {isStreamingLive && (
+                                    <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-md">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" /> {t('auctions.live')}
+                                    </span>
+                                )}
+                                {auction.status === 'ACTIVE' && (
+                                    <span className="bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md shadow-md">{t('auctions.active', 'Active')}</span>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Details Card */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20">
-                            {renderDetails()}
-                        </div>
+                        {images.length > 1 && (
+                            <div className="flex gap-2.5 overflow-x-auto pb-1">
+                                {images.map((img, idx) => (
+                                    <button
+                                        key={img.id}
+                                        onClick={() => setActiveImage(idx)}
+                                        className={`relative aspect-square w-18 shrink-0 rounded-lg overflow-hidden bg-card transition-all border cursor-pointer ${
+                                            activeImage === idx ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-muted-foreground'
+                                        }`}
+                                    >
+                                        <img src={img.image_url} alt="Thumbnail" className="h-full w-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Chat (below gallery on desktop when not in stream mode) */}
+                        {showChat && !(activeStream && isWatchingStream) && (
+                            <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col h-[400px] shadow-md">
+                                {renderChat()}
+                            </div>
+                        )}
                     </div>
 
-                    {/* ── RIGHT COLUMN ── */}
-                    <div className="flex flex-col gap-5 sticky top-24 self-start max-h-[calc(100vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        
-                        {/* Bidding Card */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden shrink-0">
-                            {renderBidding()}
+                    {/* ── RIGHT: Auction Info + Bidding (7 cols) ── */}
+                    <div className="lg:col-span-7 space-y-6">
+                        {/* Title & Meta */}
+                        <div className="space-y-2">
+                            <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground font-mono">
+                                <span className="px-2 py-0.5 rounded-md bg-muted border border-border">{auction.item.category?.name || t('auction_detail.auction_category_default')}</span>
+                                <span>•</span>
+                                <button onClick={() => setSelectedProfile({ id: auction.item.seller, username: t('auction_detail.seller_label') })} className="hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0 font-mono text-xs text-muted-foreground">
+                                    {t('auction_detail.seller_label')}
+                                </button>
+                                <span>•</span>
+                                <span>{t('auction_detail.lot')} #{auction.id}</span>
+                            </div>
+                            <h1 className="text-foreground text-2xl sm:text-3xl font-extrabold tracking-tight">{auction.item.title}</h1>
                         </div>
 
-                        {/* Bids History Card */}
-                        <div className="bg-card border border-border rounded-sm shadow-md shadow-black/20 overflow-hidden shrink-0">
-                            {renderBidsHistory()}
+                        {/* Description */}
+                        {auction.item.description && (
+                            <p className="text-muted-foreground text-sm leading-relaxed p-4 bg-muted/30 border border-border rounded-xl">
+                                {auction.item.description}
+                            </p>
+                        )}
+
+                        {/* Info Cards: Time Left + Current Price */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="bg-card border border-border p-4 rounded-xl space-y-1.5">
+                                <span className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground font-bold block">{countdownLabel}</span>
+                                <span className={`text-lg font-mono font-bold block ${isBiddingOpen && countdownDisplay?.includes('0m') ? 'text-red-500 animate-pulse' : 'text-foreground'}`}>
+                                    {countdownDisplay || '—'}
+                                </span>
+                            </div>
+                            <div className="bg-card border border-border p-4 rounded-xl space-y-1.5">
+                                <span className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground font-bold block">{t('auction_detail.current_bid')}</span>
+                                <span className="text-lg font-mono font-bold text-primary block">{formatCurrency(currentPrice, true)}</span>
+                            </div>
+                        </div>
+
+                        {/* Bid Panel */}
+                        {isBiddingOpen ? (
+                            isAuthenticated ? (
+                                <div className="p-5 rounded-xl border border-border bg-card space-y-5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-foreground font-bold text-sm">{t('auction_detail.custom_bid_label')}</span>
+                                        <span className="text-xs font-mono text-muted-foreground">{t('auction_detail.min_increment')}: {formatCurrency(minIncrement)}</span>
+                                    </div>
+
+                                    {bidError && (
+                                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs leading-relaxed">{bidError}</div>
+                                    )}
+
+                                    {/* Quick Increment Buttons */}
+                                    <div className="space-y-2">
+                                        <span className="text-[10px] text-muted-foreground font-mono font-medium block">{t('auction_detail.fast_increment')}</span>
+                                        <div className="grid grid-cols-3 gap-2.5">
+                                            {[minIncrement, minIncrement * 2, minIncrement * 4].map((inc) => (
+                                                <button
+                                                    key={inc}
+                                                    type="button"
+                                                    onClick={() => handlePresetBid(inc)}
+                                                    className="py-2.5 text-xs font-bold bg-muted hover:bg-muted/80 text-primary rounded-lg transition-all border border-border hover:border-primary/30 flex items-center justify-center gap-1 cursor-pointer"
+                                                >
+                                                    +{formatCurrency(inc).replace("AOA", "").trim()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Bid Input */}
+                                    <form onSubmit={handlePlaceBid} className="space-y-3.5">
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-muted-foreground text-xs font-mono">Kz</div>
+                                            <input
+                                                type="number"
+                                                min={minBid}
+                                                step={minIncrement}
+                                                value={bidAmount}
+                                                onChange={(e) => setBidAmount(e.target.value)}
+                                                placeholder={formatCurrency(minBid).replace("AOA", "").trim()}
+                                                className="w-full h-11 pl-9 pr-24 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary text-xs font-mono"
+                                                required
+                                            />
+                                            <div className="absolute right-1.5 top-1.5 flex gap-1.5">
+                                                <button
+                                                    type="submit"
+                                                    disabled={submittingBid}
+                                                    className="h-8 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50"
+                                                >
+                                                    {submittingBid ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Gavel className="h-3.5 w-3.5" /> {t('auction_detail.place_bid')}</>}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground">{t('auction_detail.min_bid_label')} <span className="font-semibold text-foreground">{formatCurrency(minBid)}</span></p>
+                                    </form>
+
+                                    {/* Buy Now */}
+                                    {auction.item.buy_now_price && (
+                                        <div className="pt-4 border-t border-border flex items-center justify-between">
+                                            <div className="text-left">
+                                                <span className="text-[10px] text-muted-foreground font-mono block">{t('auction_detail.buy_now_label')}</span>
+                                                <span className="text-foreground text-xs font-bold leading-normal block">{t('auction_detail.buy_now_desc')}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleBuyNowSubmit}
+                                                disabled={submittingBuyNow}
+                                                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border border-indigo-500/30 cursor-pointer disabled:opacity-50 shrink-0"
+                                            >
+                                                <ShoppingBag className="h-4 w-4" />
+                                                {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `${t('auction_detail.buy_now_btn')}${formatCurrency(auction.item.buy_now_price, true)}`}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-muted border border-border rounded-xl text-center py-6 flex flex-col items-center gap-3">
+                                    <User size={28} className="text-muted-foreground" />
+                                    <p className="text-sm font-semibold text-foreground">{t('auction_detail.login_required')}</p>
+                                    <p className="text-xs text-muted-foreground max-w-[240px]">{t('auction_detail.login_required_desc')}</p>
+                                    <Link to="/signin" className="mt-2 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors">{t('auction_detail.login_btn')}</Link>
+                                </div>
+                            )
+                        ) : (
+                            <div className="p-5 rounded-xl border border-border bg-card text-center text-muted-foreground text-xs leading-relaxed">
+                                {(auction.status === "ENDED" || auction.status === "SOLD") ? (
+                                    <div className="space-y-2">
+                                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 border border-green-500/20">
+                                            <Shield className="h-5 w-5" />
+                                        </div>
+                                        <p className="font-semibold text-foreground">{t('auction_detail.status_msg_start')} {t('auction_detail.status_msg_ended')}.</p>
+                                        {isAuthenticated && currentUser && auction.winner === currentUser.id && (
+                                            <div className="mt-1 bg-green-500/10 border border-green-500/20 text-green-500 px-4 py-2 text-sm rounded-lg font-semibold flex items-center justify-center gap-2">
+                                                <CheckCircle2 size={16} /> {t('auction_detail.you_won')}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <span>{t('auction_detail.status_msg_start')} {auction.status === "SCHEDULED" ? t('auction_detail.status_msg_scheduled') : t('auction_detail.status_msg_inactive')}.</span>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Bid History Table */}
+                        <div className="bg-card border border-border rounded-xl overflow-hidden shadow-md">
+                            <div className="px-5 py-3 border-b border-border flex items-center gap-2 bg-muted">
+                                <Gavel size={14} className="text-muted-foreground" />
+                                <span className="text-xs font-bold uppercase tracking-wider text-foreground">{t('auction_detail.bids_history')} ({auction.bids_count || bids.length})</span>
+                            </div>
+                            {bids.length === 0 ? (
+                                <div className="p-8 text-center text-muted-foreground text-xs">{t('auction_detail.no_bids')}</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="bg-muted text-muted-foreground font-mono font-bold uppercase tracking-wider border-b border-border">
+                                                <th className="px-5 py-3">{t('auction_detail.bidder', 'Ofertante')}</th>
+                                                <th className="px-5 py-3 text-right">{t('auction_detail.bid_value', 'Valor')}</th>
+                                                <th className="px-5 py-3">{t('auction_detail.bid_time', 'Data')}</th>
+                                                <th className="px-5 py-3 text-right">{t('auction_detail.bid_status', 'Status')}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border text-foreground">
+                                            {bids.map((bid, i) => (
+                                                <tr key={bid.id} className="hover:bg-muted/40 transition-colors">
+                                                    <td className="px-5 py-3.5 flex items-center gap-2">
+                                                        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0 ${i === 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                                                            {bid.bidder ? bid.bidder.username.charAt(0).toUpperCase() : "A"}
+                                                        </div>
+                                                        {bid.bidder ? (
+                                                            <button onClick={() => setSelectedProfile({ id: bid.bidder!.id, username: bid.bidder!.username })} className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer text-left bg-transparent border-none p-0 text-xs">{bid.bidder.username}</button>
+                                                        ) : (
+                                                            <span className="font-semibold">{t('auction_detail.anonymous')}</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-right font-mono font-bold">{formatCurrency(bid.amount, true)}</td>
+                                                    <td className="px-5 py-3.5 font-mono text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleString(currentLocale, { dateStyle: 'short', timeStyle: 'medium' })}</td>
+                                                    <td className="px-5 py-3.5 text-right">
+                                                        {i === 0 ? (
+                                                            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-[10px] font-semibold">{t('auction_detail.leader', 'Líder')}</span>
+                                                        ) : bid.is_buy_now ? (
+                                                            <span className="px-2 py-0.5 rounded-md bg-green-500/10 text-green-500 text-[10px] font-semibold">{t('auction_detail.direct_buy')}</span>
+                                                        ) : (
+                                                            <span className="px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[10px]">{t('auction_detail.outbid', 'Superado')}</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Lot Details */}
+                        <div className="bg-card border border-border rounded-xl shadow-md">
+                            {renderDetails()}
                         </div>
                     </div>
                 </div>

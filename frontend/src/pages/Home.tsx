@@ -401,23 +401,6 @@ export default function HomePage() {
                     </section>
                 )}
 
-                {/* ============ CATEGORIES ============ */}
-                {categories.length > 0 && (
-                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-16">
-                        <SectionHeading title={t("categories.title")} subtitle={t("categories.subtitle")} />
-                        <div className="flex flex-wrap gap-2.5">
-                            {categories.map((category) => (
-                                <Link
-                                    key={category.id}
-                                    to="/leiloes"
-                                    className="border border-border bg-card hover:border-primary/50 hover:text-primary text-sm font-medium text-foreground/80 rounded-full px-4 py-2 transition-colors"
-                                >
-                                    {category.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                )}
 
                 {/* ============ HOW IT WORKS ============ */}
                 <section className="border-y border-border bg-muted/20">
