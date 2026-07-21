@@ -12,6 +12,7 @@ import { signUpSchema, type SignUpInput } from "@/shared/schema/auth.schema";
 import logoImg from "@/assets/images/logo.png";
 import logoImgDark from "@/assets/images/logo2.png";
 import { toast } from "sonner";
+import ENV from "@/shared/utils/env.utils";
 
 function SignupForm() {
     const { t } = useTranslation();
@@ -65,14 +66,18 @@ function SignupForm() {
         }
     };
 
-    const handleIntraLogin = async () => {
+    const handleIntraLogin = () => {
         try {
-            const url = await authorizeFortyTwo();
-            if (url) {
-                window.location.href = url;
-            } else {
+            const clientId = ENV.FORTY_TWO_CLIENT_ID;
+            if (!clientId) {
+                console.error("VITE_FORTY_TWO_CLIENT_ID não está configurado.");
                 toast.error(t("auth.intra_unavailable"));
+                return;
             }
+            const redirectUri = window.location.origin + "/";
+            const state = Math.random().toString(36).substring(7);
+            const url = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${state}`;
+            window.location.href = url;
         } catch (err: any) {
             console.error("Falha ao autorizar 42:", err);
             toast.error(t("auth.intra_error"));
@@ -299,7 +304,7 @@ export default function Signup() {
     const { t } = useTranslation();
     useDocumentTitle(t("auth.page_title_signup"));
 
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    const googleClientId = ENV.GOOGLE_CLIENT_ID;
 
     return (
         <GoogleOAuthProvider clientId={googleClientId}>
