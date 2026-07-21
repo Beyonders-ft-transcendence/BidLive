@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Users, Search, UserPlus, Check, X, Clock, Loader2, Circle, Eye, Ban } from "lucide-react";
+import { Users, Search, UserPlus, Check, X, Clock, Loader2, Circle, Eye, Ban, ShieldCheck, UserMinus } from "lucide-react";
 import Avatar from "@/components/common/Avatar";
 import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { useAuthStore } from "@/shared/stores/auth.store";
@@ -15,19 +15,21 @@ import {
     useAcceptFriendRequestMutation,
     useRejectFriendRequestMutation,
     useUserSearchQuery,
+    useBlockedUsersQuery,
+    useUnblockUserMutation,
+    useRemoveFriendMutation,
 } from "@/hooks/useSocial";
 import type { PublicUser, Friendship } from "@/shared/types/social.types";
 
 /**
  * Aba "Amigos" do dashboard (ISSUE FE-010): pesquisa e adição de utilizadores,
- * gestão de convites (aceitar / rejeitar / cancelar) e lista de amigos.
- * O bloqueio de utilizadores vive no PublicProfileModal, acessível daqui.
+ * gestão de convites (aceitar / rejeitar / cancelar), lista de amigos e gestão de bloqueios.
  */
 export default function FriendsTab() {
     const { t } = useTranslation();
     const currentUser = useAuthStore((s) => s.user);
 
-    // Pesquisa com debounce (mesmo padrão do ChatTab)
+    // Pesquisa com debounce
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     useEffect(() => {
@@ -35,34 +37,40 @@ export default function FriendsTab() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    // Perfil público (com ação de bloqueio)
+    // Perfil público (com ação de bloqueio/desbloqueio)
     const [profileUser, setProfileUser] = useState<PublicUser | null>(null);
 
-    // Queries
+    // Queries do Backend
     const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
     const { data: onlineResponse } = useOnlineFriendsQuery();
     const { data: receivedResponse, isLoading: isLoadingReceived } = usePendingRequestsReceivedQuery();
     const { data: sentResponse } = usePendingRequestsSentQuery();
     const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
+    const { data: blockedResponse, isLoading: isLoadingBlocked } = useBlockedUsersQuery();
 
-    // Normalização defensiva (mesmo padrão dos outros tabs)
+    // Normalização defensiva
     const friends: PublicUser[] = Array.isArray(friendsResponse) ? friendsResponse : ((friendsResponse as any)?.data || []);
     const onlineFriends: PublicUser[] = Array.isArray(onlineResponse) ? onlineResponse : ((onlineResponse as any)?.data || []);
     const received: Friendship[] = Array.isArray(receivedResponse) ? receivedResponse : ((receivedResponse as any)?.data || []);
     const sent: Friendship[] = Array.isArray(sentResponse) ? sentResponse : ((sentResponse as any)?.data || []);
+    const blockedUsers: PublicUser[] = Array.isArray(blockedResponse) ? blockedResponse : ((blockedResponse as any)?.data || []);
 
     const onlineIds = new Set(onlineFriends.map((u) => u.id));
     const friendIds = new Set(friends.map((u) => u.id));
     const sentToIds = new Set(sent.map((f) => f.addressee.id));
     const receivedFromIds = new Set(received.map((f) => f.requester.id));
-    // Memória local de bloqueios (o backend não expõe este estado)
-    const blockedList = useBlockedStore((s) => (currentUser ? s.byUser[currentUser.id] : undefined));
-    const blockedIds = new Set(blockedList || []);
+    
+    // Combina bloqueios do backend com a memória local
+    const localBlockedList = useBlockedStore((s) => (currentUser ? s.byUser[currentUser.id] : undefined)) || [];
+    const blockedIds = new Set([...blockedUsers.map((u) => u.id), ...localBlockedList]);
+    const removeLocalBlocked = useBlockedStore((s) => s.removeBlocked);
 
     // Mutations
     const sendMutation = useSendFriendRequestMutation();
     const acceptMutation = useAcceptFriendRequestMutation();
     const rejectMutation = useRejectFriendRequestMutation();
+    const unblockMutation = useUnblockUserMutation();
+    const removeFriendMutation = useRemoveFriendMutation();
 
     const handleSend = (user: PublicUser) => {
         sendMutation.mutate({ addressee_id: user.id }, {
@@ -71,6 +79,20 @@ export default function FriendsTab() {
                 else toast.error(res.message || t("friends_tab.request_error"));
             },
             onError: () => toast.error(t("friends_tab.request_error")),
+        });
+    };
+
+    const handleUnblock = (user: PublicUser) => {
+        unblockMutation.mutate({ user_id: user.id }, {
+            onSuccess: (res) => {
+                if (res.success) {
+                    if (currentUser) removeLocalBlocked(currentUser.id, user.id);
+                    toast.success(t("public_profile.unblock_success", { name: user.full_name || user.username }));
+                } else {
+                    toast.error(res.message || t("public_profile.unblock_error"));
+                }
+            },
+            onError: () => toast.error(t("public_profile.unblock_error")),
         });
     };
 
@@ -273,12 +295,55 @@ export default function FriendsTab() {
                                         </p>
                                     </div>
                                 </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => setProfileUser(user)}
+                                        title={t("friends_tab.view_profile")}
+                                        className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer bg-transparent border-none"
+                                    >
+                                        <Eye size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Utilizadores Bloqueados */}
+            <div className="bg-card border border-border p-6 rounded-sm">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Ban size={16} className="text-destructive" />
+                    Utilizadores Bloqueados
+                    {blockedUsers.length > 0 && (
+                        <span className="bg-destructive/10 text-destructive text-[10px] font-bold px-2 py-0.5 rounded-full border border-destructive/20">{blockedUsers.length}</span>
+                    )}
+                </h3>
+                {isLoadingBlocked ? (
+                    <div className="mt-4 flex items-center gap-2 text-muted-foreground text-xs"><Loader2 size={14} className="animate-spin" /> {t("common.loading")}</div>
+                ) : blockedUsers.length === 0 ? (
+                    <p className="mt-3 text-xs text-muted-foreground">Nenhum utilizador bloqueado.</p>
+                ) : (
+                    <div className="mt-4 divide-y divide-border border border-border rounded-sm">
+                        {blockedUsers.map((user) => (
+                            <div key={user.id} className="p-3 flex items-center justify-between gap-3">
                                 <button
                                     onClick={() => setProfileUser(user)}
-                                    title={t("friends_tab.view_profile")}
-                                    className="shrink-0 p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer bg-transparent border-none"
+                                    className="flex items-center gap-3 min-w-0 bg-transparent border-none cursor-pointer text-start"
                                 >
-                                    <Eye size={16} />
+                                    <Avatar name={user.full_name || user.username} src={user.avatar_url || undefined} size="sm" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-foreground truncate">{user.full_name || user.username}</p>
+                                        <p className="text-[10px] text-muted-foreground truncate">@{user.username}</p>
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => handleUnblock(user)}
+                                    disabled={unblockMutation.isPending}
+                                    className="inline-flex items-center gap-1.5 bg-transparent hover:bg-primary/10 text-primary border border-primary/40 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                    <ShieldCheck size={12} />
+                                    Desbloquear
                                 </button>
                             </div>
                         ))}

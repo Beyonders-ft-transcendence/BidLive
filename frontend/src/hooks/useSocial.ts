@@ -97,22 +97,44 @@ export function useRejectFriendRequestMutation() {
   });
 }
 
+export function useBlockedUsersQuery() {
+  return useQuery({
+    queryKey: ["socialBlockedUsers"],
+    queryFn: async () => {
+      const res = await socialService.listBlockedUsers();
+      if (!res.success) throw new Error(res.message || "Falha ao obter utilizadores bloqueados.");
+      return res.data;
+    },
+  });
+}
+
 export function useBlockUserMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: BlockUserPayload) => socialService.blockUser(payload),
     onSuccess: (res) => {
       if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ["socialBlockedUsers"] });
         queryClient.invalidateQueries({ queryKey: ["socialFriends"] });
         queryClient.invalidateQueries({ queryKey: ["socialOnlineFriends"] });
+        queryClient.invalidateQueries({ queryKey: ["socialPendingRequestsReceived"] });
+        queryClient.invalidateQueries({ queryKey: ["socialPendingRequestsSent"] });
       }
     },
   });
 }
 
 export function useUnblockUserMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: BlockUserPayload) => socialService.unblockUser(payload),
+    onSuccess: (res) => {
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ["socialBlockedUsers"] });
+        queryClient.invalidateQueries({ queryKey: ["socialFriends"] });
+        queryClient.invalidateQueries({ queryKey: ["socialOnlineFriends"] });
+      }
+    },
   });
 }
 
