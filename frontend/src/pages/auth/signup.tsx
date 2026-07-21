@@ -19,6 +19,7 @@ function SignupForm() {
 
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
 
     const registerUser = useAuthStore((state) => state.register);
     const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
@@ -252,6 +253,19 @@ function SignupForm() {
                                                 </div>
                                             </div>
 
+                                            <div className="pt-2 flex items-center gap-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="terms" 
+                                                    checked={acceptedTerms}
+                                                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                                    className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-1"
+                                                />
+                                                <label htmlFor="terms" className="text-xs text-foreground/80 leading-tight">
+                                                    {t("legal.consent.agree_to_terms")} <Link to="/terms" className="text-primary hover:underline">{t("legal.consent.terms")}</Link> {t("legal.consent.and")} <Link to="/privacy" className="text-primary hover:underline">{t("legal.consent.privacy")}</Link>.
+                                                </label>
+                                            </div>
+
                                             <div className="pt-2 flex gap-3">
                                                 <Button
                                                     type="button"
@@ -263,8 +277,8 @@ function SignupForm() {
                                                 </Button>
                                                 <Button
                                                     type="submit"
-                                                    disabled={isLoading}
-                                                    className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
+                                                    disabled={isLoading || !acceptedTerms}
+                                                    className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {isLoading ? t("auth.creating") : t("auth.create_account")}
                                                 </Button>

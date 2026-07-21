@@ -946,5 +946,40 @@
     "ended": "Terminé",
     "cancelled": "Annulé",
     "sold": "Vendu"
+  },
+  "legal": {
+    "terms": {
+      "title": "Conditions de Service",
+      "last_updated": "Dernière mise à jour : Janvier 2026",
+      "p1": "Bienvenue sur BidLive. En utilisant notre service, vous acceptez ces conditions. Veuillez les lire attentivement.",
+      "h1": "1. Acceptation des Conditions",
+      "c1": "En accédant et en utilisant BidLive, vous acceptez d'être lié par ces Conditions de Service et par toutes les lois et réglementations applicables.",
+      "h2": "2. Inscription au Compte",
+      "c2": "Vous devez fournir des informations exactes et complètes lors de l'inscription. Vous êtes responsable du maintien de la confidentialité de votre compte.",
+      "h3": "3. Règles d'Enchères",
+      "c3": "Toutes les offres sont finales et contraignantes. Les offres frauduleuses ne sont pas autorisées."
+    },
+    "privacy": {
+      "title": "Politique de Confidentialité",
+      "last_updated": "Dernière mise à jour : Janvier 2026",
+      "p1": "Votre vie privée est importante pour nous. Cette politique explique comment nous recueillons, utilisons et protégeons vos informations.",
+      "h1": "1. Collecte des Données",
+      "c1": "Nous recueillons les informations que vous nous fournissez directement, par exemple lorsque vous créez un compte ou mettez à jour votre profil.",
+      "h2": "2. Utilisation des Données",
+      "c2": "Nous utilisons vos informations pour fournir, maintenir et améliorer nos services.",
+      "h3": "3. Protection des Données",
+      "c3": "Nous mettons en œuvre des mesures de sécurité pour protéger vos informations personnelles contre tout accès non autorisé."
+    },
+    "consent": {
+      "agree_to_terms": "J'accepte les",
+      "terms": "Conditions de Service",
+      "and": "et la",
+      "privacy": "Politique de Confidentialité"
+    },
+    "cookie_banner": {
+      "message": "Nous utilisons des cookies pour améliorer votre expérience, analyser le trafic et personnaliser le contenu. En continuant à naviguer, vous acceptez notre ",
+      "accept": "Accepter",
+      "privacy_link": "Politique de Cookies et de Confidentialité"
+    }
   }
 }

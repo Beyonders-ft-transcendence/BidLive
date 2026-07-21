@@ -990,5 +990,40 @@
     "ended": "Finalizado",
     "cancelled": "Cancelado",
     "sold": "Vendido"
+  },
+  "legal": {
+    "terms": {
+      "title": "Termos de Serviço",
+      "last_updated": "Última atualização: Janeiro 2026",
+      "p1": "Bem-vindo ao BidLive. Ao utilizar o nosso serviço, o utilizador concorda com as presentes condições. Por favor, leia com atenção.",
+      "h1": "1. Aceitação dos Termos",
+      "c1": "Ao aceder e utilizar o BidLive, concorda em ficar vinculado aos presentes Termos de Serviço e a todas as leis e regulamentos aplicáveis.",
+      "h2": "2. Registo de Conta",
+      "c2": "Deve fornecer informações precisas e completas aquando do registo. É responsável por manter a confidencialidade da sua conta.",
+      "h3": "3. Regras de Leilão",
+      "c3": "Todas as licitações são finais e vinculativas. Não são permitidas licitações fraudulentas."
+    },
+    "privacy": {
+      "title": "Política de Privacidade",
+      "last_updated": "Última atualização: Janeiro 2026",
+      "p1": "A sua privacidade é importante para nós. Esta política explica como recolhemos, utilizamos e protegemos as suas informações.",
+      "h1": "1. Recolha de Dados",
+      "c1": "Recolhemos as informações que nos fornece diretamente, tais como quando cria uma conta ou atualiza o seu perfil.",
+      "h2": "2. Uso de Dados",
+      "c2": "Utilizamos as suas informações para fornecer, manter e melhorar os nossos serviços.",
+      "h3": "3. Proteção de Dados",
+      "c3": "Implementamos medidas de segurança para proteger as suas informações pessoais contra o acesso não autorizado."
+    },
+    "consent": {
+      "agree_to_terms": "Concordo com os",
+      "terms": "Termos de Serviço",
+      "and": "e a",
+      "privacy": "Política de Privacidade"
+    },
+    "cookie_banner": {
+      "message": "Utilizamos cookies para melhorar a sua experiência, analisar o tráfego e personalizar o conteúdo. Ao continuar a navegar, está a aceitar a nossa ",
+      "accept": "Aceitar",
+      "privacy_link": "Política de Cookies e Privacidade"
+    }
   }
 }

@@ -5,6 +5,8 @@ import { useEffect } from "react"
 import { useAuthStore } from "@/shared/stores/auth.store"
 import { useQueryClient } from "@tanstack/react-query"
 
+import CookieBanner from "@/components/common/CookieBanner"
+
 export default function App()
 {
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -33,6 +35,7 @@ export default function App()
     <>
       <Toaster position="top-right" richColors />
       <IndexRoot />
+      <CookieBanner />
     </>
   )
 }
