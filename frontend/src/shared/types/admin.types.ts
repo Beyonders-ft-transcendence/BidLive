@@ -52,7 +52,12 @@ export interface PaginatedResponse<T> {
 export interface RoleWritePayload {
   name: string;
   description?: string;
-  permission_names: string[];
+  permission_names?: string[];
+}
+
+export interface PermissionWritePayload {
+  name: string;
+  description?: string;
 }
 
 export interface UserBanPayload {

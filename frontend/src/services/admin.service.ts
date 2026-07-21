@@ -10,7 +10,8 @@ import type {
   Report,
   ReportStatusUpdatePayload,
   ReportActionPayload,
-  UserCreatePayload
+  UserCreatePayload,
+  PermissionWritePayload
 } from "@/shared/types/admin.types";
 
 export const adminService = {
@@ -74,6 +75,20 @@ export const adminService = {
   getPermissions: async (): Promise<PaginatedResponse<Permission> | Permission[]> => {
     const response = await api.get("/permissions/");
     return response.data.data || response.data;
+  },
+
+  createPermission: async (payload: PermissionWritePayload): Promise<Permission> => {
+    const response = await api.post("/permissions/", payload);
+    return response.data.data;
+  },
+
+  updatePermission: async (id: number, payload: PermissionWritePayload): Promise<Permission> => {
+    const response = await api.patch(`/permissions/${id}/`, payload);
+    return response.data.data;
+  },
+
+  deletePermission: async (id: number): Promise<void> => {
+    await api.delete(`/permissions/${id}/`);
   },
 
   // --- Analytics ---
