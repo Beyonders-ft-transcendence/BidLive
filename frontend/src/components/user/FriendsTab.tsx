@@ -9,6 +9,7 @@ import {
     X,
     Clock,
     Loader2,
+    Circle,
     Eye,
     Ban,
     ShieldCheck,
@@ -64,7 +65,7 @@ export default function FriendsTab() {
     const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
     const { data: onlineResponse } = useOnlineFriendsQuery();
     const { data: receivedResponse, isLoading: isLoadingReceived } = usePendingRequestsReceivedQuery();
-    const { data: sentResponse } = usePendingRequestsSentQuery();
+    const { data: sentResponse, isLoading: isLoadingSent } = usePendingRequestsSentQuery();
     const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
     const { data: blockedResponse, isLoading: isLoadingBlocked } = useBlockedUsersQuery();
 
@@ -79,7 +80,7 @@ export default function FriendsTab() {
     const friendIds = new Set(friends.map((u) => u.id));
     const sentToIds = new Set(sent.map((f) => f.addressee.id));
     const receivedFromIds = new Set(received.map((f) => f.requester.id));
-    
+
     // Combina bloqueios do backend com a memória local
     const localBlockedList = useBlockedStore((s) => (currentUser ? s.byUser[currentUser.id] : undefined)) || [];
     const blockedIds = new Set([...blockedUsers.map((u) => u.id), ...localBlockedList]);
@@ -170,7 +171,7 @@ export default function FriendsTab() {
             <button
                 onClick={() => handleSend(user)}
                 disabled={sendMutation.isPending}
-                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow-md cursor-pointer border-none disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow-md cursor-pointer border-none disabled:opacity-50"
             >
                 <UserPlus size={13} /> {t("friends_tab.add")}
             </button>
@@ -178,16 +179,16 @@ export default function FriendsTab() {
     };
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
+        <div className="flex flex-col gap-6 w-full max-w-7md mx-auto">
             {/* HERO HEADER RESPONSIVO */}
-            <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative overflow-hidden bg-card border border-border rounded-md p-6 sm:p-8 shadow-sm">
+                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-primary/10 rounded-full blur-3md pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex flex-col gap-2 max-w-xl">
+                    <div className="flex flex-col gap-2 max-w-md">
                         <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full w-fit">
                             <Sparkles size={13} /> Rede Social & Contactos
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
+                        <h1 className="text-2md sm:text-3md font-extrabold text-foreground tracking-tight flex items-center gap-3">
                             <Users className="text-primary h-7 w-7 shrink-0" />
                             {t("friends_tab.title")}
                         </h1>
@@ -198,21 +199,21 @@ export default function FriendsTab() {
 
                     {/* MÉTROLOGIA / ESTATÍSTICAS RÁPIDAS */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
-                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-xl p-3 text-center min-w-[85px]">
+                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-md p-3 text-center min-w-[85px]">
                             <span className="text-xs text-muted-foreground font-medium block">Amigos</span>
-                            <span className="text-lg font-bold text-foreground">{friends.length}</span>
+                            <span className="text-md font-bold text-foreground">{friends.length}</span>
                         </div>
-                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-xl p-3 text-center min-w-[85px]">
+                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-md p-3 text-center min-w-[85px]">
                             <span className="text-xs text-muted-foreground font-medium block">Online</span>
-                            <span className="text-lg font-bold text-green-500">{onlineFriends.length}</span>
+                            <span className="text-md font-bold text-green-500">{onlineFriends.length}</span>
                         </div>
-                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-xl p-3 text-center min-w-[85px]">
+                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-md p-3 text-center min-w-[85px]">
                             <span className="text-xs text-muted-foreground font-medium block">Convites</span>
-                            <span className="text-lg font-bold text-primary">{received.length}</span>
+                            <span className="text-md font-bold text-primary">{received.length}</span>
                         </div>
-                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-xl p-3 text-center min-w-[85px]">
+                        <div className="bg-background/80 backdrop-blur-sm border border-border/80 rounded-md p-3 text-center min-w-[85px]">
                             <span className="text-xs text-muted-foreground font-medium block">Bloqueados</span>
-                            <span className="text-lg font-bold text-destructive">{blockedUsers.length}</span>
+                            <span className="text-md font-bold text-destructive">{blockedUsers.length}</span>
                         </div>
                     </div>
                 </div>
@@ -226,7 +227,7 @@ export default function FriendsTab() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={t("friends_tab.search_placeholder")}
-                            className="w-full bg-background border border-border rounded-xl ps-11 pe-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all outline-none text-foreground placeholder:text-muted-foreground shadow-inner"
+                            className="w-full bg-background border border-border rounded-md ps-11 pe-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all outline-none text-foreground placeholder:text-muted-foreground shadow-inner"
                         />
                         {searchQuery && (
                             <button
@@ -240,7 +241,7 @@ export default function FriendsTab() {
 
                     {/* RESULTADOS DE PESQUISA DROPDOWN */}
                     {debouncedQuery.trim() && (
-                        <div className="absolute top-full start-0 end-0 mt-2 z-30 bg-card border border-border rounded-xl shadow-2xl overflow-hidden divide-y divide-border/60 max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                        <div className="absolute top-full start-0 end-0 mt-2 z-30 bg-card border border-border rounded-md shadow-2md overflow-hidden divide-y divide-border/60 max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
                             {isSearching ? (
                                 <div className="p-6 flex items-center justify-center gap-2 text-muted-foreground text-sm">
                                     <Loader2 size={16} className="animate-spin text-primary" /> {t("friends_tab.searching")}
@@ -278,31 +279,28 @@ export default function FriendsTab() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button
                     onClick={() => setActiveSection("all")}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
-                        activeSection === "all"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${activeSection === "all"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
                 >
                     <Users size={14} /> Todos os Contactos
                 </button>
                 <button
                     onClick={() => setActiveSection("friends")}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
-                        activeSection === "friends"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${activeSection === "friends"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
                 >
                     <UserCheck size={14} /> Amigos ({friends.length})
                 </button>
                 <button
                     onClick={() => setActiveSection("received")}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
-                        activeSection === "received"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${activeSection === "received"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
                 >
                     <Inbox size={14} /> Convites ({received.length})
                     {received.length > 0 && (
@@ -313,21 +311,19 @@ export default function FriendsTab() {
                 </button>
                 <button
                     onClick={() => setActiveSection("sent")}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
-                        activeSection === "sent"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${activeSection === "sent"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
                 >
                     <Send size={14} /> Enviados ({sent.length})
                 </button>
                 <button
                     onClick={() => setActiveSection("blocked")}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
-                        activeSection === "blocked"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${activeSection === "blocked"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
                 >
                     <Ban size={14} /> Bloqueados ({blockedUsers.length})
                 </button>
@@ -337,7 +333,7 @@ export default function FriendsTab() {
             <div className="flex flex-col gap-6">
                 {/* 1. CONVITES RECEBIDOS */}
                 {(activeSection === "all" || activeSection === "received") && (
-                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                    <div className="bg-card border border-border rounded-md p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                                 <Inbox size={18} className="text-primary" />
@@ -355,7 +351,7 @@ export default function FriendsTab() {
                                 <Loader2 size={16} className="animate-spin text-primary" /> {t("common.loading")}
                             </div>
                         ) : received.length === 0 ? (
-                            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 border border-dashed border-border rounded-xl">
+                            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 border border-dashed border-border rounded-md">
                                 {t("friends_tab.no_received")}
                             </div>
                         ) : (
@@ -363,7 +359,7 @@ export default function FriendsTab() {
                                 {received.map((f) => (
                                     <div
                                         key={f.id}
-                                        className="bg-background border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/40 transition-all shadow-sm"
+                                        className="bg-background border border-border rounded-md p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/40 transition-all shadow-sm"
                                     >
                                         <button
                                             onClick={() => setProfileUser(f.requester)}
@@ -385,14 +381,14 @@ export default function FriendsTab() {
                                             <button
                                                 onClick={() => handleAccept(f)}
                                                 disabled={acceptMutation.isPending}
-                                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all shadow-sm cursor-pointer border-none disabled:opacity-50"
+                                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all shadow-sm cursor-pointer border-none disabled:opacity-50"
                                             >
                                                 <Check size={14} /> {t("friends_tab.accept")}
                                             </button>
                                             <button
                                                 onClick={() => handleReject(f)}
                                                 disabled={rejectMutation.isPending}
-                                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-transparent hover:bg-destructive/10 text-destructive border border-destructive/30 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-50"
+                                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-transparent hover:bg-destructive/10 text-destructive border border-destructive/30 px-3.5 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-50"
                                             >
                                                 <X size={14} /> {t("friends_tab.reject")}
                                             </button>
@@ -406,7 +402,7 @@ export default function FriendsTab() {
 
                 {/* 2. LISTA DE AMIGOS */}
                 {(activeSection === "all" || activeSection === "friends") && (
-                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                    <div className="bg-card border border-border rounded-md p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                                 <Users size={18} className="text-primary" />
@@ -422,7 +418,7 @@ export default function FriendsTab() {
                                 <Loader2 size={16} className="animate-spin text-primary" /> {t("common.loading")}
                             </div>
                         ) : friends.length === 0 ? (
-                            <div className="py-12 text-center bg-muted/20 border border-dashed border-border rounded-xl">
+                            <div className="py-12 text-center bg-muted/20 border border-dashed border-border rounded-md">
                                 <Users size={36} className="mx-auto text-muted-foreground/40 mb-3" />
                                 <p className="text-sm font-bold text-foreground">{t("friends_tab.no_friends")}</p>
                                 <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
@@ -430,13 +426,13 @@ export default function FriendsTab() {
                                 </p>
                             </div>
                         ) : (
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                                 {friends.map((user) => {
                                     const isOnline = onlineIds.has(user.id);
                                     return (
                                         <div
                                             key={user.id}
-                                            className="group bg-background border border-border/80 hover:border-primary/50 rounded-xl p-4 flex items-center justify-between gap-3 transition-all duration-200 hover:shadow-md"
+                                            className="group bg-background border border-border/80 hover:border-primary/50 rounded-md p-4 flex items-center justify-between gap-3 transition-all duration-200 hover:shadow-md"
                                         >
                                             <div className="flex items-center gap-3.5 min-w-0">
                                                 <div className="relative shrink-0">
@@ -467,7 +463,7 @@ export default function FriendsTab() {
                                             <button
                                                 onClick={() => setProfileUser(user)}
                                                 title={t("friends_tab.view_profile")}
-                                                className="shrink-0 p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer bg-transparent border-none"
+                                                className="shrink-0 p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors cursor-pointer bg-transparent border-none"
                                             >
                                                 <Eye size={18} />
                                             </button>
@@ -481,7 +477,7 @@ export default function FriendsTab() {
 
                 {/* 3. CONVITES ENVIADOS */}
                 {(activeSection === "all" || activeSection === "sent") && sent.length > 0 && (
-                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                    <div className="bg-card border border-border rounded-md p-6 shadow-sm">
                         <h3 className="text-base font-bold text-foreground flex items-center gap-2 mb-4">
                             <Send size={16} className="text-muted-foreground" />
                             {t("friends_tab.sent_title")}
@@ -489,9 +485,9 @@ export default function FriendsTab() {
                                 {sent.length}
                             </span>
                         </h3>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                             {sent.map((f) => (
-                                <div key={f.id} className="bg-background border border-border rounded-xl p-4 flex items-center justify-between gap-3">
+                                <div key={f.id} className="bg-background border border-border rounded-md p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <Avatar
                                             name={f.addressee.full_name || f.addressee.username}
@@ -513,7 +509,7 @@ export default function FriendsTab() {
 
                 {/* 4. UTILIZADORES BLOQUEADOS */}
                 {(activeSection === "all" || activeSection === "blocked") && (
-                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                    <div className="bg-card border border-border rounded-md p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                                 <Ban size={18} className="text-destructive" />
@@ -531,15 +527,15 @@ export default function FriendsTab() {
                                 <Loader2 size={16} className="animate-spin text-primary" /> {t("common.loading")}
                             </div>
                         ) : blockedUsers.length === 0 ? (
-                            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 border border-dashed border-border rounded-xl">
+                            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 border border-dashed border-border rounded-md">
                                 Nenhum utilizador bloqueado.
                             </div>
                         ) : (
-                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                                 {blockedUsers.map((user) => (
                                     <div
                                         key={user.id}
-                                        className="bg-background border border-border/80 rounded-xl p-4 flex items-center justify-between gap-3 hover:border-destructive/30 transition-all"
+                                        className="bg-background border border-border/80 rounded-md p-4 flex items-center justify-between gap-3 hover:border-destructive/30 transition-all"
                                     >
                                         <button
                                             onClick={() => setProfileUser(user)}
@@ -560,7 +556,7 @@ export default function FriendsTab() {
                                         <button
                                             onClick={() => handleUnblock(user)}
                                             disabled={unblockMutation.isPending}
-                                            className="inline-flex items-center gap-1.5 bg-transparent hover:bg-primary/10 text-primary border border-primary/30 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer shrink-0 disabled:opacity-50"
+                                            className="inline-flex items-center gap-1.5 bg-transparent hover:bg-primary/10 text-primary border border-primary/30 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all cursor-pointer shrink-0 disabled:opacity-50"
                                         >
                                             <ShieldCheck size={14} />
                                             Desbloquear
