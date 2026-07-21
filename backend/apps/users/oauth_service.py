@@ -15,7 +15,7 @@ from apps.analytics.models import AnalyticsEvent
 from apps.users.constants import DEFAULT_SIGNUP_ROLE
 from apps.users.models import Role, User, UserRole
 from apps.users.selectors import invalidate_user_permissions_cache
-from apps.users.services import assign_role, issue_auth_tokens_for_user
+from apps.users.services import _ensure_user_can_authenticate, assign_role, issue_auth_tokens_for_user
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +246,7 @@ def _get_or_create_user_for_google(*, profile: dict[str, Any]) -> User:
         .first()
     )
     if oauth_account:
+        _ensure_user_can_authenticate(user=oauth_account.user)
         return oauth_account.user
 
     user = User.objects.filter(email=email).first()
@@ -266,6 +267,7 @@ def _get_or_create_user_for_google(*, profile: dict[str, Any]) -> User:
         UserRole.objects.get_or_create(user=user, role=default_role)
         invalidate_user_permissions_cache(user=user)
     else:
+        _ensure_user_can_authenticate(user=user)
         assign_role(user=user, role_name=DEFAULT_SIGNUP_ROLE)
 
     return user
@@ -279,6 +281,7 @@ def _get_or_create_user_for_42(*, profile: dict[str, Any]) -> User:
         .first()
     )
     if oauth_account:
+        _ensure_user_can_authenticate(user=oauth_account.user)
         return oauth_account.user
 
     user = User.objects.filter(email=profile["email"]).first()
@@ -298,6 +301,7 @@ def _get_or_create_user_for_42(*, profile: dict[str, Any]) -> User:
         UserRole.objects.get_or_create(user=user, role=default_role)
         invalidate_user_permissions_cache(user=user)
     else:
+        _ensure_user_can_authenticate(user=user)
         assign_role(user=user, role_name=DEFAULT_SIGNUP_ROLE)
         updated_fields: list[str] = []
         if not user.avatar_url and profile["avatar_url"]:
