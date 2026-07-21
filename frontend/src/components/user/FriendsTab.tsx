@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Users, Search, UserPlus, Check, X, Clock, Loader2, Circle, Eye, Ban, ShieldCheck, UserMinus } from "lucide-react";
+import { Users, Search, UserPlus, Check, X, Clock, Loader2, Circle, Eye, Ban, ShieldCheck } from "lucide-react";
 import Avatar from "@/components/common/Avatar";
 import PublicProfileModal from "@/components/user/PublicProfileModal";
 import { useAuthStore } from "@/shared/stores/auth.store";
@@ -17,7 +17,6 @@ import {
     useUserSearchQuery,
     useBlockedUsersQuery,
     useUnblockUserMutation,
-    useRemoveFriendMutation,
 } from "@/hooks/useSocial";
 import type { PublicUser, Friendship } from "@/shared/types/social.types";
 
@@ -70,7 +69,6 @@ export default function FriendsTab() {
     const acceptMutation = useAcceptFriendRequestMutation();
     const rejectMutation = useRejectFriendRequestMutation();
     const unblockMutation = useUnblockUserMutation();
-    const removeFriendMutation = useRemoveFriendMutation();
 
     const handleSend = (user: PublicUser) => {
         sendMutation.mutate({ addressee_id: user.id }, {
