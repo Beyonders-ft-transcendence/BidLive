@@ -1,7 +1,7 @@
 import Logo2 from "@/assets/images/logo2.png";
 import Logo from "@/assets/images/logo.png";
 import { useState, useEffect } from "react";
-import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2, Globe } from "lucide-react";
+import { Sun, Moon, ChevronDown, Menu, X, Bell, CheckCircle2, Globe, MessageCircle } from "lucide-react";
 import { getTheme, setTheme as setGlobalTheme, type Theme } from "@/shared/utils/themes.utils";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@/shared/stores/auth.store";
@@ -74,8 +74,19 @@ export default function Header() {
                         </nav>
 
                     {isAuthenticated && (
-                        <div className="relative group flex items-center h-full">
-                            <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
+                        <div className="flex items-center gap-2 h-full">
+                            {/* Chat Button */}
+                            <Link 
+                                to="/user?tab=chat" 
+                                className="p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
+                                title="Chat"
+                            >
+                                <MessageCircle size={20} />
+                            </Link>
+                            
+                            {/* Notifications */}
+                            <div className="relative group flex items-center h-full">
+                                <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer border-none bg-transparent">
                                 <Bell size={20} />
                                 {unreadCount > 0 && (
                                     <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
@@ -124,6 +135,7 @@ export default function Header() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     )}
 
@@ -187,6 +199,15 @@ export default function Header() {
                         <nav className="flex flex-col gap-2 font-medium text-foreground">
                             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.home")}</Link>
                             <Link to="/leiloes" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">{t("header.auctions")}</Link>
+                            
+                            {isAuthenticated && (
+                                <Link to="/user?tab=chat" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-primary py-3 border-b border-border/50">
+                                    <div className="flex items-center gap-2">
+                                        <MessageCircle size={18} />
+                                        Chat
+                                    </div>
+                                </Link>
+                            )}
 
                             {/* Mobile Language Selection */}
                             <div className="py-4 border-b border-border/50">
