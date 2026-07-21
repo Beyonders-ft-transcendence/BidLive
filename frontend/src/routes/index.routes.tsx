@@ -13,8 +13,6 @@ import {
     BackofficeDashboard,
     UsersPage,
     ReportsPage,
-    DomainsPage,
-    DomainConfigPage,
     AdminAuctionsPage,
     RolesPage,
     TermsPage,
@@ -66,8 +64,6 @@ export default function IndexRoot() {
                         <Route path="/backoffice" element={<BackofficeDashboard />} />
                         <Route path="/backoffice/users" element={<UsersPage />} />
                         <Route path="/backoffice/reports" element={<ReportsPage />} />
-                        <Route path="/backoffice/domains" element={<DomainsPage />} />
-                        <Route path="/backoffice/domains/:id" element={<DomainConfigPage />} />
                         <Route path="/backoffice/auctions" element={<AdminAuctionsPage />} />
                         <Route path="/backoffice/roles" element={<RolesPage />} />
                     </Route>
