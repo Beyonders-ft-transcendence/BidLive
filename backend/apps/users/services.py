@@ -89,13 +89,14 @@ def _build_auth_payload(*, user: User, refresh: RefreshToken) -> dict[str, Any]:
 
 
 def _ensure_user_can_authenticate(*, user: User) -> None:
+    user.refresh_from_db(fields=["status", "is_active", "locked_until", "is_deleted"])
+    if user.is_deleted:
+        raise PermissionDenied({"account": ["Conta indisponivel para login"]})
     now = timezone.now()
-    print(f"DEBUG: ensure_user_can_authenticate called for {user}, status: {user.status}, is_active: {user.is_active}")
     if user.locked_until and user.locked_until > now:
         raise ValidationError({"credentials": ["Conta temporariamente bloqueada."]})
     if not user.is_active or user.status in (UserStatus.BANNED, UserStatus.SUSPENDED):
-        print("DEBUG: RAISING PERMISSION DENIED!")
-        raise PermissionDenied({"account": ["Conta indisponivel para login."]})
+        raise PermissionDenied({"account": ["Conta indisponivel para login"]})
 
 
 @transaction.atomic

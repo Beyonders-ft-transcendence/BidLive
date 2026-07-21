@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.access.models import OAuthAccount, OAuthProvider, Session
 from apps.analytics.models import AnalyticsEvent
-from apps.users.models import User
+from apps.users.models import User, UserStatus
 
 
 FORTY_TWO_PROFILE = {
@@ -148,6 +148,27 @@ def test_42_callback_links_existing_user_by_email(mock_post, mock_get, forty_two
     assert response.status_code == 200
     assert OAuthAccount.objects.filter(user=user, provider=OAuthProvider.FORTY_TWO).exists()
     assert User.objects.filter(email=FORTY_TWO_PROFILE["email"]).count() == 1
+
+
+@pytest.mark.django_db
+@patch("apps.users.oauth_service.requests.get", return_value=_mock_42_profile_response())
+@patch("apps.users.oauth_service.requests.post", return_value=_mock_42_token_response())
+def test_42_callback_blocked_user_returns_expected_message(mock_post, mock_get, forty_two_settings, user):
+    user.email = FORTY_TWO_PROFILE["email"]
+    user.status = UserStatus.BANNED
+    user.is_active = False
+    user.save(update_fields=["email", "status", "is_active"])
+
+    client = APIClient()
+    authorize = client.get("/api/auth/42/")
+    response = client.post(
+        "/api/auth/42/callback/",
+        {"code": "auth-code-42", "state": authorize.data["data"]["state"]},
+        format="json",
+    )
+
+    assert response.status_code == 403
+    assert response.data["message"] == "Conta indisponivel para login"
 
 
 @pytest.mark.django_db
