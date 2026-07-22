@@ -69,22 +69,47 @@ export default function UsersPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (isCreateMode) {
-      createUser(formData, {
+      const payload: any = {
+        email: formData.email,
+        username: formData.username,
+        full_name: formData.full_name,
+        password: formData.password,
+      };
+
+      if (formData.status) {
+        payload.status = formData.status;
+      }
+
+      if (Array.isArray(formData.role_names) && formData.role_names.length > 0) {
+        const filteredRoles = formData.role_names.filter((r: string) => r && r.trim() !== '');
+        if (filteredRoles.length > 0) {
+          payload.role_names = filteredRoles;
+        }
+      }
+
+      createUser(payload, {
         onSuccess: () => {
           setIsCreateMode(false);
           resetForm();
         }
       });
     } else if (selectedUserId) {
-      // In update we remove password if empty and remove email since it cannot be changed via partial update
-      const updateData = { ...formData } as any;
-      if (!updateData.password) delete updateData.password;
-      delete updateData.email;
+      const updateData: any = {};
       
-      if (Array.isArray(updateData.role_names)) {
-        updateData.role_names = updateData.role_names.filter((r: string) => r && r.trim() !== '');
+      if (formData.username && formData.username.trim()) {
+        updateData.username = formData.username.trim();
       }
-      
+      if (formData.full_name && formData.full_name.trim()) {
+        updateData.full_name = formData.full_name.trim();
+      }
+      if (formData.status) {
+        updateData.status = formData.status;
+      }
+
+      if (Array.isArray(formData.role_names)) {
+        updateData.role_names = formData.role_names.filter((r: string) => r && r.trim() !== '');
+      }
+
       updateUser({ 
         id: selectedUserId, 
         payload: updateData 
