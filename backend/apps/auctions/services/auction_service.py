@@ -281,7 +281,8 @@ def update_auction(
 
 @transaction.atomic
 def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str = "") -> Auction:
-    _ensure_owner_or_manager(user=actor, auction=auction)
+    if not (auction.item.seller_id == actor.id or actor.is_superuser):
+        raise PermissionDenied({"permission": ["Not allowed to cancel this auction."]})
     if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
         raise ValidationError({"status": ["Auction is already closed."]})
 
