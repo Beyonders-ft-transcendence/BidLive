@@ -4,6 +4,7 @@ import logging
 from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import (
+    APIException,
     AuthenticationFailed,
     MethodNotAllowed,
     NotAuthenticated,
@@ -17,6 +18,14 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 logger = logging.getLogger(__name__)
+
+
+class ConflictError(APIException):
+    """HTTP 409 Conflict — raised when a resource already exists."""
+
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "O recurso ja existe."
+    default_code = "conflict"
 
 
 def _normalize_detail(detail) -> str:
@@ -63,6 +72,9 @@ def custom_exception_handler(exc: Exception, context: dict) -> Response:
 
     elif isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
         response.data = {"success": False, "errors": {"detail": "Autenticação necessária."}}
+
+    elif isinstance(exc, ConflictError):
+        response.data = {"success": False, "errors": exc.detail if isinstance(exc.detail, dict) else {"detail": str(exc.detail)}}
 
     elif isinstance(exc, PermissionDenied):
         response.data = {"success": False, "errors": {"detail": "Não tens permissão para realizar esta acção."}}
