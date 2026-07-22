@@ -5,6 +5,8 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
+from common.exceptions import ConflictError
+
 from apps.users.authorization_service import (
     invalidate_user_role_cache,
     log_permission_audit,
@@ -40,7 +42,7 @@ def create_managed_user(
     if User.objects.filter(username=username).exists():
         duplicate_errors["username"] = ["Username ja esta em uso."]
     if duplicate_errors:
-        raise ValidationError(duplicate_errors)
+        raise ConflictError(duplicate_errors)
 
     try:
         user = User.objects.create_user(
