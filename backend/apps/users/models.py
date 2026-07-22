@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 from common.models import SoftDeleteModel, TimeStampedModel
-from apps.users.managers import UserManager
+from apps.users.managers import UserAllObjectsManager, UserManager
 
 
 class UserStatus(models.TextChoices):
@@ -29,6 +29,7 @@ class User(TimeStampedModel, SoftDeleteModel, AbstractBaseUser, PermissionsMixin
     roles = models.ManyToManyField("Role", through="UserRole", related_name="users", blank=True)
 
     objects = UserManager()
+    all_objects = UserAllObjectsManager()  # includes soft-deleted — use only for restore checks
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "full_name"]

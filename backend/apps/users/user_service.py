@@ -37,23 +37,45 @@ def create_managed_user(
     validate_password(password)
     normalized_email = User.objects.normalize_email(email)
     duplicate_errors: dict[str, list[str]] = {}
-    if User.objects.filter(email=normalized_email).exists():
+    
+    existing_user_email = User.all_objects.filter(email=normalized_email).first()
+    existing_user_username = User.all_objects.filter(username=username).first()
+    
+    if existing_user_email and not existing_user_email.is_deleted:
         duplicate_errors["email"] = ["Email ja esta em uso."]
-    if User.objects.filter(username=username).exists():
+        
+    if existing_user_username and (not existing_user_email or existing_user_email.id != existing_user_username.id):
         duplicate_errors["username"] = ["Username ja esta em uso."]
+        
     if duplicate_errors:
         raise ConflictError(duplicate_errors)
 
-    try:
-        user = User.objects.create_user(
-            email=normalized_email,
-            username=username,
-            full_name=full_name,
-            password=password,
-            **extra_fields,
-        )
-    except IntegrityError as exc:
-        raise ValidationError({"non_field_errors": ["Usuario ja existe."]}) from exc
+    if existing_user_email and existing_user_email.is_deleted:
+        user = existing_user_email
+        user.is_deleted = False
+        user.deleted_at = None
+        user.username = username
+        user.full_name = full_name
+        for k, v in extra_fields.items():
+            setattr(user, k, v)
+        user.set_password(password)
+        user.is_verified = False
+        user.is_active = True
+        user.status = UserStatus.ACTIVE
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        user.save()
+    else:
+        try:
+            user = User.objects.create_user(
+                email=normalized_email,
+                username=username,
+                full_name=full_name,
+                password=password,
+                **extra_fields,
+            )
+        except IntegrityError as exc:
+            raise ValidationError({"non_field_errors": ["Usuario ja existe."]}) from exc
 
     resolved_roles = role_names or [DEFAULT_SIGNUP_ROLE]
     _set_user_roles(user=user, role_names=resolved_roles)
