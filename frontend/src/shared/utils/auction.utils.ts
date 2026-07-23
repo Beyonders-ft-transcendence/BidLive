@@ -48,3 +48,15 @@ export function formatCurrency(value: number | string, compact?: boolean): strin
     maximumFractionDigits: compact ? 1 : 2,
   }).format(numeric);
 }
+
+export function getItemConditionLabel(condition: string | null | undefined, t?: TFunction): string {
+  if (!condition) return "—";
+  const lower = condition.toLowerCase();
+  const i18nKey = `auction_detail.condition.${lower}`;
+  if (t) {
+    const translated = t(i18nKey, { defaultValue: condition });
+    if (translated && translated !== i18nKey) return translated;
+  }
+  return condition;
+}
+

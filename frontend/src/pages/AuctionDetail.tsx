@@ -21,6 +21,8 @@ import LiveStreamViewerPlayer from "@/components/livestream/LiveStreamViewerPlay
 import { useStreamViewersQuery } from "@/hooks/useLiveKit";
 import { useCancelAuctionMutation } from "@/hooks/useAuction";
 import { usePermissions } from "@/hooks/usePermissions";
+import { getItemConditionLabel } from "@/shared/utils/auction.utils";
+
 
 function formatCurrency(val: string | number | null | undefined, compact: boolean = false, locale: string = "pt-AO") {
     if (!val) return "—";
@@ -631,7 +633,7 @@ export default function AuctionDetailPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">{t('auction_detail.lot_info')}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5">
                     {[
-                        { icon: <Shield size={13} className="text-primary" />, label: t('auction_detail.condition_label'), value: t(`auction_detail.condition.${auction.item.condition_type?.toLowerCase()}`) || auction.item.condition_type || "—" },
+                        { icon: <Shield size={13} className="text-primary" />, label: t('auction_detail.condition_label'), value: getItemConditionLabel(auction.item.condition_type, t) },
                         { 
                           icon: <User size={13} className="text-primary" />, 
                           label: t('auction_detail.seller_label'), 
