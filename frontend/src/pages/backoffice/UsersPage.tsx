@@ -161,9 +161,89 @@ export default function UsersPage() {
           </div>
         </Toolbar>
 
-        {/* Data Table */}
+        {/* Data List (Cards for Mobile) / Table (Desktop) */}
         <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
+          
+          {/* Mobile Cards View */}
+          <div className="md:hidden flex flex-col divide-y divide-zinc-800/50">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-4 animate-pulse">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800/50 shrink-0"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-32 bg-zinc-800/50 rounded mb-2"></div>
+                      <div className="h-3 w-24 bg-zinc-800/50 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-800/30">
+                    <div className="h-5 w-16 bg-zinc-800/50 rounded"></div>
+                    <div className="h-5 w-20 bg-zinc-800/50 rounded"></div>
+                  </div>
+                </div>
+              ))
+            ) : users.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-sm">
+                {t('backoffice_users.no_users')}
+              </div>
+            ) : (
+              users.map((user: any) => (
+                <div key={`mobile-${user.id}`} className="p-4 hover:bg-zinc-900/20 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={user.full_name} src={user.avatar_url} size="md" />
+                      <div>
+                        <div className="font-medium text-zinc-100">{user.full_name}</div>
+                        <div className="text-xs text-zinc-500">{user.email}</div>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedUserId(user.id);
+                        setIsCreateMode(false);
+                        setShowDeleteConfirm(false);
+                      }}
+                      className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-lg border border-zinc-800 hover:bg-zinc-800 bg-zinc-900/50 shadow-sm"
+                      title={t('backoffice_users.manage_user')}
+                    >
+                      <Edit size={16} />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-xs mt-4 bg-zinc-900/20 p-3 rounded-lg border border-zinc-800/50">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-zinc-500 uppercase font-bold text-[10px] tracking-wider">{t('backoffice_users.th_profile')}</span>
+                      <div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700/50 shadow-sm">
+                          {typeof user.roles?.[0] === 'object' ? user.roles[0].name : user.roles?.[0] || 'USER'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
+                      <span className="text-zinc-500 uppercase font-bold text-[10px] tracking-wider">{t('backoffice_users.th_status')}</span>
+                      {user.status === 'ACTIVE' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700/50 shadow-sm">
+                          <CheckCircle size={10} /> {t('backoffice_users.status_active')}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-800 text-red-400 border border-zinc-700/50 shadow-sm">
+                          <ShieldBan size={10} /> {t('backoffice_users.status_banned')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 text-[11px] text-zinc-500 flex justify-between items-center px-1">
+                    <span className="uppercase tracking-wider font-semibold">{t('backoffice_users.th_registered_at')}</span>
+                    <span className="font-mono text-zinc-400">{new Date(user.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
