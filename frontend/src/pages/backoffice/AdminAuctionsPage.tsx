@@ -80,36 +80,128 @@ export default function AdminAuctionsPage() {
 
       <div className="flex flex-col gap-6 max-w-[1400px] w-full relative">
         <Toolbar>
-          <div className="relative w-full md:w-80">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder={t('backoffice_auctions.search_placeholder')}
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
-            />
-          </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto mt-3 md:mt-0">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="bg-black border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 transition-all appearance-none"
-            >
-              <option value="">{t('backoffice_auctions.filter_all')}</option>
-              <option value="LIVE">{t('backoffice_auctions.filter_live')}</option>
-              <option value="COMPLETED">{t('backoffice_auctions.filter_completed')}</option>
-              <option value="CANCELLED">{t('backoffice_auctions.filter_cancelled')}</option>
-              <option value="DRAFT">{t('backoffice_auctions.filter_draft')}</option>
-            </select>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+            <div className="relative w-full sm:max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input 
+                type="text" 
+                placeholder={t('backoffice_auctions.search_placeholder')}
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="pl-10 pr-4 py-2 w-full bg-black border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-500 text-zinc-100 transition-all"
+              />
+            </div>
+            
+            <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                className="w-full sm:w-auto bg-black border border-zinc-800 text-zinc-100 px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:border-zinc-500 transition-all appearance-none"
+              >
+                <option value="">{t('backoffice_auctions.filter_all')}</option>
+                <option value="LIVE">{t('backoffice_auctions.filter_live')}</option>
+                <option value="COMPLETED">{t('backoffice_auctions.filter_completed')}</option>
+                <option value="CANCELLED">{t('backoffice_auctions.filter_cancelled')}</option>
+                <option value="DRAFT">{t('backoffice_auctions.filter_draft')}</option>
+              </select>
+            </div>
           </div>
         </Toolbar>
 
-        {/* Data Table */}
+        {/* Data List (Cards for Mobile) / Table (Desktop) */}
         <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          
+          {/* Mobile Cards View */}
+          <div className="md:hidden flex flex-col divide-y divide-zinc-800/50">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-4 animate-pulse">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800/50 shrink-0"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-32 bg-zinc-800/50 rounded mb-2"></div>
+                      <div className="h-3 w-24 bg-zinc-800/50 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="h-12 w-full bg-zinc-800/50 rounded mb-3"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-5 w-16 bg-zinc-800/50 rounded"></div>
+                    <div className="flex flex-col gap-1">
+                      <div className="h-4 w-20 bg-zinc-800/50 rounded"></div>
+                      <div className="h-4 w-20 bg-zinc-800/50 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : auctions.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-sm">
+                {t('backoffice_auctions.no_auctions')}
+              </div>
+            ) : (
+              auctions.map((auction: any) => (
+                <div key={`mobile-${auction.id}`} className="p-4 hover:bg-zinc-900/20 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={auction.seller?.full_name || t('backoffice_auctions.unknown_seller')} src={auction.seller?.avatar_url} size="md" />
+                      <div>
+                        <div className="font-medium text-zinc-100">{auction.seller?.full_name || t('backoffice_auctions.unknown_seller')}</div>
+                        <div className="text-xs text-zinc-500">@{auction.seller?.username || 'user'}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link 
+                        to={`/auction/${auction.id}`}
+                        className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-lg border border-zinc-800 hover:bg-zinc-800 bg-zinc-900/50 shadow-sm"
+                        title={t('backoffice_auctions.view_auction')}
+                        target="_blank"
+                      >
+                        <ExternalLink size={16} />
+                      </Link>
+                      {auction.status !== 'CANCELLED' && auction.status !== 'COMPLETED' && (
+                        <button 
+                          onClick={() => setAuctionToCancel(auction.id)}
+                          disabled={isCanceling}
+                          className="p-2 text-zinc-400 hover:text-red-400 transition-colors rounded-lg border border-zinc-800 hover:bg-zinc-800 bg-zinc-900/50 shadow-sm"
+                          title={t('backoffice_auctions.cancel_auction')}
+                        >
+                          <Ban size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col bg-zinc-900/20 p-3 rounded-lg border border-zinc-800/50 mb-3">
+                    <span className="font-semibold text-zinc-100 truncate mb-1">{auction.item?.title}</span>
+                    <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                      <DollarSign size={12} />
+                      {formatCurrency(auction.item?.current_price || auction.item?.starting_price || 0)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs text-zinc-500">
+                    <div className="flex flex-col gap-1">
+                       <span className="uppercase tracking-wider font-semibold text-[10px]">{t('backoffice_auctions.th_status')}</span>
+                       <div>{getStatusBadge(auction.status)}</div>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
+                      <div className="flex items-center gap-1.5" title={t('backoffice_auctions.start_date')}>
+                        <Calendar size={12} className="text-zinc-500" />
+                        {new Date(auction.start_time).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-1.5" title={t('backoffice_auctions.end_date')}>
+                        <Calendar size={12} className="text-zinc-500" />
+                        {new Date(auction.end_time).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
                   <th className="px-6 py-4 font-medium">{t('backoffice_auctions.th_seller')}</th>
@@ -203,11 +295,11 @@ export default function AdminAuctionsPage() {
           
           {/* Pagination */}
           {data && data.count > 10 && (
-            <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
-              <span className="text-xs text-zinc-500">
-                {t('backoffice_auctions.total_auctions')}<span className="font-medium text-zinc-300">{data.count}</span>{t('backoffice_auctions.total_auctions_suffix')}
+            <div className="px-4 sm:px-6 py-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/20">
+              <span className="text-xs text-zinc-500 w-full sm:w-auto text-center sm:text-left">
+                {t('backoffice_auctions.total_auctions')}<span className="font-medium text-zinc-300 mx-1">{data.count}</span>{t('backoffice_auctions.total_auctions_suffix')}
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={!data.previous}
