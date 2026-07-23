@@ -28,6 +28,14 @@ class ConflictError(APIException):
     default_code = "conflict"
 
 
+class WeakPasswordError(APIException):
+    """HTTP 422 Unprocessable Entity — raised when a password fails validation."""
+
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    default_detail = "Senha fraca."
+    default_code = "weak_password"
+
+
 def _normalize_detail(detail) -> str:
     if isinstance(detail, list):
         first = detail[0] if detail else "Erro desconhecido."
@@ -72,6 +80,9 @@ def custom_exception_handler(exc: Exception, context: dict) -> Response:
 
     elif isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
         response.data = {"success": False, "errors": {"detail": "Autenticação necessária."}}
+
+    elif isinstance(exc, WeakPasswordError):
+        response.data = {"success": False, "errors": {"password": str(exc.detail)}}
 
     elif isinstance(exc, ConflictError):
         response.data = {"success": False, "errors": exc.detail if isinstance(exc.detail, dict) else {"detail": str(exc.detail)}}
