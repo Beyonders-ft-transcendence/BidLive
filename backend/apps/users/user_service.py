@@ -1,11 +1,12 @@
 from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from common.exceptions import ConflictError
+from common.exceptions import ConflictError, WeakPasswordError
 
 from apps.users.authorization_service import (
     invalidate_user_role_cache,
@@ -34,7 +35,10 @@ def create_managed_user(
     if not user_has_permission(user=actor, permission_name="user.create"):
         raise PermissionDenied({"permission": ["Permissao user.create necessaria."]})
 
-    validate_password(password)
+    try:
+        validate_password(password)
+    except DjangoValidationError:
+        raise WeakPasswordError()
     normalized_email = User.objects.normalize_email(email)
     duplicate_errors: dict[str, list[str]] = {}
     
