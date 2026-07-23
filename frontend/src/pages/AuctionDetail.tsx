@@ -97,7 +97,6 @@ export default function AuctionDetailPage() {
         bidError,
         activeStream,
         isWatchingStream,
-        setIsWatchingStream,
         viewerCount,
         bidAmount,
         setBidAmount,
@@ -339,105 +338,111 @@ export default function AuctionDetailPage() {
 
     const renderMedia = () => (
         <>
-            {activeStream && (
-                <div className="flex border-b border-border bg-muted">
-                    <button
-                        onClick={() => setIsWatchingStream(false)}
-                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer ${!isWatchingStream ? "text-primary bg-card border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"}`}
-                    >
-                        {t('auction_detail.gallery')}
-                    </button>
-                    <button
-                        onClick={() => setIsWatchingStream(true)}
-                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${isWatchingStream ? "text-red-500 bg-card border-b-2 border-red-500" : "text-muted-foreground hover:text-red-500"}`}
-                    >
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        {t('auction_detail.live_stream')}
-                    </button>
-                </div>
-            )}
+    
 
             {isWatchingStream && activeStream ? (
-                <div className="relative h-[300px] sm:h-[400px] xl:h-[480px] bg-slate-950 flex flex-col justify-between p-4 text-white">
-                    <div className="flex items-center justify-between z-10">
-                        <div className="flex items-center gap-2">
-                            <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
-                                <span className="w-1 h-1 bg-[#111827] rounded-full" /> {t('auction_detail.status.live')}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-300 truncate max-w-[200px]">{activeStream.title}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1 font-mono">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/100 animate-ping" /> {liveViewerCount} {t('auction_detail.watching')}
-                            </div>
-                            <button onClick={() => setShowChat(!showChat)} className="bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[9px] font-bold flex items-center gap-1.5 text-white hover:bg-black/60 transition-colors cursor-pointer">
-                                <MessageSquare size={12} /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.chat')}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Player LiveKit do participante */}
+                <div className="relative h-[300px] sm:h-[400px] xl:h-[480px] bg-black flex flex-col justify-between overflow-hidden">
                     <div className="absolute inset-0">
                         <LiveStreamViewerPlayer auctionId={auctionId} stream={activeStream} />
                     </div>
+                    
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
 
-                    <div className="flex items-center justify-between z-10 w-full pt-2">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                            {t('auction_detail.streamer')} @{activeStream.streamer?.username || t('auction_detail.seller')}
-                        </span>
+                    <div className="relative z-10 p-4 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-red-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-red-500/20 border border-red-400/30">
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                    {t('auction_detail.status.live')}
+                                </div>
+                                <div className="bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-bold text-white flex items-center gap-2 border border-white/10">
+                                    <User size={12} className="text-slate-300" />
+                                    {liveViewerCount} {t('auction_detail.watching')}
+                                </div>
+                            </div>
+                            
+                            <button onClick={() => setShowChat(!showChat)} className="bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/70 transition-colors cursor-pointer border border-white/10" title={showChat ? t('auction_detail.hide_chat') : t('auction_detail.show_chat')}>
+                                {showChat ? <X size={16} /> : <MessageSquare size={16} />}
+                            </button>
+                        </div>
+                        <h3 className="text-sm font-bold text-white drop-shadow-md max-w-[80%] truncate">{activeStream.title}</h3>
+                    </div>
+
+                    <div className="relative z-10 p-4 w-full flex items-center justify-between">
+                        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                            <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                                <User size={10} className="text-primary-foreground" />
+                            </div>
+                            <span className="text-[10px] text-white font-bold tracking-wide">
+                                @{activeStream.streamer?.username || t('auction_detail.seller')}
+                            </span>
+                        </div>
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col h-full">
-                    <div className="relative flex-1 min-h-[300px] xl:min-h-[400px] bg-muted flex items-center justify-center">
+                <div className="flex flex-col h-full bg-card">
+                    <div className="relative flex-1 min-h-[300px] xl:min-h-[400px] bg-muted/30 flex items-center justify-center overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-muted/50 to-background opacity-50 pointer-events-none" />
+                        
                         {images.length > 0 ? (
-                            <img src={images[activeImage]?.image_url} alt={auction.item.title} className="max-w-full max-h-full object-contain p-2 absolute inset-0 m-auto" />
+                            <img src={images[activeImage]?.image_url} alt={auction.item.title} className="max-w-full max-h-full object-contain p-4 absolute inset-0 m-auto drop-shadow-xl transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                            <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                <Gavel size={44} className="mb-2" />
-                                <span className="text-sm">{t('auction_detail.no_image')}</span>
+                            <div className="flex flex-col items-center justify-center text-muted-foreground relative z-10">
+                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3 border border-border/50 shadow-sm">
+                                    <Gavel size={28} />
+                                </div>
+                                <span className="text-sm font-medium">{t('auction_detail.no_image')}</span>
                             </div>
                         )}
 
-                        <div className="absolute top-3 left-3 flex gap-2">
-                            <span className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-md shadow-black/20">
-                                {t('auction_detail.lot')}{auction.id}
+                        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                            <span className="bg-background/80 backdrop-blur-md text-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm border border-border/50">
+                                {t('auction_detail.lot')} #{auction.id}
                             </span>
                             {isStreamingLive && (
-                                <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#111827] animate-pulse" /> {t('auctions.live')}
+                                <span className="bg-red-500/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-red-500/30">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> {t('auctions.live')}
                                 </span>
                             )}
                             {auction.status === 'ACTIVE' && (
-                                <span className="bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
-                                    {t('auctions.active', 'Active')}
+                                <span className="bg-green-500/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm border border-green-500/30">
+                                    <CheckCircle2 size={12} /> {t('auctions.active', 'Active')}
                                 </span>
                             )}
                             {auction.status === 'SCHEDULED' && (
-                                <span className="bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1.5 shadow-md shadow-black/20">
-                                    {t('auctions.scheduled', 'Agendado')}
+                                <span className="bg-blue-500/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm border border-blue-500/30">
+                                    <CalendarDays size={12} /> {t('auctions.scheduled', 'Agendado')}
                                 </span>
                             )}
                         </div>
 
-                        <div className="absolute top-3 right-3 flex gap-2">
-                            <button onClick={() => setShowChat(!showChat)} className="bg-card/90 backdrop-blur-sm text-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm shadow-md shadow-black/20 flex items-center gap-1.5 hover:bg-muted transition-colors cursor-pointer">
-                                <MessageSquare size={12} /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.show_chat')}
+                        <div className="absolute top-4 right-4 z-10">
+                            <button onClick={() => setShowChat(!showChat)} className="bg-background/80 backdrop-blur-md text-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm border border-border/50 flex items-center gap-2 hover:bg-background transition-colors cursor-pointer group">
+                                <MessageSquare size={14} className="group-hover:text-primary transition-colors" /> {showChat ? t('auction_detail.hide_chat') : t('auction_detail.show_chat')}
                             </button>
                         </div>
                     </div>
 
                     {images.length > 1 && (
-                        <div className="flex gap-2 p-3 border-t border-border bg-muted overflow-x-auto h-[90px] shrink-0">
-                            {images.map((img, i) => (
-                                <button
-                                    key={img.id}
-                                    onClick={() => setActiveImage(i)}
-                                    className={`w-16 h-16 shrink-0 rounded-sm overflow-hidden border-2 transition-colors cursor-pointer ${activeImage === i ? "border-primary" : "border-transparent hover:border-slate-600"}`}
-                                >
-                                    <img src={img.image_url} alt="" className="w-full h-full object-cover" />
-                                </button>
-                            ))}
+                        <div className="p-4 border-t border-border bg-card">
+                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                                {images.map((img, i) => (
+                                    <button
+                                        key={img.id}
+                                        onClick={() => setActiveImage(i)}
+                                        className={`relative w-16 h-16 shrink-0 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer ${
+                                            activeImage === i 
+                                                ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105" 
+                                                : "opacity-70 hover:opacity-100 hover:scale-105 border border-border"
+                                        }`}
+                                    >
+                                        <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                                        {activeImage === i && (
+                                            <div className="absolute inset-0 bg-primary/10" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
