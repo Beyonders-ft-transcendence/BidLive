@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight, Menu } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Avatar from '@/components/common/Avatar';
 import { useNotificationsQuery } from '@/hooks/useNotification';
@@ -7,7 +7,11 @@ import { useNotificationRealtime } from '@/hooks/useNotificationRealtime';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
-export default function Header() {
+interface HeaderProps {
+  onOpenSidebar: () => void;
+}
+
+export default function Header({ onOpenSidebar }: HeaderProps) {
   const location = useLocation();
   const { user } = useAuthStore();
   const { t } = useTranslation();
@@ -33,13 +37,21 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 bg-black border-b border-zinc-800 sticky top-0 z-30 flex items-center justify-between px-6">
+    <header className="h-16 bg-black border-b border-zinc-800 sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
       
-      {/* Breadcrumbs / Title */}
-      <div className="flex items-center gap-2 text-sm">
-        <span className="text-zinc-500 font-medium">{t('backoffice_header.admin_title')}</span>
-        <ChevronRight size={14} className="text-zinc-600 rtl:rotate-180" />
-        <span className="font-semibold text-zinc-100">{getPageTitle()}</span>
+      {/* Mobile Menu Button & Breadcrumbs / Title */}
+      <div className="flex items-center gap-2 md:gap-4 text-sm">
+        <button 
+          onClick={onOpenSidebar}
+          className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="text-zinc-500 font-medium whitespace-nowrap">{t('backoffice_header.admin_title')}</span>
+          <ChevronRight size={14} className="text-zinc-600 rtl:rotate-180 flex-shrink-0" />
+        </div>
+        <span className="font-semibold text-zinc-100 truncate">{getPageTitle()}</span>
       </div>
 
       {/* Right Actions */}
