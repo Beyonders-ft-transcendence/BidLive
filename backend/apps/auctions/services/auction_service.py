@@ -279,54 +279,64 @@ def update_auction(
     return auction
 
 
-@transaction.atomic
 def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str = "") -> Auction:
     if not (auction.item.seller_id == actor.id or actor.is_superuser):
         raise PermissionDenied({"permission": ["Not allowed to cancel this auction."]})
-    if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
-        raise ValidationError({"status": ["Auction is already closed."]})
 
-    has_bids = auction.bids.exists()
-    not_started = auction.start_time > timezone.now()
-    if not not_started and has_bids:
-        raise ValidationError({"bids": ["Auction with bids cannot be cancelled after start."]})
+    lock = _acquire_lock(auction_id=auction.id)
+    if not lock.acquire(blocking=True):
+        raise ValidationError({"auction": ["Auction is busy. Try again."]})
 
-    auction.status = AuctionStatus.CANCELLED
-    auction.cancelled_at = timezone.now()
-    auction.cancelled_by = actor
-    auction.cancel_reason = reason
-    auction.save(update_fields=["status", "cancelled_at", "cancelled_by", "cancel_reason", "updated_at"])
+    try:
+        with transaction.atomic():
+            auction = Auction.objects.select_for_update().select_related("item").get(pk=auction.id)
 
-    AuctionAuditLog.objects.create(
-        auction=auction,
-        actor=actor,
-        action="auction.cancelled",
-        metadata={"reason": reason},
-    )
-    log_permission_audit(
-        actor=actor,
-        action="auction.cancel",
-        resource_type="auction",
-        resource_id=auction.id,
-        metadata={"reason": reason},
-        ip_address=ip_address,
-    )
-    track_event(user=actor, event_type="auction.cancelled", metadata={"auction_id": auction.id})
+            if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
+                raise ValidationError({"status": ["Auction is already closed."]})
 
-    notify_auction_watchers(
-        auction=auction,
-        notification_type=NotificationType.AUCTION_ENDED,
-        title="Auction cancelled",
-        content=f"Auction {auction.id} was cancelled.",
-    )
+            has_bids = auction.bids.exists()
+            not_started = auction.start_time > timezone.now()
+            if not not_started and has_bids:
+                raise ValidationError({"bids": ["Auction with bids cannot be cancelled after start."]})
 
-    publish_auction_event(
-        auction_id=auction.id,
-        event_type=AUCTION_CANCELLED,
-        payload={"auction_id": auction.id, "status": auction.status},
-    )
-    _publish_snapshot(auction=auction, broadcast=True)
-    return auction
+            auction.status = AuctionStatus.CANCELLED
+            auction.cancelled_at = timezone.now()
+            auction.cancelled_by = actor
+            auction.cancel_reason = reason
+            auction.save(update_fields=["status", "cancelled_at", "cancelled_by", "cancel_reason", "updated_at"])
+
+            AuctionAuditLog.objects.create(
+                auction=auction,
+                actor=actor,
+                action="auction.cancelled",
+                metadata={"reason": reason},
+            )
+            log_permission_audit(
+                actor=actor,
+                action="auction.cancel",
+                resource_type="auction",
+                resource_id=auction.id,
+                metadata={"reason": reason},
+                ip_address=ip_address,
+            )
+            track_event(user=actor, event_type="auction.cancelled", metadata={"auction_id": auction.id})
+
+            notify_auction_watchers(
+                auction=auction,
+                notification_type=NotificationType.AUCTION_ENDED,
+                title="Auction cancelled",
+                content=f"Auction {auction.id} was cancelled.",
+            )
+
+            publish_auction_event(
+                auction_id=auction.id,
+                event_type=AUCTION_CANCELLED,
+                payload={"auction_id": auction.id, "status": auction.status},
+            )
+            _publish_snapshot(auction=auction, broadcast=True)
+            return auction
+    finally:
+        lock.release()
 
 
 def place_bid(
@@ -427,14 +437,11 @@ def place_bid(
         lock.release()
 
 
-@transaction.atomic
 def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
-    if auction.status not in (AuctionStatus.SCHEDULED, AuctionStatus.ACTIVE, AuctionStatus.LIVE):
+    if auction.status not in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         raise ValidationError({"status": ["Auction is not available for buy now."]})
     if auction.item.buy_now_price is None:
         raise ValidationError({"buy_now_price": ["Buy now is not available."]})
-    if auction.item.current_price >= (Decimal('0.85') * auction.item.buy_now_price):
-        raise ValidationError({"buy_now_price": ["Compra imediata desativada para este item."]})
     if auction.end_time <= timezone.now():
         raise ValidationError({"status": ["Auction has already ended."]})
     if buyer.id == auction.item.seller_id:
@@ -445,77 +452,80 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
         raise ValidationError({"auction": ["Auction is busy. Try again."]})
 
     try:
-        auction = Auction.objects.select_for_update().select_related("item").get(pk=auction.id)
-        if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
-            raise ValidationError({"status": ["Auction is already closed."]})
+        with transaction.atomic():
+            auction = Auction.objects.select_for_update().select_related("item").get(pk=auction.id)
+            if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
+                raise ValidationError({"status": ["Auction is already closed."]})
+            if auction.item.current_price >= (Decimal('0.85') * auction.item.buy_now_price):
+                raise ValidationError({"buy_now_price": ["Compra imediata desativada para este item."]})
 
-        amount = auction.item.buy_now_price
-        bid = Bid.objects.create(auction=auction, bidder=buyer, amount=amount, is_buy_now=True)
-        auction.item.current_price = amount
-        auction.item.save(update_fields=["current_price", "updated_at"])
+            amount = auction.item.buy_now_price
+            bid = Bid.objects.create(auction=auction, bidder=buyer, amount=amount, is_buy_now=True)
+            auction.item.current_price = amount
+            auction.item.save(update_fields=["current_price", "updated_at"])
 
-        auction.status = AuctionStatus.SOLD
-        auction.winner = buyer
-        auction.winning_bid = bid
-        auction.buy_now_at = timezone.now()
-        auction.buy_now_by = buyer
-        auction.ended_at = timezone.now()
-        auction.reserve_met = True
-        auction.save(
-            update_fields=[
-                "status",
-                "winner",
-                "winning_bid",
-                "buy_now_at",
-                "buy_now_by",
-                "ended_at",
-                "reserve_met",
-                "updated_at",
-            ]
-        )
+            auction.status = AuctionStatus.SOLD
+            auction.winner = buyer
+            auction.winning_bid = bid
+            auction.buy_now_at = timezone.now()
+            auction.buy_now_by = buyer
+            auction.ended_at = timezone.now()
+            auction.reserve_met = True
+            auction.save(
+                update_fields=[
+                    "status",
+                    "winner",
+                    "winning_bid",
+                    "buy_now_at",
+                    "buy_now_by",
+                    "ended_at",
+                    "reserve_met",
+                    "updated_at",
+                ]
+            )
 
-        AuctionAuditLog.objects.create(
-            auction=auction,
-            actor=buyer,
-            action="auction.buy_now",
-            metadata={"amount": str(amount)},
-        )
-        log_permission_audit(
-            actor=buyer,
-            action="auction.buy_now",
-            resource_type="auction",
-            resource_id=auction.id,
-            metadata={"amount": str(amount)},
-            ip_address=ip_address,
-        )
-        track_event(
-            user=buyer,
-            event_type="auction.buy_now",
-            metadata={"auction_id": auction.id, "amount": str(amount)},
-            ip_address=ip_address,
-        )
+            AuctionAuditLog.objects.create(
+                auction=auction,
+                actor=buyer,
+                action="auction.buy_now",
+                metadata={"amount": str(amount)},
+            )
+            log_permission_audit(
+                actor=buyer,
+                action="auction.buy_now",
+                resource_type="auction",
+                resource_id=auction.id,
+                metadata={"amount": str(amount)},
+                ip_address=ip_address,
+            )
+            track_event(
+                user=buyer,
+                event_type="auction.buy_now",
+                metadata={"auction_id": auction.id, "amount": str(amount)},
+                ip_address=ip_address,
+            )
 
-        notify_user(
-            user=auction.item.seller,
-            notification_type=NotificationType.AUCTION_ENDED,
-            title="Auction sold",
-            content=f"Auction {auction.id} sold via buy now.",
-        )
-        notify_auction_watchers(
-            auction=auction,
-            notification_type=NotificationType.AUCTION_ENDED,
-            title="Auction sold",
-            content=f"Auction {auction.id} sold via buy now.",
-            exclude_user_ids=[buyer.id],
-        )
+            notify_user(
+                user=auction.item.seller,
+                notification_type=NotificationType.AUCTION_ENDED,
+                title="Auction sold",
+                content=f"Auction {auction.id} sold via buy now.",
+            )
+            notify_auction_watchers(
+                auction=auction,
+                notification_type=NotificationType.AUCTION_ENDED,
+                title="Auction sold",
+                content=f"Auction {auction.id} sold via buy now.",
+                exclude_user_ids=[buyer.id],
+            )
 
-        publish_auction_event(
-            auction_id=auction.id,
-            event_type=BUY_NOW_COMPLETED,
-            payload={"auction_id": auction.id, "amount": str(amount)},
-        )
-        _publish_snapshot(auction=auction, broadcast=True)
-        return auction
+            publish_auction_event(
+                auction_id=auction.id,
+                event_type=BUY_NOW_COMPLETED,
+                payload={"auction_id": auction.id, "amount": str(amount)},
+            )
+            _publish_snapshot(auction=auction, broadcast=True)
+            return auction
     finally:
         lock.release()
 
