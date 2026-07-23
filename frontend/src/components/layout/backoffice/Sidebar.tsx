@@ -6,12 +6,18 @@ import {
   LogOut,
   Gavel,
   ShieldAlert,
+  X
 } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import Logo from "@/assets/images/logo2.png";
 import { useTranslation } from 'react-i18next';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { logout } = useAuthStore();
@@ -25,11 +31,21 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-black text-zinc-400 flex flex-col fixed left-0 top-0 border-r border-zinc-800 z-40">
-      <div className="h-16 flex items-center justify-center border-b border-zinc-800">
-        <Link to="/backoffice" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+    <aside className={`
+      w-64 h-screen bg-black text-zinc-400 flex flex-col fixed left-0 top-0 border-r border-zinc-800 z-40
+      transition-transform duration-300 ease-in-out
+      ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    `}>
+      <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-800">
+        <Link to="/backoffice" className="flex items-center gap-2 transition-opacity hover:opacity-80" onClick={() => window.innerWidth < 768 && onClose()}>
           <img src={Logo} alt="BidLive Admin" className="h-6 object-contain" />
         </Link>
+        <button 
+          onClick={onClose}
+          className="md:hidden p-2 text-zinc-400 hover:text-zinc-100"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
@@ -41,6 +57,7 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => window.innerWidth < 768 && onClose()}
               className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
                 ? 'bg-zinc-800 text-zinc-50'
                 : 'hover:bg-zinc-800/50 hover:text-zinc-200'
