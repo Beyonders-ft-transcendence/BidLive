@@ -4,13 +4,37 @@ import type { RoleWritePayload, UserBanPayload, ReportActionPayload, ReportStatu
 import { toast } from "sonner";
 
 const getErrorMsg = (error: any, fallback: string): string => {
-  if (error?.response?.data) {
-    if (typeof error.response.data.message === 'string') return error.response.data.message;
-    if (typeof error.response.data.detail === 'string') return error.response.data.detail;
-    if (Array.isArray(error.response.data.detail) && error.response.data.detail.length > 0) {
-      return error.response.data.detail[0].msg || fallback;
+  if (!error) return fallback;
+
+  const data = error?.response?.data;
+  if (data) {
+    if (typeof data === "string" && data.trim()) return data;
+
+    if (typeof data.message === "string" && data.message.trim()) return data.message;
+    if (typeof data.detail === "string" && data.detail.trim()) return data.detail;
+
+    // FastAPI / Pydantic detail array: [{ msg: "...", loc: ... }]
+    if (Array.isArray(data.detail) && data.detail.length > 0) {
+      const first = data.detail[0];
+      if (typeof first === "string" && first.trim()) return first;
+      if (first && typeof first === "object" && first.msg) return String(first.msg);
+    }
+
+    // Backend error_response format: { success: false, errors: ... }
+    const errorSource = data.errors ?? data;
+    if (typeof errorSource === "string" && errorSource.trim()) return errorSource;
+
+    if (errorSource && typeof errorSource === "object") {
+      const values = Object.values(errorSource).flat();
+      const firstError = values.find((v) => typeof v === "string" && (v as string).trim());
+      if (firstError) return firstError as string;
     }
   }
+
+  if (typeof error.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+
   return fallback;
 };
 

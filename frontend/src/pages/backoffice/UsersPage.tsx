@@ -14,6 +14,7 @@ import {
 import Avatar from '@/components/common/Avatar';
 import { Search, ShieldBan, CheckCircle, Users, X, Edit, Save, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 export default function UsersPage() {
   const { t } = useTranslation();
@@ -75,9 +76,9 @@ export default function UsersPage() {
       }
 
       const payload: any = {
-        email: formData.email,
-        username: formData.username,
-        full_name: formData.full_name,
+        email: formData.email.trim(),
+        username: formData.username.trim(),
+        full_name: formData.full_name.trim(),
         password: formData.password,
       };
 

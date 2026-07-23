@@ -9,7 +9,6 @@ import {
     X,
     Clock,
     Loader2,
-    Circle,
     Eye,
     Ban,
     ShieldCheck,
@@ -65,7 +64,7 @@ export default function FriendsTab() {
     const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
     const { data: onlineResponse } = useOnlineFriendsQuery();
     const { data: receivedResponse, isLoading: isLoadingReceived } = usePendingRequestsReceivedQuery();
-    const { data: sentResponse, isLoading: isLoadingSent } = usePendingRequestsSentQuery();
+    const { data: sentResponse } = usePendingRequestsSentQuery();
     const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
     const { data: blockedResponse, isLoading: isLoadingBlocked } = useBlockedUsersQuery();
 
