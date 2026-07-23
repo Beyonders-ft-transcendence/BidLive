@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from apps.auctions.models import Auction, AuctionCategory, AuctionImage, AuctionItem
@@ -22,6 +24,12 @@ class AuctionItemSerializer(LocalizedModelSerializer):
     category = AuctionCategorySerializer(read_only=True)
     images = AuctionImageSerializer(many=True, read_only=True)
     created_at = LocalDateTimeOutputField(read_only=True)
+    is_buy_now_available = serializers.SerializerMethodField()
+
+    def get_is_buy_now_available(self, obj) -> bool:
+        if obj.buy_now_price is None:
+            return False
+        return obj.current_price < (Decimal('0.85') * obj.buy_now_price)
 
     class Meta:
         model = AuctionItem
@@ -38,11 +46,12 @@ class AuctionItemSerializer(LocalizedModelSerializer):
             "minimum_increment",
             "reserve_price",
             "buy_now_price",
+            "is_buy_now_available",
             "condition_type",
             "images",
             "created_at",
         )
-        read_only_fields = ("id", "seller", "current_price", "category_label", "created_at")
+        read_only_fields = ("id", "seller", "current_price", "category_label", "created_at", "is_buy_now_available")
 
 
 class AuctionListSerializer(LocalizedModelSerializer):

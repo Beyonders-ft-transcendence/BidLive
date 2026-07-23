@@ -433,6 +433,8 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
         raise ValidationError({"status": ["Auction is not available for buy now."]})
     if auction.item.buy_now_price is None:
         raise ValidationError({"buy_now_price": ["Buy now is not available."]})
+    if auction.item.current_price >= (Decimal('0.85') * auction.item.buy_now_price):
+        raise ValidationError({"buy_now_price": ["Compra imediata desativada para este item."]})
     if auction.end_time <= timezone.now():
         raise ValidationError({"status": ["Auction has already ended."]})
     if buyer.id == auction.item.seller_id:
