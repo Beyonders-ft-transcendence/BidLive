@@ -69,6 +69,11 @@ export default function UsersPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (isCreateMode) {
+      if (!formData.role_names || formData.role_names.length === 0 || !formData.role_names[0]) {
+        toast.error("Por favor, selecione um perfil de acesso (Role) para o novo utilizador.");
+        return;
+      }
+
       const payload: any = {
         email: formData.email,
         username: formData.username,
