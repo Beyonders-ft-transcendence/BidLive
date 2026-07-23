@@ -135,8 +135,8 @@ export default function UsersPage() {
 
       <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full relative">
         <Toolbar>
-          <div className="flex items-center gap-4 w-full">
-            <div className="relative flex-1 md:w-80 md:flex-none">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+            <div className="relative w-full sm:max-w-md">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input 
                 type="text" 
@@ -153,18 +153,18 @@ export default function UsersPage() {
                 setSelectedUserId(null);
                 setShowDeleteConfirm(false);
               }}
-              className="ml-auto flex items-center gap-2 px-4 py-2 bg-zinc-100 text-black text-sm font-medium rounded-lg hover:bg-white transition-colors"
+              className="sm:ml-auto flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-black text-sm font-medium rounded-lg hover:bg-white transition-colors"
             >
               <Plus size={16} />
-              <span className="hidden sm:inline">{t('backoffice_users.btn_new_user')}</span>
+              <span>{t('backoffice_users.btn_new_user')}</span>
             </button>
           </div>
         </Toolbar>
 
         {/* Data Table */}
         <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
               <thead className="bg-zinc-900/50 border-b border-zinc-800 text-xs font-medium text-zinc-500">
                 <tr>
                   <th className="px-6 py-4 font-medium">{t('backoffice_users.th_user')}</th>
@@ -246,11 +246,11 @@ export default function UsersPage() {
           
           {/* Pagination */}
           {data && data.count > 10 && (
-            <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/20">
-              <span className="text-xs text-zinc-500">
+            <div className="px-4 sm:px-6 py-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/20">
+              <span className="text-xs text-zinc-500 w-full sm:w-auto text-center sm:text-left">
                 {t('backoffice_users.total_users')} <span className="font-medium text-zinc-300">{data.count}</span> {t('backoffice_users.total_users_suffix')}
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={!data.previous}
@@ -286,7 +286,7 @@ export default function UsersPage() {
 
       {/* Right Drawer Panel */}
       <div 
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-black border-l border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] max-w-[100vw] bg-black border-l border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col ${
           (selectedUserId || isCreateMode) ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
