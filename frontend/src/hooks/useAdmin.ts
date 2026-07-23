@@ -3,6 +3,17 @@ import adminService from "@/services/admin.service";
 import type { RoleWritePayload, UserBanPayload, ReportActionPayload, ReportStatusUpdatePayload, PermissionWritePayload } from "@/shared/types/admin.types";
 import { toast } from "sonner";
 
+const getErrorMsg = (error: any, fallback: string): string => {
+  if (error?.response?.data) {
+    if (typeof error.response.data.message === 'string') return error.response.data.message;
+    if (typeof error.response.data.detail === 'string') return error.response.data.detail;
+    if (Array.isArray(error.response.data.detail) && error.response.data.detail.length > 0) {
+      return error.response.data.detail[0].msg || fallback;
+    }
+  }
+  return fallback;
+};
+
 export const adminKeys = {
   all: ["admin"] as const,
   users: (page: number, search: string) => [...adminKeys.all, "users", page, search] as const,
@@ -65,7 +76,7 @@ export function useBanUserMutation() {
       toast.success("Estado do utilizador atualizado com sucesso");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao atualizar estado do utilizador";
+      const msg = getErrorMsg(error, "Erro ao atualizar estado do utilizador");
       toast.error(msg);
     }
   });
@@ -82,8 +93,8 @@ export function useUpdateUserMutation() {
       queryClient.invalidateQueries({ queryKey: adminKeys.user(variables.id) });
       toast.success("Utilizador atualizado com sucesso");
     },
-    onError: () => {
-      toast.error("Erro ao atualizar utilizador");
+    onError: (error: any) => {
+      toast.error(getErrorMsg(error, "Erro ao atualizar utilizador"));
     }
   });
 }
@@ -98,7 +109,7 @@ export function useCreateUserMutation() {
       toast.success("Utilizador criado com sucesso");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao criar utilizador";
+      const msg = getErrorMsg(error, "Erro ao criar utilizador");
       toast.error(msg);
     }
   });
@@ -114,7 +125,7 @@ export function useDeleteUserMutation() {
       toast.success("Utilizador removido com sucesso");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao remover utilizador";
+      const msg = getErrorMsg(error, "Erro ao remover utilizador");
       toast.error(msg);
     }
   });
@@ -129,8 +140,8 @@ export function useCreateRoleMutation() {
       queryClient.invalidateQueries({ queryKey: adminKeys.roles() });
       toast.success("Perfil de acesso (Role) criado");
     },
-    onError: () => {
-      toast.error("Erro ao criar perfil de acesso");
+    onError: (error: any) => {
+      toast.error(getErrorMsg(error, "Erro ao criar perfil de acesso"));
     }
   });
 }
@@ -145,8 +156,8 @@ export function useUpdateRoleMutation() {
       queryClient.invalidateQueries({ queryKey: adminKeys.roles() });
       toast.success("Perfil de acesso (Role) atualizado");
     },
-    onError: () => {
-      toast.error("Erro ao atualizar perfil de acesso");
+    onError: (error: any) => {
+      toast.error(getErrorMsg(error, "Erro ao atualizar perfil de acesso"));
     }
   });
 }
@@ -161,7 +172,7 @@ export function useDeleteRoleMutation() {
       toast.success("Perfil de acesso removido");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao remover perfil de acesso";
+      const msg = getErrorMsg(error, "Erro ao remover perfil de acesso");
       toast.error(msg);
     }
   });
@@ -176,8 +187,8 @@ export function useCreatePermissionMutation() {
       queryClient.invalidateQueries({ queryKey: adminKeys.permissions() });
       toast.success("Permissão criada com sucesso");
     },
-    onError: () => {
-      toast.error("Erro ao criar permissão");
+    onError: (error: any) => {
+      toast.error(getErrorMsg(error, "Erro ao criar permissão"));
     }
   });
 }
@@ -192,8 +203,8 @@ export function useUpdatePermissionMutation() {
       queryClient.invalidateQueries({ queryKey: adminKeys.permissions() });
       toast.success("Permissão atualizada com sucesso");
     },
-    onError: () => {
-      toast.error("Erro ao atualizar permissão");
+    onError: (error: any) => {
+      toast.error(getErrorMsg(error, "Erro ao atualizar permissão"));
     }
   });
 }
@@ -208,7 +219,7 @@ export function useDeletePermissionMutation() {
       toast.success("Permissão removida com sucesso");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao remover permissão";
+      const msg = getErrorMsg(error, "Erro ao remover permissão");
       toast.error(msg);
     }
   });
@@ -241,7 +252,7 @@ export function useUpdateReportStatusMutation() {
       toast.success("Estado da denúncia atualizado");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao atualizar estado da denúncia";
+      const msg = getErrorMsg(error, "Erro ao atualizar estado da denúncia");
       toast.error(msg);
     }
   });
@@ -258,7 +269,7 @@ export function useApplyReportActionMutation() {
       toast.success("Ação administrativa aplicada com sucesso");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message || "Erro ao aplicar ação administrativa";
+      const msg = getErrorMsg(error, "Erro ao aplicar ação administrativa");
       toast.error(msg);
     }
   });

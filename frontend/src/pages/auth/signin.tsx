@@ -68,7 +68,8 @@ function SigninForm() {
             handleSuccessRedirect();
         } catch (err: any) {
             console.error("Falha ao entrar com e-mail/senha:", err);
-            toast.error(err?.response?.data?.message || err?.message || t('auth.error_signin'));
+            const errorMessage = useAuthStore.getState().error || t('auth.error_signin');
+            toast.error(errorMessage);
         }
     };
 
@@ -95,7 +96,8 @@ function SigninForm() {
                 handleSuccessRedirect();
             } catch (error: any) {
                 console.error("Erro na integração Google Auth do Backend:", error);
-                toast.error("Erro ao completar a autenticação com o Google.");
+                const errorMessage = useAuthStore.getState().error || "Erro ao completar a autenticação com o Google.";
+                toast.error(errorMessage);
             }
         },
         onError: () => {
