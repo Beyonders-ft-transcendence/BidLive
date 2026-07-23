@@ -432,16 +432,16 @@ export default function OverviewTab({
       <div className="space-y-6 min-w-0 flex-1">
         
         {/* Welcome header card */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15 rounded-sm p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
-          <div>
-            <h2 className="text-xl font-black tracking-tight">{t('overview_tab.welcome', { name: user.full_name })}</h2>
-            <p className="text-xs text-muted-foreground mt-1 font-normal">{t('overview_tab.welcome_desc')}</p>
+        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15 rounded-xl p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg sm:text-xl font-black tracking-tight truncate">{t('overview_tab.welcome', { name: user.full_name || user.username })}</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 font-normal leading-relaxed">{t('overview_tab.welcome_desc')}</p>
           </div>
           <button
             onClick={onCreateNewClick}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm shadow-md shadow-primary/10 transition uppercase cursor-pointer border-none"
+            className="flex items-center justify-center shrink-0 gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-lg shadow-md shadow-primary/20 transition uppercase cursor-pointer border-none whitespace-nowrap w-full md:w-auto"
           >
-            <PlusCircle size={15} />
+            <PlusCircle size={16} />
             {t('overview_tab.create_first')}
           </button>
         </div>
