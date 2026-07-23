@@ -54,16 +54,8 @@ function LiveStreamConsolePanel({
 
   const [activeTab, setActiveTab] = useState<"chat" | "bids" | "obs">("chat");
 
-  // Real-time bids, prices and bidding actions (based on AuctionDetail.tsx)
-  const {
-    auction,
-    bids,
-    bidAmount,
-    setBidAmount,
-    submittingBid,
-    placeBid: handlePlaceBid,
-    bidError,
-  } = useAuctionRealtime(auctionId);
+  // Real-time bids and price history stream (read-only for streamer)
+  const { auction, bids } = useAuctionRealtime(auctionId);
 
   // Real-time chat for this auction
   const { data: messagesData } = useAuctionMessagesQuery(auctionId);
@@ -110,11 +102,6 @@ function LiveStreamConsolePanel({
   };
 
   const currentPrice = Number(auction?.item?.current_price || auction?.item?.starting_price || 0);
-  const minIncrement = Number(auction?.item?.minimum_increment || 1000);
-
-  const handlePresetBid = (inc: number) => {
-    setBidAmount(String(currentPrice + inc));
-  };
 
   return (
     <div className="bg-card border border-border rounded-sm shadow-sm flex flex-col h-[520px] overflow-hidden text-left">
@@ -302,42 +289,6 @@ function LiveStreamConsolePanel({
                 );
               })
             )}
-          </div>
-
-          {/* Interactive Bidding Form & Presets (based on AuctionDetail.tsx) */}
-          <div className="p-2.5 bg-muted/40 border-t border-border space-y-2">
-            {bidError && (
-              <p className="text-[10px] text-destructive font-semibold px-1">{bidError}</p>
-            )}
-            <div className="flex gap-1.5">
-              {[minIncrement, minIncrement * 2, minIncrement * 5].map((inc) => (
-                <button
-                  key={inc}
-                  type="button"
-                  onClick={() => handlePresetBid(inc)}
-                  className="flex-1 py-1 px-1 bg-background border border-border text-[9px] font-bold rounded-sm hover:bg-muted text-foreground cursor-pointer transition-colors"
-                >
-                  +{formatCurrency(inc, true)}
-                </button>
-              ))}
-            </div>
-            <form onSubmit={(e) => { e.preventDefault(); handlePlaceBid(); }} className="flex items-center gap-1.5">
-              <input
-                type="number"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-                placeholder="Valor do lance..."
-                className="flex-1 bg-background border border-border rounded-sm px-2.5 py-1.5 text-xs text-foreground font-mono focus:outline-none focus:border-primary"
-              />
-              <button
-                type="submit"
-                disabled={submittingBid || !bidAmount}
-                className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-sm disabled:opacity-40 cursor-pointer border-none flex items-center gap-1 shrink-0"
-              >
-                <Gavel size={12} />
-                Lance
-              </button>
-            </form>
           </div>
         </div>
       )}
