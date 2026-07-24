@@ -18,6 +18,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from common.exceptions import ConflictError
+
 from apps.access.models import Session
 from apps.analytics.models import AnalyticsEvent
 from apps.users.constants import DEFAULT_SIGNUP_ROLE
@@ -89,11 +91,14 @@ def _build_auth_payload(*, user: User, refresh: RefreshToken) -> dict[str, Any]:
 
 
 def _ensure_user_can_authenticate(*, user: User) -> None:
+    user.refresh_from_db(fields=["status", "is_active", "locked_until", "is_deleted"])
+    if user.is_deleted:
+        raise PermissionDenied({"account": ["Conta indisponivel para login"]})
     now = timezone.now()
     if user.locked_until and user.locked_until > now:
         raise ValidationError({"credentials": ["Conta temporariamente bloqueada."]})
     if not user.is_active or user.status in (UserStatus.BANNED, UserStatus.SUSPENDED):
-        raise PermissionDenied({"account": ["Conta indisponivel para login."]})
+        raise PermissionDenied({"account": ["Conta indisponivel para login"]})
 
 
 @transaction.atomic
@@ -105,13 +110,57 @@ def create_user(
     password: str,
     **extra_fields: Any,
 ) -> User:
-    user = User.objects.create_user(
-        email=email,
-        username=username,
-        full_name=full_name,
-        password=password,
-        **extra_fields,
-    )
+    normalized_email = get_user_model().objects.normalize_email(email)
+    
+    # Check if a user with this email or username already exists (including soft-deleted)
+    existing_user_email = User.all_objects.filter(email=normalized_email).first()
+    existing_user_username = User.all_objects.filter(username=username).first()
+
+    duplicate_errors: dict[str, list[str]] = {}
+    
+    # If a user exists but is NOT soft-deleted, it's a conflict.
+    # If a user exists and IS soft-deleted, we allow registration ONLY IF it's the SAME user 
+    # (meaning both email and username match the same soft-deleted record, or we just restore based on email and update username if it's available).
+    
+    # Let's check email first
+    if existing_user_email:
+        if not existing_user_email.is_deleted:
+            duplicate_errors["email"] = ["Email ja esta em uso."]
+    
+    # Now check username
+    if existing_user_username:
+        # If someone else (not the existing_user_email we might restore) is using this username
+        if not existing_user_email or existing_user_email.id != existing_user_username.id:
+            duplicate_errors["username"] = ["Username ja esta em uso."]
+            
+    if duplicate_errors:
+        raise ConflictError(duplicate_errors)
+        
+    if existing_user_email and existing_user_email.is_deleted:
+        # Restore the soft-deleted user
+        user = existing_user_email
+        user.is_deleted = False
+        user.deleted_at = None
+        user.username = username
+        user.full_name = full_name
+        for k, v in extra_fields.items():
+            setattr(user, k, v)
+        user.set_password(password)
+        user.is_verified = False
+        user.is_active = True
+        user.status = UserStatus.ACTIVE
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        user.save()
+    else:
+        # Create a new user
+        user = User.objects.create_user(
+            email=normalized_email,
+            username=username,
+            full_name=full_name,
+            password=password,
+            **extra_fields,
+        )
     default_role, _ = Role.objects.get_or_create(
         name=DEFAULT_SIGNUP_ROLE,
         defaults={"description": "Default signup role"},

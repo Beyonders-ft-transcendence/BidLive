@@ -293,7 +293,7 @@ class LoginView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
         return success_response(payload, message="Login realizado com sucesso.")
@@ -826,7 +826,7 @@ class GoogleLoginView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
@@ -890,7 +890,7 @@ class GoogleCallbackView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
@@ -937,8 +937,9 @@ class FortyTwoAuthorizeView(APIView):
         ],
     )
     def get(self, request):
+        redirect_uri = request.query_params.get("redirect_uri")
         try:
-            payload = build_42_authorization_url()
+            payload = build_42_authorization_url(redirect_uri=redirect_uri)
         except ValidationError as exc:
             return error_response(exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
         return success_response(payload, message="URL de autorizacao gerada com sucesso.")
@@ -1005,7 +1006,7 @@ class FortyTwoCallbackView(APIView):
         except PermissionDenied as exc:
             return error_response(
                 exc.detail,
-                message="Conta indisponivel para login.",
+                message="Conta indisponivel para login",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 

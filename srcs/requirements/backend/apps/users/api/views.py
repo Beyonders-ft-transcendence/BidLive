@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
+from common.exceptions import ConflictError
 from common.responses import error_response, success_response
 from apps.users.api.serializers import (
     PermissionSerializer,
@@ -142,6 +143,8 @@ class UserViewSet(RBACPermissionMixin, viewsets.GenericViewSet):
                 ip_address=_client_ip(request),
                 **data,
             )
+        except ConflictError as exc:
+            return error_response(exc.detail, status_code=status.HTTP_409_CONFLICT)
         except (PermissionDenied, ValidationError) as exc:
             status_code = (
                 status.HTTP_403_FORBIDDEN

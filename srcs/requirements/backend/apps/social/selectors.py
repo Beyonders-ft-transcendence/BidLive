@@ -77,3 +77,23 @@ def get_blocked_user_ids(*, user: User) -> set[int]:
 
 	return set(list(blocked_by_user) + list(blocking_user))
 
+
+def are_friends(*, user: User, other_user: User) -> bool:
+    return Friendship.objects.filter(
+        Q(requester=user, addressee=other_user)
+        | Q(requester=other_user, addressee=user),
+        status=FriendshipStatus.ACCEPTED,
+    ).exists()
+
+
+def list_blocked_users(*, user: User) -> QuerySet[User]:
+    blocked_ids = Friendship.objects.filter(
+        requester=user,
+        status=FriendshipStatus.BLOCKED,
+    ).values_list("addressee_id", flat=True)
+
+    return User.objects.filter(
+        id__in=blocked_ids,
+        is_active=True,
+        is_deleted=False,
+    )
