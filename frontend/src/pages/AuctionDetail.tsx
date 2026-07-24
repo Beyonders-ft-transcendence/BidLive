@@ -333,6 +333,11 @@ export default function AuctionDetailPage() {
     const isBiddingOpen = auction.status === "ACTIVE" || auction.status === "LIVE" || (auction.status === "SCHEDULED" && isTimeStarted && !isTimeEnded);
     const isStreamingLive = auction.status === "LIVE" && !!activeStream;
     
+    const isBuyNowAvailable = auction.item.is_buy_now_available ?? (
+        auction.item.buy_now_price ? currentPrice < (0.85 * Number(auction.item.buy_now_price)) : false
+    );
+    const isBuyNowDisabledByPrice = !isBuyNowAvailable;
+
     const images = auction.item.images || [];
 
 
@@ -899,19 +904,34 @@ export default function AuctionDetailPage() {
 
                                     {/* Buy Now */}
                                     {auction.item.buy_now_price && (
-                                        <div className="pt-4 border-t border-border flex items-center justify-between">
+                                        <div className="pt-4 border-t border-border flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                             <div className="text-left">
                                                 <span className="text-[10px] text-muted-foreground font-mono block">{t('auction_detail.buy_now_label')}</span>
                                                 <span className="text-foreground text-xs font-bold leading-normal block">{t('auction_detail.buy_now_desc')}</span>
+                                                {isBuyNowDisabledByPrice && (
+                                                    <span className="text-[10px] text-amber-500 font-semibold mt-1 flex items-center gap-1">
+                                                        <AlertCircle size={11} /> {t('auction_detail.buy_now_disabled_reason', 'Compra imediata desativada (lance atingiu 85% do valor).')}
+                                                    </span>
+                                                )}
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={handleBuyNowSubmit}
-                                                disabled={submittingBuyNow}
-                                                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border border-indigo-500/30 cursor-pointer disabled:opacity-50 shrink-0"
+                                                disabled={submittingBuyNow || isBuyNowDisabledByPrice}
+                                                className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 ${
+                                                    isBuyNowDisabledByPrice
+                                                        ? 'bg-muted text-muted-foreground border-border cursor-not-allowed opacity-60'
+                                                        : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500/30 cursor-pointer disabled:opacity-50'
+                                                }`}
                                             >
                                                 <ShoppingBag className="h-4 w-4" />
-                                                {submittingBuyNow ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : `${t('auction_detail.buy_now_btn')}${formatCurrency(auction.item.buy_now_price, true)}`}
+                                                {submittingBuyNow ? (
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                ) : isBuyNowDisabledByPrice ? (
+                                                    t('auction_detail.buy_now_unavailable', 'Compra Indisponível')
+                                                ) : (
+                                                    `${t('auction_detail.buy_now_btn')}${formatCurrency(auction.item.buy_now_price, true)}`
+                                                )}
                                             </button>
                                         </div>
                                     )}
@@ -979,10 +999,12 @@ export default function AuctionDetailPage() {
                                                     <td className="px-5 py-3.5 text-right font-mono font-bold">{formatCurrency(bid.amount, true)}</td>
                                                     <td className="px-5 py-3.5 font-mono text-muted-foreground">{new Date(bid.timestamp || bid.created_at).toLocaleString(currentLocale, { dateStyle: 'short', timeStyle: 'medium' })}</td>
                                                     <td className="px-5 py-3.5 text-right">
-                                                        {i === 0 ? (
+                                                        {bid.is_buy_now ? (
+                                                             <span className="px-2 py-0.5 rounded-md bg-green-500/10 text-green-500 border border-green-500/20 text-[10px] font-semibold inline-flex items-center gap-1">
+                                                                 <ShoppingBag size={10} /> {t('auction_detail.direct_buy', 'Compra Direta')}
+                                                             </span>
+                                                        ) : i === 0 ? (
                                                             <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-[10px] font-semibold">{t('auction_detail.leader', 'Líder')}</span>
-                                                        ) : bid.is_buy_now ? (
-                                                            <span className="px-2 py-0.5 rounded-md bg-green-500/10 text-green-500 text-[10px] font-semibold">{t('auction_detail.direct_buy')}</span>
                                                         ) : (
                                                             <span className="px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[10px]">{t('auction_detail.outbid', 'Superado')}</span>
                                                         )}

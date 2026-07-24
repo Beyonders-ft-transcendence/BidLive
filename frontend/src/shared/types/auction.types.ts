@@ -67,6 +67,7 @@ export interface AuctionItem {
   minimum_increment: string;
   reserve_price: string | null;
   buy_now_price: string | null;
+  is_buy_now_available?: boolean;
   condition_type: ItemCondition;
   images: AuctionImage[];
   created_at: string;

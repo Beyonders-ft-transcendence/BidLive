@@ -131,11 +131,15 @@ export function useAuctionRealtime(id: number) {
 
             queryClient.setQueryData(["auction", id], (prev: any) => {
               if (!prev) return prev;
+              const newCurrentPrice = data.payload.current_price || prev.item?.current_price;
+              const buyNowPrice = prev.item?.buy_now_price ? Number(prev.item.buy_now_price) : null;
+              const isAvailable = buyNowPrice !== null ? Number(newCurrentPrice) < (0.85 * buyNowPrice) : false;
               return {
                 ...prev,
                 item: prev.item ? {
                   ...prev.item,
-                  current_price: data.payload.current_price || prev.item.current_price,
+                  current_price: newCurrentPrice,
+                  is_buy_now_available: data.payload.is_buy_now_available !== undefined ? data.payload.is_buy_now_available : isAvailable,
                 } : undefined,
               };
             });
