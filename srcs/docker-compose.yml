@@ -128,8 +128,6 @@ services:
       context: ./requirements/frontend
       dockerfile: Dockerfile
     container_name: frontend
-    ports:
-      - "3001:3001"
     depends_on:
       - backend
       - celery_worker
