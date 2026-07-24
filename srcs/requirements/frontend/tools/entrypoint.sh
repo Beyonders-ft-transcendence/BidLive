@@ -16,15 +16,19 @@ if [ -f /run/secrets/google_credenciais ]; then
     export VITE_GOOGLE_CLIENT_ID
 fi
 
-# Export .env.frontend variables if available
-if [ -f /run/secrets/env_frontend ]; then
-    while IFS= read -r line; do
-        case "$line" in
-            \#*|"") continue ;;
-            *=*) export "$line" ;;
-        esac
-    done < /run/secrets/env_frontend
-fi
+#####
+# === Create .env file with Vite variables ===
+cat <<EOF > /app/.env
+VITE_API_URL=${VITE_API_URL}
+VITE_API_BASE_URL=${VITE_API_BASE_URL}
+VITE_WS_BASE_URL=${VITE_WS_BASE_URL}
+VITE_LIVEKIT_URL=${VITE_LIVEKIT_URL}
+VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+EOF
+
+# Standardize permissions for appuser access
+chown appuser:appuser /app/.env 2>/dev/null || true
+#####
 
 # === Drop privileges and start server ===
 exec su -s /bin/sh appuser -c "

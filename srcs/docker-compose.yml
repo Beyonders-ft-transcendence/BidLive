@@ -127,18 +127,15 @@ services:
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
-      args:
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
-        VITE_API_URL: ${VITE_API_URL}
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL}
-        VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
     container_name: frontend
+    ports:
+      - "3001:3001"
     depends_on:
       - backend
       - celery_worker
       - celery_beat
       - logstash
+      - livekit
     networks:
       - frontend-network
       - backend-network
