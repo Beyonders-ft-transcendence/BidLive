@@ -1,1 +1,0 @@
-"""BidLive backend package."""
