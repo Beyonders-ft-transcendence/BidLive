@@ -3,6 +3,12 @@
 # ============================================
 FROM node:22-alpine AS build
 
+ARG VITE_API_URL
+ARG VITE_API_BASE_URL
+ARG VITE_WS_BASE_URL
+ARG VITE_LIVEKIT_URL
+ARG VITE_GOOGLE_CLIENT_ID
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./

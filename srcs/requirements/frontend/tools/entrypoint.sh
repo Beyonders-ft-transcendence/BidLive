@@ -8,27 +8,16 @@ set -e
 chmod 644 /etc/ssl/certs/server.crt 2>/dev/null || true
 chmod 644 /etc/ssl/private/server.key 2>/dev/null || true
 
-# === Export Vite build-time environment variables ===
-
-# Extract GOOGLE_CLIENT_ID from Docker secret and export as VITE_GOOGLE_CLIENT_ID
+# === Inject GOOGLE_CLIENT_ID from Docker secret at runtime ===
+# VITE_* vars are baked into the bundle at build time via Docker build args.
+# GOOGLE_CLIENT_ID comes from a Docker secret (runtime-only), so we inject it
+# into index.html before serving.
 if [ -f /run/secrets/google_credenciais ]; then
     VITE_GOOGLE_CLIENT_ID=$(sed -n '1p' /run/secrets/google_credenciais | cut -d'=' -f2 | tr -d '\r')
-    export VITE_GOOGLE_CLIENT_ID
+    if [ -n "$VITE_GOOGLE_CLIENT_ID" ] && [ -f /app/dist/index.html ]; then
+        sed -i "s|</head>|<script>window.__VITE_GOOGLE_CLIENT_ID__=\"${VITE_GOOGLE_CLIENT_ID}\"</script></head>|g" /app/dist/index.html
+    fi
 fi
-
-#####
-# === Create .env file with Vite variables ===
-cat <<EOF > /app/.env
-VITE_API_URL=${VITE_API_URL}
-VITE_API_BASE_URL=${VITE_API_BASE_URL}
-VITE_WS_BASE_URL=${VITE_WS_BASE_URL}
-VITE_LIVEKIT_URL=${VITE_LIVEKIT_URL}
-VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
-EOF
-
-# Standardize permissions for appuser access
-chown appuser:appuser /app/.env 2>/dev/null || true
-#####
 
 # === Configure stunnel ===
 echo "Configuring stunnel..."
