@@ -138,7 +138,7 @@ services:
       - frontend-network
       - backend-network
     expose:
-      - "3001"
+      - "3000"
     restart: always
     env_file:
       - ./.env.frontend
@@ -512,11 +512,11 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "discovery.type=single-node"
     healthcheck:
-      test: ["CMD-SHELL", "ELASTIC_PASSWORD=$$(sed -n '2p' /run/secrets/elasticsearch_credenciais | cut -d'=' -f2 | tr -d '\\r') && curl -k -sf -u \"elastic:$$ELASTIC_PASSWORD\" https://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "ELASTIC_PASSWORD=$$(sed -n '2p' /run/secrets/elasticsearch_credenciais 2>/dev/null | cut -d'=' -f2 | tr -d '\\r') && curl -k -sf -u \"elastic:$$ELASTIC_PASSWORD\" https://localhost:9200/_cluster/health 2>/dev/null || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
 
   kibana:
     image: kibana:0.0.1

@@ -18,7 +18,7 @@ RUN npm run build
 # ============================================
 FROM alpine:3.22
 
-RUN apk add --no-cache caddy ca-certificates
+RUN apk add --no-cache nodejs npm ca-certificates stunnel
 
 # Install cfssl from Alpine edge testing repository
 RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
@@ -34,15 +34,12 @@ RUN mkdir -p /app && \
 
 WORKDIR /app
 
-# Copy Caddyfile config
-COPY --chown=appuser:appuser ./conf/Caddyfile /etc/caddy/Caddyfile
-
 # Copy built assets from build stage
 COPY --from=build --chown=appuser:appuser /app/dist ./dist
 
 COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3001
+EXPOSE 3000
 
 ENTRYPOINT ["/entrypoint.sh"]

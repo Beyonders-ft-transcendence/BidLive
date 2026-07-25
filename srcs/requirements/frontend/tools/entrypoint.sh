@@ -30,12 +30,29 @@ EOF
 chown appuser:appuser /app/.env 2>/dev/null || true
 #####
 
-# === Drop privileges and start server ===
+# === Configure stunnel ===
+echo "Configuring stunnel..."
+cat > /tmp/stunnel.conf <<EOF
+pid = /tmp/stunnel.pid
+foreground = no
+client = no
+
+[frontend]
+accept = 0.0.0.0:3000
+connect = 127.0.0.1:3001
+cert = /etc/ssl/certs/server.crt
+key = /etc/ssl/private/server.key
+EOF
+
+stunnel /tmp/stunnel.conf
+
+# === Drop privileges and start static file server ===
+echo "Starting static file server on port 3001 (proxied via stunnel on port 3000)..."
 exec su -s /bin/sh appuser -c "
 set -e
 
 cd /app
 
-# Start Caddy with HTTPS
-exec caddy run --config /etc/caddy/Caddyfile
+# Start serve for static files
+exec npx serve -s dist -l 3001
 "
