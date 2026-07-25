@@ -125,14 +125,8 @@ services:
     image: frontend:0.0.1
     pull_policy: never
     build:
-      context: ./requirements/frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL}
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL}
-        VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+      context: ./
+      dockerfile: requirements/frontend/Dockerfile
     container_name: frontend
     depends_on:
       - backend
@@ -146,8 +140,6 @@ services:
     expose:
       - "3000"
     restart: always
-    env_file:
-      - ./.env.frontend
     secrets:
       - ca_cert
       - ca_key

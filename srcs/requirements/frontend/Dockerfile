@@ -3,19 +3,15 @@
 # ============================================
 FROM node:22-alpine AS build
 
-ARG VITE_API_URL
-ARG VITE_API_BASE_URL
-ARG VITE_WS_BASE_URL
-ARG VITE_LIVEKIT_URL
-ARG VITE_GOOGLE_CLIENT_ID
-
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY requirements/frontend/package.json requirements/frontend/package-lock.json ./
 
 RUN npm ci
 
-COPY . .
+COPY requirements/frontend/.env.frontend ./.env
+
+COPY requirements/frontend/ .
 
 RUN npm run build
 
@@ -30,7 +26,7 @@ RUN apk add --no-cache nodejs npm ca-certificates stunnel
 RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 # Copy shared certificate generation script
-COPY ./tools/generate_cert.sh /usr/local/bin/generate_cert.sh
+COPY requirements/frontend/tools/generate_cert.sh /usr/local/bin/generate_cert.sh
 RUN chmod +x /usr/local/bin/generate_cert.sh
 
 RUN id -u appuser >/dev/null 2>&1 || adduser -D appuser
@@ -43,7 +39,7 @@ WORKDIR /app
 # Copy built assets from build stage
 COPY --from=build --chown=appuser:appuser /app/dist ./dist
 
-COPY ./tools/entrypoint.sh /entrypoint.sh
+COPY requirements/frontend/tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000

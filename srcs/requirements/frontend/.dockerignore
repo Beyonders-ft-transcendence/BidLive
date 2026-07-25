@@ -7,6 +7,5 @@ dist-ssr
 .idea
 *.log
 *.local
-.env
 docs
 README.md
