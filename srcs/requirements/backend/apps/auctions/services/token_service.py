@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -27,6 +28,8 @@ from apps.auctions.services.room_service import (
 )
 from apps.auctions.services.stream_service import publish_stream_event
 from apps.users.authorization_service import user_has_permission
+
+logger = logging.getLogger(__name__)
 
 
 def _assert_livekit_configured() -> None:
@@ -81,7 +84,16 @@ def issue_livekit_stream_token(
         _assert_broadcaster_access(user=user, stream=stream)
 
     room_name = build_livekit_room_name(stream=stream)
-    ensure_livekit_room(stream=stream)
+
+    try:
+        ensure_livekit_room(stream=stream)
+    except Exception as exc:
+        logger.warning(
+            "Failed to ensure LiveKit room for stream %s (token will still be issued): %s",
+            stream.id,
+            exc,
+        )
+
     identity = build_livekit_participant_identity(stream=stream, user=user, role=role)
     name = participant_name.strip() or build_livekit_participant_name(user=user, role=role)
     claims_metadata = {

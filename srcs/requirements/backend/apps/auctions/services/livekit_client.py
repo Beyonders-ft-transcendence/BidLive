@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import hashlib
+import logging
 import time
 from datetime import timedelta
 from typing import Any
@@ -12,6 +13,8 @@ import jwt
 import requests
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class LiveKitServiceError(RuntimeError):
@@ -92,15 +95,23 @@ def _twirp_url(method: str) -> str:
 
 def _request_twirp(method: str, payload: dict[str, Any], *, grants: dict[str, Any], timeout: int = 10) -> dict[str, Any]:
     _assert_configured()
-    response = requests.post(
-        _twirp_url(method),
-        json=payload,
-        headers={
-            "Authorization": f"Bearer {build_livekit_server_token(grants=grants)}",
-            "Content-Type": "application/json",
-        },
-        timeout=timeout,
-    )
+    try:
+        response = requests.post(
+            _twirp_url(method),
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {build_livekit_server_token(grants=grants)}",
+                "Content-Type": "application/json",
+            },
+            timeout=timeout,
+        )
+    except requests.exceptions.ConnectionError:
+        raise LiveKitServiceError(f"{method} failed: LiveKit server is unreachable at {get_livekit_server_url()}")
+    except requests.exceptions.Timeout:
+        raise LiveKitServiceError(f"{method} failed: LiveKit server timed out after {timeout}s")
+    except requests.exceptions.RequestException as exc:
+        raise LiveKitServiceError(f"{method} failed: {exc}") from exc
+
     if response.ok:
         if not response.content:
             return {}

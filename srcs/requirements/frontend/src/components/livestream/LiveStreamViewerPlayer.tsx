@@ -11,7 +11,7 @@ import { ConnectionState, Track } from "livekit-client";
 import { RefreshCw, Videotape, VideoOff } from "lucide-react";
 import type { LiveStream } from "@/shared/types/auction.types";
 import { LiveStreamStatus } from "@/shared/types/auction.types";
-import { getBackendErrorMessage, useLiveKitTokenQuery } from "@/hooks/useLiveKit";
+import { getBackendErrorMessage, getHttpStatus, useLiveKitTokenQuery } from "@/hooks/useLiveKit";
 import ENV from "@/shared/utils/env.utils";
 
 interface LiveStreamViewerPlayerProps {
@@ -99,11 +99,31 @@ export default function LiveStreamViewerPlayer({ auctionId, stream }: LiveStream
 
   if (isError || !grant || !serverUrl) {
     const backendMessage = getBackendErrorMessage(error);
+    const httpStatus = getHttpStatus(error);
+
+    let message = "Não foi possível carregar a live";
+    let hint = backendMessage;
+
+    if (httpStatus === 403) {
+      message = "Transmissão indisponível";
+      hint = hint || "A transmissão ainda não começou ou não está disponível para visualização.";
+    } else if (httpStatus === 404) {
+      message = "Transmissão não encontrada";
+      hint = hint || "Esta transmissão não existe ou foi removida.";
+    } else if (httpStatus === 503) {
+      message = "Servidor de live temporariamente indisponível";
+      hint = hint || "O servidor de transmissão está fora do ar. Tente novamente em instantes.";
+    } else if (!serverUrl && grant) {
+      hint = "O servidor de mídia não está configurado.";
+    } else if (!hint) {
+      hint = "Verifique sua conexão e tente novamente.";
+    }
+
     return (
       <PlayerNotice
         icon={<Videotape size={28} className="text-slate-500" />}
-        message="Não foi possível carregar a live"
-        hint={backendMessage || (!serverUrl && grant ? "O servidor de mídia não está configurado." : "Verifique sua conexão e tente novamente.")}
+        message={message}
+        hint={hint}
         action={
           <button
             onClick={() => refetch()}

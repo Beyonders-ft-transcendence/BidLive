@@ -497,13 +497,19 @@ class StreamViewSet(viewsets.GenericViewSet):
         stream = self.get_object()
         serializer = StreamLiveKitTokenRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        payload = issue_livekit_stream_token(
-            stream=stream,
-            user=request.user,
-            requested_role=serializer.validated_data.get("role", "viewer"),
-            participant_name=serializer.validated_data.get("participant_name", ""),
-            metadata=serializer.validated_data.get("metadata") or {},
-        )
+        try:
+            payload = issue_livekit_stream_token(
+                stream=stream,
+                user=request.user,
+                requested_role=serializer.validated_data.get("role", "viewer"),
+                participant_name=serializer.validated_data.get("participant_name", ""),
+                metadata=serializer.validated_data.get("metadata") or {},
+            )
+        except Exception as exc:
+            return error_response(
+                errors={"detail": f"Erro ao gerar token LiveKit: {exc}"},
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         return success_response(
             payload,
             message="Token LiveKit emitido com sucesso.",

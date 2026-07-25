@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -11,6 +12,8 @@ from apps.auctions.services.livekit_client import (
     list_rooms as livekit_list_rooms,
     update_room_metadata as livekit_update_room_metadata,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def build_livekit_room_name(*, stream: LiveStream) -> str:
@@ -48,6 +51,7 @@ def ensure_livekit_room(*, stream: LiveStream) -> dict:
         else:
             room = livekit_create_room(room_name=room_name, metadata=metadata)
     except LiveKitServiceError as exc:
+        logger.warning("LiveKit room operation failed for stream %s: %s", stream.id, exc)
         raise ValidationError({"livekit": [str(exc)]}) from exc
 
     return room
