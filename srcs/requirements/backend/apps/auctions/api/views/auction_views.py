@@ -160,7 +160,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return success_response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         return success_response(AuctionDetailSerializer(auction).data)
 
     @extend_schema(
@@ -193,7 +193,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
         responses={200: AuctionDetailSerializer},
     )
     def partial_update(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         serializer = AuctionUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
@@ -208,7 +208,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
         return success_response(AuctionDetailSerializer(updated).data, message="Leilao atualizado.")
 
     def destroy(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         if auction.status != AuctionStatus.DRAFT or auction.bids.exists():
             return error_response({"status": ["Only draft auctions without bids can be deleted."]})
         with transaction.atomic():
@@ -226,7 +226,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     )
     @action(detail=True, methods=["post"], url_path="cancel")
     def cancel(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         serializer = AuctionCancelSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         updated = cancel_auction(
@@ -245,7 +245,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     )
     @action(detail=True, methods=["post"], url_path="buy-now")
     def buy_now(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         updated = buy_now(buyer=request.user, auction=auction, ip_address=_client_ip(request))
         return success_response(AuctionDetailSerializer(updated).data, message="Compra imediata concluida.")
 
@@ -256,7 +256,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     )
     @action(detail=True, methods=["post", "delete"], url_path="watch")
     def watch(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         if request.method == "DELETE":
             unwatch_auction(user=request.user, auction=auction)
             return success_response({}, message="Leilao removido dos favoritos.")
@@ -280,7 +280,7 @@ class AuctionViewSet(viewsets.GenericViewSet):
     )
     @action(detail=True, methods=["get", "post"], url_path="bids")
     def bids(self, request, pk=None):
-        auction = self.get_queryset().get(pk=int(pk))
+        auction = self.get_object()
         if request.method.lower() == "get":
             queryset = list_bids_for_auction(auction_id=auction.id, viewer=request.user)
             page = self.paginate_queryset(queryset)

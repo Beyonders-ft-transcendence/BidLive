@@ -4,6 +4,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from django.shortcuts import get_object_or_404
 from apps.auctions.models import Auction
 from apps.auctions.permissions import IsLiveStreamOwnerOrManager
 from apps.auctions.selectors import get_stream_for_auction, list_streams_for_auction, list_viewers_for_stream
@@ -82,22 +83,20 @@ def _client_ip(request) -> str:
 @extend_schema_view(
     list=extend_schema(
         tags=STREAM_TAGS,
-        summary="Listar streams do leilao",
-        description="Retorna todas as streams associadas ao auction informado.",
+        summary="Listar streams de um leilão",
+        description="Lista todas as streams de um leilão. Endpoint público, não requer autenticação.",
+        auth=[],
         responses={
             200: OpenApiResponse(response=STREAM_LIST_RESPONSE, description="Streams retornadas com sucesso."),
-            401: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Autenticacao ausente ou invalida."),
-            403: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Usuario sem permissao para leitura."),
         },
     ),
     retrieve=extend_schema(
         tags=STREAM_TAGS,
-        summary="Detalhar stream",
-        description="Retorna o detalhe completo da stream e seus metadados realtime.",
+        summary="Detalhar uma stream",
+        description="Retorna os detalhes de uma stream específica e seus metadados realtime. Endpoint público, não requer autenticação.",
+        auth=[],
         responses={
             200: OpenApiResponse(response=STREAM_DETAIL_RESPONSE, description="Stream retornada com sucesso."),
-            401: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Autenticacao ausente ou invalida."),
-            403: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Usuario sem permissao para leitura."),
             404: OpenApiResponse(response=STREAM_ERROR_RESPONSE, description="Stream nao encontrada."),
         },
     ),
@@ -124,14 +123,14 @@ class StreamViewSet(viewsets.GenericViewSet):
     def get_permissions(self):
         if self.action == "livekit_token":
             return [IsAuthenticated()]
-        if self.action == "list":
+        if self.action in ("list", "retrieve", "viewers"):
             return [AllowAny()]
         return super().get_permissions()
 
     def get_required_permissions(self):
         action_map = {
             "list": [],
-            "retrieve": ["auction.read"],
+            "retrieve": [],
             "create": ["auction.update"],
             "partial_update": ["auction.update"],
             "destroy": ["auction.update"],
@@ -162,7 +161,7 @@ class StreamViewSet(viewsets.GenericViewSet):
         return serializer_map.get(self.action, self.serializer_class)
 
     def get_auction(self) -> Auction:
-        return Auction.objects.select_related("item", "item__seller").get(pk=int(self.kwargs["auction_id"]))
+        return get_object_or_404(Auction.objects.select_related("item", "item__seller"), pk=int(self.kwargs["auction_id"]))
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -170,7 +169,8 @@ class StreamViewSet(viewsets.GenericViewSet):
         return list_streams_for_auction(auction_id=int(self.kwargs["auction_id"]))
 
     def get_object(self):
-        return get_stream_for_auction(auction_id=int(self.kwargs["auction_id"]), stream_id=int(self.kwargs["pk"]))
+        queryset = list_streams_for_auction(auction_id=int(self.kwargs["auction_id"]))
+        return get_object_or_404(queryset, pk=int(self.kwargs["pk"]))
 
     def list(self, request, auction_id=None):
         queryset = self.get_queryset()
