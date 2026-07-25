@@ -2,7 +2,7 @@ from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import serializers as drf_serializers
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from apps.auctions.models import Auction
 from apps.auctions.permissions import IsLiveStreamOwnerOrManager
@@ -124,11 +124,13 @@ class StreamViewSet(viewsets.GenericViewSet):
     def get_permissions(self):
         if self.action == "livekit_token":
             return [IsAuthenticated()]
+        if self.action == "list":
+            return [AllowAny()]
         return super().get_permissions()
 
     def get_required_permissions(self):
         action_map = {
-            "list": ["auction.read"],
+            "list": [],
             "retrieve": ["auction.read"],
             "create": ["auction.update"],
             "partial_update": ["auction.update"],
