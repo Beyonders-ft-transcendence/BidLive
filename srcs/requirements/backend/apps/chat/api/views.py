@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
+import logging
+
 from apps.chat.selectors import (
     get_private_conversation,
     get_room_messages,
@@ -27,6 +29,8 @@ from apps.chat.services import (
     soft_delete_room_message,
 )
 from common.responses import error_response, success_response
+
+logger = logging.getLogger(__name__)
 
 CHAT_TAGS = ["chat"]
 
@@ -105,7 +109,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
                     }
                 )
         except Exception as ws_err:
-            pass
+            logger.warning(f"WS broadcast failed for private message {message.id}: {ws_err}")
 
         return success_response(
             data=PrivateMessageSerializer(message).data,
@@ -191,7 +195,7 @@ class AuctionChatViewSet(viewsets.GenericViewSet):
                     }
                 )
         except Exception as ws_err:
-            pass
+            logger.warning(f"WS broadcast failed for auction message {message.id}: {ws_err}")
 
         return success_response(
             data=RoomMessageSerializer(message).data,

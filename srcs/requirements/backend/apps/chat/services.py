@@ -80,6 +80,9 @@ def send_room_message(*, sender: User, auction_id: int, text: str) -> Message:
     if not text or not text.strip():
         raise ValidationError("A mensagem não pode estar vazia.")
 
+    if len(text.strip()) > 2000:
+        raise ValidationError("A mensagem excede o limite de 2000 caracteres.")
+
     room, _ = get_or_create_auction_room(auction_id=auction_id)
 
     return Message.objects.create(

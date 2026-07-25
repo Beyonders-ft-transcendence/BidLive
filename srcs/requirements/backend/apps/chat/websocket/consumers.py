@@ -1,4 +1,6 @@
 import logging
+import time
+from collections import defaultdict
 
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -10,6 +12,30 @@ from apps.social.selectors import are_friends, get_blocked_user_ids, is_blocked
 from apps.users.models import User
 
 logger = logging.getLogger(__name__)
+
+WS_MESSAGE_MAX_LENGTH = 2000
+WS_RATE_LIMIT_WINDOW = 10  # seconds
+WS_RATE_LIMIT_MAX_MESSAGES = 10  # max messages per window
+
+
+class _RateLimiter:
+    """Simple sliding-window rate limiter per user across consumers."""
+
+    def __init__(self):
+        self._timestamps: dict[int, list[float]] = defaultdict(list)
+
+    def is_rate_limited(self, user_id: int) -> bool:
+        now = time.monotonic()
+        cutoff = now - WS_RATE_LIMIT_WINDOW
+        timestamps = self._timestamps[user_id]
+        self._timestamps[user_id] = [t for t in timestamps if t > cutoff]
+        if len(self._timestamps[user_id]) >= WS_RATE_LIMIT_MAX_MESSAGES:
+            return True
+        self._timestamps[user_id].append(now)
+        return False
+
+
+_rate_limiter = _RateLimiter()
 
 
 def private_group_name(user_id_1: int, user_id_2: int) -> str:
@@ -65,7 +91,7 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=4500)
 
     async def disconnect(self, close_code):
-        if hasattr(self, "group_name"):
+        if hasattr(self, "group_name") and self.channel_layer:
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
         if hasattr(self, "user"):
@@ -89,6 +115,14 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
         text = content.get("message", "").strip()
         if not text:
             await self.send_json({"error": "Mensagem vazia."})
+            return
+
+        if len(text) > WS_MESSAGE_MAX_LENGTH:
+            await self.send_json({"error": f"Mensagem excede o limite de {WS_MESSAGE_MAX_LENGTH} caracteres."})
+            return
+
+        if _rate_limiter.is_rate_limited(self.user.id):
+            await self.send_json({"error": "Rate limit excedido. Aguarda uns segundos."})
             return
 
         recipient = await sync_to_async(User.objects.get)(id=self.recipient_id)
@@ -196,17 +230,31 @@ class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
                 return
 
             self.user = user
-            self.blocked_user_ids = await sync_to_async(get_blocked_user_ids)(user=user)
 
             if self.channel_layer is None:
                 logger.error("WS AuctionChat — channel_layer é None (Redis offline?)")
                 await self.close(code=4500)
                 return
 
+            from apps.auctions.models import Auction
+            auction_exists = await sync_to_async(
+                Auction.objects.filter(id=self.auction_id).exists
+            )()
+            if not auction_exists:
+                logger.warning(f"WS AuctionChat — leilão {self.auction_id} não existe")
+                await self.close(code=4404)
+                return
+
+            self.blocked_user_ids = await sync_to_async(get_blocked_user_ids)(user=user)
+
             self.group_name = auction_chat_group_name(self.auction_id)
             await self.channel_layer.group_add(self.group_name, self.channel_name)
-            await self.accept()
 
+            await sync_to_async(User.objects.filter(id=user.id).update)(
+                is_online=True, last_seen=timezone.now()
+            )
+
+            await self.accept()
             logger.info(f"WS AuctionChat CONNECTED — {user.email} | auction {self.auction_id} | group: {self.group_name}")
 
         except Exception as e:
@@ -214,8 +262,13 @@ class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=4500)
 
     async def disconnect(self, close_code):
-        if hasattr(self, "group_name"):
+        if hasattr(self, "group_name") and self.channel_layer:
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+        if hasattr(self, "user"):
+            await sync_to_async(User.objects.filter(id=self.user.id).update)(
+                is_online=False, last_seen=timezone.now()
+            )
 
     async def receive_json(self, content: dict):
         event_type = content.get("type")
@@ -231,6 +284,14 @@ class AuctionChatConsumer(AsyncJsonWebsocketConsumer):
         text = content.get("message", "").strip()
         if not text:
             await self.send_json({"error": "Mensagem vazia."})
+            return
+
+        if len(text) > WS_MESSAGE_MAX_LENGTH:
+            await self.send_json({"error": f"Mensagem excede o limite de {WS_MESSAGE_MAX_LENGTH} caracteres."})
+            return
+
+        if _rate_limiter.is_rate_limited(self.user.id):
+            await self.send_json({"error": "Rate limit excedido. Aguarda uns segundos."})
             return
 
         room, _ = await sync_to_async(get_or_create_auction_room)(

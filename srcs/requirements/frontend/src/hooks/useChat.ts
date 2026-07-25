@@ -5,6 +5,10 @@ import { useAuthStore } from "@/shared/stores/auth.store";
 import ENV from "@/shared/utils/env.utils";
 import type { PrivateMessage, RoomMessage } from "@/shared/types/chat.types";
 
+const WS_RECONNECT_BASE_DELAY = 1000;
+const WS_RECONNECT_MAX_DELAY = 30000;
+const WS_MAX_RECONNECT_ATTEMPTS = 20;
+
 // 1. Hook to fetch the conversations list
 export function useConversationsQuery() {
   return useQuery({
@@ -97,6 +101,7 @@ export function usePrivateChatRealtime(
     let socket: WebSocket | null = null;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let isClosedIntentional = false;
+    let reconnectAttempts = 0;
 
     const connect = () => {
       if (isClosedIntentional) return;
@@ -106,9 +111,14 @@ export function usePrivateChatRealtime(
       ws.current = socket;
 
       socket.onopen = () => {
+        reconnectAttempts = 0;
         if (conversationId) {
           socket?.send(JSON.stringify({ type: "chat.read" }));
         }
+      };
+
+      socket.onerror = () => {
+        console.error("[WS PrivateChat] WebSocket error");
       };
 
       socket.onmessage = (event) => {
@@ -162,12 +172,20 @@ export function usePrivateChatRealtime(
               queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
             }
           }
-        } catch (err) {}
+        } catch (err) {
+          console.error("[WS PrivateChat] message parse error:", err);
+        }
       };
 
-      socket.onclose = () => {
-        if (!isClosedIntentional) {
-          reconnectTimeout = setTimeout(() => { connect(); }, 3000);
+      socket.onclose = (event) => {
+        if (!isClosedIntentional && reconnectAttempts < WS_MAX_RECONNECT_ATTEMPTS) {
+          const delay = Math.min(
+            WS_RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts),
+            WS_RECONNECT_MAX_DELAY
+          );
+          reconnectAttempts++;
+          console.warn(`[WS PrivateChat] disconnected (code=${event.code}), reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+          reconnectTimeout = setTimeout(() => { connect(); }, delay);
         }
       };
     };
@@ -259,6 +277,7 @@ export function useAuctionChatRealtime(auctionId: number) {
     let socket: WebSocket | null = null;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let isClosedIntentional = false;
+    let reconnectAttempts = 0;
 
     const connect = () => {
       if (isClosedIntentional) return;
@@ -266,6 +285,14 @@ export function useAuctionChatRealtime(auctionId: number) {
       const wsUrl = `${ENV.WS_BASE_URL}/ws/chat/auction/${auctionId}/?token=${accessToken}`;
       socket = new WebSocket(wsUrl);
       ws.current = socket;
+
+      socket.onopen = () => {
+        reconnectAttempts = 0;
+      };
+
+      socket.onerror = () => {
+        console.error("[WS AuctionChat] WebSocket error");
+      };
 
       socket.onmessage = (event) => {
         try {
@@ -294,13 +321,23 @@ export function useAuctionChatRealtime(auctionId: number) {
                 return [...old, newMessage];
               }
             );
+          } else if (data.error) {
+            console.warn("[WS AuctionChat] server error:", data.error);
           }
-        } catch (err) {}
+        } catch (err) {
+          console.error("[WS AuctionChat] message parse error:", err);
+        }
       };
 
-      socket.onclose = () => {
-        if (!isClosedIntentional) {
-          reconnectTimeout = setTimeout(() => { connect(); }, 3000);
+      socket.onclose = (event) => {
+        if (!isClosedIntentional && reconnectAttempts < WS_MAX_RECONNECT_ATTEMPTS) {
+          const delay = Math.min(
+            WS_RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts),
+            WS_RECONNECT_MAX_DELAY
+          );
+          reconnectAttempts++;
+          console.warn(`[WS AuctionChat] disconnected (code=${event.code}), reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+          reconnectTimeout = setTimeout(() => { connect(); }, delay);
         }
       };
     };

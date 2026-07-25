@@ -11,6 +11,10 @@ import {
   useBuyNowMutation,
 } from "./useAuction";
 
+const WS_RECONNECT_BASE_DELAY = 1000;
+const WS_RECONNECT_MAX_DELAY = 30000;
+const WS_MAX_RECONNECT_ATTEMPTS = 20;
+
 export function useAuctionRealtime(id: number) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -54,150 +58,175 @@ export function useAuctionRealtime(id: number) {
   useEffect(() => {
     if (!id || isNaN(id) || !accessToken) return;
 
-    // Setup WebSocket for Real-time Updates and Bidding
     const token = accessToken;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isClosedIntentional = false;
+    let reconnectAttempts = 0;
 
-    const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/${id}/${
-      token ? `?token=${token}` : ""
-    }`;
+    const connect = () => {
+      if (isClosedIntentional) return;
 
-    try {
-      const socket = new WebSocket(wsUrl);
-      ws.current = socket;
+      const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/${id}/${
+        token ? `?token=${token}` : ""
+      }`;
 
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
+      try {
+        const socket = new WebSocket(wsUrl);
+        ws.current = socket;
 
-          if (data.event === "auction_snapshot" && data.payload) {
-            queryClient.setQueryData(["auction", id], (prev: any) => {
-              if (!prev) {
-                return {
-                  id: data.payload.auction_id,
-                  status: data.payload.status,
-                  start_time: data.payload.start_time,
-                  end_time: data.payload.end_time,
-                  reserve_met: data.payload.reserve_met,
-                  item: {
+        socket.onopen = () => {
+          reconnectAttempts = 0;
+        };
+
+        socket.onerror = () => {
+          console.error("[WS AuctionRealtime] WebSocket error");
+        };
+
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            if (data.event === "auction_snapshot" && data.payload) {
+              queryClient.setQueryData(["auction", id], (prev: any) => {
+                if (!prev) {
+                  return {
                     id: data.payload.auction_id,
+                    status: data.payload.status,
+                    start_time: data.payload.start_time,
+                    end_time: data.payload.end_time,
+                    reserve_met: data.payload.reserve_met,
+                    item: {
+                      id: data.payload.auction_id,
+                      current_price: data.payload.current_price,
+                      starting_price: data.payload.current_price,
+                    }
+                  };
+                }
+                return {
+                  ...prev,
+                  status: data.payload.status !== undefined ? data.payload.status : prev.status,
+                  start_time: data.payload.start_time !== undefined ? data.payload.start_time : prev.start_time,
+                  end_time: data.payload.end_time !== undefined ? data.payload.end_time : prev.end_time,
+                  reserve_met: data.payload.reserve_met !== undefined ? data.payload.reserve_met : prev.reserve_met,
+                  winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
+                  item: prev.item ? {
+                    ...prev.item,
+                    current_price: data.payload.current_price !== undefined ? data.payload.current_price : prev.item.current_price,
+                  } : {
                     current_price: data.payload.current_price,
                     starting_price: data.payload.current_price,
-                  }
+                  },
                 };
+              });
+              if (data.payload.active_connections !== undefined) {
+                setViewerCount(data.payload.active_connections);
               }
-              return {
-                ...prev,
-                status: data.payload.status !== undefined ? data.payload.status : prev.status,
-                start_time: data.payload.start_time !== undefined ? data.payload.start_time : prev.start_time,
-                end_time: data.payload.end_time !== undefined ? data.payload.end_time : prev.end_time,
-                reserve_met: data.payload.reserve_met !== undefined ? data.payload.reserve_met : prev.reserve_met,
-                winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
-                item: prev.item ? {
-                  ...prev.item,
-                  current_price: data.payload.current_price !== undefined ? data.payload.current_price : prev.item.current_price,
-                } : {
-                  current_price: data.payload.current_price,
-                  starting_price: data.payload.current_price,
-                },
+            } else if (data.event === "new_bid" && data.payload) {
+              const newBid = {
+                id: data.payload.bid_id,
+                auction: data.payload.auction_id,
+                auction_id: data.payload.auction_id,
+                bidder: data.payload.bidder,
+                bidder_id: data.payload.bidder ? data.payload.bidder.id : 0,
+                amount: data.payload.bid_amount,
+                is_buy_now: !!data.payload.is_buy_now,
+                ip_address: "",
+                metadata: data.payload.metadata || null,
+                timestamp: data.payload.timestamp,
+                created_at: data.payload.timestamp,
               };
-            });
-            if (data.payload.active_connections !== undefined) {
-              setViewerCount(data.payload.active_connections);
-            }
-          } else if (data.event === "new_bid" && data.payload) {
-            const newBid = {
-              id: data.payload.bid_id,
-              auction: data.payload.auction_id,
-              auction_id: data.payload.auction_id,
-              bidder: data.payload.bidder,
-              bidder_id: data.payload.bidder ? data.payload.bidder.id : 0,
-              amount: data.payload.bid_amount,
-              is_buy_now: !!data.payload.is_buy_now,
-              ip_address: "",
-              metadata: data.payload.metadata || null,
-              timestamp: data.payload.timestamp,
-              created_at: data.payload.timestamp,
-            };
 
-            queryClient.setQueriesData({ queryKey: ["auctionBids", id] }, (prev: any) => {
-              if (!prev) return { results: [newBid] };
-              const results = prev.results || [];
-              if (results.some((b: any) => b.id === newBid.id)) return prev;
-              return {
-                ...prev,
-                results: [newBid, ...results],
-              };
-            });
+              queryClient.setQueriesData({ queryKey: ["auctionBids", id] }, (prev: any) => {
+                if (!prev) return { results: [newBid] };
+                const results = prev.results || [];
+                if (results.some((b: any) => b.id === newBid.id)) return prev;
+                return {
+                  ...prev,
+                  results: [newBid, ...results],
+                };
+              });
 
-            queryClient.setQueryData(["auction", id], (prev: any) => {
-              if (!prev) return prev;
-              const newCurrentPrice = data.payload.current_price || prev.item?.current_price;
-              const buyNowPrice = prev.item?.buy_now_price ? Number(prev.item.buy_now_price) : null;
-              const isAvailable = buyNowPrice !== null ? Number(newCurrentPrice) < (0.85 * buyNowPrice) : false;
-              return {
-                ...prev,
-                item: prev.item ? {
-                  ...prev.item,
-                  current_price: newCurrentPrice,
-                  is_buy_now_available: data.payload.is_buy_now_available !== undefined ? data.payload.is_buy_now_available : isAvailable,
-                } : undefined,
-              };
-            });
-          } else if (
-            (data.event === "timer_update" ||
-              data.event === "auction_started" ||
-              data.event === "auction_ended" ||
-              data.event === "auction_cancelled" ||
-              data.event === "auction_updated") &&
-            data.payload
-          ) {
-            queryClient.setQueryData(["auction", id], (prev: any) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                status: data.payload.status || prev.status,
-                end_time: data.payload.end_time || prev.end_time,
-                winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
-              };
-            });
-          } else if (
-            (data.event === "user_joined" || data.event === "user_left") &&
-            data.payload
-          ) {
-            if (data.payload.active_connections !== undefined) {
-              setViewerCount(data.payload.active_connections);
-            }
-          } else if (data.event === "bid_accepted") {
-            setBidAmount("");
-            setSubmittingBid(false);
-          } else if (data.event === "bid_error") {
-            let errorMsg = "Erro ao processar o lance.";
-            if (data.payload?.errors && data.payload.errors.length > 0) {
-              const firstErr = data.payload.errors[0];
-              if (typeof firstErr === "object") {
-                errorMsg = Object.values(firstErr).flat().join(" ");
-              } else if (typeof firstErr === "string") {
-                errorMsg = firstErr;
+              queryClient.setQueryData(["auction", id], (prev: any) => {
+                if (!prev) return prev;
+                const newCurrentPrice = data.payload.current_price || prev.item?.current_price;
+                const buyNowPrice = prev.item?.buy_now_price ? Number(prev.item.buy_now_price) : null;
+                const isAvailable = buyNowPrice !== null ? Number(newCurrentPrice) < (0.85 * buyNowPrice) : false;
+                return {
+                  ...prev,
+                  item: prev.item ? {
+                    ...prev.item,
+                    current_price: newCurrentPrice,
+                    is_buy_now_available: data.payload.is_buy_now_available !== undefined ? data.payload.is_buy_now_available : isAvailable,
+                  } : undefined,
+                };
+              });
+            } else if (
+              (data.event === "timer_update" ||
+                data.event === "auction_started" ||
+                data.event === "auction_ended" ||
+                data.event === "auction_cancelled" ||
+                data.event === "auction_updated") &&
+              data.payload
+            ) {
+              queryClient.setQueryData(["auction", id], (prev: any) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  status: data.payload.status || prev.status,
+                  end_time: data.payload.end_time || prev.end_time,
+                  winner: data.payload.winner_id !== undefined ? data.payload.winner_id : prev.winner,
+                };
+              });
+            } else if (
+              (data.event === "user_joined" || data.event === "user_left") &&
+              data.payload
+            ) {
+              if (data.payload.active_connections !== undefined) {
+                setViewerCount(data.payload.active_connections);
               }
+            } else if (data.event === "bid_accepted") {
+              setBidAmount("");
+              setSubmittingBid(false);
+            } else if (data.event === "bid_error") {
+              let errorMsg = "Erro ao processar o lance.";
+              if (data.payload?.errors && data.payload.errors.length > 0) {
+                const firstErr = data.payload.errors[0];
+                if (typeof firstErr === "object") {
+                  errorMsg = Object.values(firstErr).flat().join(" ");
+                } else if (typeof firstErr === "string") {
+                  errorMsg = firstErr;
+                }
+              }
+              setError(errorMsg);
+              setSubmittingBid(false);
             }
-            setError(errorMsg);
-            setSubmittingBid(false);
+          } catch (err) {
+            console.error("[WS AuctionRealtime] message parse error:", err);
           }
-        } catch (err) {
-          // Silent: WS message parse error
-        }
-      };
+        };
 
-      socket.onerror = () => {};
+        socket.onclose = (event) => {
+          ws.current = null;
+          if (!isClosedIntentional && reconnectAttempts < WS_MAX_RECONNECT_ATTEMPTS) {
+            const delay = Math.min(
+              WS_RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts),
+              WS_RECONNECT_MAX_DELAY
+            );
+            reconnectAttempts++;
+            console.warn(`[WS AuctionRealtime] disconnected (code=${event.code}), reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+            reconnectTimeout = setTimeout(() => { connect(); }, delay);
+          }
+        };
+      } catch (err) {
+        console.error("[WS AuctionRealtime] init error:", err);
+      }
+    };
 
-      socket.onclose = () => {
-        ws.current = null;
-      };
-    } catch {
-      // Silent: WS init error
-    }
+    connect();
 
     return () => {
+      isClosedIntentional = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (ws.current) {
         ws.current.onclose = null;
         ws.current.onerror = null;
@@ -360,36 +389,62 @@ export function useGlobalAuctionRealtime() {
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/global/`;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isClosedIntentional = false;
+    let reconnectAttempts = 0;
 
-    try {
-      const socket = new WebSocket(wsUrl);
-      ws.current = socket;
+    const connect = () => {
+      if (isClosedIntentional) return;
 
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
+      const wsUrl = `${ENV.WS_BASE_URL}/ws/auctions/global/`;
 
-          if (data.event === "GLOBAL_BID_CREATED" && data.payload) {
-            queryClient.setQueryData(["auctionActivities"], (oldData: any) => {
-              const currentActivities = oldData || [];
-              // Add new activity at the beginning and keep only top 10
-              return [data.payload, ...currentActivities].slice(0, 10);
-            });
+      try {
+        const socket = new WebSocket(wsUrl);
+        ws.current = socket;
+
+        socket.onopen = () => {
+          reconnectAttempts = 0;
+        };
+
+        socket.onerror = () => {
+          console.error("[WS GlobalAuction] WebSocket error");
+        };
+
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            if (data.event === "GLOBAL_BID_CREATED" && data.payload) {
+              queryClient.setQueryData(["auctionActivities"], (oldData: any) => {
+                const currentActivities = oldData || [];
+                return [data.payload, ...currentActivities].slice(0, 10);
+              });
+            }
+          } catch (err) {
+            console.error("[WS GlobalAuction] message parse error:", err);
           }
-        } catch {
-          // Silent: global WS message parse error
-        }
-      };
+        };
 
-      socket.onclose = () => {};
+        socket.onclose = () => {
+          if (!isClosedIntentional && reconnectAttempts < WS_MAX_RECONNECT_ATTEMPTS) {
+            const delay = Math.min(
+              WS_RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts),
+              WS_RECONNECT_MAX_DELAY
+            );
+            reconnectAttempts++;
+            reconnectTimeout = setTimeout(() => { connect(); }, delay);
+          }
+        };
+      } catch (err) {
+        console.error("[WS GlobalAuction] init error:", err);
+      }
+    };
 
-      socket.onerror = () => {};
-    } catch {
-      // Silent: global WS init error
-    }
+    connect();
 
     return () => {
+      isClosedIntentional = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (ws.current) {
         ws.current.close();
       }
