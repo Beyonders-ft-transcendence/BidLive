@@ -1,0 +1,38 @@
+groups:
+  - name: bidlive_alerts
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Serviço {{ $labels.instance }} inoperante"
+          description: "O serviço {{ $labels.instance }} está fora do ar há mais de 1 minuto."
+
+      - alert: NginxHighConnections
+        expr: nginx_connections_active > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto volume de conexões no Nginx"
+          description: "O Nginx está com {{ $value }} conexões ativas por mais de 2 minutos."
+
+      - alert: RedisExporterError
+        expr: redis_exporter_last_scrape_error > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Erro no Redis Exporter"
+          description: "O exportador do Redis reportou erro na última coleta."
+
+      - alert: ServiceStarted
+        expr: (time() - process_start_time_seconds) < 300
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Serviço {{ $labels.job }} iniciado recentemente"
+          description: "O container/serviço {{ $labels.job }} subiu há menos de 5 minutos."

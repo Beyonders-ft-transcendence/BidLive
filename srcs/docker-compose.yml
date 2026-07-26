@@ -1,0 +1,598 @@
+services:
+
+  nginx:
+    image: nginx:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    depends_on:
+      - frontend
+      - logstash
+    ports:
+      - "443:443"
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.nginx
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "nginx"
+
+  nginx_exporter:
+    image: nginx_exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/nginx_exporter
+      dockerfile: Dockerfile
+    container_name: nginx_exporter
+    depends_on:
+      - nginx
+    networks:
+      - frontend-network
+      - backend-network
+    expose:
+      - "9113"
+    restart: always
+    env_file:
+      - ./.env.nginx
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+
+  grafana:
+    image: grafana:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/grafana
+      dockerfile: Dockerfile
+    container_name: grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - grafana_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+      - elasticsearch_credenciais
+    env_file:
+      - ./.env.grafana
+
+  prometheus:
+    image: prometheus:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/prometheus
+      dockerfile: Dockerfile
+    container_name: prometheus
+    depends_on:
+      - backend
+      - celery_worker
+      - celery_beat
+      - livekit
+      - postgres_exporter
+      - redis_exporter
+      - nginx_exporter
+      - celery_exporter
+      - alertmanager
+    networks:
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - prometheus_data:/prometheus
+
+  alertmanager:
+    image: alertmanager:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/alertmanager
+      dockerfile: Dockerfile
+    container_name: alertmanager
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.email
+      - ./.env.webhook
+    secrets:
+      - email_credenciais
+      - webhook_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - alertmanager_data:/alertmanager
+
+  frontend:
+    image: frontend:0.0.1
+    pull_policy: never
+    build:
+      context: ./
+      dockerfile: requirements/frontend/Dockerfile
+    container_name: frontend
+    depends_on:
+      - backend
+      - celery_worker
+      - celery_beat
+      - logstash
+      - livekit
+    networks:
+      - frontend-network
+      - backend-network
+    expose:
+      - "3000"
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+      - google_credenciais
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "frontend"
+
+  celery_beat:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: celery_beat
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
+      logstash:
+        condition: service_started
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
+      - ./.env.email
+    secrets:
+      - db_credenciais
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+      - email_credenciais
+      - 42_credenciais
+      - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    environment:
+      SERVICE_ROLE: celery-beat
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "celery-beat"
+
+  celery_worker:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
+      logstash:
+        condition: service_started
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
+      - ./.env.email
+    secrets:
+      - db_credenciais
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+      - email_credenciais
+      - 42_credenciais
+      - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    environment:
+      SERVICE_ROLE: celery-worker
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "celery-worker"
+
+  backend:
+    image: backend:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      livekit:
+        condition: service_started
+      logstash:
+        condition: service_started
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.backend
+      - ./.env.db
+      - ./.env.redis
+      - ./.env.livekit
+      - ./.env.email
+    secrets:
+      - db_credenciais
+      - redis_credenciais
+      - livekit_credenciais
+      - backend_credenciais
+      - email_credenciais
+      - 42_credenciais
+      - google_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    environment:
+      SERVICE_ROLE: django
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "django-backend"
+
+  logstash:
+    image: logstash:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/logstash
+      dockerfile: Dockerfile
+    container_name: logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - backend-network
+      - frontend-network
+    ports:
+      - "127.0.0.1:12201:12201/udp"
+    expose:
+      - "5000"
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+      - elasticsearch_credenciais
+    volumes:
+      - logstash_data:/usr/share/logstash/data
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+
+  livekit:
+    image: livekit:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/livekit
+      dockerfile: Dockerfile
+    container_name: livekit
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - frontend-network
+      - backend-network
+    expose:
+      - "6789"
+    restart: always
+    env_file:
+      - ./.env.livekit
+      - ./.env.redis
+    secrets:
+      - redis_credenciais
+      - livekit_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "livekit"
+
+  adminer:
+    image: adminer:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+
+  postgres:
+    image: postgres:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/postgres
+      dockerfile: Dockerfile
+    container_name: postgres
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.db
+    secrets:
+      - db_credenciais
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$DATABASE_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_exporter:
+    image: postgres_exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/postgres_exporter
+      dockerfile: Dockerfile
+    container_name: postgres_exporter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend-network
+    expose:
+      - "9187"
+    restart: always
+    secrets:
+      - db_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    env_file:
+      - ./.env.db
+
+  redis:
+    image: redis:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    networks:
+      - backend-network
+    restart: always
+    env_file:
+      - ./.env.redis
+    secrets:
+      - redis_credenciais
+    volumes:
+      - redis_data:/data
+  
+  redis_exporter:
+    image: redis_exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/redis_exporter
+      dockerfile: Dockerfile
+    container_name: redis_exporter
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend-network
+    expose:
+      - "9121"
+    restart: always
+    secrets:
+      - redis_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    env_file:
+      - ./.env.redis
+
+  celery_exporter:
+    image: celery_exporter:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/celery_exporter
+      dockerfile: Dockerfile
+    container_name: celery_exporter
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - backend-network
+    expose:
+      - "9808"
+    restart: always
+    secrets:
+      - redis_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    env_file:
+      - ./.env.redis
+
+  portainer:
+    image: portainer:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/portainer
+      dockerfile: Dockerfile
+    container_name: portainer
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - portainer_credenciais
+      - ca_cert
+      - ca_key
+      - ca_config
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  elasticsearch:
+    image: elasticsearch:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/elasticsearch
+      dockerfile: Dockerfile
+    container_name: elasticsearch
+    networks:
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+      - elasticsearch_credenciais
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+    healthcheck:
+      test: ["CMD-SHELL", "ELASTIC_PASSWORD=$$(sed -n '2p' /run/secrets/elasticsearch_credenciais 2>/dev/null | cut -d'=' -f2 | tr -d '\\r') && curl -k -sf -u \"elastic:$$ELASTIC_PASSWORD\" https://localhost:9200/_cluster/health 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
+
+  kibana:
+    image: kibana:0.0.1
+    pull_policy: never
+    build:
+      context: ./requirements/kibana
+      dockerfile: Dockerfile
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+    restart: always
+    secrets:
+      - ca_cert
+      - ca_key
+      - ca_config
+      - elasticsearch_credenciais
+
+secrets:
+  db_credenciais:
+    file: ../secrets/db_credenciais.txt
+  redis_credenciais:
+    file: ../secrets/redis_credenciais.txt
+  livekit_credenciais:
+    file: ../secrets/livekit_credenciais.txt
+  backend_credenciais:
+    file: ../secrets/backend_credenciais.txt
+  42_credenciais:
+    file: ../secrets/42_credenciais.txt
+  google_credenciais:
+    file: ../secrets/google_credenciais.txt
+  grafana_credenciais:
+    file: ../secrets/grafana_credenciais.txt
+  portainer_credenciais:
+    file: ../secrets/portainer_credenciais.txt
+  email_credenciais:
+    file: ../secrets/email_credenciais.txt
+  webhook_credenciais:
+    file: ../secrets/webhook_credenciais.txt
+  ca_cert:
+    file: ../secrets/ca.pem
+  ca_key:
+    file: ../secrets/ca-key.pem
+  ca_config:
+    file: ../secrets/ca-config.json
+  elasticsearch_credenciais:
+    file: ../secrets/elasticsearch_credenciais.txt
+
+networks:
+  frontend-network:
+    driver: bridge
+    name: frontend-network
+  backend-network:
+    driver: bridge
+    name: backend-network
+
+volumes:
+  redis_data:
+    driver: local
+
+  postgres_data:
+    driver: local
+
+  prometheus_data:
+    driver: local
+
+  portainer_data:
+    driver: local
+
+  alertmanager_data:
+    driver: local
+
+  elasticsearch_data:
+    driver: local
+
+  logstash_data:
+    driver: local
