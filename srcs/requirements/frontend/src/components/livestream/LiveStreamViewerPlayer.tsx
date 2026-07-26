@@ -8,10 +8,12 @@ import {
   useTracks,
 } from "@livekit/components-react";
 import { ConnectionState, Track } from "livekit-client";
-import { RefreshCw, Videotape, VideoOff } from "lucide-react";
+import { RefreshCw, LogIn, Videotape, VideoOff } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { LiveStream } from "@/shared/types/auction.types";
 import { LiveStreamStatus } from "@/shared/types/auction.types";
 import { getBackendErrorMessage, getHttpStatus, useLiveKitTokenQuery } from "@/hooks/useLiveKit";
+import { useAuthStore } from "@/shared/stores/auth.store";
 import ENV from "@/shared/utils/env.utils";
 
 interface LiveStreamViewerPlayerProps {
@@ -80,23 +82,53 @@ function ViewerStage() {
 /**
  * Player LiveKit do participante (viewer): solicita um token somente-assinatura
  * via /livekit-token/ e reproduz o vídeo/áudio da sala do stream.
+ *
+ * Estados tratados:
+ *  - Visitante anônimo: não faz request ao endpoint LiveKit, exibe CTA de login.
+ *  - Autenticado + live offline/erro: exibe mensagem de erro com retry.
+ *  - Autenticado + sucesso: conecta ao LiveKit e reproduz o stream.
  */
 export default function LiveStreamViewerPlayer({ auctionId, stream }: LiveStreamViewerPlayerProps) {
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
+  const isStreamLive = stream.status === LiveStreamStatus.LIVE;
+
   const {
     data: grant,
     isLoading,
     isError,
     error,
     refetch,
-  } = useLiveKitTokenQuery(auctionId, stream.id, "viewer", stream.status === LiveStreamStatus.LIVE);
+  } = useLiveKitTokenQuery(auctionId, stream.id, "viewer", isAuthenticated && isStreamLive);
 
   const serverUrl = grant?.url || ENV.LIVEKIT_URL;
 
+  // ── Visitante anônimo ────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <PlayerNotice
+        icon={<Videotape size={28} className="text-slate-500" />}
+        message="Faça login para assistir a live"
+        hint="Você precisa de uma conta para participar da transmissão ao vivo."
+        action={
+          <Link
+            to="/signin"
+            className="mt-1 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase tracking-wider rounded-sm inline-flex items-center gap-1.5 no-underline"
+          >
+            <LogIn size={12} />
+            Login
+          </Link>
+        }
+      />
+    );
+  }
+
+  // ── Autenticado: carregando token ────────────────────────────────────
   if (isLoading) {
     return <PlayerNotice icon={<Spinner />} message="Preparando o player..." />;
   }
 
+  // ── Autenticado: erro ao obter token ─────────────────────────────────
   if (isError || !grant || !serverUrl) {
     const backendMessage = getBackendErrorMessage(error);
     const httpStatus = getHttpStatus(error);
@@ -137,6 +169,7 @@ export default function LiveStreamViewerPlayer({ auctionId, stream }: LiveStream
     );
   }
 
+  // ── Autenticado: conectar ao LiveKit ─────────────────────────────────
   return (
     <LiveKitRoom
       serverUrl={serverUrl}
@@ -146,8 +179,6 @@ export default function LiveStreamViewerPlayer({ auctionId, stream }: LiveStream
       audio={false}
       className="absolute inset-0"
       onDisconnected={() => {
-        // A sala foi encerrada (ex.: leiloeiro finalizou a live) — atualiza o
-        // estado dos streams para a página refletir o fim da transmissão.
         queryClient.invalidateQueries({ queryKey: ["auctionStreams", auctionId] });
         queryClient.invalidateQueries({ queryKey: ["streamViewers", auctionId, stream.id] });
       }}
