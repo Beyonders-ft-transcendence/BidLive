@@ -6,7 +6,8 @@ set -e
 
 export TLS_CERT=/etc/ssl/certs/server.crt
 export TLS_KEY=/etc/ssl/private/server.key
-export SSL_CERT_FILE=/etc/ssl/certs/ca.crt
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Make certs readable by appuser
 chmod 644 /etc/ssl/certs/server.crt 2>/dev/null || true
@@ -77,7 +78,8 @@ echo \"PostgreSQL is up.\"
 
 export TLS_CERT=/etc/ssl/certs/server.crt
 export TLS_KEY=/etc/ssl/private/server.key
-export SSL_CERT_FILE=/etc/ssl/certs/ca.crt
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 if [ \"\$SERVICE_ROLE\" = \"django\" ]; then
   echo \"Running migrations...\"
