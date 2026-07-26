@@ -297,7 +297,7 @@ def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str
             has_bids = auction.bids.exists()
             not_started = auction.start_time > timezone.now()
             if not not_started and has_bids:
-                raise ValidationError({"bids": ["Auction with bids cannot be cancelled after start."]})
+                raise ValidationError({"bids": ["Leilões com licitações não podem ser cancelados após o início."]})
 
             auction.status = AuctionStatus.CANCELLED
             auction.cancelled_at = timezone.now()
