@@ -13,6 +13,7 @@ class ChatUserSerializer(LocalizedModelSerializer):
             "username",
             "full_name",
             "avatar_url",
+            "bio",
             "is_online"
         )
         read_only_fields = fields

@@ -3,6 +3,7 @@ export interface ChatUser {
   username: string;
   full_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
   is_online: boolean;
 }
 
