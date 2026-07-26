@@ -383,6 +383,7 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 ### Tools
 
 - **GitHub Issues & Projects** — task tracking, EPICs, bug reports, checklist per issue
+- **Discord** —  Infrastructure alerts
 - **Slack & Whatsapp** — daily communication, code reviews, debugging sessions
 - **Git** — feature branches per EPIC/issue, conventional commits (`feat`, `fix`, `chore`)
 
@@ -952,11 +953,15 @@ Co-built the backoffice admin dashboard with user management (list, search, ban/
 
 **Role:** Frontend Developer
 
-**Issues owned:** FE-008, FE-012 (co-owner)
+**Issues owned:** FE-008, FE-10 FE-012 (co-owner)
 
 **LiveKit Livestream Integration (FE-008)**
 
 Built the livestream UI for both broadcasters and viewers. Implemented the LiveKit React component integration for real-time video streaming within auction pages, including stream creation, start/stop controls, viewer count display, and token-based authentication with the backend.
+
+**Social System (FE-010)**
+
+Contributed to the social features, implementing user discovery, friend request management, and user blocking functionality through the platform's social APIs.
 
 **Admin Dashboard (FE-012, co-owner)**
 
@@ -968,11 +973,15 @@ Co-built the backoffice admin dashboard, implementing the reports review panel a
 
 **Role:** Frontend Developer
 
-**Issues owned:** FE-005 (co-owner)
+**Issues owned:** FE-006, FE-005 (co-owner)
 
 **Password Recovery and Profile (FE-005, co-owner)**
 
 Contributed to the password recovery flow and user profile implementation, working on form validation, API integration, and UI components for the forgot password and profile editing screens.
+
+**Auction Listing and Creation Screens (FE-006)**
+
+Contributed to the auction listing and creation flows, working on auction browsing, category filtering, pagination, API integration, multi-step auction creation, and image uploads.
 
 ---
 
