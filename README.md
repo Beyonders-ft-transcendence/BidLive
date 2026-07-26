@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by [nmatondo], [asebasti], [emalungo], [jorcarva], [ferda-si].*
+*This project has been created as part of the 42 curriculum by [nmatondo], [asebasti], [jorcarva], [emalungo], [ferda-si].*
 
 ---
 
@@ -6,7 +6,7 @@
 
 # 🔨 BidLive
 
-**A real-time live auction platform with streaming, chat, and social features — ft_transcendence final project at 42 Luanda**
+**A real-time live auction platform — ft_transcendence final project at 42 Luanda**
 
 *Bid. Stream. Connect. All in real time.*
 
@@ -17,17 +17,15 @@
 ## Table of Contents
 
 - [Description](#description)
-- [Instructions](#instructions)
-- [Resources](#resources)
 - [Team Information](#team-information)
 - [Project Management](#project-management)
 - [Technical Stack](#technical-stack)
 - [Database Schema](#database-schema)
 - [Features List](#features-list)
 - [Modules](#modules)
+- [Instructions](#instructions)
 - [Individual Contributions](#individual-contributions)
-- [Known Limitations](#known-limitations)
-- [License](#license)
+- [Resources](#resources)
 
 ---
 
@@ -35,7 +33,7 @@
 
 **BidLive** is a full-stack web application that reimagines the traditional auction experience as a real-time, social platform. Users can create and participate in timed auctions or live-streamed bidding events, interact through public and private chat, build a social network, and manage their activity through a personal dashboard.
 
-The platform is built on a service-oriented Django backend with WebSocket support via Django Channels, a React frontend with full TypeScript, and a production-grade infrastructure stack with Docker, Nginx, Prometheus, Grafana, and an ELK logging stack.
+The platform is built on a service-oriented Django backend with WebSocket support via Django Channels, a React frontend with full TypeScript, and a production-grade infrastructure stack with Docker, Nginx, Prometheus, and Grafana.
 
 ### Core Concept
 
@@ -54,265 +52,8 @@ A seller creates an auction for an item — setting a starting price, duration, 
 - **Notifications** — real-time in-app delivery via WebSocket + REST history
 - **Analytics** — async event tracking via Celery
 - **Internationalisation** — UI in English, Portuguese, and Arabic
-- **Observability** — Prometheus metrics + Grafana dashboards + ELK logging
-- **One-command deploy** — `docker compose up --build` starts all 20 containers
-
----
-
-## Instructions
-
-### Prerequisites
-
-| Tool | Version | Install |
-|---|---|---|
-| Docker | 24+ | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) |
-| Docker Compose | V2+ | Included with Docker Desktop |
-| Git | any | `apt install git` / `brew install git` |
-
-> No Python, Node.js, or database installation required — everything runs inside Docker containers.
-
----
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/nmatondo/BidLive.git
-cd BidLive
-```
-
-The project root contains a `Makefile` that orchestrates the full stack. The Docker Compose file lives at `srcs/docker-compose.yml`.
-
----
-
-### 2. Configure the Domain Name
-
-The platform is configured to serve on the domain `bidlive.42.fr`. You must map this domain to your local machine:
-
-| OS | File to edit | Line to add |
-|---|---|---|
-| Linux / macOS | `/etc/hosts` | `127.0.0.1 bidlive.42.fr` |
-| Windows | `C:\Windows\System32\drivers\etc\hosts` | `127.0.0.1 bidlive.42.fr` |
-
-Open the file with administrator/root privileges and append the line above. Without this step, Nginx will reject requests because the `server_name` directive matches only `bidlive.42.fr`.
-
-> If you need a different domain, update `server_name` in `srcs/requirements/nginx/conf/nginx.conf` and the `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`, and `FRONTEND_URL` values in `srcs/.env.backend`.
-
----
-
-### 3. Create and Configure Environment Variables
-
-All environment files live in `srcs/` and are named `.env.<service>`. The repository includes committed `.env.*` files with development defaults — review them and adjust as needed:
-
-| File | Purpose | Key variables |
-|---|---|---|
-| `.env.backend` | Django settings, CORS, JWT | `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL` |
-| `.env.db` | PostgreSQL connection | `DATABASE_DB`, `DATABASE_USER`, `DATABASE_HOST` |
-| `.env.redis` | Redis connection | `REDIS_USER`, `REDIS_HOST`, `REDIS_PORT` |
-| `.env.livekit` | LiveKit streaming server | `LIVEKIT_URL`, `LIVEKIT_API_KEY` (loaded from secrets) |
-| `.env.frontend` | Vite / React config | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WS_BASE_URL`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID` |
-| `.env.nginx` | Nginx exporter scrape URI | `NGINX_EXPORTER_SCRAPE_URI` |
-| `.env.grafana` | Grafana server config | `GF_SERVER_DOMAIN`, `GF_SERVER_ROOT_URL` |
-| `.env.email` | SMTP / Alertmanager email | `SMTP_SMARTHOST`, `EMAIL_TO` |
-| `.env.webhook` | Alertmanager webhook | Discord/Slack webhook URL |
-
-> Database passwords, JWT secrets, and API keys are **not** in `.env` files. They are managed via Docker secrets — see the next step.
-
----
-
-### 4. Set Up Secrets and Credential Files
-
-Sensitive credentials are stored in the `secrets/` directory (gitignored). Create each file with the exact variable names the containers expect:
-
-#### Required secrets files
-
-| File | Variables | Example |
-|---|---|---|
-| `secrets/db_credenciais.txt` | `POSTGRES_PASSWORD` | `POSTGRES_PASSWORD=bidlive` |
-| `secrets/redis_credenciais.txt` | `REDIS_PASSWORD` | `REDIS_PASSWORD=1234567890` |
-| `secrets/backend_credenciais.txt` | `SECRET_KEY` | `SECRET_KEY=<your-django-secret>` |
-| `secrets/livekit_credenciais.txt` | `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | `LIVEKIT_API_KEY=devkey` |
-| `secrets/grafana_credenciais.txt` | `GF_SECURITY_ADMIN_USER`, `GF_SECURITY_ADMIN_PASSWORD` | `GF_SECURITY_ADMIN_USER=bidlive` |
-| `secrets/email_credenciais.txt` | `EMAIL_USER`, `EMAIL_PASSWORD` | `EMAIL_USER=you@gmail.com` |
-| `secrets/elasticsearch_credenciais.txt` | `ELASTICSEARCH_USER`, `ELASTICSEARCH_PASSWORD` | `ELASTICSEARCH_USER=bidlive` |
-| `secrets/portainer_credenciais.txt` | `PORTAINER_USER`, `PORTAINER_PASSWORD` | `PORTAINER_USER=admin_bidlive` |
-| `secrets/42_credenciais.txt` | `FORTY_TWO_CLIENT_ID`, `FORTY_TWO_CLIENT_SECRET`, `FORTY_TWO_REDIRECT_URI` | Obtain from 42 API settings |
-| `secrets/google_credenciais.txt` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Obtain from Google Cloud Console |
-| `secrets/webhook_credenciais.txt` | `APIURL` | Discord/Slack webhook URL |
-
-Each file contains plain `KEY=VALUE` pairs, one per line. The Docker Compose file mounts these as Docker secrets at `/run/secrets/<name>` inside the containers.
-
-#### TLS certificates (auto-generated)
-
-The `Makefile` `all` target runs `make ca` before building, which invokes `srcs/ca/generate_ca.sh`. This script uses `cfssl` in Docker to generate a self-signed Root CA (`ca.pem` + `ca-key.pem`) in the `secrets/` directory. Individual service certificates are generated at container startup by each container's `entrypoint.sh`.
-
-> You do **not** need to manually generate certificates. The `make all` command handles this automatically.
-
----
-
-### 5. Run the Project
-
-The Makefile provides a single command that generates the Root CA, builds all 20 Docker images, and starts every container:
-
-```bash
-make all
-```
-
-This is equivalent to:
-
-```bash
-make ca       # Generate Root CA certificates (requires Docker)
-make build    # Build all 20 Docker images
-make up       # Start all containers in detached mode
-```
-
-On first run (or after a full reset), run migrations and seed the demo data:
-
-```bash
-# Wait for PostgreSQL to be healthy (~15 seconds after containers start)
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run python manage.py migrate
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed
-```
-
-> On Windows, use `make all` from PowerShell or Git Bash. The `make` targets call `docker compose` with the correct project name and compose file path automatically.
-
-Once all containers are healthy, the platform is accessible at the URLs listed in the [Services](#main-services) table below.
-
----
-
-### Main Services
-
-| Service | URL | Credentials / Access Notes |
-|---|---|---|
-| **Frontend** (React) | `https://bidlive.42.fr` | Self-signed certificate — browser will warn on first visit; click "Advanced" -> "Proceed" |
-| **Backend API** | `https://bidlive.42.fr/api/` | JWT-authenticated. Register or use demo accounts below |
-| **Swagger UI** | `https://bidlive.42.fr/api/docs/` | No auth required |
-| **Redoc** | `https://bidlive.42.fr/api/redoc/` | No auth required |
-| **Grafana** | `https://bidlive.42.fr/grafana/` | User: `bidlive`, Password: from `secrets/grafana_credenciais.txt` |
-| **Kibana** | `https://bidlive.42.fr/kibana/` | User: `elastic`, Password: from `secrets/elasticsearch_credenciais.txt` |
-| **Adminer** | `https://bidlive.42.fr/adminer/` | Server: `postgres`, User: `bidlive`, Password: from `secrets/db_credenciais.txt` |
-| **Portainer** | `https://bidlive.42.fr/portainer/` | User: from `secrets/portainer_credenciais.txt`, Password: same file |
-| **LiveKit** | Internal only (`livekit:7880`) | Not exposed externally; tokens issued by the backend |
-| **Prometheus** | Internal only (`backend-network`) | Scrapes metrics from all exporters; accessed via Grafana dashboards |
-
-> All services are behind Nginx reverse proxy with HTTPS (port 443). The Nginx container is the only service exposed to the host via `ports: "443:443"`.
-
----
-
-### Demo Accounts
-
-After seeding, these accounts are available (password: `demo1234`):
-
-| Email | Role | Capabilities |
-|---|---|---|
-| `admin@bidlive.dev` | SUPER_ADMIN | Full platform access, backoffice |
-| `seller@bidlive.dev` | USER | Create and manage auctions |
-| `manager@bidlive.dev` | MONITOR | Moderation panel, review reports |
-| `buyer1@bidlive.dev` | USER | Place bids, chat |
-| `buyer2@bidlive.dev` | USER | Place bids, chat |
-| `buyer3@bidlive.dev` | USER | Place bids, chat |
-| `buyer4@bidlive.dev` | USER | Place bids, chat |
-| `banned@bidlive.dev` | USER | Banned account (for testing moderation) |
-
----
-
-### Useful Commands
-
-```bash
-# Full rebuild (tear down, remove volumes, rebuild, restart)
-make re
-
-# Stop all containers
-make down
-
-# Remove containers + volumes (full reset, no rebuild)
-make clean
-
-# Nuclear option — removes all Docker data on the system
-make fclean
-
-# View all logs
-make logs
-
-# View logs for a specific container
-docker compose -p bidlive -f srcs/docker-compose.yml logs -f backend
-docker compose -p bidlive -f srcs/docker-compose.yml logs -f celery_worker
-
-# Run tests inside the backend container
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run pytest tests -v
-
-# Access Django shell
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend uv run python manage.py shell
-
-# Clear and reseed demo data
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed-clear
-docker compose -p bidlive -f srcs/docker-compose.yml exec backend make seed
-```
-
----
-
-### Running Tests
-
-```bash
-# All tests
-uv run pytest tests -v
-
-# Specific module
-uv run pytest tests/test_social_api.py -v      # EPIC 4 — Social
-uv run pytest tests/test_chat_api.py -v        # EPIC 7 — Chat
-uv run pytest tests/test_reports_api.py -v     # BE-003 — Reports
-
-# With server output (useful for debugging 500s)
-uv run pytest tests -x -vv -s
-
-# Coverage report
-uv run pytest tests --cov=apps --cov-report=term-missing
-```
-
----
-
-## Resources
-
-### Official Documentation
-
-- [Django Documentation](https://docs.djangoproject.com/) — web framework
-- [Django REST Framework](https://www.django-rest-framework.org/) — API layer
-- [Django Channels](https://channels.readthedocs.io/) — WebSocket and ASGI
-- [Celery Documentation](https://docs.celeryq.dev/) — async task queue
-- [Redis Documentation](https://redis.io/docs/) — data structures and pub/sub
-- [LiveKit Documentation](https://docs.livekit.io/) — WebRTC streaming
-- [drf-spectacular](https://drf-spectacular.readthedocs.io/) — OpenAPI schema
-- [SimpleJWT](https://django-rest-framework-simplejwt.readthedocs.io/) — JWT auth
-- [React Documentation](https://react.dev/) — UI framework
-- [TanStack Query](https://tanstack.com/query/latest) — server state management
-- [i18next](https://www.i18next.com/) — internationalisation
-- [Prometheus](https://prometheus.io/docs/) — metrics collection
-- [Grafana](https://grafana.com/docs/) — dashboards and visualization
-- [Elasticsearch](https://www.elastic.co/guide/) — log storage and search
-
-### Architecture References
-
-- [HackSoft Django Styleguide](https://github.com/HackSoftware/Django-Styleguide) — Service + Selector pattern used throughout the backend
-- [Django Channels Tutorial](https://channels.readthedocs.io/en/stable/tutorial/index.html) — WebSocket consumer lifecycle
-- [PostgreSQL SELECT FOR UPDATE](https://www.postgresql.org/docs/current/sql-select.html) — concurrency control for bidding
-- [Conventional Commits](https://www.conventionalcommits.org/) — commit message format
-
-### AI Usage
-
-Types of AI assistance used
-
-| Type of AI assistance |
-|---|
-| Software architecture and technical design discussions, including evaluation of implementation approaches, design patterns, system structure, and technical trade-offs |
-| Frontend and backend development support, including implementation guidance, framework usage, API integration, data handling, and application structure |
-| Debugging and troubleshooting of application behaviour, runtime errors, integration issues, configuration problems, and unexpected system behaviour |
-| Code review and implementation guidance, including identifying potential bugs, improving existing code, refactoring, and suggesting implementation approaches |
-| Real-time and asynchronous development support, including WebSockets, messaging, asynchronous processing, and background tasks |
-| Database and data management guidance, including query optimisation, data relationships, persistence strategies, and concurrency considerations |
-| Error handling, validation, and API behaviour, including exception handling and data serialisation |
-| Documentation support, including explaining technical concepts, documenting implementation details, and improving project and technical documentation |
-| Development workflow support, including Git workflows, commit organisation, dependency ordering, and Conventional Commits |
-
-AI was used as an assistance tool throughout the development process. Any AI-assistence was reviewed, understood, debugged where necessary, and manually integrated by the team. All architectural decisions, debugging approaches, and final implementation choices remained the responsibility of the team.
+- **Observability** — Prometheus metrics + Grafana dashboards
+- **One-command deploy** — `docker compose up` starts all 9 containers
 
 ---
 
@@ -320,11 +61,12 @@ AI was used as an assistance tool throughout the development process. Any AI-ass
 
 | Name | Role | Responsibilities |
 |---|---|---|
-| **nmatondo** | Tech Leader / Backend Developer, DevOps | Backend architecture and infrastructure. Owned EPIC 1 (Infrastructure), EPIC 2 (User System), EPIC 3 (RBAC), EPIC 5 (Auctions), EPIC 6 (Real-time Bidding), EPIC 8 (Live Streaming), BE-004 (Notifications), BE-007 (Analytics), and DO-001 through DO-007 (Docker, Nginx, Prometheus, Grafana, LiveKit, SSL, Deploy). |
-| **asebasti** | Product Owner / Backend Developer | Social and communication systems. Owned EPIC 4 (Social System), EPIC 7 (Real-time Chat), BE-003 (Reports & Moderation), BE-005 (Social-Chat Block Integration), BE-008 (Global Error Handling). |
-| **emalungo** | Project Manager / Frontend Developer | Frontend implementation and project coordination. Owned FE-001 through FE-009, FE-011 (Frontend Architecture, Routing, Auth UI, OAuth, Profile, Auctions, Bidding, Chat, Social, Domains). Co-owned FE-012 (Admin Dashboard). |
-| **jorcarva** | Frontend Developer | Frontend streaming and admin features. Owned FE-008 (LiveKit Livestream Integration) and co-owned FE-012 (Admin Dashboard with RBAC). |
-| **ferda-si** | Frontend Developer | Frontend authentication and profile features. Co-owned FE-005 (Password Recovery and Profile). |
+| **nmatondo** | Tech Leader / Backend Developer, DevOps | Frontend architecture (FE-001/002), Authentication UI (FE-003/004), Profile & password recovery (FE-005), Auction listing & creation (FE-006), Auction detail & bidding (FE-007), LiveKit integration (FE-008), Chat UI (FE-009), Social UI (FE-010), Backoffice panel (FE-011/012) |
+| **asebasti** | Product Owner / Backend Developer | Social system (EPIC 4), Real-time Chat (EPIC 7), Reports & Moderation API (BE-003), Social-Chat block integration (BE-005), Global error handling (BE-008) |
+| **emalungo** | Project Manager / Frontend Developer | Backend infrastructure (EPIC 1), User system & OAuth (EPIC 2), RBAC (EPIC 3), Auction system (EPIC 5), Real-time bidding (EPIC 6), Notifications (BE-004), Analytics (BE-007), Docker infrastructure (DO-001 to DO-007), Project management |
+| **jorcarva** | Frontend Developer | Frontend architecture (FE-001/002), Authentication UI (FE-003/004), Profile & password recovery (FE-005), Auction listing & creation (FE-006), Auction detail & bidding (FE-007), LiveKit integration (FE-008), Chat UI (FE-009), Social UI (FE-010), Backoffice panel (FE-011/012) |
+| **ferda-si** | Frontend Developer | Frontend architecture (FE-001/002), Authentication UI (FE-003/004), Profile & password recovery (FE-005), Auction listing & creation (FE-006), Auction detail & bidding (FE-007), LiveKit integration (FE-008), Chat UI (FE-009), Social UI (FE-010), Backoffice panel (FE-011/012) |
+
 
 ---
 
@@ -332,7 +74,7 @@ AI was used as an assistance tool throughout the development process. Any AI-ass
 
 ### Work Organisation
 
-The project was divided into **EPICs** (major functional systems) and **Issues** (specific tasks). Each EPIC was developed on its own Git branch and merged after internal review. Issues were categorised by prefix:
+The project was divided into **EPICs** (major functional systems) and **ISSUEs** (specific tasks). Each EPIC was developed on its own Git branch and merged after internal review. Issues were categorised by prefix:
 
 | Prefix | Scope |
 |---|---|
@@ -344,47 +86,51 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 
 ### Issue Breakdown
 
-| Issue | Title | Owner |
+| Issue | Title | Status |
 |---|---|---|
-| EPIC 1 | Infrastructure Setup | nmatondo |
-| EPIC 2 | User System | nmatondo |
-| EPIC 3 | Roles & Permissions (RBAC) | nmatondo |
-| EPIC 4 | Social System | asebasti |
-| EPIC 5 | Auction System | nmatondo |
-| EPIC 6 | Real-time Bidding | nmatondo |
-| EPIC 7 | Real-time Chat | asebasti |
-| EPIC 8 | Live Streaming | nmatondo |
-| BE-003 | Reports API | asebasti |
-| BE-004 | Notifications (API & WebSockets) | nmatondo |
-| BE-005 | Social-Chat Block Integration | nmatondo, asebasti |
-| BE-007 | Analytics API | nmatondo |
-| BE-008 | Global Error Handling | asebasti |
-| DO-001 | Base Architecture, Networks and Volumes | nmatondo |
-| DO-002 | PostgreSQL, Redis and Adminer | nmatondo |
-| DO-003 | Containerisation (Frontend and Backend) | nmatondo |
-| DO-004 | LiveKit (Streaming) | nmatondo |
-| DO-005 | Prometheus and Grafana | nmatondo |
-| DO-006 | Nginx, SSL/TLS | nmatondo |
-| DO-007 | Deploy Automation and Validation | nmatondo |
-| FE-001 | Frontend Base Configuration and Architecture | emalungo |
-| FE-002 | Routing and Base Layout | emalungo |
-| FE-003 | Local Authentication | emalungo |
-| FE-004 | OAuth (Google and 42) | emalungo |
-| FE-005 | Password Recovery and Profile | emalungo, ferda-si |
-| FE-006 | Auction Listing and Creation | emalungo |
-| FE-007 | Auction Detail and Bidding | emalungo |
-| FE-008 | Livestream (LiveKit) | jorcarva |
-| FE-009 | Chat System | emalungo |
-| FE-010 | Social System (Friends and Blocks) | emalungo |
-| FE-011 | Domain Management | emalungo |
-| FE-012 | Admin Dashboard (RBAC) | emalungo, jorcarva |
-| VAL-001 through VAL-006 | Validation and Evaluation Preparation | Team |
+| EPIC 1 | Infraestrutura Inicial | ✅ Closed |
+| EPIC 2 | Sistema de Usuários | ✅ Closed |
+| EPIC 3 | Sistema de Roles & Permissões | ✅ Closed |
+| EPIC 4 | Sistema Social | ✅ Closed |
+| EPIC 5 | Sistema de Leilões | ✅ Closed |
+| EPIC 6 | Sistema de Lances em Tempo Real | ✅ Closed |
+| EPIC 7 | Chat em Tempo Real | ✅ Closed |
+| EPIC 8 | Streaming Ao Vivo | ✅ Closed |
+| BE-003 | Reports API (Denúncias) | ✅ Closed |
+| BE-004 | Notificações (API & WebSockets) | ✅ Closed |
+| BE-005 | Integração Social-Chat (Bloqueios) | ✅ Closed |
+| BE-007 | Analytics API | ✅ Closed |
+| BE-008 | Validações Globais e Tratamento de Erros | ✅ Closed |
+| DO-001 | Arquitetura Base, Redes e Volumes | ✅ Closed |
+| DO-002 | PostgreSQL, Redis e Adminer | ✅ Closed |
+| DO-003 | Conteinerização (Frontend e Backend) | ✅ Closed |
+| DO-004 | LiveKit (Streaming) | ✅ Closed |
+| DO-005 | Prometheus e Grafana | ✅ Closed |
+| DO-006 | Nginx, SSL/TLS | ✅ Closed |
+| DO-007 | Automação e Validação do Deploy | ✅ Closed |
+| FE-001 | Configuração Base e Arquitetura Frontend | ✅ Closed |
+| FE-002 | Sistema de Roteamento e Layout Base | ✅ Closed |
+| FE-003 | Autenticação Local | ✅ Closed |
+| FE-004 | OAuth (Google e 42) | ✅ Closed |
+| FE-005 | Recuperação de Senha e Perfil | ✅ Closed |
+| FE-006 | Listagem e Criação de Leilões | ✅ Closed |
+| FE-007 | Tela de Detalhes e Lances | ✅ Closed |
+| FE-008 | Livestream (LiveKit) | ✅ Closed |
+| FE-009 | Sistema de Chat | ✅ Closed |
+| FE-010 | Sistema Social (Amizades e Bloqueios) | ✅ Closed |
+| FE-011 | Gestão de Domínios | ✅ Closed |
+| FE-012 | Dashboard Administrativo (RBAC) | ✅ Closed |
+| VAL-001 | README Completo | ✅ Closed |
+| VAL-002 | Infraestrutura e Deploy | ✅ Closed |
+| VAL-003 | Segurança e Validação de Dados | ✅ Closed |
+| VAL-004 | Interface e UX | ✅ Closed |
+| VAL-005 | Qualidade do Repositório | ✅ Closed |
+| VAL-006 | Verificação de Módulos | ✅ Closed |
 
 ### Tools
 
 - **GitHub Issues & Projects** — task tracking, EPICs, bug reports, checklist per issue
-- **Discord** —  Infrastructure alerts
-- **Slack & Whatsapp** — daily communication, code reviews, debugging sessions
+- **Discord** — daily communication, code reviews, debugging sessions
 - **Git** — feature branches per EPIC/issue, conventional commits (`feat`, `fix`, `chore`)
 
 ---
@@ -408,47 +154,38 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 | django-allauth | 65+ | OAuth 2.0 with Google and 42 Intranet |
 | LiveKit | latest | WebRTC / RTMP live streaming server |
 | django-prometheus | 2.5+ | Prometheus metrics endpoint |
-| uv | latest | Fast Python package manager |
+| uv | latest | Fast Python package manager (replaces pip/Poetry) |
 | Gunicorn + Uvicorn | latest | Production ASGI workers |
+| Whitenoise | 6.x | Static file serving without external CDN |
 
 ### Frontend
 
 | Technology | Version | Purpose |
 |---|---|---|
-| React | 19+ | UI framework |
-| TypeScript | 6+ | Type safety across all components and services |
-| Vite | 8+ | Build tool — fast HMR in development |
+| React | 18+ | UI framework |
+| TypeScript | 5+ | Type safety across all components and services |
+| Vite | 5+ | Build tool — fast HMR in development |
 | TailwindCSS | 4+ | Utility-first CSS styling |
-| shadcn/ui | latest | Accessible, unstyled component library (built on Radix UI) |
+| shadcn/ui | latest | Accessible, unstyled component library |
 | React Query (TanStack) | 5+ | Server state — fetch, cache, sync |
 | Zustand | 5+ | Global client state (auth, user session) |
 | React Hook Form + Zod | latest | Form handling + schema validation |
 | Axios | latest | HTTP client with JWT interceptors |
-| React Router | 7+ | Client-side routing with protected routes |
+| React Router | 6+ | Client-side routing with protected routes |
 | i18next | latest | Internationalisation — EN, PT, AR |
 | LiveKit Components React | latest | WebRTC player and broadcaster UI |
-| Sonner | latest | Toast notifications |
-| Lucide React | latest | Icon library |
+| Cloudinary | latest | Image upload and CDN |
 
 ### Infrastructure & DevOps
 
 | Technology | Purpose |
 |---|---|
-| Docker + Docker Compose | 20-container orchestration |
+| Docker + Docker Compose | 9-container orchestration |
 | Nginx | Reverse proxy, SSL termination, static files, WebSocket proxy |
-| Prometheus | Metrics scraping from Django, Node Exporter, LiveKit, and exporters |
+| Prometheus | Metrics scraping from Django, Node Exporter, LiveKit |
 | Grafana | Visual dashboards — server health, API traffic, DB metrics |
-| Elasticsearch | Log storage and full-text search |
-| Logstash | Log collection and transformation (GELF input) |
-| Kibana | Log visualization and exploration dashboards |
-| Alertmanager | Alert routing and notification (email, webhooks) |
 | Adminer | PostgreSQL web UI (internal network only) |
-| Portainer | Docker container management UI |
-| Docker Secrets | Secure credential management for all services |
-| Nginx Exporter | Prometheus metrics for Nginx |
-| PostgreSQL Exporter | Prometheus metrics for PostgreSQL |
-| Redis Exporter | Prometheus metrics for Redis |
-| Celery Exporter | Prometheus metrics for Celery workers |
+| mkcert / OpenSSL | Self-signed SSL certificates for local HTTPS |
 
 ### Why These Choices
 
@@ -464,8 +201,6 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 
 **shadcn/ui + Tailwind** — shadcn provides accessible, headless components that integrate cleanly with Tailwind without heavy CSS overrides or bundle bloat. Every component is owned in the codebase — no black-box library updates breaking the UI.
 
-**ELK Stack for logging** — Elasticsearch, Logstash, and Kibana provide centralized log management across all containers. GELF drivers on application containers feed logs through Logstash into Elasticsearch, with Kibana providing exploration and dashboards.
-
 ---
 
 ## Database Schema
@@ -474,73 +209,69 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 
 ```
 Internet
-    |
-    v
-+----------------------------------------------------------+
-|  frontend-network (public)                               |
-|  +--------+                                              |
-|  | Nginx  | :80 -> :443  (SSL, reverse proxy)            |
-|  +---+----+                                              |
-|      | /         -> Frontend (Vite)                      |
-|      | /api/     -> Backend (Daphne)                     |
-|      | /ws/      -> Backend (WebSocket)                  |
-|      | /grafana/ -> Grafana                              |
-+------+---------------------------------------------------+
-       |
-+------+---------------------------------------------------+
-|  backend-network (private)                               |
-|      |                                                   |
-|  +---v-----+  +----------+  +--------+  +--------+       |
-|  | Backend |  |PostgreSQL|  | Redis  |  |LiveKit |       |
-|  | (Django)|  |  :5432   |  | :6379  |  | :7880  |       |
-|  +---------+  +----------+  +--------+  +--------+       |
-|                                                          |
-|  +---------+  +----------+  +---------+  +-------------+ |
-|  | Celery  |  |Prometheus|  | Grafana |  |Elasticsearch| |
-|  | Worker  |  |  :9090   |  |  :3000  |  |  :9200      | |
-|  +---------+  +----------+  +---------+  +-------------+ |
-|                                                          |
-|  +----------+  +----------+  +----------+  +---------+   |
-|  | Logstash |  |Kibana    |  |Alertmgr  |  |Portainer|   |
-|  |  :5000   |  |  :5601   |  |  :9093   |  | :9000   |   |
-|  +----------+  +----------+  +----------+  +---------+   |
-+----------------------------------------------------------+
+    │
+    ▼
+┌────────────────────────────────────────────────────┐
+│  frontend-network (public)                         │
+│  ┌────────┐                                        │
+│  │ Nginx  │ :80 → :443  (SSL, reverse proxy)       │ 
+│  └───┬────┘                                        │
+│      │ /         → Frontend (Vite)                 │
+│      │ /api/     → Backend (Daphne)                │
+│      │ /ws/      → Backend (WebSocket)             │
+│      │ /adminer/ → Adminer                         │
+│      │ /grafana/ → Grafana                         │
+└──────┼─────────────────────────────────────────────┘
+       │
+┌──────┼─────────────────────────────────────────────┐
+│  backend-network (private)                         │
+│      │                                             │
+│  ┌───▼────┐  ┌──────────┐  ┌────────┐  ┌────────┐  │
+│  │Backend │  │PostgreSQL│  │ Redis  │  │LiveKit │  │
+│  │(Django)│  │  :5432   │  │ :6379  │  │ :7880  │  │
+│  └────────┘  └──────────┘  └────────┘  └────────┘  │
+│                                                    │
+│  ┌─────────┐  ┌──────────┐  ┌─────────┐            │
+│  │ Celery  │  │Prometheus│  │ Grafana │            │
+│  │ Worker  │  │  :9090   │  │  :3000  │            │
+│  └─────────┘  └──────────┘  └─────────┘            │
+└────────────────────────────────────────────────────┘
 ```
 
 ### Core Tables and Relationships
 
 ```
 users
-  |-- user_roles --> roles --> role_permissions --> permissions
-  |-- oauth_accounts (provider: GOOGLE | 42)
-  |-- sessions
-  |
-  |-- friendships
-  |     requester_id --> users
-  |     addressee_id --> users
-  |     status: PENDING | ACCEPTED | BLOCKED
-  |
-  |-- auction_items (seller_id)
-  |     +-- auctions (item_id)
-  |           |-- bids (bidder_id, amount)
-  |           |-- auction_watchers (user_id)
-  |           |-- live_streams (streamer_id, stream_key)
-  |           |     +-- stream_viewers
-  |           +-- chat_rooms
-  |                 +-- messages (sender_id, is_deleted)
-  |
-  |-- private_conversations (user_one_id, user_two_id)
-  |     +-- private_messages (sender_id, is_read)
-  |
-  |-- notifications (type, title, content, is_read)
-  |
-  |-- reports (target_type, target_id, reason, status)
-  |     |-- report_actions (admin_id, action, note)
-  |     +-- report_evidence --> files
-  |
-  |-- files (uploader_id, url, mime_type)
-  |-- analytics_events (event_type, metadata, ip_address)
-  +-- api_keys
+  ├── user_roles ──► roles ──► role_permissions ──► permissions
+  ├── oauth_accounts (provider: GOOGLE | 42)
+  ├── sessions
+  │
+  ├── friendships
+  │     requester_id ──► users
+  │     addressee_id ──► users
+  │     status: PENDING | ACCEPTED | BLOCKED
+  │
+  ├── auction_items (seller_id)
+  │     └── auctions (item_id)
+  │           ├── bids (bidder_id, amount)
+  │           ├── auction_watchers (user_id)
+  │           ├── live_streams (streamer_id, stream_key)
+  │           │     └── stream_viewers
+  │           └── chat_rooms
+  │                 └── messages (sender_id, is_deleted)
+  │
+  ├── private_conversations (user_one_id, user_two_id)
+  │     └── private_messages (sender_id, is_read)
+  │
+  ├── notifications (type, title, content, is_read)
+  │
+  ├── reports (target_type, target_id, reason, status)
+  │     ├── report_actions (admin_id, action, note)
+  │     └── report_evidence ──► files
+  │
+  ├── files (uploader_id, url, mime_type)
+  ├── analytics_events (event_type, metadata, ip_address)
+  └── api_keys
 ```
 
 ### Key Models
@@ -549,7 +280,7 @@ users
 |---|---|---|
 | `User` | `email`, `username`, `status`, `is_online`, `last_seen` | Custom auth model, soft-deletable |
 | `AuctionItem` | `title`, `starting_price`, `current_price`, `buy_now_price`, `minimum_increment`, `condition_type` | Owned by seller |
-| `Auction` | `status`, `start_time`, `end_time`, `winner_id` | Lifecycle: DRAFT -> SCHEDULED -> ACTIVE -> LIVE -> ENDED/SOLD |
+| `Auction` | `status`, `start_time`, `end_time`, `winner_id` | Lifecycle: DRAFT → SCHEDULED → ACTIVE → LIVE → ENDED/SOLD |
 | `Bid` | `amount`, `is_buy_now`, `created_at` | `SELECT FOR UPDATE` on parent auction |
 | `Friendship` | `status` | Normalised: always `requester_id < addressee_id` |
 | `ChatRoom` | `auction_id`, `name` | One per auction, auto-created |
@@ -564,16 +295,16 @@ users
 
 | Model | Possible States |
 |---|---|
-| `Auction.status` | `DRAFT` -> `SCHEDULED` -> `ACTIVE` -> `LIVE` -> `ENDED` / `SOLD` / `CANCELLED` |
-| `Friendship.status` | `PENDING` -> `ACCEPTED` \| `BLOCKED` |
-| `Report.status` | `OPEN` -> `UNDER_REVIEW` -> `RESOLVED` / `REJECTED` / `IGNORED` |
+| `Auction.status` | `DRAFT` → `SCHEDULED` → `ACTIVE` → `LIVE` → `ENDED` / `SOLD` / `CANCELLED` |
+| `Friendship.status` | `PENDING` → `ACCEPTED` \| `BLOCKED` |
+| `Report.status` | `OPEN` → `UNDER_REVIEW` → `RESOLVED` / `REJECTED` / `IGNORED` |
 | `User.status` | `ACTIVE` \| `BANNED` \| `SUSPENDED` |
 
 ---
 
 ## Features List
 
-### Authentication & Users *(EPIC 2 — nmatondo)*
+### Authentication & Users *(EPIC 2 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -586,7 +317,7 @@ users
 | Email verification | Account verification link via email |
 | Session management | Token blacklisting, multi-device support |
 
-### RBAC — Roles & Permissions *(EPIC 3 — nmatondo)*
+### RBAC — Roles & Permissions *(EPIC 3 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -595,7 +326,7 @@ users
 | Role assignment | Admin assigns roles per user |
 | Authorisation middleware | `AuthorizationAuditMiddleware` logs every permission check |
 
-### Social System *(EPIC 4 — asebasti)*
+### Social System *(EPIC 4 — António Sebastião)*
 
 | Feature | Description |
 |---|---|
@@ -605,7 +336,7 @@ users
 | Block enforcement | Blocked users cannot send messages or friend requests |
 | Online presence | `is_online` and `last_seen` updated on WebSocket connect/disconnect |
 
-### Auction System *(EPIC 5 — nmatondo)*
+### Auction System *(EPIC 5 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -613,12 +344,12 @@ users
 | Buy Now | Instant purchase at fixed price, closes auction immediately |
 | Auction categories | Seeded categories for filtering and discovery |
 | Image upload | Multiple images per auction — binary upload or external URL |
-| Auto-activation | Celery beat activates `SCHEDULED` -> `ACTIVE` every minute |
+| Auto-activation | Celery beat activates `SCHEDULED` → `ACTIVE` every minute |
 | Auto-close | Celery beat closes expired auctions and determines winner |
 | Watchlist | Favourite/unwatch auctions |
 | Auction filters | Filter by status, category, price range, seller |
 
-### Real-time Bidding *(EPIC 6 — nmatondo)*
+### Real-time Bidding *(EPIC 6 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -629,7 +360,7 @@ users
 | Outbid notification | Previous highest bidder receives instant notification |
 | Bid history | Paginated bid history, newest first |
 
-### Real-time Chat *(EPIC 7 — asebasti)*
+### Real-time Chat *(EPIC 7 — António Sebastião)*
 
 | Feature | Description |
 |---|---|
@@ -642,7 +373,7 @@ users
 | Message deletion | Hard delete for private messages; soft delete for room messages |
 | Block integration | `is_blocked` checked before delivering any message |
 
-### Live Streaming *(EPIC 8 — nmatondo)*
+### Live Streaming *(EPIC 8 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -653,7 +384,7 @@ users
 | Viewer count | Real-time viewer tracking |
 | LiveKit webhook | Backend processes room events from LiveKit server |
 
-### Notifications *(BE-004 — nmatondo)*
+### Notifications *(BE-004 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -663,7 +394,7 @@ users
 | Celery tasks | Async notification dispatch for high-volume events |
 | Types | `NEW_BID`, `OUTBID`, `MESSAGE`, `FRIEND_REQUEST`, `STREAM_STARTED`, `AUCTION_ENDED` |
 
-### Reports & Moderation *(BE-003 — asebasti)*
+### Reports & Moderation *(BE-003 — António Sebastião)*
 
 | Feature | Description |
 |---|---|
@@ -678,7 +409,7 @@ users
 | Action: ESCALATE | Flags for senior review |
 | Audit trail | Every admin action recorded in `ReportAction` |
 
-### Analytics *(BE-007 — nmatondo)*
+### Analytics *(BE-007 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
@@ -686,7 +417,7 @@ users
 | Admin statistics | `GET /api/analytics/stats/` — aggregated metrics for admins |
 | Event types | Page views, bid events, auction interactions, system logs |
 
-### Social-Chat Integration *(BE-005 — nmatondo, asebasti)*
+### Social-Chat Integration *(BE-005 — António Sebastião)*
 
 | Feature | Description |
 |---|---|
@@ -695,185 +426,271 @@ users
 | Filtered room history | `get_room_messages(viewer=user)` excludes blocked senders |
 | Bug fix | Fixed typo `adrressee` in `is_blocked` selector |
 
-### Error Handling *(BE-008 — asebasti)*
+### Error Handling *(BE-008 — António Sebastião)*
 
 | Feature | Description |
 |---|---|
 | Standardised error format | All errors return `{"success": false, "errors": {...}}` |
-| Malformed JSON -> 400 | `ParseError` and `json.JSONDecodeError` caught — no more 500 |
+| Malformed JSON → 400 | `ParseError` and `json.JSONDecodeError` caught — no more 500 |
 | Rate limit message | 429 includes `wait` time in seconds |
 | Server errors | 500 logs full traceback server-side, returns clean message to client |
 | No stack traces | Zero raw Python tracebacks exposed to any client |
 
-### Infrastructure *(DO-001 to DO-007 — nmatondo)*
+### Infrastructure *(DO-001 to DO-007 — Emanuel Malungo)*
 
 | Feature | Description |
 |---|---|
-| Docker Compose | 20-container orchestration with isolated networks |
+| 9-container Docker Compose | Backend, Frontend, PostgreSQL, Redis, Nginx, Celery, LiveKit, Prometheus, Grafana |
 | Isolated networks | `frontend-network` (public) and `backend-network` (private) |
-| Nginx reverse proxy | Routes `/`, `/api/`, `/ws/`, `/grafana/` |
-| SSL/TLS | Self-signed certificates via Docker secrets for local HTTPS |
+| Nginx reverse proxy | Routes `/`, `/api/`, `/ws/`, `/adminer/`, `/grafana/` |
+| SSL/TLS | Self-signed certificates via mkcert for local HTTPS |
 | WebSocket proxy | `Upgrade` and `Connection` headers forwarded correctly |
-| Prometheus | Scrapes Django (`django-prometheus`), exporters, LiveKit |
+| Prometheus | Scrapes Django (`django-prometheus`), Node Exporter, LiveKit |
 | Grafana | Auto-provisioned dashboards with Prometheus data source |
-| ELK Stack | Elasticsearch + Logstash + Kibana for centralized logging |
-| Alertmanager | Alert routing with email and webhook notifications |
 | Adminer | PostgreSQL web UI on internal network only |
-| Portainer | Docker container management UI |
-| Docker Secrets | Secure credential management for all services |
-| Persistent volumes | `postgres_data`, `redis_data`, `grafana_data`, `prometheus_data`, `elasticsearch_data`, and more |
+| Persistent volumes | `postgres_data`, `redis_data`, `grafana_data`, `prometheus_data`, `media_volume`, `static_volume` |
 
-### Frontend *(FE-001 to FE-012 — emalungo, jorcarva, ferda-si)*
+### Frontend *(FE-001 to FE-012 — [Teammate Name])*
 
-| Feature | Description | Owner(s) |
-|---|---|---|
-| Base architecture | Vite + React + TypeScript + TailwindCSS + shadcn/ui | emalungo |
-| Routing + protected routes | `ProtectedRoute` with role-based access control | emalungo |
-| Login / Register | Email + password with JWT storage and interceptors | emalungo |
-| OAuth | Google and 42 login with callback handling | emalungo |
-| Password reset | Forgot password + reset via email token | emalungo, ferda-si |
-| User profile | Edit profile, change password, upload avatar | emalungo, ferda-si |
-| Auction catalogue | Grid/list view with category filters and search | emalungo |
-| Create auction wizard | Multi-step form with image upload | emalungo |
-| Auction detail | Live timer, bid history, bid input, buy-now button | emalungo |
-| Private chat | DM hub with conversation list, unread count, real-time delivery | emalungo |
-| Auction room chat | Sidebar chat during live auction with WebSocket | emalungo |
-| Livestream | LiveKit video player and broadcaster integration | jorcarva |
-| Social system | Friend requests, blocking, online presence UI | emalungo |
-| Backoffice | Admin dashboard — users, auctions, roles, permissions, reports, domains | emalungo, jorcarva |
-| Domain management | Backoffice domain configuration | emalungo |
-| Internationalisation | EN, PT, AR via i18next with browser language detection | emalungo |
-| RTL support | Arabic RTL layout with mirrored icons and alignment | emalungo |
-| Custom design system | 13+ reusable components (Button, Input, Dialog, Modal, Avatar, etc.) | emalungo |
-| Advanced search & filters | Text search, category/status/price/date filters, sorting, pagination | emalungo |
-| File upload | Avatar and auction image upload via Cloudinary with progress indicator | emalungo, jorcarva |
+| Feature | Description |
+|---|---|
+| Routing + protected routes | `ProtectedRoute` with role-based access control |
+| Login / Register | Email + password with JWT storage and interceptors |
+| OAuth | Google and 42 login with callback handling |
+| Password reset | Forgot password + reset via email token |
+| User profile | Edit profile, change password, upload avatar |
+| Auction catalogue | Grid/list view with category filters and search |
+| Create auction wizard | 3-step form with image upload (Cloudinary) |
+| Auction detail | Live timer, bid history, bid input, buy-now button |
+| Private chat | DM hub with conversation list, unread count, real-time delivery |
+| Auction room chat | Sidebar chat during live auction with WebSocket |
+| Backoffice | Admin dashboard — users, auctions, roles, permissions, reports, domains |
+| Internationalisation | EN, PT, AR via i18next with browser language detection |
+| Privacy Policy | Legal page accessible from footer |
+| Terms of Service | Legal page accessible from footer |
 
 ---
 
 ## Modules
 
-| # | Module | Category | Type | Points | Owner(s) |
+| # | Module | Type | Points | Owner | Implementation |
 |---|---|---|---|---|---|
-| 1 | **Framework for Frontend and Backend** | Web | Major | 2 | nmatondo, emalungo |
-| 2 | **Real-time Features via WebSockets** | Web | Major | 2 | nmatondo, asebasti |
-| 3 | **User Interaction (Chat, Profile, Friends)** | Web | Major | 2 | asebasti, emalungo, jorcarva |
-| 4 | **Public API (5+ endpoints)** | Web | Major | 2 | nmatondo, asebasti |
-| 5 | **Standard User Management & Authentication** | User Management | Major | 2 | nmatondo |
-| 6 | **Advanced Permissions (RBAC)** | User Management | Major | 2 | nmatondo |
-| 7 | **Live Video Streaming** | Custom | Major | 2 | nmatondo, jorcarva |
-| 8 | **Monitoring with Prometheus and Grafana** | DevOps | Major | 2 | nmatondo |
-| 9 | **ELK Stack (Elasticsearch, Logstash, Kibana)** | DevOps | Major | 2 | nmatondo |
-| 10 | **ORM** | Web | Minor | 1 | nmatondo, asebasti |
-| 11 | **Notification System** | Web | Minor | 1 | nmatondo, emalungo |
-| 12 | **Remote Authentication (OAuth 2.0)** | User Management | Minor | 1 | nmatondo, emalungo |
-| 13 | **Multiple Languages (i18n)** | Accessibility & i18n | Minor | 1 | emalungo, jorcarva, ferda-si |
-| 14 | **Custom Design System** | Web | Minor | 1 | emalungo, jorcarva, ferda-si |
-| 15 | **Advanced Search (Filters, Sorting, Pagination)** | Web | Minor | 1 | emalungo, nmatondo |
-| 16 | **RTL Support** | Accessibility & i18n | Secondary | 1 | emalungo |
-| 17 | **File Upload and Management** | Web | Minor | 1 | emalungo, jorcarva |
+| 1 | **Backend Framework** | Major | 2 | Emanuel Malungo | Django 5 + Django REST Framework — full REST API, ORM, admin |
+| 2 | **Standard User Management & Authentication** | Major | 2 | Emanuel Malungo | Custom `User` model, JWT with rotation, profile, online status, session history |
+| 3 | **Remote Authentication (OAuth 2.0)** | Major | 2 | Emanuel Malungo | Google OAuth and 42 Intranet OAuth via `django-allauth` |
+| 4 | **Frontend Framework** | Major | 2 | [Teammate] | React 18 + TypeScript + Vite — SPA with protected routes |
+| 5 | **Database for Backend** | Minor | 1 | Emanuel Malungo | PostgreSQL 16 — chosen for `SELECT FOR UPDATE`, ACID, and Django ORM compatibility |
+| 6 | **Live Chat** | Major | 2 | António Sebastião | Django Channels WebSocket — private chat and auction room chat with typing indicators and read receipts |
+| 7 | **Real-time Multiplayer** | Major | 2 | Emanuel Malungo / António Sebastião | Multi-user live bidding and chat via WebSocket with Redis channel layers |
+| 8 | **Live Video Streaming** | Major | 2 | Emanuel Malungo | LiveKit server (WebRTC/RTMP) — create, start, end streams; token auth; viewer tracking |
+| 9 | **Monitoring System** | Minor | 1 | Emanuel Malungo | Prometheus scraping + Grafana dashboards — API traffic, DB health, server metrics |
+| 10 | **Internationalisation (i18n)** | Minor | 1 | [Teammate] | i18next — EN, PT, AR with browser language detection |
+| 11 | **GDPR — User Privacy Controls** *(custom)* | Minor | 1 | António Sebastião / Emanuel Malungo | User blocking, content deletion on moderation, data scoping per user role |
+| 12 | **Advanced 3D Techniques** *(custom — Auction System)* | Major | 2 | Emanuel Malungo | Full auction lifecycle replacing the traditional "game": scheduling, bidding, concurrency, winner determination, Celery automation |
 
-**Total: 9 Major x 2 + 7 Minor x 1 + 1 Secondary x 1 = 26 points**
+**Total: 8 Major × 2 + 4 Minor × 1 = 20 points**
 
-> The minimum required is 14 points. We exceeded this target to provide a safety margin in case some modules are not validated during evaluation.
+> The minimum required is 14 points. The custom modules replace traditional game mechanics with auction-specific features that satisfy the same multiplayer real-time interaction requirements — live bidding between multiple simultaneous users with conflict resolution and event broadcasting.
 
-### Module Justifications
+---
 
-**1. Framework for Frontend and Backend (Major, 2 pts)** — Django 5 with Django REST Framework on the backend; React 19 with TypeScript on the frontend. Both are full-featured frameworks with established ecosystems, conventions, and tooling. This satisfies the requirement of using a framework on both sides of the application.
+## Instructions
 
-**2. Real-time Features via WebSockets (Major, 2 pts)** — Django Channels with Redis channel layer provides WebSocket support for real-time bidding, chat, and notifications. The `BidConsumer`, `AuctionChatConsumer`, `PrivateChatConsumer`, and `NotificationConsumer` handle concurrent connections with proper group broadcasting and disconnect handling.
+### Prerequisites
 
-**3. User Interaction (Major, 2 pts)** — The platform provides private and auction room chat (send/receive messages), user profiles (avatar, bio, online status, last seen), and a social system (friend requests, friend list, blocking). All three required sub-features — chat, profile, and friends — are fully implemented.
+| Tool | Version | Install |
+|---|---|---|
+| Docker | 24+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
+| Docker Compose | V2+ | Included with Docker Desktop |
+| Git | any | `apt install git` / `brew install git` |
 
-**4. Public API (Major, 2 pts)** — The backend exposes a comprehensive REST API with OpenAPI 3.0 documentation via drf-spectacular. Endpoints include authentication, users, roles, permissions, auctions, bids, chat, social, reports, notifications, analytics, and streams — well over the 5-endpoint minimum. API docs are available at `/api/docs/` (Swagger) and `/api/redoc/` (Redoc).
+> No Python, Node.js, or database installation required — everything runs inside Docker.
 
-**5. Standard User Management (Major, 2 pts)** — Custom `User` model with email-based authentication, JWT access/refresh tokens with rotation and blacklisting, profile management (avatar, bio, online status), password reset flow, email verification, and session management.
+---
 
-**6. Advanced Permissions / RBAC (Major, 2 pts)** — Four-tier role system (VISITOR, USER, MONITOR, SUPER_ADMIN) with granular permission strings. Roles are assignable per user, and the `AuthorizationAuditMiddleware` logs every permission check. The backoffice admin panel allows full CRUD on users, roles, and permissions.
+### Option A — One-Command Deploy (Recommended)
 
-**7. Live Video Streaming (Major, 2 pts)** — Custom module using LiveKit for WebRTC/RTMP live streaming. Sellers can create streams linked to auctions, broadcast live video, and buyers can watch in real time with viewer count tracking. The backend issues signed JWT tokens per viewer/broadcaster and processes LiveKit webhook events. This is a custom module because no standard subject module covers live video streaming, and it required significant technical complexity: token-based auth, WebRTC peer connections, and real-time viewer tracking.
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/BidLive.git
+cd BidLive
 
-**8. Monitoring with Prometheus and Grafana (Major, 2 pts)** — Prometheus scrapes metrics from Django (`django-prometheus`), Nginx, PostgreSQL, Redis, Celery, and LiveKit via dedicated exporters. Grafana provides auto-provisioned dashboards for API traffic, database health, server metrics, and Celery task performance.
+# 2. Copy and configure environment variables
+cp .env.example .env
+# Edit .env — see configuration section below
 
-**9. ELK Stack (Major, 2 pts)** — Elasticsearch, Logstash, and Kibana provide centralized log management. Application containers use the GELF logging driver to send structured logs to Logstash, which transforms and indexes them into Elasticsearch. Kibana provides exploration, search, and visualization dashboards for operational logs.
+# 3. Start all 9 containers
+docker compose up --build
 
-**10. ORM (Minor, 1 pt)** — Django ORM with advanced features: `select_for_update()` for auction concurrency, `select_related` / `prefetch_related` for query optimization, `Q()` objects for complex queries, `annotate` / `Window` for analytics, and custom managers for domain-specific queries.
+# 4. (First run only) Run migrations and seed demo data
+docker compose exec backend uv run python manage.py migrate
+docker compose exec backend make seed
+```
 
-**11. Notification System (Minor, 1 pt)** — Complete notification system with real-time WebSocket delivery and REST API for history. Django signals auto-generate notifications on key events (new bid, outbid, message, friend request, stream started, auction ended). Celery tasks handle async dispatch for high-volume events.
+The application will be available at:
 
-**12. Remote Authentication / OAuth 2.0 (Minor, 1 pt)** — Google OAuth and 42 Intranet OAuth via `django-allauth`. The frontend handles OAuth callbacks and integrates with the JWT auth flow. Users can link OAuth accounts or use them as primary login methods.
+| URL | Service |
+|---|---|
+| `https://localhost` | Frontend |
+| `https://localhost/api/docs/` | Swagger UI |
+| `https://localhost/api/redoc/` | Redoc |
+| `https://localhost/adminer/` | Database UI |
+| `https://localhost/grafana/` | Monitoring |
 
-**13. Multiple Languages / i18n (Minor, 1 pt)** — i18next with English, Portuguese, and Arabic translations. The language switcher is accessible from the navigation bar and footer. Browser language detection is enabled via `i18next-browser-languagedetector`. All user-visible text is translatable.
+---
 
-**14. Custom Design System (Minor, 1 pt)** — The frontend includes 13+ reusable components built on shadcn/ui and Radix UI: `Button`, `Input`, `Dialog`, `Popover`, `Select`, `Avatar`, `Modal`, `SideDrawer`, `TableSection`, `StatsGrid`, `ConfirmModal`, `ReportModal`, and `LanguageSwitcher`. All components use a consistent design token system with TailwindCSS, supporting light/dark themes. Components are owned in the codebase — no external library updates can break the UI.
+### Environment Variables
 
-**15. Advanced Search / Filters / Sorting / Pagination (Minor, 1 pt)** — The auction catalogue page (`Auctions.tsx`) provides a full-featured search and filter system: text search, category filter, status filter (Live/Scheduled/Ended), price range (min/max), date range (starts after/ends before), featured filter, and sorting (recent, price ascending, price descending, ending soon). Results are paginated with page navigation. The backoffice admin pages (Users, Auctions, Domains, Reports) each include search and status filters with server-side pagination via `StandardResultsSetPagination` (page_size=20, max=100).
+Create a `.env` file at the project root. The `.env.example` file contains all required keys. Minimum required values for local development:
 
-**16. RTL Support (Secondary, 1 pt)** — Arabic is supported as a right-to-left language. The i18n system sets `document.documentElement.dir = 'rtl'` when Arabic is selected. Tailwind's `rtl:` variant is used throughout the UI: icons mirror with `rtl:-scale-x-100` and `rtl:rotate-180`, layout alignment switches with `rtl:items-start`, and the language switcher exposes the direction per locale. The layout mirrors cleanly between LTR and RTL modes.
+```env
+# Application
+SECRET_KEY=change-me-to-a-long-random-string
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=https://localhost
 
-**17. File Upload and Management (Minor, 1 pt)** — Users can upload avatars and auction images via Cloudinary integration (`uploadImageToCloudinary`). The upload flow supports file selection, progress indication, and returns a hosted URL stored in the backend. Auction creation supports multiple images via binary upload or external URL. Stream thumbnails support file upload, external URL, or referencing an existing `File` record. Server-side validation enforces file type and size constraints.
+# Database
+POSTGRES_DB=bidlive
+POSTGRES_USER=bidlive
+POSTGRES_PASSWORD=bidlive
+DATABASE_URL=postgresql://bidlive:bidlive@postgres:5432/bidlive
+
+# Redis
+REDIS_URL=redis://redis:6379/0
+
+# JWT
+JWT_ACCESS_MINUTES=15
+JWT_REFRESH_DAYS=7
+
+# OAuth — Google (optional)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=https://localhost/auth/google/callback
+
+# OAuth — 42 Intranet (optional)
+FORTY_TWO_CLIENT_ID=
+FORTY_TWO_CLIENT_SECRET=
+FORTY_TWO_REDIRECT_URI=https://localhost/auth/42/callback
+
+# LiveKit — Streaming (required for EPIC 8)
+LIVEKIT_API_KEY=devkey
+LIVEKIT_API_SECRET=devsecret
+LIVEKIT_URL=wss://localhost/livekit
+
+# Frontend
+VITE_API_URL=https://localhost
+VITE_WS_URL=wss://localhost
+```
+
+> ⚠️ **Never commit `.env` to Git.** The `.gitignore` already excludes it. Use `.env.example` for documentation.
+
+---
+
+### Option B — Local Development (without Docker)
+
+For active backend development with hot reload:
+
+```bash
+cd backend
+
+# Install Python dependencies
+uv venv && uv sync
+
+# Start infrastructure containers only
+make container  # starts Redis, PostgreSQL, LiveKit via Docker
+
+# Configure environment
+cp .env.example .env
+# Set DATABASE_URL and REDIS_URL to point to localhost
+
+# Run migrations and seed
+make migrate
+make seed
+
+# Start everything (worker + beat + server)
+make dev
+
+# Or run individually
+make runserver     # Django server
+make worker        # Celery worker
+make beat          # Celery beat scheduler
+```
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+# Set VITE_API_URL=http://localhost:8000
+npm run dev
+```
+
+---
+
+### Useful Commands
+
+```bash
+# Tear down all containers
+docker compose down
+
+# Remove containers + volumes (full reset)
+docker compose down -v
+
+# View logs
+docker compose logs -f backend
+docker compose logs -f celery
+
+# Run tests
+docker compose exec backend uv run pytest tests -v
+
+# Access Django shell
+docker compose exec backend uv run python manage.py shell
+
+# Clear and reseed demo data
+docker compose exec backend make seed-clear
+docker compose exec backend make seed
+```
+
+---
+
+### Demo Accounts
+
+After seeding, these accounts are available (password: `demo1234`):
+
+| Email | Role | Can do |
+|---|---|---|
+| `admin@bidlive.dev` | SUPER_ADMIN | Everything — full platform access |
+| `seller@bidlive.dev` | USER | Create and manage auctions |
+| `manager@bidlive.dev` | MONITOR | Moderation panel, review reports |
+| `buyer1@bidlive.dev` | USER | Place bids, chat |
+| `buyer2@bidlive.dev` | USER | Place bids, chat |
+| `banned@bidlive.dev` | USER | Banned account — for testing |
+
+---
+
+### Running Tests
+
+```bash
+# All tests
+uv run pytest tests -v
+
+# Specific module
+uv run pytest tests/test_social_api.py -v      # EPIC 4 — Social
+uv run pytest tests/test_chat_api.py -v        # EPIC 7 — Chat
+uv run pytest tests/test_reports_api.py -v     # BE-003 — Reports
+
+# With server output (useful for debugging 500s)
+uv run pytest tests -x -vv -s
+
+# Coverage report
+uv run pytest tests --cov=apps --cov-report=term-missing
+```
 
 ---
 
 ## Individual Contributions
 
-### nmatondo
-
-**Role:** Tech Leader / Backend Developer, DevOps
-
-**Issues owned:** EPIC 1, 2, 3, 5, 6, 8, BE-004, BE-007, DO-001 to DO-007
-
-**Backend Architecture and Core Systems**
-
-Designed and implemented the backend architecture following the HackSoft Django Styleguide (Service + Selector pattern). Built the domain-driven app structure under `apps/` with clear separation between `views.py` (request handling), `services.py` (business logic), `selectors.py` (reusable queries), and `serializers.py` (validation/representation).
-
-**EPIC 1 — Infrastructure Setup**
-
-Set up the initial Django project with DRF, JWT auth, CORS, OpenAPI documentation, and the modular app structure. Configured the development and production settings split, ASGI entrypoint for WebSocket support, and Celery integration.
-
-**EPIC 2 — User System**
-
-Built the custom `User` model with email-based auth, JWT token rotation with blacklisting, password reset flow, email verification, and profile management. Integrated `django-allauth` for OAuth 2.0 with Google and 42 Intranet.
-
-**EPIC 3 — Roles & Permissions (RBAC)**
-
-Implemented the four-tier role system (VISITOR, USER, MONITOR, SUPER_ADMIN) with granular permission strings. Built the `AuthorizationAuditMiddleware` that logs every permission check, and the admin endpoints for role assignment.
-
-**EPIC 5 — Auction System**
-
-Built the complete auction lifecycle: `AuctionItem` creation with image upload (binary or URL), `Auction` scheduling with Celery beat auto-activation and auto-close, `Bid` placement with `SELECT FOR UPDATE` concurrency control, Buy Now functionality, watchlist, and category filtering.
-
-**EPIC 6 — Real-time Bidding**
-
-Implemented WebSocket-based real-time bidding via `BidConsumer`. Added anti-spam rate limiting (5 bids per 10 seconds with 30-second block), anti-self-bid validation, outbid notifications, and bid history pagination.
-
-**EPIC 8 — Live Streaming**
-
-Integrated LiveKit for WebRTC/RTMP live streaming. Built the `LiveStream` model with token-based auth (signed JWT per viewer/broadcaster), stream key management, viewer count tracking, and LiveKit webhook processing.
-
-**BE-004 — Notifications**
-
-Built the notification system with Django signals for auto-generation on key events, `NotificationConsumer` for real-time WebSocket delivery, REST API for history, and Celery tasks for async dispatch.
-
-**BE-007 — Analytics**
-
-Built the analytics event ingestion endpoint (`POST /api/analytics/events/`) with async write via Celery, and the admin statistics endpoint for aggregated metrics.
-
-**DO-001 to DO-007 — DevOps**
-
-Designed and implemented the entire Docker Compose infrastructure: 20-container orchestration with isolated networks (frontend/public and backend/private), Nginx reverse proxy with SSL termination and WebSocket proxy, Prometheus + Grafana monitoring with dedicated exporters, ELK stack (Elasticsearch, Logstash, Kibana) for centralized logging, Alertmanager for alert routing, Docker secrets for credential management, and persistent volumes for stateful services.
-
-**Key challenges solved:**
-
-- Designed `SELECT FOR UPDATE` concurrency control for auction bidding to prevent race conditions
-- Diagnosed and fixed WebSocket 403 rejections caused by missing `try/except` in `connect()`
-- Resolved `CELERY_BEAT_SCHEDULE` double-definition overwrite that silently broke scheduled tasks
-- Fixed `PrimaryKeyRelatedField` vs `read_only_fields` serialisation inconsistency
-
----
-
-### asebasti
-
-**Role:** Product Owner / Backend Developer
+### António Sebastião
 
 **Issues owned:** EPIC 4, EPIC 7, BE-003, BE-005, BE-008
 
@@ -899,99 +716,78 @@ Rewrote `common/exceptions.py` to guarantee consistent `{"success": false, "erro
 
 **Key challenges solved:**
 
-- WebSocket 403 rejections — the `connect()` method had no `try/except`, causing silent failures. Added structured logging throughout the middleware and consumer that revealed the root cause within seconds.
-- DRF `ValidationError` not caught — `except Exception` doesn't catch DRF exceptions before the global handler intercepts them. Fixed by explicitly catching `(ValidationError, PermissionDenied)` in every view method.
-- `exc.detail` format inconsistency — DRF's `exc.detail` can be a string, `ErrorDetail`, list, or dict. Built a `_normalize_detail()` helper that always produces a clean string.
+- *WebSocket 403 rejections* — the `connect()` method had no `try/except`, causing silent failures. Added structured logging throughout the middleware and consumer that revealed the root cause (missing test user) within seconds.
+- *DRF `ValidationError` not caught* — `except Exception` doesn't catch DRF exceptions before the global handler intercepts them. Fixed by explicitly catching `(ValidationError, PermissionDenied)` in every view method.
+- *`exc.detail` format inconsistency* — DRF's `exc.detail` can be a string, `ErrorDetail`, list, or dict. Built a `_normalize_detail()` helper that always produces a clean string.
 
 ---
 
-### emalungo
+### Emanuel Malungo
 
-**Role:** Project Manager / Frontend Developer
+**Issues owned:** EPIC 1, 2, 3, 5, 6, 8, BE-004, BE-007, DO-001 to DO-007
 
-**Issues owned:** FE-001 to FE-009, FE-011, FE-012 (co-owner)
-
-**Frontend Architecture (FE-001, FE-002)**
-
-Set up the React 19 + TypeScript + Vite project with TailwindCSS 4, shadcn/ui component library, and the project's folder structure. Implemented client-side routing with React Router 7, protected routes with role-based access control, and the base layout with navigation, sidebar, and footer.
-
-**Authentication UI (FE-003, FE-004)**
-
-Built the login and registration pages with email + password, JWT token storage in localStorage, and Axios interceptors for automatic token refresh. Implemented OAuth callback handling for Google and 42 Intranet login flows.
-
-**Password Recovery and Profile (FE-005)**
-
-Built the forgot password flow (email submission, token-based reset), password change endpoint, and user profile page with avatar upload, bio editing, and online status display.
-
-**Auction Listing and Creation (FE-006)**
-
-Built the auction catalogue with grid/list view, category filters, search, and pagination. Implemented the multi-step auction creation wizard with image upload (binary or URL), price configuration, scheduling, and condition selection.
-
-**Auction Detail and Bidding (FE-007)**
-
-Built the auction detail page with live countdown timer, bid history, bid input with validation, buy-now button, and watcher count. Integrated WebSocket connection for real-time bid updates.
-
-**Chat System (FE-009)**
-
-Built the private messaging hub with conversation list, unread counts, and real-time message delivery via WebSocket. Implemented the auction room chat sidebar with WebSocket integration and typing indicators.
-
-**Social System (FE-010)**
-
-Built the friend request interface, friend list with online status indicators, and blocking/unblocking functionality.
-
-**Domain Management (FE-011)**
-
-Built the backoffice domain configuration page for managing auction categories and platform settings.
-
-**Admin Dashboard (FE-012, co-owner)**
-
-Co-built the backoffice admin dashboard with user management (list, search, ban/unban), auction management, role and permission assignment, and report review panels with role-based access control.
+*(Fill in with actual contribution details)*
 
 ---
 
-### jorcarva
+### [Teammate Name]
 
-**Role:** Frontend Developer
+**Issues owned:** FE-001 to FE-012
 
-**Issues owned:** FE-008, FE-10 FE-012 (co-owner)
-
-**LiveKit Livestream Integration (FE-008)**
-
-Built the livestream UI for both broadcasters and viewers. Implemented the LiveKit React component integration for real-time video streaming within auction pages, including stream creation, start/stop controls, viewer count display, and token-based authentication with the backend.
-
-**Social System (FE-010)**
-
-Contributed to the social features, implementing user discovery, friend request management, and user blocking functionality through the platform's social APIs.
-
-**Admin Dashboard (FE-012, co-owner)**
-
-Co-built the backoffice admin dashboard, implementing the reports review panel and contributing to the user management interface with role-based access control.
+*(Fill in with actual contribution details)*
 
 ---
 
-### ferda-si
+## Resources
 
-**Role:** Frontend Developer
+### Official Documentation
 
-**Issues owned:** FE-006, FE-005 (co-owner)
+- [Django Documentation](https://docs.djangoproject.com/) — framework reference
+- [Django REST Framework](https://www.django-rest-framework.org/) — API layer
+- [Django Channels](https://channels.readthedocs.io/) — WebSocket and ASGI
+- [Celery Documentation](https://docs.celeryq.dev/) — task queue
+- [Redis Documentation](https://redis.io/docs/) — data structures and pub/sub
+- [LiveKit Documentation](https://docs.livekit.io/) — WebRTC streaming
+- [drf-spectacular](https://drf-spectacular.readthedocs.io/) — OpenAPI schema
+- [SimpleJWT](https://django-rest-framework-simplejwt.readthedocs.io/) — JWT auth
+- [React Documentation](https://react.dev/) — UI framework
+- [TanStack Query](https://tanstack.com/query/latest) — server state
+- [i18next](https://www.i18next.com/) — internationalisation
+- [Prometheus](https://prometheus.io/docs/) — metrics
+- [Grafana](https://grafana.com/docs/) — dashboards
 
-**Password Recovery and Profile (FE-005, co-owner)**
+### Architecture References
 
-Contributed to the password recovery flow and user profile implementation, working on form validation, API integration, and UI components for the forgot password and profile editing screens.
+- [HackSoft Django Styleguide](https://github.com/HackSoftware/Django-Styleguide) — Service + Selector pattern used throughout the backend
+- [Django Channels Tutorial](https://channels.readthedocs.io/en/stable/tutorial/index.html) — WebSocket consumer lifecycle
+- [PostgreSQL SELECT FOR UPDATE](https://www.postgresql.org/docs/current/sql-select.html) — concurrency control for bidding
+- [Conventional Commits](https://www.conventionalcommits.org/) — commit message format used across the project
 
-**Auction Listing and Creation Screens (FE-006)**
+### AI Usage
 
-Contributed to the auction listing and creation flows, working on auction browsing, category filtering, pagination, API integration, multi-step auction creation, and image uploads.
+**Claude (Anthropic — claude-sonnet-4-6)** was used as a technical assistant throughout the backend development of this project. The following table specifies exactly where and how:
+
+| Area | Tasks where AI assisted |
+|---|---|
+| **Architecture** | Evaluated Django vs FastAPI trade-offs; explained Service + Selector pattern; discussed `select_for_update` vs optimistic locking for auction concurrency |
+| **EPIC 4 — Social** | Explained `select_related` vs `prefetch_related` |
+| **EPIC 7 — Chat** | Explained `sync_to_async`, channel layer group messaging, the two-step dispatch pattern (`group_send` → handler method);
+| **BE-003 — Reports** | Explained soft delete vs hard delete trade-offs |
+| **BE-005 — Block integration** | Identified the `adrressee` typo bug; generated block checks at all three enforcement points |
+| **BE-008 — Error handling** | Explained why `except Exception` doesn't catch DRF exceptions |
+| **Debugging** | Diagnosed WebSocket 403 rejections (no `try/except` in `connect()`); `int(pk)` string casting bugs; `CELERY_BEAT_SCHEDULE` double-definition overwrite; `PrimaryKeyRelatedField` vs `read_only_fields` serialisation difference |
+| **Git workflow** | Suggested dependency-ordered commit sequences; Conventional Commits format |
+
+Every AI-generated piece of code was reviewed, understood, debugged where necessary, and integrated manually. All architecture decisions, debugging approaches, and final implementation choices were made by the team. AI accelerated implementation but did not replace engineering judgement.
 
 ---
 
 ## Known Limitations
 
-- **Privacy Policy and Terms of Service pages** — The 42 subject requires these pages to be accessible from the application. These pages are not yet implemented in the frontend. They must be added before evaluation.
 - The `DELETE_CONTENT` moderation action supports `MESSAGE` and `PRIVATE_MESSAGE`. Auction and bid deletion requires additional service logic not yet implemented.
-- The frontend does not implement automatic WebSocket reconnection on connection drop.
-- Self-signed SSL certificates will trigger browser warnings on first visit — click "Advanced -> Proceed" to continue.
-- LiveKit requires open UDP ports (5000-5100) for WebRTC peer connections. Some corporate firewalls block these ranges.
+- The frontend does not yet implement automatic WebSocket reconnection on connection drop.
+- Self-signed SSL certificates will trigger browser warnings on first visit — click "Advanced → Proceed" to continue.
+- LiveKit requires open UDP ports (5000–5100) for WebRTC peer connections. Some corporate firewalls block these ranges.
 
 ---
 
