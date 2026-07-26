@@ -991,8 +991,6 @@ Contributed to the auction listing and creation flows, working on auction browsi
 
 ## Known Limitations
 
-- **Privacy Policy and Terms of Service pages** — The 42 subject requires these pages to be accessible from the application. These pages are not yet implemented in the frontend. They must be added before evaluation.
-- The `DELETE_CONTENT` moderation action supports `MESSAGE` and `PRIVATE_MESSAGE`. Auction and bid deletion requires additional service logic not yet implemented.
 - The frontend does not implement automatic WebSocket reconnection on connection drop.
 - Self-signed SSL certificates will trigger browser warnings on first visit — click "Advanced -> Proceed" to continue.
 - LiveKit requires open UDP ports (5000-5100) for WebRTC peer connections. Some corporate firewalls block these ranges.
