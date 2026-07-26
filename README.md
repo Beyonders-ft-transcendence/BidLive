@@ -298,20 +298,21 @@ uv run pytest tests --cov=apps --cov-report=term-missing
 
 ### AI Usage
 
-**Claude (Anthropic)** was used as a technical assistant throughout the backend development of this project:
+Types of AI assistance used
 
-| Area | Tasks where AI assisted |
-|---|---|
-| **Architecture** | Evaluated Django vs FastAPI trade-offs; explained Service + Selector pattern; discussed `select_for_update` vs optimistic locking for auction concurrency |
-| **EPIC 4 — Social** | Explained `select_related` vs `prefetch_related` |
-| **EPIC 7 — Chat** | Explained `sync_to_async`, channel layer group messaging, the two-step dispatch pattern |
-| **BE-003 — Reports** | Explained soft delete vs hard delete trade-offs |
-| **BE-005 — Block integration** | Identified the `adrressee` typo bug; generated block checks at all three enforcement points |
-| **BE-008 — Error handling** | Explained why `except Exception` doesn't catch DRF exceptions |
-| **Debugging** | Diagnosed WebSocket 403 rejections; `int(pk)` string casting bugs; `CELERY_BEAT_SCHEDULE` double-definition overwrite; `PrimaryKeyRelatedField` vs `read_only_fields` serialisation difference |
-| **Git workflow** | Suggested dependency-ordered commit sequences; Conventional Commits format |
+| Type of AI assistance |
+|---|
+| Software architecture and technical design discussions, including evaluation of implementation approaches, design patterns, system structure, and technical trade-offs |
+| Frontend and backend development support, including implementation guidance, framework usage, API integration, data handling, and application structure |
+| Debugging and troubleshooting of application behaviour, runtime errors, integration issues, configuration problems, and unexpected system behaviour |
+| Code review and implementation guidance, including identifying potential bugs, improving existing code, refactoring, and suggesting implementation approaches |
+| Real-time and asynchronous development support, including WebSockets, messaging, asynchronous processing, and background tasks |
+| Database and data management guidance, including query optimisation, data relationships, persistence strategies, and concurrency considerations |
+| Error handling, validation, and API behaviour, including exception handling and data serialisation |
+| Documentation support, including explaining technical concepts, documenting implementation details, and improving project and technical documentation |
+| Development workflow support, including Git workflows, commit organisation, dependency ordering, and Conventional Commits |
 
-Every AI-generated piece of code was reviewed, understood, debugged where necessary, and integrated manually. All architecture decisions, debugging approaches, and final implementation choices were made by the team.
+AI was used as an assistance tool throughout the development process. Any AI-assistence was reviewed, understood, debugged where necessary, and manually integrated by the team. All architectural decisions, debugging approaches, and final implementation choices remained the responsibility of the team.
 
 ---
 
