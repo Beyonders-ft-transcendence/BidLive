@@ -41,7 +41,6 @@ class ReportActionType(models.TextChoices):
     WARN_USER = "WARN_USER", "Warn User"
     BAN_USER = "BAN_USER", "Ban User"
     DELETE_CONTENT = "DELETE_CONTENT", "Delete Content"
-    ESCALATE = "ESCALATE", "Escalate"
 
 
 class Report(TimeStampedModel):

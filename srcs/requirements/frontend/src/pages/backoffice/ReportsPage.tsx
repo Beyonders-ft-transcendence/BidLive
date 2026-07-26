@@ -299,7 +299,6 @@ export default function ReportsPage() {
                     <option value="WARN_USER">{t('backoffice_reports.action_warn')}</option>
                     <option value="BAN_USER">{t('backoffice_reports.action_ban')}</option>
                     <option value="DELETE_CONTENT">{t('backoffice_reports.action_delete')}</option>
-                    <option value="ESCALATE">{t('backoffice_reports.action_escalate')}</option>
                   </select>
                 </div>
 

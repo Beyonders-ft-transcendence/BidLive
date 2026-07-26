@@ -96,12 +96,8 @@ def apply_report_action(
         _execute_warn_user(report=report)
 
     elif action == ReportActionType.DELETE_CONTENT:
-        _execute_delete_content(report=report)
+        _execute_delete_content(report=report, admin=admin)
         report.status = ReportStatus.RESOLVED
-        report.save(update_fields=["status", "updated_at"])
-
-    elif action == ReportActionType.ESCALATE:
-        report.status = ReportStatus.UNDER_REVIEW
         report.save(update_fields=["status", "updated_at"])
 
     report_action = ReportAction.objects.create(
@@ -119,15 +115,34 @@ def apply_report_action(
     return report_action
 
 
-def _execute_ban_user(*, report: Report, admin: User) -> None:
-    if report.target_type != ReportTargetType.USER:
-        raise ValidationError(
-            "BAN_USER só pode ser aplicado a denúncias de utilizadores."
-        )
+def _get_target_user_for_report(report: Report) -> User | None:
+    if report.target_type == ReportTargetType.USER:
+        return User.objects.filter(id=report.target_id).first()
+    elif report.target_type == ReportTargetType.AUCTION:
+        from apps.auctions.models import Auction
+        auction = Auction.objects.filter(id=report.target_id).first()
+        return auction.item.seller if auction and auction.item else None
+    elif report.target_type == ReportTargetType.STREAM:
+        from apps.auctions.models import LiveStream
+        stream = LiveStream.objects.filter(id=report.target_id).first()
+        return stream.streamer if stream else None
+    elif report.target_type == ReportTargetType.BID:
+        from apps.auctions.models import Bid
+        bid = Bid.objects.filter(id=report.target_id).first()
+        return bid.bidder if bid else None
+    elif report.target_type == ReportTargetType.MESSAGE:
+        from apps.chat.models import Message
+        msg = Message.objects.filter(id=report.target_id).first()
+        return msg.sender if msg else None
+    elif report.target_type == ReportTargetType.PRIVATE_MESSAGE:
+        from apps.chat.models import PrivateMessage
+        msg = PrivateMessage.objects.filter(id=report.target_id).first()
+        return msg.sender if msg else None
+    return None
 
-    try:
-        target_user = User.objects.get(id=report.target_id)
-    except User.DoesNotExist:
+def _execute_ban_user(*, report: Report, admin: User) -> None:
+    target_user = _get_target_user_for_report(report)
+    if not target_user:
         raise ValidationError("Utilizador alvo não encontrado.")
 
     if target_user.status == UserStatus.BANNED:
@@ -155,12 +170,8 @@ def _execute_ban_user(*, report: Report, admin: User) -> None:
 
 
 def _execute_warn_user(*, report: Report) -> None:
-    if report.target_type != ReportTargetType.USER:
-        return
-
-    try:
-        target_user = User.objects.get(id=report.target_id)
-    except User.DoesNotExist:
+    target_user = _get_target_user_for_report(report)
+    if not target_user:
         return
 
     notify_user(
@@ -174,8 +185,11 @@ def _execute_warn_user(*, report: Report) -> None:
     )
 
 
-def _execute_delete_content(*, report: Report) -> None:
+def _execute_delete_content(*, report: Report, admin: User) -> None:
     from apps.chat.models import Message, PrivateMessage
+    from apps.auctions.models import Auction, LiveStream, Bid
+    from apps.auctions.services.auction_service import cancel_auction
+    from apps.auctions.services.stream_service import cancel_stream
 
     if report.target_type == ReportTargetType.MESSAGE:
         Message.objects.filter(id=report.target_id).update(is_deleted=True)
@@ -184,6 +198,38 @@ def _execute_delete_content(*, report: Report) -> None:
     elif report.target_type == ReportTargetType.PRIVATE_MESSAGE:
         PrivateMessage.objects.filter(id=report.target_id).delete()
         logger.info(f"PrivateMessage {report.target_id} deleted via report {report.id}")
+
+    elif report.target_type == ReportTargetType.AUCTION:
+        try:
+            auction = Auction.objects.get(id=report.target_id)
+            cancel_auction(
+                actor=admin,
+                auction=auction,
+                reason=f"Cancelado por moderação (Denúncia #{report.id})"
+            )
+            logger.info(f"Auction {report.target_id} cancelled via report {report.id}")
+        except Auction.DoesNotExist:
+            logger.warning(f"Auction {report.target_id} not found for report {report.id}")
+
+    elif report.target_type == ReportTargetType.STREAM:
+        try:
+            stream = LiveStream.objects.get(id=report.target_id)
+            cancel_stream(
+                actor=admin,
+                stream=stream,
+                reason=f"Encerrado por moderação (Denúncia #{report.id})"
+            )
+            logger.info(f"Stream {report.target_id} cancelled via report {report.id}")
+        except LiveStream.DoesNotExist:
+            logger.warning(f"Stream {report.target_id} not found for report {report.id}")
+
+    elif report.target_type == ReportTargetType.BID:
+        try:
+            bid = Bid.objects.get(id=report.target_id)
+            bid.delete()
+            logger.info(f"Bid {report.target_id} deleted via report {report.id}")
+        except Bid.DoesNotExist:
+            logger.warning(f"Bid {report.target_id} not found for report {report.id}")
 
     else:
         logger.info(
