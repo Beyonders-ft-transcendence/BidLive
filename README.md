@@ -383,7 +383,7 @@ The project was divided into **EPICs** (major functional systems) and **Issues**
 ### Tools
 
 - **GitHub Issues & Projects** — task tracking, EPICs, bug reports, checklist per issue
-- **Discord** — daily communication, code reviews, debugging sessions
+- **Slack & Whatsapp** — daily communication, code reviews, debugging sessions
 - **Git** — feature branches per EPIC/issue, conventional commits (`feat`, `fix`, `chore`)
 
 ---
