@@ -390,7 +390,9 @@
     "reserve_price": "Prix de réserve",
     "reached": "Atteint",
     "not_reached": "Non atteint",
-    "explore_lots": "Explorer les lots"
+    "explore_lots": "Explorer les lots",
+    "chat_winner": "Organiser la livraison avec le gagnant",
+    "chat_seller": "Organiser la livraison avec le vendeur"
   },
   "home": {
     "title": "Accueil",

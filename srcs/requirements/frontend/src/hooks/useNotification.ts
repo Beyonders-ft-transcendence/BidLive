@@ -4,12 +4,21 @@ import { useAuthStore } from "@/shared/stores/auth.store";
 
 export function useNotificationsQuery() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   return useQuery({
     queryKey: ["notifications"],
     queryFn: () => notificationService.getMyNotifications(),
-    enabled: isAuthenticated,
-    refetchInterval: 30000, // Poll every 30 seconds for new notifications
+    enabled: isAuthenticated && !!accessToken,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401) return false;
+      return failureCount < 2;
+    },
+    refetchInterval: (query) => {
+      if (!useAuthStore.getState().isAuthenticated || !useAuthStore.getState().accessToken) return false;
+      if (query.state.error && (query.state.error as any)?.response?.status === 401) return false;
+      return 30000;
+    },
   });
 }
 

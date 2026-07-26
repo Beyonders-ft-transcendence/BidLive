@@ -21,7 +21,6 @@ export const uploadImageToCloudinary = async (file: File | string): Promise<stri
 
         const result = await response.json();
         if (result.secure_url) {
-            console.log("Upload realizado com sucesso:", result.secure_url);
             return result.secure_url;
         } else {
             console.error("Erro no upload: URL segura não encontrada", result);

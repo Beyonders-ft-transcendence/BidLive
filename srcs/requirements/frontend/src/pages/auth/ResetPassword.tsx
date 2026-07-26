@@ -56,10 +56,12 @@ export default function ResetPassword() {
         new_password_confirm: data.new_password_confirm
       });
       setSuccess(true);
+      toast.success("Senha redefinida com sucesso!");
       // Opcional: Redirecionar após uns segundos
       setTimeout(() => navigate('/auth/signin'), 4000);
     } catch (err) {
-      // O erro já é tratado e guardado na store (zustand)
+      const authError = useAuthStore.getState().error;
+      toast.error(authError || "Erro ao redefinir a senha.");
     }
   };
 

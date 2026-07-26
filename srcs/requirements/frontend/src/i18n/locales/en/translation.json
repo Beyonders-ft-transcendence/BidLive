@@ -434,7 +434,9 @@
     "reserve_price": "Reserve Price",
     "reached": "Reached",
     "not_reached": "Not Reached",
-    "explore_lots": "Explore Lots"
+    "explore_lots": "Explore Lots",
+    "chat_winner": "Contact Winner for Delivery",
+    "chat_seller": "Contact Seller for Delivery"
   },
   "home": {
     "title": "Home",

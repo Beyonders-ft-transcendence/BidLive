@@ -54,9 +54,17 @@ export interface AuctionImage {
   created_at: string;
 }
 
+export interface UserSummary {
+  id: number;
+  username: string;
+  full_name?: string;
+  avatar_url?: string;
+}
+
 export interface AuctionItem {
   id: number;
   seller: number; // User ID
+  seller_detail?: UserSummary | null;
   title: string;
   description: string;
   category: AuctionCategory | null;
@@ -80,6 +88,7 @@ export interface Auction {
   end_time: string; // ISO 8601 datetime
   status: AuctionStatus;
   winner: number | null; // User ID
+  winner_detail?: UserSummary | null;
   winning_bid: number | null; // Bid ID
   started_at: string | null;
   ended_at: string | null;
@@ -88,6 +97,7 @@ export interface Auction {
   cancel_reason: string;
   buy_now_at: string | null;
   buy_now_by: number | null;
+  buy_now_by_detail?: UserSummary | null;
   reserve_met: boolean;
   rules: Record<string, any> | null;
   bids_count?: number;

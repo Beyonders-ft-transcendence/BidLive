@@ -815,8 +815,8 @@ export default function AuctionDetailPage() {
                             <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground font-mono">
                                 <span className="px-2 py-0.5 rounded-md bg-muted border border-border">{auction.item.category?.name || t('auction_detail.auction_category_default')}</span>
                                 <span>•</span>
-                                <button onClick={() => setSelectedProfile({ id: auction.item.seller, username: t('auction_detail.seller_label') })} className="hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0 font-mono text-xs text-muted-foreground">
-                                    {t('auction_detail.seller_label')}
+                                <button onClick={() => setSelectedProfile({ id: auction.item.seller, username: auction.item.seller_detail?.username || t('auction_detail.seller_label') })} className="hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0 font-mono text-xs text-muted-foreground font-bold">
+                                    @{auction.item.seller_detail?.username || t('auction_detail.seller_label')}
                                 </button>
                                 <span>•</span>
                                 <span>{t('auction_detail.lot')} #{auction.id}</span>
@@ -945,17 +945,85 @@ export default function AuctionDetailPage() {
                                 </div>
                             )
                         ) : (
-                            <div className="p-5 rounded-xl border border-border bg-card text-center text-muted-foreground text-xs leading-relaxed">
+                            <div className="p-6 rounded-xl border border-border bg-card shadow-md space-y-4">
                                 {(auction.status === "ENDED" || auction.status === "SOLD") ? (
-                                    <div className="space-y-2">
-                                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 border border-green-500/20">
-                                            <Shield className="h-5 w-5" />
-                                        </div>
-                                        <p className="font-semibold text-foreground">{t('auction_detail.status_msg_start')} {t('auction_detail.status_msg_ended')}.</p>
-                                        {isAuthenticated && currentUser && auction.winner === currentUser.id && (
-                                            <div className="mt-1 bg-green-500/10 border border-green-500/20 text-green-500 px-4 py-2 text-sm rounded-lg font-semibold flex items-center justify-center gap-2">
-                                                <CheckCircle2 size={16} /> {t('auction_detail.you_won')}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3 pb-3 border-b border-border">
+                                            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                <CheckCircle2 className="h-6 w-6" />
                                             </div>
+                                            <div>
+                                                <h3 className="font-extrabold text-foreground text-sm">
+                                                    {auction.status === "SOLD" ? t('auction_detail.status_sold', 'Leilão Arrematado') : t('auction_detail.status_ended', 'Leilão Encerrado')}
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {t('auction_detail.closed_at', 'Finalizado em')}: {new Date(auction.ended_at || auction.end_time).toLocaleString(currentLocale, { dateStyle: 'short', timeStyle: 'short' })}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Winner Profile Card */}
+                                        {((auction as any).winner_detail || (auction as any).buy_now_by_detail || (bids && bids[0]?.bidder) || auction.winner) ? (
+                                            (() => {
+                                                const winnerObj = (auction as any).winner_detail || (auction as any).buy_now_by_detail || (bids && bids[0]?.bidder);
+                                                const winnerName = winnerObj?.full_name || winnerObj?.username || `Usuário #${auction.winner}`;
+                                                const winnerUsername = winnerObj?.username || `user_${auction.winner}`;
+                                                
+                                                const sellerId = typeof auction.item.seller === 'object' ? (auction.item.seller as any).id : Number(auction.item.seller);
+                                                const winnerId = winnerObj?.id ? Number(winnerObj.id) : (auction.winner ? Number(auction.winner) : null);
+                                                const currentUserId = currentUser?.id ? Number(currentUser.id) : null;
+
+                                                const isSeller = !!currentUserId && currentUserId === sellerId;
+                                                const isWinner = !!currentUserId && currentUserId === winnerId;
+
+                                                return (
+                                                    <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setSelectedProfile({ id: winnerObj?.id || (auction.winner as number), username: winnerUsername })}
+                                                                className="w-11 h-11 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold flex items-center justify-center text-sm border border-emerald-500/30 hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+                                                            >
+                                                                {winnerObj?.avatar_url ? (
+                                                                    <img src={winnerObj.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    winnerUsername.charAt(0).toUpperCase()
+                                                                )}
+                                                            </button>
+                                                            <div className="text-left">
+                                                                <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-emerald-400 block">
+                                                                    {isWinner ? "🏆 " + t('auction_detail.you_won', 'Você venceu!') : "🏆 " + t('auction_detail.winner_label', 'Vencedor do Leilão')}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setSelectedProfile({ id: winnerObj?.id || (auction.winner as number), username: winnerUsername })}
+                                                                    className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0"
+                                                                >
+                                                                    {winnerName} <span className="text-xs text-muted-foreground font-mono">(@{winnerUsername})</span>
+                                                                </button>
+                                                                <p className="text-xs font-mono font-semibold text-primary mt-0.5">
+                                                                    {t('auction_detail.final_price', 'Valor Final')}: {formatCurrency(auction.item.current_price, true)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Action to start chat or report */}
+                                                        {isAuthenticated && (isWinner || isSeller) && (
+                                                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                                <Link
+                                                                    to="/user?tab=chat"
+                                                                    className="flex-1 sm:flex-initial px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm text-center"
+                                                                >
+                                                                    <MessageSquare size={14} />
+                                                                    {isSeller ? t('auction_detail.chat_winner', 'Combinar Entrega com Vencedor') : t('auction_detail.chat_seller', 'Combinar Entrega com Vendedor')}
+                                                                </Link>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground">{t('auction_detail.no_winner', 'Nenhum lance vencedor neste leilão.')}</p>
                                         )}
                                     </div>
                                 ) : (

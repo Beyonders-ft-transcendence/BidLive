@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.chat.models import ChatRoom, Message, PrivateConversation, PrivateMessage
+from apps.social.selectors import are_friends
 from apps.users.models import User
 from common.fields import LocalizedModelSerializer
 
@@ -40,6 +41,8 @@ class PrivateConversationSerializer(LocalizedModelSerializer):
     user_two = ChatUserSerializer(read_only=True)
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
+    are_friends = serializers.SerializerMethodField()
+    recommend_friendship = serializers.SerializerMethodField()
 
     class Meta:
         model = PrivateConversation
@@ -49,9 +52,20 @@ class PrivateConversationSerializer(LocalizedModelSerializer):
             "user_two",
             "last_message",
             "unread_count",
+            "are_friends",
+            "recommend_friendship",
             "created_at"
         )
         read_only_fields = fields
+
+    def get_are_friends(self, obj) -> bool:
+        return are_friends(user=obj.user_one, other_user=obj.user_two)
+
+    def get_recommend_friendship(self, obj) -> bool:
+        from apps.chat.services import _has_trade_relationship
+        friends = are_friends(user=obj.user_one, other_user=obj.user_two)
+        trade = _has_trade_relationship(obj.user_one, obj.user_two)
+        return trade and not friends
 
     def get_last_message(self, obj) -> dict | None:
         last = obj.messages.order_by("-created_at").first()

@@ -434,7 +434,9 @@
     "reserve_price": "Preço de Reserva",
     "reached": "Atingido",
     "not_reached": "Não Atingido",
-    "explore_lots": "Explorar Lotes"
+    "explore_lots": "Explorar Lotes",
+    "chat_winner": "Combinar Entrega com Vencedor",
+    "chat_seller": "Combinar Entrega com Vendedor"
   },
   "home": {
     "title": "Página Inicial",

@@ -20,6 +20,8 @@ export interface PrivateConversation {
   user_two: ChatUser;
   last_message: LastMessage | null;
   unread_count: number;
+  are_friends?: boolean;
+  recommend_friendship?: boolean;
   created_at: string;
 }
 

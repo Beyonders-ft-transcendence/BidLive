@@ -688,7 +688,14 @@ class ResetPasswordView(APIView):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        reset_user_password(**serializer.validated_data)
+        try:
+            reset_user_password(**serializer.validated_data)
+        except ValidationError as exc:
+            return error_response(
+                exc.detail,
+                message="Falha ao redefinir senha.",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         return success_response({}, message="Senha redefinida com sucesso.")
 
 

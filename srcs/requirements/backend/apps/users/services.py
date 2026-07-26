@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -337,7 +338,10 @@ def logout_user(*, user: User, refresh_token: str | None = None, ip_address: str
 def change_user_password(*, user: User, current_password: str, new_password: str) -> None:
     if not user.check_password(current_password):
         raise ValidationError({"current_password": ["Password atual invalido."]})
-    validate_password(new_password, user=user)
+    try:
+        validate_password(new_password, user=user)
+    except DjangoValidationError as e:
+        raise ValidationError({"new_password": e.messages})
     user.set_password(new_password)
     user.save(update_fields=["password", "updated_at"])
     AnalyticsEvent.objects.create(user=user, event_type="auth.password_changed")
@@ -414,11 +418,20 @@ def send_verification_email(*, user: User, request_origin: str = "") -> None:
 
 @transaction.atomic
 def reset_user_password(*, uid: str, token: str, new_password: str) -> None:
-    user_id = force_str(urlsafe_base64_decode(uid))
-    user = User.objects.get(pk=user_id, is_active=True)
+    try:
+        user_id = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=user_id, is_active=True)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        raise ValidationError({"token": ["Token de redefinição inválido ou usuário não encontrado."]})
+
     if not default_token_generator.check_token(user, token):
         raise ValidationError({"token": ["Token de redefinicao invalido."]})
-    validate_password(new_password, user=user)
+
+    try:
+        validate_password(new_password, user=user)
+    except DjangoValidationError as e:
+        raise ValidationError({"new_password": e.messages})
+
     user.set_password(new_password)
     user.save(update_fields=["password", "updated_at"])
     AnalyticsEvent.objects.create(user=user, event_type="auth.password_reset_completed")

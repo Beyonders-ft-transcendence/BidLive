@@ -437,6 +437,28 @@ def place_bid(
         lock.release()
 
 
+def _create_deal_chat_conversation(*, seller, winner, auction: Auction, amount: Decimal) -> None:
+    if not seller or not winner or seller.id == winner.id:
+        return
+    try:
+        from apps.chat.selectors import get_or_create_private_conversation
+        from apps.chat.models import PrivateMessage
+
+        conversation, _ = get_or_create_private_conversation(user_one=seller, user_two=winner)
+        text = (
+            f"🎉 Leilão #{auction.id} ('{auction.item.title}') arrematado com sucesso por Kz {amount}! "
+            f"Utilizem este chat privado para combinarem os detalhes do pagamento e da entrega do produto."
+        )
+        PrivateMessage.objects.create(
+            conversation=conversation,
+            sender=seller,
+            message=text,
+            is_read=False,
+        )
+    except Exception:
+        pass
+
+
 def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
     if auction.status not in (AuctionStatus.ACTIVE, AuctionStatus.LIVE):
         raise ValidationError({"status": ["Auction is not available for buy now."]})
@@ -517,6 +539,13 @@ def buy_now(*, buyer, auction: Auction, ip_address: str = "") -> Auction:
                 title="Auction sold",
                 content=f"Auction {auction.id} sold via buy now.",
                 exclude_user_ids=[buyer.id],
+            )
+
+            _create_deal_chat_conversation(
+                seller=auction.item.seller,
+                winner=buyer,
+                auction=auction,
+                amount=amount,
             )
 
             publish_auction_event(
@@ -615,6 +644,13 @@ def close_auction(*, auction: Auction) -> Auction:
             title="Auction sold",
             content=f"Auction {auction.id} has a winner.",
         )
+        if winning_bid:
+            _create_deal_chat_conversation(
+                seller=auction.item.seller,
+                winner=auction.winner,
+                auction=auction,
+                amount=winning_bid.amount,
+            )
 
     publish_auction_event(
         auction_id=auction.id,

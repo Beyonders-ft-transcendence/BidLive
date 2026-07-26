@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from apps.auctions.models import Auction, AuctionCategory, AuctionImage, AuctionItem
 from apps.auctions.serializers.category_serializers import AuctionCategorySerializer
+from apps.users.serializers import UserPublicSerializer
 from apps.storage.services import is_http_url
 from common.fields import LocalDateTimeField, LocalDateTimeOutputField, LocalizedModelSerializer
 
@@ -22,6 +23,7 @@ class AuctionItemSerializer(LocalizedModelSerializer):
         queryset=AuctionCategory.objects.all(), source="category", allow_null=True, required=False
     )
     category = AuctionCategorySerializer(read_only=True)
+    seller_detail = UserPublicSerializer(source="seller", read_only=True)
     images = AuctionImageSerializer(many=True, read_only=True)
     created_at = LocalDateTimeOutputField(read_only=True)
     is_buy_now_available = serializers.SerializerMethodField()
@@ -36,6 +38,7 @@ class AuctionItemSerializer(LocalizedModelSerializer):
         fields = (
             "id",
             "seller",
+            "seller_detail",
             "title",
             "description",
             "category",
@@ -51,22 +54,25 @@ class AuctionItemSerializer(LocalizedModelSerializer):
             "images",
             "created_at",
         )
-        read_only_fields = ("id", "seller", "current_price", "category_label", "created_at", "is_buy_now_available")
+        read_only_fields = ("id", "seller", "seller_detail", "current_price", "category_label", "created_at", "is_buy_now_available")
 
 
 class AuctionListSerializer(LocalizedModelSerializer):
     item = AuctionItemSerializer(read_only=True)
+    winner_detail = UserPublicSerializer(source="winner", read_only=True)
     start_time = LocalDateTimeOutputField()
     end_time = LocalDateTimeOutputField()
     created_at = LocalDateTimeOutputField(read_only=True)
 
     class Meta:
         model = Auction
-        fields = ("id", "item", "start_time", "end_time", "status", "winner", "is_featured", "created_at")
+        fields = ("id", "item", "start_time", "end_time", "status", "winner", "winner_detail", "is_featured", "created_at")
 
 
 class AuctionDetailSerializer(LocalizedModelSerializer):
     item = AuctionItemSerializer(read_only=True)
+    winner_detail = UserPublicSerializer(source="winner", read_only=True)
+    buy_now_by_detail = UserPublicSerializer(source="buy_now_by", read_only=True)
     start_time = LocalDateTimeOutputField()
     end_time = LocalDateTimeOutputField()
     started_at = LocalDateTimeOutputField(read_only=True)
@@ -84,6 +90,7 @@ class AuctionDetailSerializer(LocalizedModelSerializer):
             "end_time",
             "status",
             "winner",
+            "winner_detail",
             "winning_bid",
             "started_at",
             "ended_at",
@@ -92,6 +99,7 @@ class AuctionDetailSerializer(LocalizedModelSerializer):
             "cancel_reason",
             "buy_now_at",
             "buy_now_by",
+            "buy_now_by_detail",
             "reserve_met",
             "is_featured",
             "rules",

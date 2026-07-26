@@ -36,6 +36,12 @@ class UserSerializer(LocalizedModelSerializer):
         )
 
 
+class UserPublicSerializer(LocalizedModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "full_name", "avatar_url")
+
+
 class AuthUserSerializer(LocalizedModelSerializer):
     roles = serializers.ListField(child=serializers.CharField(), read_only=True)
     permissions = serializers.ListField(child=serializers.CharField(), read_only=True)

@@ -13,6 +13,9 @@ from apps.notifications.services import notify_user
 from apps.social.selectors import are_friends, get_blocked_user_ids, is_blocked
 from apps.users.models import User
 
+from apps.chat.services import _has_trade_relationship
+
+
 logger = logging.getLogger(__name__)
 
 WS_MESSAGE_MAX_LENGTH = 2000
@@ -139,9 +142,14 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
         friends = await sync_to_async(are_friends)(
             user=self.user, other_user=recipient
         )
-        if not friends:
-            await self.send_json({"error": "Só podes enviar mensagens privadas a amigos."})
+        has_trade = await sync_to_async(_has_trade_relationship)(
+            self.user, recipient
+        )
+        if not friends and not has_trade:
+            await self.send_json({"error": "Só podes enviar mensagens privadas a amigos ou parceiros de leilão."})
             return
+
+        recommend_friendship = has_trade and not friends
 
         conversation, _ = await sync_to_async(get_or_create_private_conversation)(
             user_one=self.user,
@@ -172,6 +180,7 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
                 "sender_id": self.user.id,
                 "sender_username": self.user.username,
                 "sender_avatar": self.user.avatar_url or "",
+                "recommend_friendship": recommend_friendship,
                 "created_at": message.created_at.isoformat(),
             },
         )
@@ -210,6 +219,7 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             "sender_id": event["sender_id"],
             "sender_username": event["sender_username"],
             "sender_avatar": event["sender_avatar"],
+            "recommend_friendship": event.get("recommend_friendship", False),
             "created_at": event["created_at"],
         })
 

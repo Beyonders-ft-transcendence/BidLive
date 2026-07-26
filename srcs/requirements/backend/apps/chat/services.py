@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.chat.models import Message, PrivateMessage
@@ -11,6 +12,14 @@ from apps.notifications.models import NotificationType
 from apps.notifications.services import notify_user
 from apps.social.selectors import are_friends, is_blocked
 from apps.users.models import User
+from apps.auctions.models import Auction
+
+
+def _has_trade_relationship(user1: User, user2: User) -> bool:
+    return Auction.objects.filter(
+        (Q(item__seller=user1) & Q(winner=user2)) |
+        (Q(item__seller=user2) & Q(winner=user1))
+    ).exists()
 
 
 @transaction.atomic
@@ -26,8 +35,8 @@ def send_private_message(
     if is_blocked(user=sender, other_user=recipient):
         raise ValidationError("Não podes enviar mensagem a este utilizador.")
 
-    if not are_friends(user=sender, other_user=recipient):
-        raise ValidationError("Só podes enviar mensagens privadas a amigos.")
+    if not are_friends(user=sender, other_user=recipient) and not _has_trade_relationship(sender, recipient):
+        raise ValidationError("Só podes enviar mensagens privadas a amigos ou parceiros de leilões encerrados.")
 
     conversation, _ = get_or_create_private_conversation(
         user_one=sender,

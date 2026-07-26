@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import chatService from "@/services/chat.service";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import ENV from "@/shared/utils/env.utils";
@@ -172,6 +173,8 @@ export function usePrivateChatRealtime(
               );
               queryClient.invalidateQueries({ queryKey: ["privateConversations"] });
             }
+          } else if (data.error) {
+            toast.error(data.error);
           }
         } catch (err) {
           console.error("[WS PrivateChat] message parse error:", err);

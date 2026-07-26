@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Send, MessageSquare, ArrowLeft, Loader2, Circle, Users, Search, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Send, MessageSquare, ArrowLeft, Loader2, Circle, Users, Search, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, UserPlus } from "lucide-react";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import {
   useConversationsQuery,
@@ -520,6 +520,39 @@ export default function ChatTab() {
                 {showRightSidebar ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
               </button>
             </div>
+
+            {/* Recommendation Banner for Winner & Owner without friendship */}
+            {recipient && !friends.some((f: any) => f.id === recipient.id) && selectedConv && (
+              <div className="bg-amber-500/10 border-b border-amber-500/20 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3 text-xs z-10 shrink-0">
+                <div className="flex items-center gap-2 text-amber-300 min-w-0">
+                  <UserPlus size={16} className="shrink-0" />
+                  <span className="text-[11px] sm:text-xs leading-tight font-medium truncate">
+                    🤝 Recomendação: Adicionem-se como amigos para manterem contacto facilmente pós-leilão!
+                  </span>
+                </div>
+                {pendingSent ? (
+                  <span className="text-[10px] font-bold text-amber-400/80 whitespace-nowrap bg-amber-500/10 px-2.5 py-1 rounded-md shrink-0">
+                    Pedido Enviado
+                  </span>
+                ) : pendingReceived ? (
+                  <button
+                    onClick={() => handleAcceptRequest(pendingReceived.id)}
+                    disabled={acceptFriendRequest.isPending}
+                    className="text-[10px] font-bold bg-green-500 text-black hover:bg-green-400 px-3 py-1 rounded-md transition-colors border-none cursor-pointer whitespace-nowrap shrink-0"
+                  >
+                    Aceitar Pedido
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSendRequest}
+                    disabled={sendFriendRequest.isPending}
+                    className="text-[10px] font-bold bg-amber-400 text-black hover:bg-amber-300 px-3 py-1 rounded-md transition-colors border-none cursor-pointer whitespace-nowrap shrink-0"
+                  >
+                    Adicionar Amigo
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Messages List */}
             <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 custom-scrollbar">
