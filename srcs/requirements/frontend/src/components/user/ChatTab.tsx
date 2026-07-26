@@ -68,6 +68,8 @@ export default function ChatTab() {
   const sentRequests = Array.isArray(sentReqsResponse) ? sentReqsResponse : ((sentReqsResponse as any)?.data || []);
   const receivedRequests = Array.isArray(recReqsResponse) ? recReqsResponse : ((recReqsResponse as any)?.data || []);
 
+  const unreadConversations = conversations.filter((c: any) => c.unread_count > 0).length;
+
   // Mutations
   const sendMutation = useSendPrivateMessageMutation();
   const markAsReadMutation = useMarkMessagesAsReadMutation();
@@ -270,9 +272,10 @@ export default function ChatTab() {
             <div className="grid grid-cols-4 bg-muted/50 p-1 rounded-md gap-0.5">
               <button
                 onClick={() => setLeftTab("conversas")}
-                className={`text-[11px] font-bold py-1.5 rounded-sm transition-colors cursor-pointer border-none text-center truncate ${leftTab === "conversas" ? "bg-background shadow-sm text-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+                className={`text-[11px] font-bold py-1.5 rounded-sm transition-colors cursor-pointer border-none text-center truncate relative ${leftTab === "conversas" ? "bg-background shadow-sm text-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
               >
                 {t('chat_tab.tab_conversations')}
+                {unreadConversations > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
               </button>
               <button
                 onClick={() => setLeftTab("amigos")}

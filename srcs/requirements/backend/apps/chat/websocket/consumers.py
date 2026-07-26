@@ -8,6 +8,8 @@ from django.utils import timezone
 
 from apps.chat.models import Message, PrivateMessage
 from apps.chat.selectors import get_or_create_auction_room, get_or_create_private_conversation
+from apps.notifications.models import NotificationType
+from apps.notifications.services import notify_user
 from apps.social.selectors import are_friends, get_blocked_user_ids, is_blocked
 from apps.users.models import User
 
@@ -151,6 +153,13 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             sender=self.user,
             message=text,
             is_read=False,
+        )
+
+        await sync_to_async(notify_user)(
+            user=recipient,
+            notification_type=NotificationType.MESSAGE,
+            title=f"Nova mensagem de {self.user.full_name or self.user.username}",
+            content=text[:100],
         )
 
         await self.channel_layer.group_send(
