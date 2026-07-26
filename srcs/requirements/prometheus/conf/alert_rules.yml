@@ -27,3 +27,12 @@ groups:
         annotations:
           summary: "Erro no Redis Exporter"
           description: "O exportador do Redis reportou erro na última coleta."
+
+      - alert: ServiceStarted
+        expr: (time() - process_start_time_seconds) < 300
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Serviço {{ $labels.job }} iniciado recentemente"
+          description: "O container/serviço {{ $labels.job }} subiu há menos de 5 minutos."

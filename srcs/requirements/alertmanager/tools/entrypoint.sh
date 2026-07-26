@@ -26,6 +26,19 @@ tls_server_config:
   key_file: /etc/ssl/private/server.key
 EOF
 
+# === Enviar Alerta Base de Startup (quando o container sobe) ===
+(
+  sleep 15
+  amtool alert add AlertmanagerStarted \
+    service=alertmanager \
+    severity=info \
+    instance=alertmanager \
+    --annotation="summary=\"Alertmanager iniciado com sucesso\"" \
+    --annotation="description=\"O container do Alertmanager subiu e está operacional para gestão de alertas.\"" \
+    --alertmanager.url=https://localhost:9093 \
+    --http.config.file=/dev/null 2>/dev/null || true
+) &
+
 exec alertmanager \
   --config.file=/etc/alertmanager/alertmanager.yml \
   --storage.path=/alertmanager \
