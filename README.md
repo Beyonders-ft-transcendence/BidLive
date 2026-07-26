@@ -756,19 +756,19 @@ users
 |---|---|---|---|---|---|
 | 1 | **Framework for Frontend and Backend** | Web | Major | 2 | nmatondo, emalungo |
 | 2 | **Real-time Features via WebSockets** | Web | Major | 2 | nmatondo, asebasti |
-| 3 | **User Interaction (Chat, Profile, Friends)** | Web | Major | 2 | asebasti, emalungo |
-| 4 | **Public API (5+ endpoints)** | Web | Major | 2 | nmatondo |
+| 3 | **User Interaction (Chat, Profile, Friends)** | Web | Major | 2 | asebasti, emalungo, jorcarva |
+| 4 | **Public API (5+ endpoints)** | Web | Major | 2 | nmatondo, asebasti |
 | 5 | **Standard User Management & Authentication** | User Management | Major | 2 | nmatondo |
 | 6 | **Advanced Permissions (RBAC)** | User Management | Major | 2 | nmatondo |
 | 7 | **Live Video Streaming** | Custom | Major | 2 | nmatondo, jorcarva |
 | 8 | **Monitoring with Prometheus and Grafana** | DevOps | Major | 2 | nmatondo |
 | 9 | **ELK Stack (Elasticsearch, Logstash, Kibana)** | DevOps | Major | 2 | nmatondo |
-| 10 | **ORM** | Web | Minor | 1 | nmatondo |
-| 11 | **Notification System** | Web | Minor | 1 | nmatondo |
+| 10 | **ORM** | Web | Minor | 1 | nmatondo, asebasti |
+| 11 | **Notification System** | Web | Minor | 1 | nmatondo, emalungo |
 | 12 | **Remote Authentication (OAuth 2.0)** | User Management | Minor | 1 | nmatondo, emalungo |
-| 13 | **Multiple Languages (i18n)** | Accessibility & i18n | Minor | 1 | emalungo |
-| 14 | **Custom Design System** | Web | Minor | 1 | emalungo |
-| 15 | **Advanced Search (Filters, Sorting, Pagination)** | Web | Minor | 1 | emalungo |
+| 13 | **Multiple Languages (i18n)** | Accessibility & i18n | Minor | 1 | emalungo, jorcarva, ferda-si |
+| 14 | **Custom Design System** | Web | Minor | 1 | emalungo, jorcarva, ferda-si |
+| 15 | **Advanced Search (Filters, Sorting, Pagination)** | Web | Minor | 1 | emalungo, nmatondo |
 | 16 | **RTL Support** | Accessibility & i18n | Secondary | 1 | emalungo |
 | 17 | **File Upload and Management** | Web | Minor | 1 | emalungo, jorcarva |
 
