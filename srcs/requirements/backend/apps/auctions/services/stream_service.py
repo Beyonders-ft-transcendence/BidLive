@@ -83,7 +83,9 @@ def _can_manage_auction(*, user, auction: Auction) -> bool:
         return True
     if user_has_permission(user=user, permission_name="auction.manage"):
         return True
-    return bool(user.has_role("admin"))
+    if getattr(user, "is_superuser", False):
+        return
+    return bool(user.has_role("SUPER_ADMIN") or user.has_role("MONITOR") or user.has_role("admin"))
 
 
 def _ensure_can_manage_auction(*, user, auction: Auction) -> None:

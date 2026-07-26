@@ -73,7 +73,9 @@ def _ensure_owner_or_manager(*, user, auction: Auction) -> None:
         return
     if user_has_permission(user=user, permission_name="auction.manage"):
         return
-    if user.has_role("admin"):
+    if getattr(user, "is_superuser", False):
+        return
+    if user.has_role("SUPER_ADMIN") or user.has_role("MONITOR") or user.has_role("admin"):
         return
     raise PermissionDenied({"permission": ["Not allowed to manage this auction."]})
 
@@ -280,8 +282,8 @@ def update_auction(
 
 
 def cancel_auction(*, actor, auction: Auction, reason: str = "", ip_address: str = "") -> Auction:
-    if not (auction.item.seller_id == actor.id or actor.is_superuser):
-        raise PermissionDenied({"permission": ["Not allowed to cancel this auction."]})
+    _ensure_owner_or_manager(user=actor, auction=auction)
+
 
     lock = _acquire_lock(auction_id=auction.id)
     if not lock.acquire(blocking=True):
