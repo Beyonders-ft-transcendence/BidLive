@@ -56,8 +56,7 @@ def _assert_viewer_access(*, user, stream: LiveStream) -> None:
         user=user, stream=stream
     ):
         raise PermissionDenied("You are not allowed to view this stream.")
-    if stream.visibility == LiveStreamVisibility.PRIVATE and not _can_manage_stream(user=user, stream=stream):
-        raise PermissionDenied("This stream is private.")
+
 
 
 def _assert_broadcaster_access(*, user, stream: LiveStream) -> None:

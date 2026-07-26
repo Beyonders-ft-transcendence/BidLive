@@ -15,7 +15,6 @@ class LiveStreamStatus(models.TextChoices):
 class LiveStreamVisibility(models.TextChoices):
     PUBLIC = "PUBLIC", "Public"
     UNLISTED = "UNLISTED", "Unlisted"
-    PRIVATE = "PRIVATE", "Private"
 
 
 class LiveStream(TimeStampedModel):

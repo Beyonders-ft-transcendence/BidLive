@@ -324,7 +324,6 @@ export default function StreamConsoleModal({ isOpen, onClose, auction }: StreamC
                 >
                   <option value={LiveStreamVisibility.PUBLIC}>Público (Visível para todos)</option>
                   <option value={LiveStreamVisibility.UNLISTED}>Não Listado (Apenas com link)</option>
-                  <option value={LiveStreamVisibility.PRIVATE}>Privado (Apenas vendedor)</option>
                 </select>
               </div>
             </div>

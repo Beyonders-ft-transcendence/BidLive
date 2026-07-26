@@ -736,7 +736,6 @@
     "visibility": "Visibilité",
     "visibility_public": "Public",
     "visibility_unlisted": "Non listé",
-    "visibility_private": "Privé",
     "stream_description": "Description de la diffusion",
     "stream_description_placeholder": "Décrivez des détails spécifiques pour les spectateurs...",
     "creating_room": "Création de la salle...",

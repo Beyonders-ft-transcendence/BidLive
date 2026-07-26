@@ -751,7 +751,6 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                   >
                     <option value={LiveStreamVisibility.PUBLIC}>{t('live_stream_tab.visibility_public')}</option>
                     <option value={LiveStreamVisibility.UNLISTED}>{t('live_stream_tab.visibility_unlisted')}</option>
-                    <option value={LiveStreamVisibility.PRIVATE}>{t('live_stream_tab.visibility_private')}</option>
                   </select>
                 </div>
               </div>

@@ -176,7 +176,6 @@ export type LiveStreamStatus = typeof LiveStreamStatus[keyof typeof LiveStreamSt
 export const LiveStreamVisibility = {
   PUBLIC: "PUBLIC",
   UNLISTED: "UNLISTED",
-  PRIVATE: "PRIVATE",
 } as const;
 
 export type LiveStreamVisibility = typeof LiveStreamVisibility[keyof typeof LiveStreamVisibility];
