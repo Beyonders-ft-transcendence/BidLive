@@ -593,7 +593,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
   const serverUrl = "rtmp://rtmp.bidlive.ao/live";
 
   const streamableAuctions = myAuctions.filter(
-    (auc) => auc.status === AuctionStatus.LIVE || auc.status === AuctionStatus.SCHEDULED
+    (auc) => auc.status === AuctionStatus.LIVE
   );
 
   return (

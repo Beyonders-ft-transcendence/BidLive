@@ -768,7 +768,7 @@
     "subtitle_console": "Console de Streaming: Lote #{{id}} • {{title}}",
     "loading_eligible": "Buscando lotes elegíveis...",
     "no_eligible_title": "Nenhum lote elegível para live",
-    "no_eligible_desc": "Apenas lotes com status **Ativo (LIVE)** ou **Agendado (SCHEDULED)** podem ser transmitidos.",
+    "no_eligible_desc": "Apenas lotes com status **Ativo (LIVE)** podem ser transmitidos.",
     "create_new_auction": "Criar Novo Leilão",
     "category_fallback": "Geral",
     "configure_stream": "Configurar Transmissão",
