@@ -4,6 +4,7 @@ import base64
 import json
 import hashlib
 import logging
+import os
 import time
 from datetime import timedelta
 from typing import Any
@@ -15,6 +16,18 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+def _get_ssl_verify():
+    """Return the SSL verification option for requests.
+    Uses the internal CA cert if available, otherwise disables verification
+    for internal services that use self-signed certs."""
+    ca_cert = os.environ.get("SSL_CERT_FILE", "")
+    if ca_cert and os.path.isfile(ca_cert):
+        return ca_cert
+    # Fallback: trust the system CA bundle
+    return True
+
 
 
 class LiveKitServiceError(RuntimeError):
@@ -104,6 +117,7 @@ def _request_twirp(method: str, payload: dict[str, Any], *, grants: dict[str, An
                 "Content-Type": "application/json",
             },
             timeout=timeout,
+            verify=_get_ssl_verify(),
         )
     except requests.exceptions.ConnectionError:
         raise LiveKitServiceError(f"{method} failed: LiveKit server is unreachable at {get_livekit_server_url()}")

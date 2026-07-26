@@ -233,7 +233,7 @@ export function useAuctionRealtime(id: number) {
         ws.current.close();
       }
     };
-  }, [id, queryClient]);
+  }, [id, accessToken, queryClient]);
 
   // Clean up auction queries from cache when navigating away (unmounting)
   useEffect(() => {
