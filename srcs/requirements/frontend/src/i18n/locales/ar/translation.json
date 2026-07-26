@@ -49,7 +49,20 @@
     "change_password_success": "تم تغيير كلمة المرور بنجاح!",
     "change_password_error": "خطأ في تغيير كلمة المرور.",
     "verify_success": "تم التحقق من الحساب بنجاح!",
-    "verify_error": "خطأ في التحقق من الحساب."
+    "verify_error": "خطأ في التحقق من الحساب.",
+    "invalid_link": "رابط غير صالح",
+    "invalid_link_desc": "رابط استرداد كلمة المرور غير مكتمل أو غير صالح. يرجى طلب رابط جديد.",
+    "request_new_link": "طلب رابط جديد",
+    "new_password_desc": "أنشئ كلمة مرور جديدة قوية وسهلة التذكر لحماية حسابك واستعادة الوصول إلى جميع ميزات BidLive الحصرية.",
+    "choose_new_password": "اختر كلمة مرور الوصول الجديدة الخاصة بك.",
+    "password_updated_title": "تم تحديث كلمة المرور!",
+    "password_updated_desc": "تم تغيير كلمة المرور بنجاح. يمكنك الآن الدخول إلى حسابك باستخدام بيانات الاعتماد الجديدة.",
+    "login_now": "تسجيل الدخول الآن",
+    "new_password_label": "كلمة المرور الجديدة",
+    "confirm_new_password_label": "تأكيد كلمة المرور الجديدة",
+    "repeat_password_placeholder": "أعد إدخال كلمة المرور",
+    "save_new_password": "حفظ كلمة المرور الجديدة",
+    "remembered_password": "هل تذكرت كلمة المرور القديمة؟"
   },
   "header": {
     "auctions": "المزادات",

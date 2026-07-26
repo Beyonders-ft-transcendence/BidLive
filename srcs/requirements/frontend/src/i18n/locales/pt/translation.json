@@ -49,7 +49,20 @@
     "change_password_success": "Senha alterada com sucesso!",
     "change_password_error": "Erro ao alterar senha.",
     "verify_success": "Conta verificada com sucesso!",
-    "verify_error": "Erro ao verificar conta."
+    "verify_error": "Erro ao verificar conta.",
+    "invalid_link": "Link Inválido",
+    "invalid_link_desc": "O link de recuperação de senha está incompleto ou inválido. Por favor, solicite um novo link.",
+    "request_new_link": "Solicitar Novo Link",
+    "new_password_desc": "Crie uma nova senha forte e memorável para proteger a sua conta e voltar a ter acesso a todos os recursos exclusivos da BidLive.",
+    "choose_new_password": "Escolha a sua nova senha de acesso.",
+    "password_updated_title": "Senha Atualizada!",
+    "password_updated_desc": "A sua senha foi alterada com sucesso. Já pode aceder à sua conta com as novas credenciais.",
+    "login_now": "Fazer Login Agora",
+    "new_password_label": "Nova Senha",
+    "confirm_new_password_label": "Confirmar Nova Senha",
+    "repeat_password_placeholder": "Repita a senha",
+    "save_new_password": "Guardar Nova Senha",
+    "remembered_password": "Lembrou-se da senha antiga?"
   },
   "header": {
     "auctions": "Leilões",

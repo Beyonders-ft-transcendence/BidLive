@@ -49,7 +49,20 @@
     "change_password_success": "Password changed successfully!",
     "change_password_error": "Error changing password.",
     "verify_success": "Account verified successfully!",
-    "verify_error": "Error verifying account."
+    "verify_error": "Error verifying account.",
+    "invalid_link": "Invalid Link",
+    "invalid_link_desc": "The password recovery link is incomplete or invalid. Please request a new link.",
+    "request_new_link": "Request New Link",
+    "new_password_desc": "Create a strong and memorable new password to protect your account and regain access to all exclusive BidLive features.",
+    "choose_new_password": "Choose your new access password.",
+    "password_updated_title": "Password Updated!",
+    "password_updated_desc": "Your password has been changed successfully. You can now access your account with the new credentials.",
+    "login_now": "Login Now",
+    "new_password_label": "New Password",
+    "confirm_new_password_label": "Confirm New Password",
+    "repeat_password_placeholder": "Repeat the password",
+    "save_new_password": "Save New Password",
+    "remembered_password": "Remembered your old password?"
   },
   "header": {
     "auctions": "Auctions",

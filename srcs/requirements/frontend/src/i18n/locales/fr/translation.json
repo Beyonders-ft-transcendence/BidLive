@@ -25,6 +25,24 @@
     "menu": "Menu",
     "language": "Langue"
   },
+  "auth": {
+    "invalid_link": "Lien Invalide",
+    "invalid_link_desc": "Le lien de récupération de mot de passe est incomplet ou invalide. Veuillez demander un nouveau lien.",
+    "request_new_link": "Demander un Nouveau Lien",
+    "new_password_desc": "Créez un nouveau mot de passe fort et mémorable pour protéger votre compte et retrouver l'accès à toutes les fonctionnalités exclusives de BidLive.",
+    "choose_new_password": "Choisissez votre nouveau mot de passe d'accès.",
+    "password_updated_title": "Mot de Passe Mis à Jour !",
+    "password_updated_desc": "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant accéder à votre compte avec les nouvelles informations d'identification.",
+    "login_now": "Se Connecter Maintenant",
+    "new_password_label": "Nouveau Mot de Passe",
+    "confirm_new_password_label": "Confirmer le Nouveau Mot de Passe",
+    "repeat_password_placeholder": "Répétez le mot de passe",
+    "save_new_password": "Enregistrer le Nouveau Mot de Passe",
+    "remembered_password": "Vous vous souvenez de votre ancien mot de passe ?",
+    "reset_success": "Mot de passe réinitialisé avec succès !",
+    "reset_error": "Erreur lors de la réinitialisation. Lien invalide ou expiré.",
+    "reset_password": "Réinitialiser le mot de passe"
+  },
   "backoffice_header": {
     "admin_title": "BidLive Admin",
     "dashboard": "Tableau de bord",

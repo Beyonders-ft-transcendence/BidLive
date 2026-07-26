@@ -8,11 +8,12 @@ import { ArrowLeft, Lock, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/shared/schema/auth.schema';
 import Logo from "@/assets/images/logo2.png";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-  useDocumentTitle("Nova Senha");
+  useDocumentTitle(t('auth.new_password_label'));
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -31,15 +32,15 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen bg-black flex text-zinc-100 items-center justify-center p-4">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-md w-full text-center">
-          <h2 className="text-xl font-bold mb-4 text-red-400">Link Inválido</h2>
+          <h2 className="text-xl font-bold mb-4 text-red-400">{t('auth.invalid_link')}</h2>
           <p className="text-zinc-400 mb-6">
-            O link de recuperação de senha está incompleto ou inválido. Por favor, solicite um novo link.
+            {t('auth.invalid_link_desc')}
           </p>
           <Link 
             to="/auth/forgot-password" 
             className="w-full inline-flex justify-center items-center py-3 px-4 bg-white hover:bg-zinc-200 text-black rounded-lg text-sm font-bold transition-all"
           >
-            Solicitar Novo Link
+            {t('auth.request_new_link')}
           </Link>
         </div>
       </div>
@@ -56,12 +57,12 @@ export default function ResetPassword() {
         new_password_confirm: data.new_password_confirm
       });
       setSuccess(true);
-      toast.success("Senha redefinida com sucesso!");
+      toast.success(t('auth.reset_success'));
       // Opcional: Redirecionar após uns segundos
       setTimeout(() => navigate('/auth/signin'), 4000);
     } catch (err) {
       const authError = useAuthStore.getState().error;
-      toast.error(authError || "Erro ao redefinir a senha.");
+      toast.error(authError || t('auth.reset_error'));
     }
   };
 
@@ -81,9 +82,9 @@ export default function ResetPassword() {
         </div>
 
         <div className="relative z-10 max-w-md">
-          <h2 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.new_password')}</h2>
+          <h2 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.new_password_label')}</h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
-            Crie uma nova senha forte e memorável para proteger a sua conta e voltar a ter acesso a todos os recursos exclusivos da BidLive.
+            {t('auth.new_password_desc')}
           </p>
         </div>
       </div>
@@ -100,7 +101,7 @@ export default function ResetPassword() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight mb-2">{t('auth.reset_password')}</h1>
             <p className="text-zinc-400">
-              {success ? 'Senha alterada com sucesso.' : 'Escolha a sua nova senha de acesso.'}
+              {success ? t('auth.reset_success') : t('auth.choose_new_password')}
             </p>
           </div>
 
@@ -109,15 +110,15 @@ export default function ResetPassword() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-500/20 text-emerald-400 mb-4">
                 <CheckCircle2 size={24} />
               </div>
-              <h3 className="text-lg font-medium text-emerald-400 mb-2">Senha Atualizada!</h3>
+              <h3 className="text-lg font-medium text-emerald-400 mb-2">{t('auth.password_updated_title')}</h3>
               <p className="text-zinc-400 text-sm mb-6">
-                A sua senha foi alterada com sucesso. Já pode aceder à sua conta com as novas credenciais.
+                {t('auth.password_updated_desc')}
               </p>
               <Link 
                 to="/auth/signin" 
                 className="w-full inline-flex justify-center items-center py-3 px-4 bg-white hover:bg-zinc-200 text-black rounded-lg text-sm font-bold transition-all hover:scale-[1.02]"
               >
-                Fazer Login Agora
+                {t('auth.login_now')}
               </Link>
             </div>
           ) : (
@@ -131,7 +132,7 @@ export default function ResetPassword() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2" htmlFor="new_password">
-                  Nova Senha
+                  {t('auth.new_password_label')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-white transition-colors">
@@ -142,7 +143,7 @@ export default function ResetPassword() {
                     type="password"
                     {...register("new_password")}
                     className={`w-full bg-zinc-900 border ${errors.new_password ? 'border-red-500' : 'border-zinc-800'} text-white rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all placeholder:text-zinc-600`}
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={t('auth.password_placeholder')}
                   />
                 </div>
                 {errors.new_password && <p className="mt-2 text-sm text-red-400">{errors.new_password.message}</p>}
@@ -150,7 +151,7 @@ export default function ResetPassword() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2" htmlFor="new_password_confirm">
-                  Confirmar Nova Senha
+                  {t('auth.confirm_new_password_label')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-white transition-colors">
@@ -161,7 +162,7 @@ export default function ResetPassword() {
                     type="password"
                     {...register("new_password_confirm")}
                     className={`w-full bg-zinc-900 border ${errors.new_password_confirm ? 'border-red-500' : 'border-zinc-800'} text-white rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all placeholder:text-zinc-600`}
-                    placeholder="Repita a senha"
+                    placeholder={t('auth.repeat_password_placeholder')}
                   />
                 </div>
                 {errors.new_password_confirm && <p className="mt-2 text-sm text-red-400">{errors.new_password_confirm.message}</p>}
@@ -175,16 +176,16 @@ export default function ResetPassword() {
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  'Guardar Nova Senha'
+                  t('auth.save_new_password')
                 )}
               </button>
             </form>
           )}
 
           <div className="mt-8 text-center text-sm text-zinc-500">
-            Lembrou-se da senha antiga?{' '}
+            {t('auth.remembered_password')}{' '}
             <Link to="/auth/signin" className="text-white hover:underline font-medium inline-flex items-center gap-1 transition-colors">
-              <ArrowLeft size={14} /> Cancelar
+              <ArrowLeft size={14} /> {t('common.cancel')}
             </Link>
           </div>
 
