@@ -12,7 +12,7 @@ import Logo from "@/assets/images/logo2.png";
 export default function ForgotPassword() {
     const { t } = useTranslation();
 
-  useDocumentTitle("Recuperar Senha");
+  useDocumentTitle(t("auth.page_title_forgot"));
 
   const { forgotPassword, isLoading, error, clearError } = useAuthStore();
   const [success, setSuccess] = useState(false);
@@ -47,9 +47,9 @@ export default function ForgotPassword() {
         </div>
 
         <div className="relative z-10 max-w-md">
-          <h2 className="text-4xl font-bold mb-4 tracking-tight">Recuperar o Acesso</h2>
+          <h2 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.recover_access')}</h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
-            Esqueceu a sua senha? Não se preocupe. Introduza o seu e-mail e enviaremos um link de recuperação para que volte a aceder à plataforma com total segurança.
+            {t('auth.recover_access_desc')}
           </p>
         </div>
       </div>
@@ -64,9 +64,9 @@ export default function ForgotPassword() {
                 <img src={Logo} alt="BidLive" className="h-8 object-contain" />
               </Link>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Esqueceu a senha?</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">{t('auth.forgot_password')}</h1>
             <p className="text-zinc-400">
-              {success ? 'Verifique a sua caixa de entrada.' : 'Insira o seu e-mail para receber as instruções de redefinição.'}
+              {success ? t('auth.check_inbox') : t('auth.insert_email_instructions')}
             </p>
           </div>
 
@@ -75,15 +75,15 @@ export default function ForgotPassword() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-500/20 text-emerald-400 mb-4">
                 <CheckCircle2 size={24} />
               </div>
-              <h3 className="text-lg font-medium text-emerald-400 mb-2">E-mail enviado!</h3>
+              <h3 className="text-lg font-medium text-emerald-400 mb-2">{t('auth.email_sent')}</h3>
               <p className="text-zinc-400 text-sm mb-6">
-                Se o e-mail estiver associado a uma conta, receberá um link para redefinir a sua senha em poucos minutos.
+                {t('auth.email_sent_desc')}
               </p>
               <Link 
                 to="/auth/signin" 
                 className="w-full inline-flex justify-center items-center py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-colors border border-zinc-800"
               >
-                Voltar para o Login
+                {t('auth.back_to_login')}
               </Link>
             </div>
           ) : (
@@ -97,7 +97,7 @@ export default function ForgotPassword() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2" htmlFor="email">
-                  Endereço de E-mail
+                  {t('auth.email_address')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-white transition-colors">
@@ -108,7 +108,7 @@ export default function ForgotPassword() {
                     type="email"
                     {...register("email")}
                     className={`w-full bg-zinc-900 border ${errors.email ? 'border-red-500' : 'border-zinc-800'} text-white rounded-lg py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all placeholder:text-zinc-600`}
-                    placeholder="o.seu@email.com"
+                    placeholder={t('auth.email_placeholder_2')}
                   />
                 </div>
                 {errors.email && <p className="mt-2 text-sm text-red-400">{errors.email.message}</p>}
@@ -122,14 +122,14 @@ export default function ForgotPassword() {
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  'Enviar Link de Recuperação'
+                  t('auth.send_recovery_link')
                 )}
               </button>
             </form>
           )}
 
           <div className="mt-8 text-center text-sm text-zinc-500">
-            Lembrou-se da senha?{' '}
+            {t('auth.remembered_password')}{' '}
             <Link to="/auth/signin" className="text-white hover:underline font-medium inline-flex items-center gap-1 transition-colors">
               <ArrowLeft size={14} />{t('auth.back_to_login')}</Link>
           </div>

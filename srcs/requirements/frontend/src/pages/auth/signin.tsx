@@ -120,8 +120,8 @@ function SigninForm() {
                                 <img src={logoImgDark} alt="BidLive Logo" className="h-8 object-contain hidden dark:block" />
                             </Link>
 
-                            <h1 className="text-2xl font-bold mb-1 text-foreground">Bem-vindo de volta</h1>
-                            <p className="text-muted-foreground text-sm mb-4">Bem-vindo de volta! Por favor, insira os seus dados.</p>
+                            <h1 className="text-2xl font-bold mb-1 text-foreground">{t('auth.welcome_back')}</h1>
+                            <p className="text-muted-foreground text-sm mb-4">{t('auth.welcome_back_desc')}</p>
 
                             <div className="w-full text-left">
                                 <div className="flex gap-3 mb-4">
@@ -153,17 +153,17 @@ function SigninForm() {
 
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="flex-1 border-t border-border"></div>
-                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ou</span>
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('auth.or')}</span>
                                 <div className="flex-1 border-t border-border"></div>
                             </div>
 
                             <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
                                 <div className="space-y-1.5">
-                                    <label className="block text-sm font-medium text-foreground">Email</label>
+                                    <label className="block text-sm font-medium text-foreground">{t('auth.email')}</label>
                                     <div className="relative">
                                         <Input
                                             type="email"
-                                            placeholder="Insira o seu email"
+                                            placeholder={t('auth.email_placeholder')}
                                             {...register("email")}
                                             className={`h-11 bg-background border rounded-sm focus-visible:ring-1 shadow-sm w-full text-foreground placeholder:text-muted-foreground pr-32 ${errors.email ? 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive' : 'border-border focus-visible:ring-primary focus-visible:border-primary'}`}
                                         />
@@ -176,7 +176,7 @@ function SigninForm() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-sm font-medium text-foreground">Palavra-passe</label>
+                                    <label className="block text-sm font-medium text-foreground">{t('auth.password')}</label>
                                     <div className="relative">
                                         <Input
                                             type="password"
@@ -194,7 +194,7 @@ function SigninForm() {
 
                                 <div className="flex items-center justify-end text-sm">
                                     <Link to="/auth/forgot-password" className="text-primary font-semibold hover:text-primary/80 transition-colors">
-                                        Esqueceu a palavra-passe?
+                                        {t('auth.forgot_password')}
                                     </Link>
                                 </div>
 
@@ -204,14 +204,14 @@ function SigninForm() {
                                         disabled={isLoading}
                                         className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-semibold text-base transition-colors shadow-sm"
                                     >
-                                        {isLoading ? "A entrar..." : "Entrar"}
+                                        {isLoading ? t('auth.signing_in') : t('auth.signin')}
                                     </Button>
                                 </div>
                             </form>
 
                                 <div className="mt-6 text-center">
                                     <p className="text-sm text-muted-foreground">
-                                        Não tem uma conta? <Link to="/signup" className="text-primary font-semibold hover:underline">Registe-se</Link>
+                                        {t('auth.no_account')} <Link to="/signup" className="text-primary font-semibold hover:underline">{t('auth.register')}</Link>
                                     </p>
                                 </div>
                             </div>
@@ -234,7 +234,9 @@ function SigninForm() {
 }
 
 export default function Signin() {
-  useDocumentTitle("Login");
+    const { t } = useTranslation();
+
+  useDocumentTitle(t("auth.page_title_login"));
 
     const googleClientId = ENV.GOOGLE_CLIENT_ID;
     
