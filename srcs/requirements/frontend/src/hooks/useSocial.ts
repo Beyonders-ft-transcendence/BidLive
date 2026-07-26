@@ -75,6 +75,22 @@ export function useAcceptFriendRequestMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (friendshipId: number) => socialService.acceptFriendRequest(friendshipId),
+    onMutate: async (friendshipId) => {
+      await queryClient.cancelQueries({ queryKey: ["socialPendingRequestsReceived"] });
+      const previousRequests = queryClient.getQueryData(["socialPendingRequestsReceived"]);
+      queryClient.setQueryData(["socialPendingRequestsReceived"], (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) return old.filter((f: any) => f.id !== friendshipId);
+        if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.filter((f: any) => f.id !== friendshipId) };
+        return old;
+      });
+      return { previousRequests };
+    },
+    onError: (_err, _friendshipId, context) => {
+      if (context?.previousRequests) {
+        queryClient.setQueryData(["socialPendingRequestsReceived"], context.previousRequests);
+      }
+    },
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: ["socialFriends"] });
@@ -89,6 +105,22 @@ export function useRejectFriendRequestMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (friendshipId: number) => socialService.rejectFriendRequest(friendshipId),
+    onMutate: async (friendshipId) => {
+      await queryClient.cancelQueries({ queryKey: ["socialPendingRequestsReceived"] });
+      const previousRequests = queryClient.getQueryData(["socialPendingRequestsReceived"]);
+      queryClient.setQueryData(["socialPendingRequestsReceived"], (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) return old.filter((f: any) => f.id !== friendshipId);
+        if (old.data && Array.isArray(old.data)) return { ...old, data: old.data.filter((f: any) => f.id !== friendshipId) };
+        return old;
+      });
+      return { previousRequests };
+    },
+    onError: (_err, _friendshipId, context) => {
+      if (context?.previousRequests) {
+        queryClient.setQueryData(["socialPendingRequestsReceived"], context.previousRequests);
+      }
+    },
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: ["socialPendingRequestsReceived"] });

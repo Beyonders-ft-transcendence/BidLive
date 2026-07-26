@@ -158,6 +158,7 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
             {
                 "type": "chat.message",
                 "message_id": message.id,
+                "conversation_id": message.conversation_id,
                 "message": text,
                 "sender_id": self.user.id,
                 "sender_username": self.user.username,
@@ -195,6 +196,7 @@ class PrivateChatConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({
             "type": "chat.message",
             "message_id": event["message_id"],
+            "conversation_id": event.get("conversation_id"),
             "message": event["message"],
             "sender_id": event["sender_id"],
             "sender_username": event["sender_username"],

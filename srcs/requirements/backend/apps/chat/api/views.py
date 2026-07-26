@@ -101,6 +101,7 @@ class PrivateConversationViewSet(viewsets.GenericViewSet):
                     {
                         "type": "chat.message",
                         "message_id": message.id,
+                        "conversation_id": message.conversation_id,
                         "message": message.message,
                         "sender_id": message.sender_id,
                         "sender_username": message.sender.username,

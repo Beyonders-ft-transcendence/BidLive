@@ -63,13 +63,15 @@ def reject_friend_request(*, friendship_id: int, user: User) -> None:
 
 
 @transaction.atomic
-def remove_friend(*, friendship_id: int, user: User) -> None:
-	try:
-		friendship = get_friendship_by_id(friendship_id=friendship_id, user=user)
-	except Friendship.DoesNotExist:
-		raise ValidationError({"detail": "Amizade não encontrada."})
+def remove_friend(*, friend_id: int, user: User) -> None:
+	from django.db.models import Q
+	friendship = Friendship.objects.filter(
+		Q(requester=user, addressee_id=friend_id) | 
+		Q(requester_id=friend_id, addressee=user),
+		status=FriendshipStatus.ACCEPTED
+	).first()
 	
-	if friendship.status != FriendshipStatus.ACCEPTED:
+	if not friendship:
 		raise ValidationError({"detail": "Não há amizade ativa para remover."})
 	
 	friendship.delete()

@@ -60,6 +60,17 @@ export function useNotificationRealtime() {
               });
 
               toast.info(`🔔 ${data.notification.title}`);
+
+              // Bug 1: Sincronização do contador de amizades
+              if (
+                data.notification.type === "friend_request" || 
+                data.notification.type === "friend_accept" ||
+                data.notification.title.toLowerCase().includes("amizade")
+              ) {
+                queryClient.invalidateQueries({ queryKey: ["socialPendingRequestsReceived"] });
+                queryClient.invalidateQueries({ queryKey: ["socialPendingRequestsSent"] });
+                queryClient.invalidateQueries({ queryKey: ["socialFriends"] });
+              }
             }
           } catch (err) {
             console.error("[WS Notifications] message parse error:", err);

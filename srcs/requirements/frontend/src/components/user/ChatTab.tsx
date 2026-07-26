@@ -58,7 +58,8 @@ export default function ChatTab() {
   // Queries - Social
   const { data: friendsResponse, isLoading: isLoadingFriends } = useFriendsQuery();
   const { data: onlineResponse } = useOnlineFriendsQuery();
-  const { data: searchResults, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
+  const { data: searchResultsData, isLoading: isSearching } = useUserSearchQuery(debouncedQuery);
+  const searchResults = searchResultsData?.filter((u: any) => u.id !== currentUser?.id) || [];
   const { data: sentReqsResponse } = usePendingRequestsSentQuery();
   const { data: recReqsResponse } = usePendingRequestsReceivedQuery();
 
@@ -141,15 +142,42 @@ export default function ChatTab() {
     const msgText = typedMessage.trim();
     setTypedMessage("");
 
-    const wsSuccess = sendWsMessage(msgText);
-    if (!wsSuccess) {
+    if (!selectedConv) {
       try {
-        await sendMutation.mutateAsync({
+        const res = await sendMutation.mutateAsync({
           recipientId: recipient.id,
           message: msgText,
         });
-      } catch (err) {
-        // console.log("Erro ao enviar mensagem por REST:", err);
+        if (res) {
+          const newMsg = res as any;
+          const convId = typeof newMsg.conversation === "object" ? newMsg.conversation.id : newMsg.conversation;
+          const newConv: PrivateConversation = conversations.find((c: any) => c.id === convId) || {
+            id: convId,
+            user_one: currentUser as ChatUser,
+            user_two: recipient as ChatUser,
+            last_message: {
+              id: newMsg.id || 0,
+              message: newMsg.message,
+              sender_id: currentUser?.id || 0,
+              created_at: newMsg.created_at
+            },
+            created_at: newMsg.created_at,
+            unread_count: 0
+          };
+          setSelectedConv(newConv);
+          setSelectedFriend(null);
+          setLeftTab("conversas");
+        }
+      } catch (err) { }
+    } else {
+      const wsSuccess = sendWsMessage(msgText);
+      if (!wsSuccess) {
+        try {
+          await sendMutation.mutateAsync({
+            recipientId: recipient.id,
+            message: msgText,
+          });
+        } catch (err) { }
       }
     }
   };

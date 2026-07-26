@@ -77,7 +77,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     def destroy(self, request: Request, pk=None):
         """DELETE /api/social/friendships/{id}/ — remover amizade"""
         try:
-            remove_friend(friendship_id=int(pk), user=request.user)
+            remove_friend(friend_id=int(pk), user=request.user)
         except (ValidationError, PermissionDenied) as exc:
             detail = exc.detail if hasattr(exc, "detail") else str(exc)
             return error_response(errors=detail, status_code=status.HTTP_400_BAD_REQUEST)

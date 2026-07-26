@@ -127,12 +127,13 @@ export function usePrivateChatRealtime(
           if (data.type === "chat.message") {
             const newMessage: PrivateMessage = {
               id: data.message_id,
-              conversation: conversationId || 0,
+              conversation: data.conversation_id || conversationId || 0,
               sender: {
                 id: data.sender_id,
                 username: data.sender_username,
                 full_name: data.sender_username,
                 avatar_url: data.sender_avatar,
+                bio: null,
                 is_online: true,
               },
               message: data.message,
@@ -140,9 +141,9 @@ export function usePrivateChatRealtime(
               created_at: data.created_at,
             };
 
-            if (conversationId) {
+            if (newMessage.conversation) {
               queryClient.setQueryData(
-                ["privateMessages", conversationId],
+                ["privateMessages", newMessage.conversation],
                 (old: PrivateMessage[] | undefined) => {
                   if (!old) return [newMessage];
                   if (old.some((m) => m.id === newMessage.id)) return old;
@@ -306,6 +307,7 @@ export function useAuctionChatRealtime(auctionId: number) {
                 username: data.sender_username,
                 full_name: data.sender_username,
                 avatar_url: data.sender_avatar,
+                bio: null,
                 is_online: true,
               },
               message: data.message,
