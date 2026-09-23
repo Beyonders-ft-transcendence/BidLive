@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Key, Copy, Check,
   Tv, Radio, Users, RefreshCw, ArrowLeft,
@@ -55,7 +56,11 @@ function LiveStreamConsolePanel({
   const [activeTab, setActiveTab] = useState<"chat" | "bids" | "obs">("chat");
 
   // Real-time bids and price history stream (read-only for streamer)
-  const { auction, bids } = useAuctionRealtime(auctionId);
+  const { auction, bids, viewerCount: wsViewerCount } = useAuctionRealtime(auctionId);
+  const effectiveViewerCount = Math.max(
+    viewerCount,
+    wsViewerCount > 0 ? wsViewerCount - 1 : 0
+  );
 
   // Real-time chat for this auction
   const { data: messagesData } = useAuctionMessagesQuery(auctionId);
@@ -106,52 +111,64 @@ function LiveStreamConsolePanel({
   return (
     <div className="bg-card border border-border rounded-sm shadow-sm flex flex-col h-[520px] overflow-hidden text-left">
       {/* Header Tabs */}
-      <div className="flex items-center border-b border-border bg-muted/30 p-1 gap-1">
-        <button
-          onClick={() => setActiveTab("chat")}
-          className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
-            activeTab === "chat"
-              ? "bg-card text-primary shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <MessageSquare size={14} />
-          {t('auction_detail.public_chat', 'Chat')}
-          {chatMessages.length > 0 && (
-            <span className="ml-0.5 px-1.5 py-0.2 bg-primary/10 text-primary rounded-full text-[9px] font-extrabold font-mono">
-              {chatMessages.length}
-            </span>
-          )}
-        </button>
+      <div className="flex items-center justify-between border-b border-border bg-muted/30 p-1 gap-1">
+        <div className="flex items-center gap-1 flex-1">
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
+              activeTab === "chat"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquare size={14} />
+            {t('auction_detail.public_chat', 'Chat')}
+            {chatMessages.length > 0 && (
+              <span className="ml-0.5 px-1.5 py-0.2 bg-primary/10 text-primary rounded-full text-[9px] font-extrabold font-mono">
+                {chatMessages.length}
+              </span>
+            )}
+          </button>
 
-        <button
-          onClick={() => setActiveTab("bids")}
-          className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
-            activeTab === "bids"
-              ? "bg-card text-primary shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <History size={14} />
-          {t('auction_detail.bids_tab', 'Lances')}
-          {bids.length > 0 && (
-            <span className="ml-0.5 px-1.5 py-0.2 bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] font-extrabold font-mono">
-              {bids.length}
-            </span>
-          )}
-        </button>
+          <button
+            onClick={() => setActiveTab("bids")}
+            className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
+              activeTab === "bids"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <History size={14} />
+            {t('auction_detail.bids_tab', 'Lances')}
+            {bids.length > 0 && (
+              <span className="ml-0.5 px-1.5 py-0.2 bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] font-extrabold font-mono">
+                {bids.length}
+              </span>
+            )}
+          </button>
 
-        <button
-          onClick={() => setActiveTab("obs")}
-          className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
-            activeTab === "obs"
-              ? "bg-card text-primary shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Key size={14} />
-          OBS & Config
-        </button>
+          <button
+            onClick={() => setActiveTab("obs")}
+            className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none ${
+              activeTab === "obs"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Key size={14} />
+            OBS & Config
+          </button>
+        </div>
+
+        {(broadcasting || stream.status === LiveStreamStatus.LIVE) && (
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 text-red-500 rounded-sm text-[11px] font-bold shrink-0 animate-pulse"
+            title="Espectadores ao vivo"
+          >
+            <Users size={13} />
+            <span>{effectiveViewerCount}</span>
+          </div>
+        )}
       </div>
 
       {/* TAB CONTENT 1: REALTIME CHAT */}
@@ -370,7 +387,7 @@ function LiveStreamConsolePanel({
           <div className="space-y-3 pt-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5 border-b border-border pb-1">
               <Users className="w-3.5 h-3.5" />
-              {t('live_stream_tab.viewers_title', { count: viewerCount })}
+              {t('live_stream_tab.viewers_title', { count: effectiveViewerCount })}
             </span>
             
             <div className="divide-y divide-border/60 text-xs">
@@ -398,6 +415,7 @@ function LiveStreamConsolePanel({
 
 export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNewClick }: LiveStreamTabProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeAuction, setActiveAuction] = useState<Auction | null>(null);
@@ -485,21 +503,31 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
     }
   }, [activeAuction, stream]);
 
+  const handleRemoteViewerCountChange = useCallback((count: number) => {
+    setViewerCount((prev) => Math.max(prev, count));
+  }, []);
+
   useEffect(() => {
     let interval: any;
-    if (activeAuction && stream && stream.status === LiveStreamStatus.LIVE) {
-      interval = setInterval(async () => {
-        try {
-          const vRes = await auctionService.listStreamViewers(activeAuction.id, stream.id);
-          if (vRes.success && vRes.data) {
-            setViewers(vRes.data.results || []);
-            setViewerCount(vRes.data.count || 0);
-          }
-        } catch (e) {}
-      }, 5000);
+    const fetchViewers = async () => {
+      if (!activeAuction || !stream) return;
+      try {
+        const vRes = await auctionService.listStreamViewers(activeAuction.id, stream.id);
+        if (vRes.success && vRes.data) {
+          const fetchedResults = vRes.data.results || [];
+          const fetchedCount = vRes.data.count || 0;
+          setViewers(fetchedResults);
+          setViewerCount((prev) => Math.max(prev, fetchedCount));
+        }
+      } catch (e) {}
+    };
+
+    if (activeAuction && stream && (broadcasting || stream.status === LiveStreamStatus.LIVE)) {
+      fetchViewers();
+      interval = setInterval(fetchViewers, 3000);
     }
     return () => clearInterval(interval);
-  }, [activeAuction, stream]);
+  }, [activeAuction, stream, broadcasting]);
 
   const showBackendError = (err: any, fallbackMessage: string) => {
     const errorMsg = err?.response?.data?.message || fallbackMessage;
@@ -537,6 +565,10 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       });
       if (res.success) {
         setBroadcasting(true);
+        setActiveAuction((prev) => (prev ? { ...prev, status: AuctionStatus.LIVE } : null));
+        queryClient.invalidateQueries({ queryKey: ["auctions"] });
+        queryClient.invalidateQueries({ queryKey: ["auction", activeAuction.id] });
+        queryClient.invalidateQueries({ queryKey: ["auctionStreams", activeAuction.id] });
         loadStream(activeAuction.id);
         toast.success(t('live_stream_tab.toast_stream_started'));
       }
@@ -553,6 +585,9 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
       });
       if (res.success) {
         setBroadcasting(false);
+        queryClient.invalidateQueries({ queryKey: ["auctions"] });
+        queryClient.invalidateQueries({ queryKey: ["auction", activeAuction.id] });
+        queryClient.invalidateQueries({ queryKey: ["auctionStreams", activeAuction.id] });
         loadStream(activeAuction.id);
         toast.success(t('live_stream_tab.toast_stream_ended'));
       }
@@ -593,7 +628,10 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
   const serverUrl = "rtmp://rtmp.bidlive.ao/live";
 
   const streamableAuctions = myAuctions.filter(
-    (auc) => auc.status === AuctionStatus.LIVE
+    (auc) =>
+      auc.status === AuctionStatus.LIVE ||
+      auc.status === AuctionStatus.ACTIVE ||
+      auc.status === AuctionStatus.SCHEDULED
   );
 
   return (
@@ -790,6 +828,7 @@ export default function LiveStreamTab({ myAuctions, loadingAuctions, onCreateNew
                   stream={stream}
                   broadcasting={broadcasting}
                   viewerCount={viewerCount}
+                  onRemoteViewerCountChange={handleRemoteViewerCountChange}
                   onStart={handleStartStream}
                   onEnd={handleEndStream}
                 />
