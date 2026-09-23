@@ -130,14 +130,15 @@ export default function AuctionDetailPage() {
     }
 
     // Contagem de espectadores via GET /auctions/:id/streams/:pk/viewers/
-    // (fallback para as conexões do WebSocket enquanto o polling não responde)
+    // O total de conexões ativas na sala inclui o criador da live; desconta 1 para refletir apenas os espectadores
     const { data: streamViewersData } = useStreamViewersQuery(
         auctionId,
         activeStream?.id,
         !!activeStream,
-        10000
+        3000
     );
-    const liveViewerCount = streamViewersData?.count ?? viewerCount;
+    const totalConnections = Math.max(streamViewersData?.count || 0, viewerCount || 0);
+    const liveViewerCount = Math.max(0, totalConnections > 0 ? totalConnections - 1 : 0);
 
     const [isFavorite, setIsFavorite] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
