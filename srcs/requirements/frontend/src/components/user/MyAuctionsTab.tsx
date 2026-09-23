@@ -151,7 +151,9 @@ export default function MyAuctionsTab({
                       </button>
                     )}
 
-                    {(auc.status === AuctionStatus.LIVE) && (
+                    {(auc.status === AuctionStatus.LIVE ||
+                      auc.status === AuctionStatus.ACTIVE ||
+                      auc.status === AuctionStatus.SCHEDULED) && (
                       <button
                         onClick={() => onManageStreamClick(auc)}
                         title={t('my_auctions_tab.manage_stream')}
@@ -273,7 +275,9 @@ export default function MyAuctionsTab({
                           </button>
                         )}
 
-                        {(auc.status === AuctionStatus.LIVE) && (
+                        {(auc.status === AuctionStatus.LIVE ||
+                          auc.status === AuctionStatus.ACTIVE ||
+                          auc.status === AuctionStatus.SCHEDULED) && (
                           <button
                             onClick={() => onManageStreamClick(auc)}
                             title={t('my_auctions_tab.manage_stream')}
