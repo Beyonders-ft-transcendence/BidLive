@@ -1,0 +1,196 @@
+{
+  "id": "bidlive",
+  "name": "BidLive",
+  "tagline": {
+    "pt": "Plataforma de Leilões em Tempo Real com Streaming WebRTC, WebSockets e Observabilidade Completa",
+    "en": "Real-time Live Auction Platform with WebRTC Streaming, WebSockets, and Full Observability"
+  },
+  "category": "fullstack",
+  "featured": true,
+  "architecture_type": "Event-Driven Microservices with Container Orchestration",
+  "about": {
+    "pt": "O BidLive é uma plataforma de leilões ao vivo de alta performance desenvolvida no currículo da 42 School (projeto ft_transcendence). Permite que compradores participem de disputas de lances em frações de segundo sem recarregamento de página, assistam a transmissões ao vivo de vídeo de baixa latência via LiveKit (WebRTC) e interajam por chat simultâneo. A infraestrutura conta com 15+ microsserviços containerizados com Docker Compose, telemetria em tempo real com Prometheus e Grafana, e auditoria e agregação de logs com a stack ELK (Elasticsearch, Logstash, Kibana).",
+    "en": "BidLive is a high-performance live auction platform developed as the capstone project at 42 School (ft_transcendence). It allows buyers to participate in split-second real-time bidding without page reloads, watch ultra-low latency video streams via LiveKit (WebRTC), and interact via simultaneous chat. The infrastructure features 15+ containerized microservices managed by Docker Compose, real-time observability with Prometheus and Grafana, and centralized log auditing with the ELK stack (Elasticsearch, Logstash, Kibana)."
+  },
+  "highlights": [
+    "Lances em tempo real com WebSockets (Django Channels + Redis Channel Layer)",
+    "Proteção estrita anti-race condition e integridade transacional de carteiras",
+    "Streaming ao vivo com WebRTC de ultrabaixa latência powered by LiveKit",
+    "Orquestração multi-container de 15+ serviços isolados em redes Docker dedicadas",
+    "Observabilidade de ponta: Prometheus, Grafana e Exporters (Nginx, Redis, Postgres, Celery)",
+    "Logging centralizado estruturado com Stack ELK (Logstash GELF + Elasticsearch + Kibana)",
+    "Autenticação segura JWT com suporte a OAuth2 (Google e 42 Intra)",
+    "Gerenciamento de banco de dados relacional PostgreSQL via Adminer e orquestração via Portainer"
+  ],
+  "technologies": [
+    "TypeScript",
+    "React",
+    "Python",
+    "Django",
+    "Django Channels",
+    "PostgreSQL",
+    "Redis",
+    "Celery",
+    "LiveKit",
+    "WebRTC",
+    "WebSockets",
+    "Docker",
+    "Docker Compose",
+    "Nginx",
+    "Prometheus",
+    "Grafana",
+    "Elasticsearch",
+    "Logstash",
+    "Kibana",
+    "Portainer",
+    "Adminer"
+  ],
+  "media": {
+    "cover": "cover.webp",
+    "gallery": [
+      {
+        "type": "video",
+        "src": "gallery/demo.mp4",
+        "caption": "Demonstração em Tempo Real: Disputa de Lances Concorrentes (Anti-Race Condition via WebSockets)"
+      },
+      {
+        "type": "image",
+        "src": "gallery/01-landing-hero.webp",
+        "caption": "Landing Page com Hero Section e Chamada para Ação"
+      },
+      {
+        "type": "image",
+        "src": "gallery/02-destaques-ao-vivo.webp",
+        "caption": "Leilões Acontecendo Agora e em Destaque"
+      },
+      {
+        "type": "image",
+        "src": "gallery/03-leiloes-catalogo.webp",
+        "caption": "Catálogo Completo com Filtros Dinâmicos e Busca"
+      },
+      {
+        "type": "image",
+        "src": "gallery/04-login-oauth.webp",
+        "caption": "Autenticação OAuth2 (Google e 42 Intra)"
+      },
+      {
+        "type": "image",
+        "src": "gallery/05-dashboard-usuario.webp",
+        "caption": "Painel Geral do Usuário e Métricas de Atividade"
+      },
+      {
+        "type": "image",
+        "src": "gallery/06-meus-leiloes-gestao.webp",
+        "caption": "Gestão de Leilões Criados pelo Usuário"
+      },
+      {
+        "type": "image",
+        "src": "gallery/07-criar-leilao-wizard.webp",
+        "caption": "Wizard de Criação de Novos Lotes em 3 Etapas"
+      },
+      {
+        "type": "image",
+        "src": "gallery/08-transmissao-livekit.webp",
+        "caption": "Central de Transmissão Ao Vivo com WebRTC"
+      },
+      {
+        "type": "image",
+        "src": "gallery/09-amigos-rede-social.webp",
+        "caption": "Rede Social de Amigos e Solicitações de Amizade"
+      },
+      {
+        "type": "image",
+        "src": "gallery/10-chat-tempo-real.webp",
+        "caption": "Chat Social com WebSocket Full-Duplex"
+      },
+      {
+        "type": "image",
+        "src": "gallery/11-batalha-lances-split.webp",
+        "caption": "Disputa de Lances Concorrentes em Tempo Real"
+      },
+      {
+        "type": "image",
+        "src": "gallery/12-grafana-dashboards.webp",
+        "caption": "Painel de Observabilidade do Grafana"
+      },
+      {
+        "type": "image",
+        "src": "gallery/13-grafana-nginx-conn.webp",
+        "caption": "Telemetria Nginx: Conexões Ativas e Tráfego"
+      },
+      {
+        "type": "image",
+        "src": "gallery/14-grafana-celery-tasks.webp",
+        "caption": "Monitoramento de Workers Celery e Filas"
+      },
+      {
+        "type": "image",
+        "src": "gallery/15-grafana-django-prometheus.webp",
+        "caption": "Métricas Django Prometheus: Latência e Throughput"
+      },
+      {
+        "type": "image",
+        "src": "gallery/16-grafana-livekit-webrtc.webp",
+        "caption": "Métricas de Áudio/Vídeo e Salas LiveKit"
+      },
+      {
+        "type": "image",
+        "src": "gallery/17-grafana-redis-metrics.webp",
+        "caption": "Métricas do Redis: Comandos/s e Clientes Ativos"
+      },
+      {
+        "type": "image",
+        "src": "gallery/18-kibana-security-overview.webp",
+        "caption": "Stack ELK: Dashboard de Segurança no Kibana"
+      },
+      {
+        "type": "image",
+        "src": "gallery/19-kibana-nginx-performance.webp",
+        "caption": "Stack ELK: Performance de Resposta HTTP do Nginx"
+      },
+      {
+        "type": "image",
+        "src": "gallery/20-kibana-celery-tasks.webp",
+        "caption": "Stack ELK: Rastreamento de Tarefas Assíncronas Celery"
+      }
+    ],
+    "recordings": [
+      {
+        "file": "videos/01-capa-principal-bidlive.mp4",
+        "title": "Landing Page e Visão Geral"
+      },
+      {
+        "file": "videos/02-grafana-bidlive.mp4",
+        "title": "Painel de Métricas e Observabilidade (Grafana)"
+      },
+      {
+        "file": "videos/03-kibana-bidlive.mp4",
+        "title": "Auditoria de Logs e Segurança (Kibana ELK)"
+      },
+      {
+        "file": "videos/04-portainer-bidlive.mp4",
+        "title": "Topologia e Gestão de Containers (Portainer)"
+      },
+      {
+        "file": "videos/05-adminer-bidlive.mp4",
+        "title": "Estrutura do Banco de Dados Relacional (Adminer)"
+      },
+      {
+        "file": "videos/06-leiloeiro-mobile-bidlive.mp4",
+        "title": "Painel de Transmissão do Leiloeiro"
+      },
+      {
+        "file": "videos/07-batalha-lances-bidlive.mp4",
+        "title": "Batalha de Lances Concorrentes (Take 1)"
+      },
+      {
+        "file": "videos/07-batalha-lances-take2-bidlive.mp4",
+        "title": "Batalha de Lances Concorrentes (Take 2)"
+      },
+      {
+        "file": "videos/08-chat-amigos-bidlive.mp4",
+        "title": "Chat Social e Amigos em Tempo Real"
+      }
+    ]
+  }
+}

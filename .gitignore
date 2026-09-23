@@ -76,3 +76,6 @@ ruff_cache/
 .vscode/
 .idea/
 
+# Portfolio - ignore raw heavy video recordings and raw PNGs (keep web-optimized gallery, cover, and details.json)
+.portfolio/videos/
+.portfolio/raw-captures/
