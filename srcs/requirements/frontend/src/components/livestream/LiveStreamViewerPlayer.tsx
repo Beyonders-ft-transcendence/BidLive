@@ -12,7 +12,7 @@ import { RefreshCw, LogIn, Videotape, VideoOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { LiveStream } from "@/shared/types/auction.types";
 import { LiveStreamStatus } from "@/shared/types/auction.types";
-import { getBackendErrorMessage, getHttpStatus, useLiveKitTokenQuery } from "@/hooks/useLiveKit";
+import { getBackendErrorMessage, getHttpStatus, useLiveKitTokenQuery, resolveLiveKitUrl } from "@/hooks/useLiveKit";
 import { useAuthStore } from "@/shared/stores/auth.store";
 import ENV from "@/shared/utils/env.utils";
 
@@ -101,7 +101,7 @@ export default function LiveStreamViewerPlayer({ auctionId, stream }: LiveStream
     refetch,
   } = useLiveKitTokenQuery(auctionId, stream.id, "viewer", isAuthenticated && isStreamLive);
 
-  const serverUrl = grant?.url || ENV.LIVEKIT_URL;
+  const serverUrl = resolveLiveKitUrl(grant?.url || ENV.LIVEKIT_URL);
 
   // ── Visitante anônimo ────────────────────────────────────────────────
   if (!isAuthenticated) {
