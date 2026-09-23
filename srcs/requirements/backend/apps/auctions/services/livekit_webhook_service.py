@@ -57,6 +57,11 @@ def _parse_json_payload(value) -> dict:
     return {}
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def _parse_authorization_header(authorization: str) -> str:
     if not authorization:
         raise PermissionDenied("Missing LiveKit webhook authorization.")
@@ -66,33 +71,72 @@ def _parse_authorization_header(authorization: str) -> str:
     return authorization[len(prefix) :].strip()
 
 
-def verify_livekit_webhook(*, body: str, authorization: str) -> dict:
+def verify_livekit_webhook(*, body: str | bytes, authorization: str) -> dict:
     token = _parse_authorization_header(authorization)
+    expected_secret = getattr(settings, "LIVEKIT_API_SECRET", "")
+    expected_key = getattr(settings, "LIVEKIT_API_KEY", "")
+
     try:
         claims = jwt.decode(
             token,
-            key=getattr(settings, "LIVEKIT_API_SECRET", ""),
-            issuer=getattr(settings, "LIVEKIT_API_KEY", ""),
+            key=expected_secret,
             algorithms=["HS256"],
+            leeway=30,
+            options={"verify_issuer": False},
         )
     except Exception as exc:
-        raise PermissionDenied("Invalid LiveKit webhook signature.") from exc
+        logger.error(
+            "LiveKit webhook signature verification failed: %s (token prefix: %s)",
+            exc,
+            token[:20] if token else "",
+        )
+        raise PermissionDenied(f"Invalid LiveKit webhook signature: {exc}") from exc
 
-    sha256_b64 = claims.get("sha256")
-    if not sha256_b64:
+    token_iss = claims.get("iss")
+    if token_iss and expected_key and token_iss != expected_key:
+        logger.error(
+            "LiveKit webhook issuer mismatch: received '%s', expected '%s'",
+            token_iss,
+            expected_key,
+        )
+        raise PermissionDenied("Invalid LiveKit webhook issuer.")
+
+    sha256_claim = claims.get("sha256")
+    if not sha256_claim:
+        logger.error("LiveKit webhook token missing sha256 claim. Claims: %s", list(claims.keys()))
         raise PermissionDenied("LiveKit webhook hash is missing.")
-    try:
-        expected_hash = base64.b64decode(sha256_b64)
-    except Exception as exc:
-        raise PermissionDenied("Invalid LiveKit webhook hash.") from exc
 
-    actual_hash = hashlib.sha256(body.encode("utf-8")).digest()
-    if actual_hash != expected_hash:
+    body_bytes = body if isinstance(body, bytes) else body.encode("utf-8")
+    actual_digest = hashlib.sha256(body_bytes).digest()
+    actual_b64 = base64.b64encode(actual_digest).decode()
+    actual_urlsafe_b64 = base64.urlsafe_b64encode(actual_digest).decode().rstrip("=")
+    actual_hex = hashlib.sha256(body_bytes).hexdigest()
+
+    # Match against standard base64, urlsafe base64, hex, or decoded raw digest
+    matched = False
+    if sha256_claim in (actual_b64, actual_urlsafe_b64, actual_hex):
+        matched = True
+    else:
+        try:
+            # Add padding if missing and compare bytes
+            padded = sha256_claim + "=" * (-len(sha256_claim) % 4)
+            if base64.b64decode(padded) == actual_digest:
+                matched = True
+        except Exception:
+            pass
+
+    if not matched:
+        logger.error(
+            "LiveKit webhook payload hash mismatch: claim='%s', computed_b64='%s'",
+            sha256_claim,
+            actual_b64,
+        )
         raise PermissionDenied("LiveKit webhook payload hash mismatch.")
 
     try:
-        payload = json.loads(body)
-    except json.JSONDecodeError as exc:
+        payload_str = body_bytes.decode("utf-8")
+        payload = json.loads(payload_str)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ValidationError({"body": ["Invalid JSON payload."]}) from exc
 
     if not isinstance(payload, dict):
@@ -138,8 +182,13 @@ def _participant_name(participant: dict) -> str:
     return str(participant.get("name") or "")
 
 
-def _is_broadcaster(metadata: dict) -> bool:
-    return str(metadata.get("role") or "").lower() in {"broadcaster", "moderator"}
+def _is_broadcaster(metadata: dict, identity: str = "") -> bool:
+    role = str(metadata.get("role") or "").lower()
+    if role in {"broadcaster", "moderator"}:
+        return True
+    if identity and str(identity).lower().startswith(("broadcaster-", "moderator-")):
+        return True
+    return False
 
 
 def _find_user(participant: dict, metadata: dict) -> User | None:
@@ -173,10 +222,60 @@ def _set_stream_live(*, stream: LiveStream) -> None:
 
     from apps.auctions.models import AuctionStatus
     auction = stream.auction
-    auction.refresh_from_db(fields=["status"])
-    if auction.status == AuctionStatus.ACTIVE:
+    auction.refresh_from_db(fields=["status", "start_time"])
+    status_changed = False
+    if auction.status in (AuctionStatus.ACTIVE, AuctionStatus.SCHEDULED):
         auction.status = AuctionStatus.LIVE
-        auction.save(update_fields=["status", "updated_at"])
+        if auction.start_time and auction.start_time > timezone.now():
+            auction.start_time = timezone.now()
+        auction.save(update_fields=["status", "start_time", "updated_at"])
+        status_changed = True
+
+    from apps.auctions.events import AUCTION_UPDATED, STREAM_STARTED
+    from apps.auctions.services.realtime_service import (
+        publish_auction_event,
+        publish_auction_snapshot,
+        build_auction_snapshot,
+    )
+    from apps.auctions.services.stream_service import (
+        publish_stream_event,
+        notify_auction_watchers,
+        notify_user,
+    )
+    from apps.notifications.models import NotificationType
+
+    if status_changed:
+        publish_auction_event(
+            auction_id=auction.id,
+            event_type=AUCTION_UPDATED,
+            payload={"auction_id": auction.id, "status": auction.status},
+        )
+        publish_auction_snapshot(
+            auction_id=auction.id,
+            snapshot=build_auction_snapshot(auction=auction),
+            broadcast=True,
+        )
+
+    publish_stream_event(
+        stream=stream,
+        event_type=STREAM_STARTED,
+        payload={"stream_id": stream.id, "auction_id": stream.auction_id},
+    )
+
+    notify_auction_watchers(
+        auction=stream.auction,
+        notification_type=NotificationType.STREAM_STARTED,
+        title="Live stream started",
+        content=f"Stream {stream.id} for auction {stream.auction_id} is now live.",
+        exclude_user_ids=[stream.streamer_id] if stream.streamer_id else [],
+    )
+    if stream.streamer:
+        notify_user(
+            user=stream.streamer,
+            notification_type=NotificationType.STREAM_STARTED,
+            title="Your stream is live",
+            content=f"Stream {stream.id} for auction {stream.auction_id} started.",
+        )
 
 
 def _update_stream_meta(*, stream: LiveStream, event_name: str, extra: dict | None = None) -> None:
@@ -241,8 +340,10 @@ def process_livekit_webhook_event(*, payload: dict) -> dict:
         )
         return {"event": event_name, "stream_id": stream.id, "auction_id": stream.auction_id}
 
+    is_broadcaster = _is_broadcaster(participant_metadata, participant_identity)
+
     if event_name == "participant_joined":
-        if _is_broadcaster(participant_metadata):
+        if is_broadcaster:
             _set_stream_live(stream=stream)
             track_event(
                 user=user or stream.streamer,
@@ -269,7 +370,7 @@ def process_livekit_webhook_event(*, payload: dict) -> dict:
         return {"event": event_name, "stream_id": stream.id, "auction_id": stream.auction_id}
 
     if event_name == "participant_left":
-        if _is_broadcaster(participant_metadata):
+        if is_broadcaster:
             end_stream(actor=None, stream=stream, reason="livekit_broadcaster_left", status=LiveStreamStatus.ENDED)
         elif user is not None:
             leave_stream(
@@ -290,6 +391,8 @@ def process_livekit_webhook_event(*, payload: dict) -> dict:
         return {"event": event_name, "stream_id": stream.id, "auction_id": stream.auction_id}
 
     if event_name in {"track_published", "track_unpublished", "participant_connection_aborted"}:
+        if event_name == "track_published" and is_broadcaster:
+            _set_stream_live(stream=stream)
         track_event(
             user=user or stream.streamer,
             event_type=f"stream.livekit_{event_name}",
