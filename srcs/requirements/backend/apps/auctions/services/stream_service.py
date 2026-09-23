@@ -84,7 +84,7 @@ def _can_manage_auction(*, user, auction: Auction) -> bool:
     if user_has_permission(user=user, permission_name="auction.manage"):
         return True
     if getattr(user, "is_superuser", False):
-        return
+        return True
     return bool(user.has_role("SUPER_ADMIN") or user.has_role("MONITOR") or user.has_role("admin"))
 
 
@@ -96,10 +96,8 @@ def _ensure_can_manage_auction(*, user, auction: Auction) -> None:
 def _ensure_auction_streamable(*, auction: Auction) -> None:
     if auction.status in (AuctionStatus.ENDED, AuctionStatus.CANCELLED, AuctionStatus.SOLD):
         raise ValidationError({"auction": ["Auction is already closed."]})
-    if auction.end_time <= timezone.now():
+    if auction.end_time and auction.end_time <= timezone.now():
         raise ValidationError({"auction": ["Auction has already ended."]})
-    if auction.start_time > timezone.now():
-        raise ValidationError({"auction": ["Auction has not started yet."]})
 
 
 def _validate_stream_key(stream: LiveStream, stream_key: str) -> bool:
@@ -360,9 +358,11 @@ def start_stream(
 
     auction = stream.auction
     auction.refresh_from_db(fields=["status", "started_at"])
-    if auction.status == AuctionStatus.ACTIVE:
+    if auction.status in (AuctionStatus.ACTIVE, AuctionStatus.SCHEDULED):
         auction.status = AuctionStatus.LIVE
-        auction.save(update_fields=["status", "updated_at"])
+        if auction.start_time and auction.start_time > timezone.now():
+            auction.start_time = timezone.now()
+        auction.save(update_fields=["status", "start_time", "updated_at"])
         from apps.auctions.events import AUCTION_UPDATED
         from apps.auctions.services.realtime_service import publish_auction_event, publish_auction_snapshot, build_auction_snapshot
         publish_auction_event(
