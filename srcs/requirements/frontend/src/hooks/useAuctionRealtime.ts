@@ -33,7 +33,7 @@ export function useAuctionRealtime(id: number) {
   // React Query Queries
   const { data: auction, isLoading: loadingAuction, error: auctionQueryError } = useAuctionQuery(id);
   const { data: bidsData, isLoading: loadingBids } = useAuctionBidsQuery(id);
-  const { data: streamsData } = useAuctionStreamsQuery(id, isAuthenticated, 15000);
+  const { data: streamsData } = useAuctionStreamsQuery(id, true, 15000);
 
   const placeBidMutation = usePlaceBidMutation();
   const buyNowMutation = useBuyNowMutation();
