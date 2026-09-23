@@ -327,6 +327,9 @@ services:
       - backend-network
     expose:
       - "6789"
+    ports:
+      - "7881:7881"
+      - "5000-5100:5000-5100/udp"
     restart: always
     env_file:
       - ./.env.livekit
