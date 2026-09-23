@@ -41,7 +41,7 @@ def mock_livekit_room_service(monkeypatch):
         def text(self):
             return json.dumps(self._payload)
 
-    def fake_post(url, json=None, headers=None, timeout=None):
+    def fake_post(url, json=None, headers=None, timeout=None, **kwargs):
         method = url.rsplit("/", 1)[-1]
         body = json or {}
         if method == "ListRooms":
