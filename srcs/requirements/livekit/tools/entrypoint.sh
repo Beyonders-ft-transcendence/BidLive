@@ -61,8 +61,21 @@ rtc:
   port_range_start: ${LIVEKIT_RTC_UDP_PORT_RANGE_START}
   port_range_end: ${LIVEKIT_RTC_UDP_PORT_RANGE_END}
   use_external_ip: false
+INNEREOF
+
+if [ -n "$LIVEKIT_NODE_IP" ]; then
+  cat >> "$CONFIG_FILE" <<INNEREOF
+  node_ip: ${LIVEKIT_NODE_IP}
+INNEREOF
+fi
+
+cat >> "$CONFIG_FILE" <<INNEREOF
 keys:
   ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
+webhook:
+  api_key: ${LIVEKIT_API_KEY}
+  urls:
+    - https://backend:8000/api/livekit/webhook/
 logging:
   level: info
 INNEREOF
@@ -86,5 +99,10 @@ unset REDIS_PORT
 unset REDIS_PASSWORD
 unset REDIS_USER
 
-exec livekit-server --config "$CONFIG_FILE" --bind 0.0.0.0
+EXTRA_ARGS=""
+if [ -n "$LIVEKIT_NODE_IP" ]; then
+  EXTRA_ARGS="--node-ip $LIVEKIT_NODE_IP"
+fi
+
+exec livekit-server --config "$CONFIG_FILE" --bind 0.0.0.0 $EXTRA_ARGS
 '
