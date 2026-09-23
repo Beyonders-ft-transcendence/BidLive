@@ -4,7 +4,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied, ValidationError as DRFValidationError
 from apps.auctions.models import Auction
 from apps.auctions.permissions import IsLiveStreamOwnerOrManager
 from apps.auctions.selectors import get_stream_for_auction, list_streams_for_auction, list_viewers_for_stream
@@ -174,12 +176,12 @@ class StreamViewSet(viewsets.GenericViewSet):
 
     def list(self, request, auction_id=None):
         queryset = self.get_queryset()
-        serializer = StreamListSerializer(queryset, many=True)
+        serializer = StreamListSerializer(queryset, many=True, context={"request": request})
         return success_response(serializer.data)
 
     def retrieve(self, request, auction_id=None, pk=None):
         stream = self.get_object()
-        return success_response(StreamDetailSerializer(stream).data)
+        return success_response(StreamDetailSerializer(stream, context={"request": request}).data)
 
     @extend_schema(
         tags=STREAM_TAGS,
@@ -507,6 +509,8 @@ class StreamViewSet(viewsets.GenericViewSet):
                 participant_name=serializer.validated_data.get("participant_name", ""),
                 metadata=serializer.validated_data.get("metadata") or {},
             )
+        except (DjangoPermissionDenied, DRFPermissionDenied, DRFValidationError):
+            raise
         except Exception as exc:
             return error_response(
                 errors={"detail": f"Erro ao gerar token LiveKit: {exc}"},
