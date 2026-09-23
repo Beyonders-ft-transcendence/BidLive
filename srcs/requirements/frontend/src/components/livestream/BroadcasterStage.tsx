@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LiveKitRoom,
   VideoTrack,
   useConnectionState,
   useLocalParticipant,
+  useRemoteParticipants,
   useTracks,
 } from "@livekit/components-react";
 import { ConnectionState, Track } from "livekit-client";
@@ -11,7 +12,7 @@ import { Mic, MicOff, Play, Radio, RefreshCw, Square, Users, Video, VideoOff } f
 import { toast } from "sonner";
 import type { LiveStream } from "@/shared/types/auction.types";
 import { LiveStreamStatus } from "@/shared/types/auction.types";
-import { getBackendErrorMessage, useLiveKitTokenQuery } from "@/hooks/useLiveKit";
+import { getBackendErrorMessage, useLiveKitTokenQuery, resolveLiveKitUrl } from "@/hooks/useLiveKit";
 import ENV from "@/shared/utils/env.utils";
 
 interface BroadcasterStageProps {
@@ -19,6 +20,7 @@ interface BroadcasterStageProps {
   stream: LiveStream;
   broadcasting: boolean;
   viewerCount: number;
+  onRemoteViewerCountChange?: (count: number) => void;
   onStart: () => void;
   onEnd: () => void;
 }
@@ -55,11 +57,28 @@ const connectionLabels: Partial<Record<ConnectionState, string>> = {
  * Interior da sala LiveKit: preview da câmera publicada, controles de
  * dispositivos e botões de iniciar/encerrar a transmissão.
  */
-function StageControls({ broadcasting, viewerCount, onStart, onEnd }: Omit<BroadcasterStageProps, "auctionId" | "stream">) {
+function StageControls({
+  stream,
+  broadcasting,
+  viewerCount,
+  onRemoteViewerCountChange,
+  onStart,
+  onEnd,
+}: Omit<BroadcasterStageProps, "auctionId">) {
   const connectionState = useConnectionState();
   const { localParticipant, isCameraEnabled, isMicrophoneEnabled } = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
   const [togglingCamera, setTogglingCamera] = useState(false);
   const [togglingMic, setTogglingMic] = useState(false);
+
+  const activeViewers = Math.max(viewerCount || 0, remoteParticipants.length);
+  const isStreamLive = broadcasting || stream.status === LiveStreamStatus.LIVE;
+
+  useEffect(() => {
+    if (onRemoteViewerCountChange) {
+      onRemoteViewerCountChange(remoteParticipants.length);
+    }
+  }, [remoteParticipants.length, onRemoteViewerCountChange]);
 
   const cameraTracks = useTracks([Track.Source.Camera], { onlySubscribed: false });
   const localCamera = cameraTracks.find((t) => t.participant.isLocal);
@@ -104,22 +123,22 @@ function StageControls({ broadcasting, viewerCount, onStart, onEnd }: Omit<Broad
         {/* Status Overlay Badges */}
         <div className="absolute top-4 left-4 flex items-center gap-2">
           <span
-            className={`px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest ${
-              broadcasting ? "bg-red-500 text-white animate-pulse" : "bg-slate-800 text-slate-300"
+            className={`px-2.5 py-1 rounded-sm text-[9px] font-black uppercase tracking-widest ${
+              isStreamLive ? "bg-red-500 text-white animate-pulse" : "bg-slate-800 text-slate-300"
             }`}
           >
-            {broadcasting ? "AO VIVO" : "OFFLINE"}
+            {isStreamLive ? "AO VIVO" : "OFFLINE"}
           </span>
 
-          {broadcasting && (
-            <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-sm text-[8px] font-bold text-white flex items-center gap-1">
-              <Users size={10} />
-              {viewerCount}
+          {isStreamLive && (
+            <span className="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-sm text-[10px] font-bold text-white flex items-center gap-1.5 border border-white/10 shadow-sm">
+              <Users size={12} className="text-red-400" />
+              <span>{activeViewers} assistindo</span>
             </span>
           )}
 
           {connectionLabel && (
-            <span className="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-sm text-[8px] font-bold uppercase tracking-widest">
+            <span className="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-2 py-1 rounded-sm text-[9px] font-bold uppercase tracking-widest">
               {connectionLabel}
             </span>
           )}
@@ -160,7 +179,7 @@ function StageControls({ broadcasting, viewerCount, onStart, onEnd }: Omit<Broad
           {!broadcasting ? (
             <button
               onClick={onStart}
-              className="px-5 py-2.5 bg-red-650 hover:bg-red-700 text-white font-bold text-xs rounded-sm shadow-sm uppercase flex items-center gap-1.5 cursor-pointer border-none animate-pulse"
+              className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-sm shadow-sm uppercase flex items-center gap-1.5 cursor-pointer border-none animate-pulse"
             >
               <Play size={14} />
               Iniciar Transmissão
@@ -186,7 +205,15 @@ function StageControls({ broadcasting, viewerCount, onStart, onEnd }: Omit<Broad
  * o leiloeiro já pode pré-visualizar câmera/microfone (os espectadores só
  * conseguem entrar quando o stream fica LIVE via /start/).
  */
-export default function BroadcasterStage({ auctionId, stream, broadcasting, viewerCount, onStart, onEnd }: BroadcasterStageProps) {
+export default function BroadcasterStage({
+  auctionId,
+  stream,
+  broadcasting,
+  viewerCount,
+  onRemoteViewerCountChange,
+  onStart,
+  onEnd,
+}: BroadcasterStageProps) {
   const isActive = stream.status === LiveStreamStatus.READY || stream.status === LiveStreamStatus.LIVE;
 
   const {
@@ -197,7 +224,7 @@ export default function BroadcasterStage({ auctionId, stream, broadcasting, view
     refetch,
   } = useLiveKitTokenQuery(auctionId, stream.id, "broadcaster", isActive);
 
-  const serverUrl = grant?.url || ENV.LIVEKIT_URL;
+  const serverUrl = resolveLiveKitUrl(grant?.url || ENV.LIVEKIT_URL);
 
   if (!isActive) {
     return (
@@ -257,7 +284,15 @@ export default function BroadcasterStage({ auctionId, stream, broadcasting, view
         toast.error("Erro na conexão com o estúdio de transmissão.");
       }}
     >
-      <StageControls broadcasting={broadcasting} viewerCount={viewerCount} onStart={onStart} onEnd={onEnd} />
+      <StageControls
+        stream={stream}
+        broadcasting={broadcasting}
+        viewerCount={viewerCount}
+        onRemoteViewerCountChange={onRemoteViewerCountChange}
+        onStart={onStart}
+        onEnd={onEnd}
+      />
     </LiveKitRoom>
   );
 }
+
