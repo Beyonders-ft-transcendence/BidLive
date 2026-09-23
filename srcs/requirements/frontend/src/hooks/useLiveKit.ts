@@ -30,6 +30,31 @@ const TOKEN_STALE_TIME_MS = 50 * 60 * 1000;
  * - role "broadcaster": emitido enquanto o stream não estiver ENDED/CANCELLED,
  *   apenas para o vendedor/streamer/admin (permite publicar).
  */
+export function resolveLiveKitUrl(rawUrl?: string): string {
+  if (typeof window === "undefined") return rawUrl || "";
+  const isHttps = window.location.protocol === "https:";
+  const wsProto = isHttps ? "wss:" : "ws:";
+  const currentHost = window.location.host;
+
+  if (!rawUrl) {
+    return `${wsProto}//${currentHost}/livekit`;
+  }
+
+  try {
+    const parsed = new URL(rawUrl);
+    // If backend returns internal container host or a different domain/IP than current browser session
+    if (parsed.hostname === "livekit" || parsed.hostname !== window.location.hostname) {
+      return `${wsProto}//${currentHost}/livekit`;
+    }
+  } catch {
+    if (rawUrl.startsWith("/")) {
+      return `${wsProto}//${currentHost}${rawUrl}`;
+    }
+  }
+
+  return rawUrl;
+}
+
 export function useLiveKitTokenQuery(
   auctionId: number | undefined,
   streamId: number | undefined,
@@ -42,6 +67,9 @@ export function useLiveKitTokenQuery(
       const res = await auctionService.getLiveKitToken(auctionId!, streamId!, { role });
       if (!res.success || !res.data) {
         throw new Error(res.message || "Falha ao obter acesso à transmissão.");
+      }
+      if (res.data.url) {
+        res.data.url = resolveLiveKitUrl(res.data.url);
       }
       return res.data;
     },
