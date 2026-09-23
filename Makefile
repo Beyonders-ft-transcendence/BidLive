@@ -12,8 +12,14 @@ ca:
 build:
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) build
 
+HOST_IP ?= $(shell hostname -I 2>/dev/null | awk '{print $$1}')
+
 up:
 	@echo "🚀 Starting containers..."
+	@if [ -n "$(HOST_IP)" ]; then \
+		echo "📡 Syncing LIVEKIT_NODE_IP=$(HOST_IP) in srcs/.env.livekit..."; \
+		sed -i "s/^LIVEKIT_NODE_IP=.*/LIVEKIT_NODE_IP=$(HOST_IP)/" srcs/.env.livekit 2>/dev/null || true; \
+	fi
 	@docker compose -p $(PROJECT_NAME) -f $(COMPOSE_FILE) up -d
 
 down:
