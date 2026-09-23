@@ -79,6 +79,27 @@ class LiveStreamBaseSerializer(LocalizedModelSerializer):
             "full_name": getattr(obj.streamer, "full_name", ""),
         }
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request is not None:
+            user = getattr(request, "user", None)
+            is_authorized = False
+            if user and user.is_authenticated:
+                if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
+                    is_authorized = True
+                elif instance.streamer_id == user.id:
+                    is_authorized = True
+                elif (
+                    getattr(instance, "auction", None)
+                    and getattr(instance.auction, "item", None)
+                    and instance.auction.item.seller_id == user.id
+                ):
+                    is_authorized = True
+            if not is_authorized:
+                data.pop("stream_key", None)
+        return data
+
 
 class StreamListSerializer(LiveStreamBaseSerializer):
     class Meta(LiveStreamBaseSerializer.Meta):
@@ -89,6 +110,7 @@ class StreamListSerializer(LiveStreamBaseSerializer):
             "streamer",
             "title",
             "thumbnail",
+            "stream_key",
             "status",
             "visibility",
             "is_live",
