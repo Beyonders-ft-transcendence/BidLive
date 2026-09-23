@@ -1,11 +1,10 @@
-FROM alpine:3.22
+FROM livekit/livekit-server:v1.11.0 AS livekit-source
 
-ENV LIVEKIT_VERSION=1.11.0
+FROM alpine:3.22
 
 RUN apk add --no-cache \
     ca-certificates \
-    curl \
-    tar \
+    libc6-compat \
     stunnel
 
 # Install cfssl natively from Alpine edge testing repository
@@ -15,11 +14,8 @@ RUN apk add --no-cache cfssl --repository=http://dl-cdn.alpinelinux.org/alpine/e
 COPY ./tools/generate_cert.sh  /usr/local/bin/generate_cert.sh
 RUN chmod +x /usr/local/bin/generate_cert.sh
 
-RUN curl -sSL -o /tmp/livekit.tar.gz \
-    "https://github.com/livekit/livekit/releases/download/v${LIVEKIT_VERSION}/livekit_${LIVEKIT_VERSION}_linux_amd64.tar.gz" && \
-    tar -xzf /tmp/livekit.tar.gz -C /usr/local/bin/ livekit-server && \
-    rm /tmp/livekit.tar.gz && \
-    apk del curl tar
+# Copy livekit-server binary from official image
+COPY --from=livekit-source /livekit-server /usr/local/bin/livekit-server
 
 # CORRIGIDO: Comando unificado na mesma linha para evitar falha no build
 RUN id -u livekit >/dev/null 2>&1 || adduser -D livekit
