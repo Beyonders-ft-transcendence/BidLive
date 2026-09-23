@@ -25,8 +25,14 @@ def _get_ssl_verify():
     ca_cert = os.environ.get("SSL_CERT_FILE", "")
     if ca_cert and os.path.isfile(ca_cert):
         return ca_cert
-    # Fallback: trust the system CA bundle
-    return True
+    for fallback in (
+        "/run/secrets/ca_cert",
+        "/usr/local/share/ca-certificates/ca.crt",
+        "/etc/ssl/certs/ca-certificates.crt",
+    ):
+        if os.path.isfile(fallback):
+            return fallback
+    return False
 
 
 
