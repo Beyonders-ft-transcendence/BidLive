@@ -154,42 +154,96 @@
         "caption": "Stack ELK: Rastreamento de Tarefas Assíncronas Celery"
       }
     ],
-    "recordings": [
+    "videos": [
       {
-        "file": "videos/01-capa-principal-bidlive.mp4",
-        "title": "Landing Page e Visão Geral"
+        "id": "landing-page",
+        "file": "01-capa-principal-bidlive.mp4",
+        "title": "Visão Geral e Navegação na Plataforma",
+        "description": "Navegação pela Landing Page, exibição de leilões ao vivo, em destaque e catálogo de produtos.",
+        "category": "frontend",
+        "duration": "69s",
+        "size_mb": 3.74,
+        "src": "videos/01-capa-principal-bidlive.mp4"
       },
       {
-        "file": "videos/02-grafana-bidlive.mp4",
-        "title": "Painel de Métricas e Observabilidade (Grafana)"
+        "id": "telemetria-grafana",
+        "file": "02-grafana-bidlive.mp4",
+        "title": "Telemetria e Observabilidade em Tempo Real (Grafana)",
+        "description": "Monitoramento em tempo real de requisições Nginx, pooling PostgreSQL, filas Celery e métricas de conexão Redis.",
+        "category": "devops",
+        "duration": "49s",
+        "size_mb": 2.83,
+        "src": "videos/02-grafana-bidlive.mp4"
       },
       {
-        "file": "videos/03-kibana-bidlive.mp4",
-        "title": "Auditoria de Logs e Segurança (Kibana ELK)"
+        "id": "auditoria-kibana",
+        "file": "03-kibana-bidlive.mp4",
+        "title": "Central de Logs e Auditoria de Segurança (Stack ELK)",
+        "description": "Agregação e busca estruturada de logs com Logstash GELF, Elasticsearch e dashboards de segurança no Kibana.",
+        "category": "devops",
+        "duration": "35s",
+        "size_mb": 1.82,
+        "src": "videos/03-kibana-bidlive.mp4"
       },
       {
-        "file": "videos/04-portainer-bidlive.mp4",
-        "title": "Topologia e Gestão de Containers (Portainer)"
+        "id": "orquestracao-portainer",
+        "file": "04-portainer-bidlive.mp4",
+        "title": "Topologia e Gestão de Containers (Portainer)",
+        "description": "Visualização da orquestração dos 15+ microsserviços containerizados e isolamento de redes frontend/backend.",
+        "category": "devops",
+        "duration": "45s",
+        "size_mb": 1.62,
+        "src": "videos/04-portainer-bidlive.mp4"
       },
       {
-        "file": "videos/05-adminer-bidlive.mp4",
-        "title": "Estrutura do Banco de Dados Relacional (Adminer)"
+        "id": "banco-adminer",
+        "file": "05-adminer-bidlive.mp4",
+        "title": "Estrutura do Banco Relacional (Adminer & PostgreSQL)",
+        "description": "Inspeção de tabelas relacionais de usuários, carteiras, transações e auditoria de integridade de lances.",
+        "category": "database",
+        "duration": "19s",
+        "size_mb": 0.68,
+        "src": "videos/05-adminer-bidlive.mp4"
       },
       {
-        "file": "videos/06-leiloeiro-mobile-bidlive.mp4",
-        "title": "Painel de Transmissão do Leiloeiro"
+        "id": "streamer-leiloeiro",
+        "file": "06-leiloeiro-mobile-bidlive.mp4",
+        "title": "Painel de Transmissão do Leiloeiro (LiveKit WebRTC)",
+        "description": "Interface responsiva do leiloeiro com publicação de streaming WebRTC de ultrabaixa latência e controle do lote.",
+        "category": "realtime",
+        "duration": "49s",
+        "size_mb": 3.01,
+        "src": "videos/06-leiloeiro-mobile-bidlive.mp4"
       },
       {
-        "file": "videos/07-batalha-lances-bidlive.mp4",
-        "title": "Batalha de Lances Concorrentes (Take 1)"
+        "id": "batalha-lances",
+        "file": "07-batalha-lances-bidlive.mp4",
+        "title": "Batalha de Lances Concorrentes (WebSockets)",
+        "description": "Dois usuários disputando lances ao vivo com propagação instantânea via Django Channels e proteção anti-race condition.",
+        "category": "realtime",
+        "duration": "20s",
+        "size_mb": 2.67,
+        "src": "videos/07-batalha-lances-bidlive.mp4"
       },
       {
-        "file": "videos/07-batalha-lances-take2-bidlive.mp4",
-        "title": "Batalha de Lances Concorrentes (Take 2)"
+        "id": "batalha-lances-take2",
+        "file": "07-batalha-lances-take2-bidlive.mp4",
+        "title": "Batalha de Lances Concorrentes - Tomada Estendida",
+        "description": "Disputa estendida de lances demonstrando atualização dinâmica de saldos e contagem regressiva em tempo real.",
+        "category": "realtime",
+        "duration": "35s",
+        "size_mb": 2.81,
+        "src": "videos/07-batalha-lances-take2-bidlive.mp4"
       },
       {
-        "file": "videos/08-chat-amigos-bidlive.mp4",
-        "title": "Chat Social e Amigos em Tempo Real"
+        "id": "chat-social",
+        "file": "08-chat-amigos-bidlive.mp4",
+        "title": "Chat Social e Amigos em Tempo Real",
+        "description": "Comunicação full-duplex entre usuários, lista de contatos e notificações instantâneas de convites.",
+        "category": "frontend",
+        "duration": "53s",
+        "size_mb": 1.17,
+        "src": "videos/08-chat-amigos-bidlive.mp4"
       }
     ]
   }
